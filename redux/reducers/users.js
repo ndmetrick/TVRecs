@@ -6,7 +6,7 @@ import {
 
 const initialState = {
   users: [],
-  friendShows: [],
+  recShows: [],
   usersFollowingLoaded: 0,
 };
 
@@ -21,7 +21,8 @@ export default function usersReducer(state = initialState, action) {
       return {
         ...state,
         usersFollowingLoaded: state.usersFollowingLoaded + 1,
-        friendShows: [...state.friendShows, ...action.shows],
+        // users: state.users.map(user => uid === action.uid ? { ...user, shows: action.shows } : user),
+        recShows: [...state.recShows, ...action.shows],
       };
     case CLEAR_DATA:
       return initialState;

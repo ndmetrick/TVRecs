@@ -1,13 +1,16 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, TextInput, Text, Image, Button, StyleSheet } from 'react-native';
+import { connect } from 'react-redux';
 
 import firebase from 'firebase';
 import { NavigationContainer } from '@react-navigation/native';
 require('firebase/firestore');
 
-export default function SaveShow(props) {
+function SaveShow(props) {
   const { imageUrl, showName, streaming, purchase, description, navigation } =
     props.route.params || '';
+
+  const [goBack, setGoBack] = useState(false);
 
   useEffect(() => {
     const saveShowData = async () => {
@@ -21,15 +24,28 @@ export default function SaveShow(props) {
           description,
           streaming,
           purchase,
+          imageUrl,
           creation: firebase.firestore.FieldValue.serverTimestamp(),
         });
     };
-    saveShowData();
+    if (!props.userShows.includes(showName)) {
+      saveShowData();
+    } else {
+      setGoBack(true);
+    }
   }, []);
 
   console.log('here and', imageUrl);
   const image = { uri: imageUrl };
 
+  if (goBack) {
+    return (
+      <View>
+        <Text style={styles.text}>You've already added that show.</Text>
+        <Button title="Go back" onPress={() => props.navigation.popToTop()} />
+      </View>
+    );
+  }
   return (
     <View>
       <Text style={styles.text}>{showName}</Text>
@@ -60,10 +76,7 @@ export default function SaveShow(props) {
         title="Next: add descriptive tags"
         onPress={() => navigation.navigate('AddShowTags')}
       />
-      <Button
-        title="Skip adding tags"
-        onPress={() => navigation.navigate('Landing')}
-      />
+      <Button title="Skip tags" onPress={() => props.navigation.popToTop()} />
     </View>
   );
 }
@@ -96,3 +109,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
   },
 });
+
+const mapStateToProps = (state) => ({
+  userShows: state.userState.showList,
+});
+export default connect(mapStateToProps, null)(SaveShow);

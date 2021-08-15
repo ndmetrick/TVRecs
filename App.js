@@ -10,6 +10,7 @@ import Main from './components/Main';
 import AddShowTags from './components/Main/AddShowTags';
 import SaveShow from './components/Main/SaveShow';
 import AddShow from './components/Main/AddShow';
+import RecShows from './components/Main/RecShows';
 
 import firebase from 'firebase/app';
 

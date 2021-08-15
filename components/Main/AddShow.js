@@ -86,7 +86,7 @@ export default function AddShow({ navigation }) {
       const imageShow = await axios.get(imageShowText);
       const poster = imageShow.data.Poster;
       console.log('got poster: ', poster);
-      setImageUrl(imageShow.Poster);
+      setImageUrl(poster);
       setAdded(true);
     } catch (e) {
       console.error(e);

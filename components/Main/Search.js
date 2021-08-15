@@ -13,11 +13,11 @@ require('firebase/firestore');
 export default function Search(props) {
   const [users, setUsers] = useState([]);
 
-  const fetchUsers = (search) => {
+  const getUsers = (search) => {
     firebase
       .firestore()
       .collection('users')
-      .where('name', '>=', search)
+      .where('firstName', '>=', search)
       .get()
       .then((snapshot) => {
         let users = snapshot.docs.map((doc) => {
@@ -28,11 +28,12 @@ export default function Search(props) {
         setUsers(users);
       });
   };
+
   return (
     <View>
       <TextInput
-        placeholder="Type Here..."
-        onChangeText={(search) => fetchUsers(search)}
+        placeholder="Type in a new TV friend..."
+        onChangeText={(search) => getUsers(search)}
       />
 
       <FlatList
@@ -45,7 +46,7 @@ export default function Search(props) {
               props.navigation.navigate('Profile', { uid: item.id })
             }
           >
-            <Text>{item.name}</Text>
+            <Text>{item.firstName}</Text>
           </TouchableOpacity>
         )}
       />

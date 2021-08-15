@@ -38,7 +38,7 @@ export function getUserShows() {
         .collection('userShows')
         .orderBy('creation', 'asc')
         .get();
-      let shows = userShows.doc.map((doc) => {
+      let shows = userShows.docs.map((doc) => {
         const data = doc.data();
         const id = doc.id;
         return { id, ...data };
@@ -49,6 +49,24 @@ export function getUserShows() {
     }
   };
 }
+
+// export function getUserShowDetails(docId) {
+//   return async (dispatch) => {
+//     try {
+//       const userShowDetails = await firebase
+//         .firestore()
+//         .collection('shows')
+//         .doc(firebase.auth().currentUser.uid)
+//         .collection('userShows')
+//         .doc(docId)
+//         .get();
+//       let show = { id: userShowDetails.id, ...userShowDetails.data };
+//       dispatch({ type: types.USER_SHOW_DETAILS, show });
+//     } catch (e) {
+//       console.error(e);
+//     }
+//   };
+// }
 
 export function getUserFollowing() {
   return async (dispatch) => {
@@ -65,7 +83,7 @@ export function getUserFollowing() {
           });
           dispatch({ type: types.USER_FOLLOWING_STATE_CHANGE, following });
           following.forEach((followedUser) => {
-            dispatch(getUsersData(followedUser, true));
+            dispatch(getUsersData(followedUser));
           });
         });
     } catch (e) {
@@ -74,28 +92,27 @@ export function getUserFollowing() {
   };
 }
 
-export function getUsersData(uid, getShows) {
+export function getUsersData(uid) {
   return async (dispatch, getState) => {
     try {
-      const found = getState().usersState.users.some(
+      const foundInUsers = getState().usersState.users.some(
         (user) => user.uid === uid
       );
-      if (!found) {
+      if (!foundInUsers) {
         const userInfo = await firebase
           .firestore()
           .collection('users')
           .doc(uid)
           .get();
+
         if (userInfo.exists) {
           let user = userInfo.data();
           user.uid = userInfo.id;
+          dispatch({ type: types.USERS_DATA_STATE_CHANGE, user });
+          dispatch(getUsersFollowingShows(uid));
+        } else {
+          console.log('does not exist');
         }
-        dispatch({ type: types.USERS_DATA_STATE_CHANGE, user });
-      } else {
-        console.log('does not exist');
-      }
-      if (getShows) {
-        dispatch(getUsersFollowingShows(uid));
       }
     } catch (e) {
       console.error(e);
@@ -103,13 +120,13 @@ export function getUsersData(uid, getShows) {
   };
 }
 
-export function getUsersFollowingShows(uid) {
+export function getUsersFollowingShows(userId) {
   return async (dispatch, getState) => {
     try {
       const followedShows = await firebase
         .firestore()
         .collection('shows')
-        .doc(uid)
+        .doc(userId)
         .collection('userShows')
         .orderBy('creation', 'asc')
         .get();

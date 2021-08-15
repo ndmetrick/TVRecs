@@ -7,8 +7,9 @@ import {
 
 const initialState = {
   currentUser: null,
-  tvShows: [],
+  shows: [],
   following: [],
+  showList: [],
 };
 
 export default function userReducer(state = initialState, action) {
@@ -19,8 +20,8 @@ export default function userReducer(state = initialState, action) {
       return {
         ...state,
         shows: action.shows,
+        showList: action.shows.map((show) => show.showName),
       };
-
     case USER_FOLLOWING_STATE_CHANGE:
       return {
         ...state,
