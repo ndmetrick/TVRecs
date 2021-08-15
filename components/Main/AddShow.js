@@ -60,7 +60,6 @@ export default function AddShow({ navigation }) {
   const setStreamingAndPurchase = (data) => {
     const stream = data['watch/providers'].results.US.flatrate;
     // console.log(data);
-    console.log('stream', stream);
     const buy = data['watch/providers'].results.US.buy;
     const streamingOptions =
       stream && stream.map((option) => option.provider_name).join(', ');

@@ -28,22 +28,83 @@ export function clearData() {
   };
 }
 
+export function getTags() {
+  return async (dispatch) => {
+    try {
+      const tagsInfo = await firebase.firestore().collection('tags').get();
+      let tags = tagsInfo.docs.map((doc) => {
+        const data = doc.data();
+        const id = doc.id;
+        return { id, ...data };
+      });
+      dispatch({ type: types.GET_TAGS, tags });
+    } catch (e) {
+      console.error(e);
+    }
+  };
+}
+
 export function getUserShows() {
   return async (dispatch) => {
     try {
-      const userShows = await firebase
+      firebase
         .firestore()
         .collection('shows')
         .doc(firebase.auth().currentUser.uid)
         .collection('userShows')
         .orderBy('creation', 'asc')
+        .onSnapshot((snapshot) => {
+          const uid = firebase.auth().currentUser.uid;
+          let shows = snapshot.docs.map((doc) => {
+            const data = doc.data();
+            const id = doc.id;
+            return { uid, id, ...data };
+          });
+          dispatch({ type: types.USER_SHOWS_STATE_CHANGE, shows });
+        });
+    } catch (e) {
+      console.error(e);
+    }
+  };
+}
+
+export function getUserSingleShow(showId) {
+  return async (dispatch) => {
+    try {
+      const userShow = await firebase
+        .firestore()
+        .collection('shows')
+        .doc(firebase.auth().currentUser.uid)
+        .collection('userShows')
+        .doc(showId)
         .get();
-      let shows = userShows.docs.map((doc) => {
-        const data = doc.data();
-        const id = doc.id;
-        return { id, ...data };
-      });
-      dispatch({ type: types.USER_SHOWS_STATE_CHANGE, shows });
+      const data = await userShow.data();
+      const id = userShow.id;
+      const uid = await firebase.auth().currentUser.uid;
+      const show = { uid, id, ...data };
+      console.log('TYPES', types);
+      console.log('sSHOWWHO', show);
+      dispatch({ type: types.USER_SHOW_STATE_CHANGE, show });
+    } catch (e) {
+      console.error(e);
+    }
+  };
+}
+
+export function getUsersSingleShow(uid, showId) {
+  return async (dispatch) => {
+    try {
+      const usersShow = await firebase
+        .firestore()
+        .collection('shows')
+        .doc(uid)
+        .collection('userShows')
+        .doc(showId)
+        .get();
+      const data = await usersShow.data();
+      const id = usersShow.id;
+      const show = { uid, id, ...data };
+      dispatch({ type: types.USERS_SHOW_STATE_CHANGE, show });
     } catch (e) {
       console.error(e);
     }
@@ -120,20 +181,18 @@ export function getUsersData(uid) {
   };
 }
 
-export function getUsersFollowingShows(userId) {
+export function getUsersFollowingShows(uid) {
   return async (dispatch, getState) => {
     try {
-      const followedShows = await firebase
+      const followingShows = await firebase
         .firestore()
         .collection('shows')
-        .doc(userId)
+        .doc(uid)
         .collection('userShows')
         .orderBy('creation', 'asc')
         .get();
-      const uid = followedShows.query.EP.path.segments[1];
       const user = getState().usersState.users.find((user) => user.uid === uid);
-
-      let shows = followedShows.docs.map((doc) => {
+      let shows = followingShows.docs.map((doc) => {
         const data = doc.data();
         const id = doc.id;
         return { id, ...data, user };
@@ -145,6 +204,30 @@ export function getUsersFollowingShows(userId) {
     }
   };
 }
+
+// export function getUsersFollowingShows(uid) {
+//   return (dispatch, getState) => {
+//     firebase
+//       .firestore()
+//       .collection('shows')
+//       .doc(uid)
+//       .collection('userShows')
+//       .orderBy('creation', 'asc')
+//       .get()
+//       .then((snapshot) => {
+//         const uid = snapshot.query.EP.path.segments[1];
+//         const user = getState().usersState.users.find(
+//           (user) => user.uid === uid
+//         );
+//         let shows = snapshot.docs.map((doc) => {
+//           const data = doc.data();
+//           const id = doc.id;
+//           return { id, ...data, user };
+//         });
+//         dispatch({ type: types.USERS_SHOWS_STATE_CHANGE, shows, uid });
+//       });
+//   };
+// }
 
 export default {
   getUser,

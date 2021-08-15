@@ -10,7 +10,7 @@ import Main from './components/Main';
 import AddShowTags from './components/Main/AddShowTags';
 import SaveShow from './components/Main/SaveShow';
 import AddShow from './components/Main/AddShow';
-import RecShows from './components/Main/RecShows';
+import SingleShow from './components/Main/SingleShow';
 
 import firebase from 'firebase/app';
 
@@ -101,6 +101,11 @@ const App = (props) => {
           <Stack.Screen
             name="SaveShow"
             component={SaveShow}
+            navigation={props.navigation}
+          />
+          <Stack.Screen
+            name="SingleShow"
+            component={SingleShow}
             navigation={props.navigation}
           />
         </Stack.Navigator>

@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, Image, FlatList, Button } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Text,
+  Image,
+  FlatList,
+  Button,
+  Alert,
+  TouchableOpacity,
+} from 'react-native';
 
 import firebase from 'firebase';
 require('firebase/firestore');
@@ -9,7 +18,6 @@ const RecShows = (props) => {
   const [shows, setShows] = useState([]);
 
   useEffect(() => {
-    console.log('following', props.usersFollowingLoaded, props.following);
     if (
       props.usersFollowingLoaded === props.following.length &&
       props.following.length !== 0
@@ -19,11 +27,13 @@ const RecShows = (props) => {
       });
       setShows(props.recShows);
     }
-    console.log('Shows', shows);
+    return () => {
+      setShows([]);
+    };
   }, [props.usersFollowingLoaded, props.recShows]);
 
-  const addShow = (showName, imageUrl, streaming, purchase) => {
-    firebase
+  const addShow = async (showName, imageUrl, streaming, purchase) => {
+    await firebase
       .firestore()
       .collection('shows')
       .doc(firebase.auth().currentUser.uid)
@@ -35,6 +45,9 @@ const RecShows = (props) => {
         purchase,
         creation: firebase.firestore.FieldValue.serverTimestamp(),
       });
+    Alert.alert('Show added', `${showName} was added to your shows`, {
+      text: 'OK',
+    });
   };
 
   return (
@@ -47,16 +60,37 @@ const RecShows = (props) => {
           renderItem={({ item }) => (
             <View style={styles.containerImage}>
               <Text>{item.showName}</Text>
-              <Image style={styles.image} source={{ uri: item.imageUrl }} />
-              <Text style={styles.container}>
-                Rec'er:
-                {item.user.firstName} {item.user.lastName}
-              </Text>
+              <TouchableOpacity
+                onPress={() =>
+                  props.navigation.navigate('SingleShow', {
+                    uid: item.user.uid,
+                    showId: item.id,
+                  })
+                }
+                style={styles.catalogContainer}
+              >
+                <Image source={{ uri: item.imageUrl }} style={styles.image} />
+              </TouchableOpacity>
+              <View style={styles.rowContainer}>
+                <Text style>Rec'er: </Text>
+                <TouchableOpacity
+                  onPress={() =>
+                    props.navigation.navigate('Profile', {
+                      uid: item.user.uid,
+                    })
+                  }
+                >
+                  <Text
+                    style={{ color: 'blue' }}
+                  >{`${item.user.firstName} ${item.user.lastName}`}</Text>
+                </TouchableOpacity>
+              </View>
+
               {item.streaming ? (
                 <Text>Streams on: {item.streaming}</Text>
               ) : null}
               {item.purchase ? (
-                <Text>You can also purchase episodes via: {item.purchase}</Text>
+                <Text>Available to buy on: {item.purchase}</Text>
               ) : null}
               {props.userShows.some(
                 (show) => show.showName === item.showName
@@ -90,6 +124,9 @@ const RecShows = (props) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  rowContainer: {
+    flexDirection: 'row',
   },
   containerInfo: {
     margin: 20,

@@ -31,6 +31,8 @@
     "react-native-reanimated": "~2.2.0",
     "react-native-safe-area-context": "3.2.0",
     "react-native-screens": "~3.4.0",
+    "react-native-selectmultiple-button": "^0.1.105",
+    "react-native-tag-group": "^1.0.2",
     "react-native-vector-icons": "^7.1.0",
     "react-native-web": "~0.13.12",
     "react-navigation": "^4.4.4",

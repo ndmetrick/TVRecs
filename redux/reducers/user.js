@@ -3,6 +3,7 @@ import {
   USER_SHOWS_STATE_CHANGE,
   USER_FOLLOWING_STATE_CHANGE,
   CLEAR_DATA,
+  GET_TAGS,
 } from '../constants';
 
 const initialState = {
@@ -10,6 +11,7 @@ const initialState = {
   shows: [],
   following: [],
   showList: [],
+  tags: [],
 };
 
 export default function userReducer(state = initialState, action) {
@@ -26,6 +28,11 @@ export default function userReducer(state = initialState, action) {
       return {
         ...state,
         following: action.following,
+      };
+    case GET_TAGS:
+      return {
+        ...state,
+        tags: action.tags,
       };
     case CLEAR_DATA:
       return initialState;

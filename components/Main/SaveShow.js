@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, Text, Image, Button, StyleSheet } from 'react-native';
 import { connect } from 'react-redux';
+import { getUserShows } from '../../redux/actions';
 
 import firebase from 'firebase';
 import { NavigationContainer } from '@react-navigation/native';
@@ -30,6 +31,7 @@ function SaveShow(props) {
     };
     if (!props.userShows.includes(showName)) {
       saveShowData();
+      getUserShows();
     } else {
       setGoBack(true);
     }
@@ -113,4 +115,10 @@ const styles = StyleSheet.create({
 const mapStateToProps = (state) => ({
   userShows: state.userState.showList,
 });
-export default connect(mapStateToProps, null)(SaveShow);
+
+const mapDispatch = (dispatch) => {
+  return {
+    getUserShows: () => dispatch(getUserShows()),
+  };
+};
+export default connect(mapStateToProps, mapDispatch)(SaveShow);

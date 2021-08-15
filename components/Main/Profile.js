@@ -1,20 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { View, Text, Image, FlatList, Button, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  FlatList,
+  Button,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
+import { getUserShows } from '../../redux/actions';
 
 import firebase from 'firebase/app';
 require('firebase/firestore');
 
 function Profile(props) {
-  const { currentUser, shows } = props;
-
   const [userShows, setUserShows] = useState([]);
   const [user, setUser] = useState(null);
   const [following, setFollowing] = useState(false);
+  const [change, setChange] = useState(0);
 
   useEffect(() => {
+    console.log('PROPPPPPS', props);
+    const { currentUser, shows } = props;
+    getUserShows();
     if (props.route.params.uid === firebase.auth().currentUser.uid) {
-      setUser(currentUser);
+      const uid = props.route.params.uid;
+      setUser({ uid, ...currentUser });
       setUserShows(shows);
     } else {
       firebase
@@ -24,7 +36,9 @@ function Profile(props) {
         .get()
         .then((userInfo) => {
           if (userInfo.exists) {
-            setUser(userInfo.data());
+            const uid = props.route.params.uid;
+            const data = userInfo.data();
+            setUser({ uid, ...data });
           } else {
             console.log('That user does not exist');
           }
@@ -50,23 +64,35 @@ function Profile(props) {
     } else {
       setFollowing(false);
     }
+    return () => {
+      setUserShows([]);
+      setUser(null);
+      setFollowing(false);
+    };
   }, [props.route.params.uid, props.following]);
+
+  // useEffect(() => {
+  //   if (props.changedState) {
+  //     setChange(change + 1);
+  //     console.log('i got here');
+  //   }
+  // });
 
   const watch = () => {
     firebase
       .firestore()
-      .collection('watching')
+      .collection('following')
       .doc(firebase.auth().currentUser.uid)
-      .collection('userWatching')
+      .collection('userFollowing')
       .doc(props.route.params.uid)
       .set({});
   };
   const stopWatching = () => {
     firebase
       .firestore()
-      .collection('watching')
+      .collection('following')
       .doc(firebase.auth().currentUser.uid)
-      .collection('userWatching')
+      .collection('userFollowing')
       .doc(props.route.params.uid)
       .delete();
   };
@@ -78,6 +104,7 @@ function Profile(props) {
   if (user === null) {
     return <View />;
   }
+  console.log('SHOWS', props.shows);
 
   return (
     <View style={styles.container}>
@@ -85,13 +112,16 @@ function Profile(props) {
         <Text style={styles.text}>
           {user.firstName} {user.lastName}
         </Text>
-        <Text style={styles.text}>{currentUser.email}</Text>
+        <Text style={styles.text}>{user.email}</Text>
         {props.route.params.uid !== firebase.auth().currentUser.uid ? (
           <View>
             {following ? (
-              <Button title="stop watching" onPress={() => stopWatching()} />
+              <Button
+                title="stop receiving recs"
+                onPress={() => stopWatching()}
+              />
             ) : (
-              <Button title="watch" onPress={() => watch()} />
+              <Button title="receive recs" onPress={() => watch()} />
             )}
           </View>
         ) : (
@@ -105,7 +135,17 @@ function Profile(props) {
           data={userShows}
           renderItem={({ item }) => (
             <View style={styles.containerImage}>
-              <Image style={styles.image} source={{ uri: item.imageUrl }} />
+              <TouchableOpacity
+                onPress={() =>
+                  props.navigation.navigate('SingleShow', {
+                    uid: user.uid,
+                    showId: item.id,
+                  })
+                }
+                style={styles.catalogContainer}
+              >
+                <Image style={styles.image} source={{ uri: item.imageUrl }} />
+              </TouchableOpacity>
             </View>
           )}
         />
@@ -145,4 +185,9 @@ const mapStateToProps = (store) => ({
   shows: store.userState.shows,
   following: store.userState.following,
 });
-export default connect(mapStateToProps)(Profile);
+const mapDispatch = (dispatch) => {
+  return {
+    getUserShows: () => dispatch(getUserShows()),
+  };
+};
+export default connect(mapStateToProps, mapDispatch)(Profile);
