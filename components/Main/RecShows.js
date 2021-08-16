@@ -13,9 +13,11 @@ import {
 import firebase from 'firebase';
 require('firebase/firestore');
 import { connect } from 'react-redux';
+import { useIsFocused } from '@react-navigation/native';
 
 const RecShows = (props) => {
   const [shows, setShows] = useState([]);
+  const isFocused = useIsFocused();
 
   useEffect(() => {
     if (
@@ -30,7 +32,7 @@ const RecShows = (props) => {
     return () => {
       setShows([]);
     };
-  }, [props.usersFollowingLoaded, props.recShows]);
+  }, [props.usersFollowingLoaded, props.recShows, isFocused]);
 
   const addShow = async (showName, imageUrl, streaming, purchase) => {
     await firebase
@@ -49,6 +51,17 @@ const RecShows = (props) => {
       text: 'OK',
     });
   };
+
+  if (props.following.length === 0) {
+    return (
+      <View>
+        <Text style={styles.text}>
+          Recommendations will come your way as soon as you ask to receive some
+          recs!
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -140,6 +153,11 @@ const styles = StyleSheet.create({
   image: {
     flex: 1,
     aspectRatio: 1 / 1,
+  },
+  text: {
+    margin: 5,
+    textAlign: 'center',
+    fontSize: 20,
   },
 });
 const mapStateToProps = (store) => ({

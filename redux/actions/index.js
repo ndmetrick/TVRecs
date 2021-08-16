@@ -22,6 +22,47 @@ export function getUser() {
   };
 }
 
+export async function setTags(tags, showName) {
+  try {
+    console.log('IM HERE', tags, showName, typeof showName);
+
+    const db = firebase.firestore();
+    const showsRef = await db
+      .collectionGroup('userShows')
+      .where('showName', '==', showName)
+      .get();
+    console.log(showsRef.data());
+
+    // const querySnapshot = await db
+    //   .collectionGroup('landmarks')
+    //   .where('type', '==', 'museum')
+    //   .get();
+    // const show = await firebase
+    //   .firestore()
+    //   .collection('shows')
+    //   .doc(firebase.auth().currentUser.uid)
+    //   .collection('userShows')
+    //   .get();
+    // let following = show.docs.map((doc) => {
+    //   const id = doc.id;
+    //   return id;
+    // });
+    // console.log(following)
+    //   .where('showName', '==', showName)
+    //   .get();
+    // if (show.exists) {
+    //   console.log(show.data(), 'thingie');
+    // } else {
+    //   console.log('no such show');
+    // }
+
+    // .collection('userShowTags')
+    // .add(tags);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
 export function clearData() {
   return (dispatch) => {
     dispatch({ type: types.CLEAR_DATA });

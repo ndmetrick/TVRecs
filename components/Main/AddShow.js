@@ -110,9 +110,10 @@ export default function AddShow({ navigation }) {
     return unsubscribe;
   }, [navigation]);
 
+  const image = { uri: imageUrl };
   return (
     <View style={styles.container}>
-      <Text>What show do you want to add?</Text>
+      <Text style={styles.text}>What show do you want to add?</Text>
       <TextInput
         style={styles.inputText}
         placeholder="Show Title"
@@ -134,6 +135,7 @@ export default function AddShow({ navigation }) {
               borderRadius: 4,
               color: 'black',
               paddingRight: 30,
+              placeholder: 26,
             }}
           />
         </View>
@@ -155,26 +157,53 @@ export default function AddShow({ navigation }) {
         style={styles.inputText}
         onChangeText={(description) => setDescription(description)}
       />
-      {added ? <AddShowTags /> : null}
-
-      <Button
-        title="Save"
-        onPress={() =>
-          navigation.navigate('SaveShow', {
-            showName,
-            description,
-            imageUrl,
-            streaming,
-            purchase,
-          })
-        }
-      ></Button>
+      {added ? (
+        <View>
+          <Text style={styles.text}>{showName}</Text>
+          <View style={styles.separator} />
+          {description ? (
+            <View>
+              <Text style={styles.text}>Description: {description}</Text>
+              <View style={styles.separator} />
+            </View>
+          ) : null}
+          {purchase ? (
+            <View>
+              <Text style={styles.text}>Streaming options: {streaming}</Text>
+              <View style={styles.separator} />
+            </View>
+          ) : null}
+          {streaming ? (
+            <View>
+              <Text style={styles.text}>Purchase options: {purchase}</Text>
+              <View style={styles.separator} />
+            </View>
+          ) : null}
+          <Image
+            source={image}
+            style={{ height: 300, resizeMode: 'contain', margin: 5 }}
+          />
+          <Button
+            title="Save"
+            onPress={() =>
+              navigation.navigate('SaveShow', {
+                showName,
+                description,
+                imageUrl,
+                streaming,
+                purchase,
+              })
+            }
+          ></Button>
+        </View>
+      ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    marginTop: 15,
     flex: 1,
     // justifyContent: 'center',
     marginHorizontal: 2,

@@ -11,6 +11,7 @@ export const USERS_DATA_STATE_CHANGE = 'USERS_DATA_STATE_CHANGE';
 
 export const CLEAR_DATA = 'CLEAR_DATA';
 export const GET_TAGS = 'GET_TAGS';
+export const SET_TAGS = 'SET_TAGS';
 
 export default {
   USER_STATE_CHANGE,
@@ -23,4 +24,5 @@ export default {
   USER_SHOW_STATE_CHANGE,
   USERS_SHOW_STATE_CHANGE,
   GET_TAGS,
+  SET_TAGS,
 };

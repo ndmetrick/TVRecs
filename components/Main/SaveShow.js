@@ -8,7 +8,7 @@ import { NavigationContainer } from '@react-navigation/native';
 require('firebase/firestore');
 
 function SaveShow(props) {
-  const { imageUrl, showName, streaming, purchase, description, navigation } =
+  const { imageUrl, showName, streaming, purchase, description } =
     props.route.params || '';
 
   const [goBack, setGoBack] = useState(false);
@@ -60,13 +60,13 @@ function SaveShow(props) {
       ) : null}
       {purchase ? (
         <View>
-          <Text style={styles.text}>Purchase options: {purchase}</Text>
+          <Text style={styles.text}>Streaming options: {streaming}</Text>
           <View style={styles.separator} />
         </View>
       ) : null}
       {streaming ? (
         <View>
-          <Text style={styles.text}>Streaming options: {streaming}</Text>
+          <Text style={styles.text}>Purchase options: {purchase}</Text>
           <View style={styles.separator} />
         </View>
       ) : null}
@@ -76,9 +76,16 @@ function SaveShow(props) {
       />
       <Button
         title="Next: add descriptive tags"
-        onPress={() => navigation.navigate('AddShowTags')}
+        onPress={() => props.navigation.navigate('AddShowTags', { showName })}
       />
-      <Button title="Skip tags" onPress={() => props.navigation.popToTop()} />
+      <Button
+        title="Skip tags"
+        onPress={() =>
+          props.navigation.navigate('Profile', {
+            uid: firebase.auth().currentUser.uid,
+          })
+        }
+      />
     </View>
   );
 }

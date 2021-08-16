@@ -14,11 +14,14 @@ import { getUserShows } from '../../redux/actions';
 import firebase from 'firebase/app';
 require('firebase/firestore');
 
+import { useIsFocused } from '@react-navigation/native';
+
 function Profile(props) {
   const [userShows, setUserShows] = useState([]);
   const [user, setUser] = useState(null);
   const [following, setFollowing] = useState(false);
-  const [change, setChange] = useState(0);
+
+  const isFocused = useIsFocused();
 
   useEffect(() => {
     console.log('PROPPPPPS', props);
@@ -69,14 +72,7 @@ function Profile(props) {
       setUser(null);
       setFollowing(false);
     };
-  }, [props.route.params.uid, props.following]);
-
-  // useEffect(() => {
-  //   if (props.changedState) {
-  //     setChange(change + 1);
-  //     console.log('i got here');
-  //   }
-  // });
+  }, [props.route.params.uid, props.following, isFocused]);
 
   const watch = () => {
     firebase
