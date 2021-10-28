@@ -15,9 +15,10 @@ require('firebase/firestore');
 import { connect } from 'react-redux';
 import { useIsFocused } from '@react-navigation/native';
 
+// const isFocused = useIsFocused();
+
 const RecShows = (props) => {
   const [shows, setShows] = useState([]);
-  const isFocused = useIsFocused();
 
   useEffect(() => {
     if (
@@ -32,7 +33,7 @@ const RecShows = (props) => {
     return () => {
       setShows([]);
     };
-  }, [props.usersFollowingLoaded, props.recShows, isFocused]);
+  }, [props.usersFollowingLoaded, props.recShows]);
 
   const addShow = async (showName, imageUrl, streaming, purchase) => {
     await firebase
@@ -72,7 +73,6 @@ const RecShows = (props) => {
           data={shows}
           renderItem={({ item }) => (
             <View style={styles.containerImage}>
-              <Text>{item.showName}</Text>
               <TouchableOpacity
                 onPress={() =>
                   props.navigation.navigate('SingleShow', {
@@ -84,19 +84,22 @@ const RecShows = (props) => {
               >
                 <Image source={{ uri: item.imageUrl }} style={styles.image} />
               </TouchableOpacity>
-              <View style={styles.rowContainer}>
-                <Text style>Rec'er: </Text>
-                <TouchableOpacity
-                  onPress={() =>
-                    props.navigation.navigate('Profile', {
-                      uid: item.user.uid,
-                    })
-                  }
-                >
-                  <Text
-                    style={{ color: 'blue' }}
-                  >{`${item.user.firstName} ${item.user.lastName}`}</Text>
-                </TouchableOpacity>
+              <View>
+                <Text style={{ fontWeight: 'bold' }}>{item.showName}</Text>
+                <View style={styles.rowContainer}>
+                  <Text>Rec'er: </Text>
+                  <TouchableOpacity
+                    onPress={() =>
+                      props.navigation.navigate('Profile', {
+                        uid: item.user.uid,
+                      })
+                    }
+                  >
+                    <Text
+                      style={{ color: 'blue' }}
+                    >{`${item.user.firstName} ${item.user.lastName}`}</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
 
               {item.streaming ? (

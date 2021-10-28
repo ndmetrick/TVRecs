@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import 'react-native-gesture-handler';
-import { View, Text } from 'react-native';
+import { View, Text, Platform } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import LandingPage from './components/auth/Landing';
@@ -12,29 +12,31 @@ import SaveShow from './components/Main/SaveShow';
 import AddShow from './components/Main/AddShow';
 import SingleShow from './components/Main/SingleShow';
 
-import firebase from 'firebase/app';
+import * as SQLite from 'expo-sqlite';
 
 import { Provider } from 'react-redux';
 import { createStore, applyMiddleware } from 'redux';
-import rootReducer from './client/redux/reducers';
+import rootReducer from './redux/reducers';
 import thunk from 'redux-thunk';
 const store = createStore(rootReducer, applyMiddleware(thunk));
 
-const firebaseConfig = {
-  apiKey: 'AIzaSyByiiBbrPFrCLObYJrQvhxl-SCPNHP23-g',
-  authDomain: 'televisionismyfriend.firebaseapp.com',
-  projectId: 'televisionismyfriend',
-  storageBucket: 'televisionismyfriend.appspot.com',
-  messagingSenderId: '838762127917',
-  appId: '1:838762127917:web:4c230e11a2043a5a0f0ea4',
-  measurementId: 'G-CG4TGRFKZH',
-};
+// switching back to SQLite from Firebase
+function openDatabase() {
+  if (Platform.OS === 'web') {
+    return {
+      transaction: () => {
+        return {
+          executeSql: () => {},
+        };
+      },
+    };
+  }
 
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
-} else {
-  firebase.app();
+  const db = SQLite.openDatabase('db.db');
+  return db;
 }
+
+const db = openDatabase();
 
 const App = (props) => {
   const Stack = createStackNavigator();

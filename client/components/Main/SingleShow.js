@@ -122,15 +122,15 @@ function SingleShow(props) {
         {props.show.showName}
       </Text>
       <View style={styles.extra}>
-        {show.description ? (
+        {props.show.description ? (
           <Text style={styles.text}>Description: {props.show.description}</Text>
         ) : null}
-        {show.streaming ? (
+        {props.show.streaming ? (
           <Text style={styles.text}>
             Streaming options: {props.show.streaming}
           </Text>
         ) : null}
-        {show.purchase ? (
+        {props.show.purchase ? (
           <Text style={styles.text}>
             Purchase options: {props.show.purchase}
           </Text>

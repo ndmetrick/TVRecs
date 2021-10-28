@@ -20,14 +20,11 @@ export default function AddShow({ navigation }) {
   const key = 'e7eaca48bd580f966d3d14526c3ddff0';
 
   // https://api.themoviedb.org/4/search/tv?api_key=e7eaca48bd580f966d3d14526c3ddff0&query=we+are+lady+parts
-
   // 100351;
-
   // https://api.themoviedb.org/3/tv/70493?api_key=e7eaca48bd580f966d3d14526c3ddff0&language=en-US&append_to_response=watch%2Fproviders,images
 
   const findShowOptions = async () => {
     try {
-      console.log('i got here');
       const titleString = showInput.split(' ').join('+');
       const getShowOptions = `https://api.themoviedb.org/4/search/tv?api_key=${key}&query=${titleString}`;
       const { data } = await axios.get(getShowOptions);
@@ -48,7 +45,6 @@ export default function AddShow({ navigation }) {
         const imageShowText = `http://www.omdbapi.com/?t=${titleString}&apikey=aa03da30`;
         const imageShow = await axios.get(imageShowText);
         const poster = imageShow.data.Poster;
-        console.log('got poster: ', poster, imageShow.data.Poster);
         setImageUrl(poster);
         setAdded(true);
       }
@@ -59,7 +55,6 @@ export default function AddShow({ navigation }) {
 
   const setStreamingAndPurchase = (data) => {
     const stream = data['watch/providers'].results.US.flatrate;
-    // console.log(data);
     const buy = data['watch/providers'].results.US.buy;
     const streamingOptions =
       stream && stream.map((option) => option.provider_name).join(', ');

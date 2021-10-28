@@ -24,7 +24,6 @@ function Profile(props) {
   const isFocused = useIsFocused();
 
   useEffect(() => {
-    console.log('PROPPPPPS', props);
     const { currentUser, shows } = props;
     getUserShows();
     if (props.route.params.uid === firebase.auth().currentUser.uid) {
