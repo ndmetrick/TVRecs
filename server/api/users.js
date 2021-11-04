@@ -1,18 +1,22 @@
 const router = require('express').Router();
 const {
-  models: { User },
-} = require('../db');
+  models: { User, Follow, Show },
+} = require('../db/models');
 module.exports = router;
 
-router.get('/', async (req, res, next) => {
+
+// figure out gatekeeping middleware / how to protect back end
+const { requireToken, isLoggedIn } = require('./gatekeepingMiddleware');
+module.exports = router;
+
+router.get('/currentUser', requireToken, isLoggedIn, async (req, res, next) => {
   try {
-    const users = await User.findAll({
-      // explicitly select only the id and username fields - even though
-      // users' passwords are encrypted, it won't help if we just
-      // send everything to anyone who asks!
-      attributes: ['id', 'username'],
+    const user = await User.findAll({
+      where:
+      include: [Follow, Show],
     });
-    res.json(users);
+    console.log('current user', user);
+    res.json(user);
   } catch (err) {
     next(err);
   }

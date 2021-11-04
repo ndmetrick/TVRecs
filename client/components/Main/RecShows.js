@@ -10,8 +10,8 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
-import firebase from 'firebase';
-require('firebase/firestore');
+import { addShow } from '../../redux/actions';
+
 import { connect } from 'react-redux';
 import { useIsFocused } from '@react-navigation/native';
 
@@ -36,18 +36,7 @@ const RecShows = (props) => {
   }, [props.usersFollowingLoaded, props.recShows]);
 
   const addShow = async (showName, imageUrl, streaming, purchase) => {
-    await firebase
-      .firestore()
-      .collection('shows')
-      .doc(firebase.auth().currentUser.uid)
-      .collection('userShows')
-      .add({
-        showName,
-        imageUrl,
-        streaming,
-        purchase,
-        creation: firebase.firestore.FieldValue.serverTimestamp(),
-      });
+    await props.addShow(showName, imageUrl, streaming, purchase);
     Alert.alert('Show added', `${showName} was added to your shows`, {
       text: 'OK',
     });
@@ -170,4 +159,12 @@ const mapStateToProps = (store) => ({
   usersFollowingLoaded: store.usersState.usersFollowingLoaded,
   userShows: store.userState.shows,
 });
-export default connect(mapStateToProps, null)(RecShows);
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    addShow: (showName, imageUrl, streaming, purchase) =>
+      dispatch(addShow(showName, imageUrl, streaming, purchase)),
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(RecShows);

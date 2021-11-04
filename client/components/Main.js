@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { View, Text, StyleSheet } from 'react-native';
-import firebase from 'firebase/app';
 import {
   getUser,
   clearData,
@@ -32,6 +31,8 @@ export class Main extends Component {
   }
 
   render() {
+    const { user } = this.props;
+
     return (
       <Tab.Navigator initialRouteName="Feed" labeled={false}>
         <Tab.Screen
@@ -92,7 +93,7 @@ export class Main extends Component {
             tabPress: (event) => {
               event.preventDefault();
               navigation.navigate('Profile', {
-                uid: firebase.auth().currentUser.uid,
+                uid: user.id,
               });
             },
           })}

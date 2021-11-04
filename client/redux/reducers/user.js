@@ -1,5 +1,5 @@
 import {
-  USER_STATE_CHANGE,
+  GET_CURRENT_USER,
   USER_SHOWS_STATE_CHANGE,
   USER_FOLLOWING_STATE_CHANGE,
   CLEAR_DATA,
@@ -16,7 +16,8 @@ const initialState = {
 
 export default function userReducer(state = initialState, action) {
   switch (action.type) {
-    case USER_STATE_CHANGE:
+    case GET_CURRENT_USER:
+      // how to get the shows and following here / should we do it before here?
       return { ...state, currentUser: action.currentUser };
     case USER_SHOWS_STATE_CHANGE:
       return {

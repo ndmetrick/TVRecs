@@ -1,70 +1,82 @@
+import * as AuthSession from 'expo-auth-session';
+import jwtDecode from 'jwt-decode';
 import React, { useState, useEffect } from 'react';
-import { View, Button, TextInput, StyleSheet } from 'react-native';
-import firebase from 'firebase';
+import { Alert, Button, Platform, StyleSheet, Text, View } from 'react-native';
+import Main from '../Main';
 
-const Login = (props) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+const auth0ClientId = 'rMIdw36DYTg1ZmOuux0xDfUvj0rbO6u3';
+const authorizationEndpoint = 'https://dev--5p-bz53.us.auth0.com/authorize';
 
-  const onLogin = async () => {
-    try {
-      const result = await firebase
-        .auth()
-        .signInWithEmailAndPassword(email, password);
-      console.log(result);
-    } catch (e) {
-      console.error(e);
+const useProxy = Platform.select({ web: false, default: true });
+const redirectUri = AuthSession.makeRedirectUri({ useProxy });
+
+export default function Login() {
+  const [name, setName] = useState(null);
+
+  const [request, result, promptAsync] = AuthSession.useAuthRequest(
+    {
+      redirectUri,
+      clientId: auth0ClientId,
+      // id_token will return a JWT token
+      responseType: 'id_token',
+      // retrieve the user's profile
+      scopes: ['openid', 'profile'],
+      extraParams: {
+        // ideally, this will be a random value
+        nonce: 'nonce',
+      },
+    },
+    { authorizationEndpoint }
+  );
+
+  useEffect(() => {
+    if (result) {
+      if (result.error) {
+        Alert.alert(
+          'Authentication error',
+          result.params.error_description || 'something went wrong'
+        );
+        return;
+      }
+      if (result.type === 'success') {
+        // Retrieve the JWT token and decode it
+        const jwtToken = result.params.id_token;
+        const decoded = jwtDecode(jwtToken);
+
+        const { name } = decoded;
+        setName(name);
+      }
     }
-  };
+  }, [result]);
 
   return (
     <View style={styles.container}>
-      <TextInput
-        style={styles.inputText}
-        placeholder="Email"
-        onChangeText={(email) => setEmail(email)}
-        value={email}
-      />
-      <TextInput
-        style={styles.inputText}
-        placeholder="Password"
-        onChangeText={(password) => setPassword(password)}
-        secureTextEntry={true}
-        value={password}
-      />
-
-      <Button style={styles.button} onPress={() => onLogin()} title="Sign in" />
+      {name ? (
+        <>
+          <Text style={styles.title}>You are logged in, {name}!</Text>
+          <Button title="Log out" onPress={() => setName(null)} />
+        </>
+      ) : (
+        <Button
+          disabled={!request}
+          title="Log in with Auth0"
+          onPress={() => promptAsync({ useProxy })}
+        />
+      )}
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // justifyContent: 'center',
-    marginHorizontal: 2,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  text: {
-    margin: 5,
-    textAlign: 'center',
+  title: {
     fontSize: 20,
-    fontWeight: 'bold',
-  },
-  inputText: {
-    margin: 5,
     textAlign: 'center',
-    fontSize: 20,
-  },
-  button: {
-    textAlign: 'center',
-    backgroundColor: '#4281A4',
-    marginVertical: 8,
-  },
-  separator: {
-    marginVertical: 8,
-    borderBottomColor: '#6F98AE',
-    borderBottomWidth: 2,
+    marginTop: 40,
   },
 });
-
-export default Login;
