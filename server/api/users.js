@@ -9,6 +9,10 @@ module.exports = router;
 const { requireToken, isLoggedIn } = require('./gatekeepingMiddleware');
 module.exports = router;
 
+router.get('/', async (req, res, next) => {
+  res.json('hello')
+})
+
 router.get('/currentUser', requireToken, isLoggedIn, async (req, res, next) => {
   try {
     const user = await User.findAll({

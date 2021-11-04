@@ -5,13 +5,6 @@ const {
 module.exports = router;
 const ManagementClient = require('auth0').ManagementClient;
 
-const auth0 = new ManagementClient({
-  domain: 'dev--5p-bz53.us.auth0.com',
-  clientId: 'rMIdw36DYTg1ZmOuux0xDfUvj0rbO6u3',
-  clientSecret:
-    'l4MtU3fRBARKE9pLUx4sYhhQkklip3fYk1Zg2ou7a0H3Q2zWz3iu2Ud-v0r0Z-zx',
-});
-
 router.post('/signup', async (req, res, next) => {
   try {
     const { data } = await auth0.getUsers({ id: req.user.sub });
@@ -30,6 +23,13 @@ router.post('/signup', async (req, res, next) => {
 
 router.get('/login', async (req, res, next) => {
   try {
+    console.log('i got here to login');
+
+    const auth0 = new ManagementClient({
+      domain, // figure out where to store
+      clientId, // figure out where to store
+      clientSecret, // figure out where to store
+    });
     const { data } = await auth0.getUsers({ id: req.user.sub });
     if (data.blocked === true) {
       throw new Error('Blocked');
@@ -47,10 +47,15 @@ router.get('/login', async (req, res, next) => {
     });
     if (user) {
       res.send(user);
-    }
-    //*** */
-    else {
-      console.log('CANNOT FIND A USER');
+    } else {
+      //***** */
+
+      console.log('CANNOT FIND A USER so I am making a new one');
+      const user = await User.create({
+        username: data.name,
+        auth0Id: data.sub,
+      });
+      res.send(user);
     }
   } catch (err) {
     next(err);

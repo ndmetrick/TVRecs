@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { View, Text, StyleSheet } from 'react-native';
 import {
-  getUser,
+  getCurrentUser,
   clearData,
   getUserShows,
   getUserFollowing,
@@ -24,10 +24,10 @@ const EmptyScreen = () => {
 export class Main extends Component {
   componentDidMount() {
     this.props.clearData();
-    this.props.getUser();
-    this.props.getUserShows();
-    this.props.getUserFollowing();
-    this.props.getTags();
+    this.props.getCurrentUser();
+    // this.props.getUserShows();
+    // this.props.getUserFollowing();
+    // this.props.getTags();
   }
 
   render() {
@@ -124,11 +124,11 @@ const mapState = (state) => {
 
 const mapDispatch = (dispatch) => {
   return {
-    getUser: () => dispatch(getUser()),
+    getCurrentUser: () => dispatch(getCurrentUser()),
     clearData: () => dispatch(clearData()),
-    getUserShows: () => dispatch(getUserShows()),
-    getUserFollowing: () => dispatch(getUserFollowing()),
-    getTags: () => dispatch(getTags()),
+    // getUserShows: () => dispatch(getUserShows()),
+    // getUserFollowing: () => dispatch(getUserFollowing()),
+    // getTags: () => dispatch(getTags()),
   };
 };
 

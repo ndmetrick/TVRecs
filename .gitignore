@@ -8,6 +8,11 @@ npm-debug.*
 *.mobileprovision
 *.orig.*
 web-build/
+client/redux/actions/indexOld.js
+OldApp.js
+newApp.js
+notesForFollowing.js
+appcut.js
 
 # macOS
 .DS_Store

@@ -17,6 +17,15 @@ const Show = db.define('show', {
       notEmpty: true,
     },
   },
+  imageUrl: {
+    type: Sequelize.STRING,
+  },
+  streaming: {
+    type: Sequelize.STRING,
+  },
+  purchase: {
+    type: Sequelize.STRING,
+  },
 });
 
 module.exports = Show;

@@ -5,6 +5,7 @@ const db = require('./db');
 const User = require('./models/User');
 const Follow = require('./models/Follow');
 const Show = require('./models/Show');
+const UserShow = require('./models/UserShow');
 
 User.belongsToMany(User, {
   through: Follow,
@@ -36,8 +37,14 @@ Follow.belongsTo(User, {
   foreignKey: 'follower',
 });
 
-User.belongsToMany(Show);
-Show.belongsToMany(User);
+User.hasMany(UserShow);
+Show.hasMany(UserShow);
+
+UserShow.belongsTo(User);
+UserShow.belongsTo(Show);
+
+User.belongsToMany(Show, { through: UserShow });
+Show.belongsToMany(User, { through: UserShow });
 
 module.exports = {
   db,
