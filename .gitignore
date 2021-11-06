@@ -13,6 +13,7 @@ OldApp.js
 newApp.js
 notesForFollowing.js
 appcut.js
+FIND.env
 
 # macOS
 .DS_Store

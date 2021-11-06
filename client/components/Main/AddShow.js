@@ -5,9 +5,6 @@ import RNPickerSelect from 'react-native-picker-select';
 import AddShowTags from './AddShowTags';
 import SaveShow from './SaveShow';
 
-import firebase from 'firebase/app';
-require('firebase/firestore');
-
 export default function AddShow({ navigation }) {
   const [showInput, setShowInput] = useState('');
   const [showName, setShowName] = useState('');

@@ -1,18 +1,33 @@
 import axios from 'axios';
 import types from '../constants';
-import { SnapshotViewIOSComponent } from 'react-native';
+import jwtDecode from 'jwt-decode';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+// import { SnapshotViewIOSComponent } from 'react-native';
+
+const baseUrl = process.env.BASEURL;
+
+const getToken = async () => {
+  try {
+    const token = await AsyncStorage.getItem('token');
+    const headers = {
+      headers: {
+        authorization: `Bearer ${token}`,
+      },
+    };
+    return headers;
+  } catch (err) {
+    console.error(err);
+  }
+};
 
 export function getCurrentUser() {
   return async (dispatch) => {
     try {
-      console.log('i got to getCurrentUser and next is w');
-      const w = await axios.get('/api/users');
-      console.log('i did not get stuck yet');
-      console.log(w);
-      const user = await axios.get(`/auth/login`);
+      const user = await axios.get(`${baseUrl}/auth/login`, getToken());
+      console.log('user on front end', user.data);
       dispatch({
         type: types.GET_CURRENT_USER,
-        currentUser: user.data(),
+        currentUser: user.data,
       });
     } catch (err) {
       console.error(err);
@@ -20,26 +35,18 @@ export function getCurrentUser() {
   };
 }
 
-export function addUser() {
+export function addShow(showInfo) {
   return async (dispatch) => {
     try {
-      console.log('i got to adduser');
-      const user = await axios.post('/auth/signup');
-      dispatch({ type: types.GET_CURRENT_USER, currentUser: user.data() });
-    } catch (e) {
-      console.error(e);
-    }
-  };
-}
-
-export function addShow(showName, imdbId, imageUrl, streaming, purchase) {
-  return async (dispatch) => {
-    try {
-      const showAdded = await axios.put();
+      const showAdded = await axios.put(
+        `${baseUrl}/users/addShow`,
+        showInfo,
+        getToken()
+      );
       if (showAdded) {
-        dispatch({ type: types.USER_STATE_CHANGE, currentUser: user.data() });
+        dispatch({ type: types.ADD_SHOW, show: showAdded.data });
       } else {
-        console.log('User does not exist');
+        console.log('Something went wrong trying to add show');
       }
     } catch (e) {
       console.error(e);

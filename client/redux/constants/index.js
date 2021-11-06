@@ -7,7 +7,7 @@ export const GET_SINGLE_USER = 'GET_SINGLE_USER';
 export const SET_USER_FOLLOWING = 'SET_USER_FOLLOWING';
 export const SET_UNFOLLOW = 'SET_UNFOLLOW';
 export const CREATE_USER = 'CREATE_USER';
-export const ADD_USER = 'ADD_USER';
+export const ADD_SHOW = 'ADD_SHOW';
 
 // export const USER_SHOWS_TAGS_STATE_CHANGE = 'USER_SHOW_TAGS_STATE_CHANGE';
 
@@ -22,7 +22,7 @@ export const GET_TAGS = 'GET_TAGS';
 export const SET_TAGS = 'SET_TAGS';
 
 export default {
-  ADD_USER,
+  ADD_SHOW,
   GET_CURRENT_USER,
   GET_CURRENT_USER_SHOWS,
   GET_USERS_FOLLOWING,

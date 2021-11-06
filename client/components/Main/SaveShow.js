@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, Text, Image, Button, StyleSheet } from 'react-native';
 import { connect } from 'react-redux';
-import { getUserShows } from '../../redux/actions';
+import { getUserShows, addShow } from '../../redux/actions';
 
-import firebase from 'firebase';
 import { NavigationContainer } from '@react-navigation/native';
-require('firebase/firestore');
 
 function SaveShow(props) {
   const { imageUrl, showName, streaming, purchase, description } =
@@ -15,19 +13,8 @@ function SaveShow(props) {
 
   useEffect(() => {
     const saveShowData = async () => {
-      await firebase
-        .firestore()
-        .collection('shows')
-        .doc(firebase.auth().currentUser.uid)
-        .collection('userShows')
-        .add({
-          showName,
-          description,
-          streaming,
-          purchase,
-          imageUrl,
-          creation: firebase.firestore.FieldValue.serverTimestamp(),
-        });
+      const showData = { showName, description, streaming, purchase, imageUrl };
+      await props.addShow(showData);
     };
     if (!props.userShows.includes(showName)) {
       saveShowData();
@@ -82,7 +69,7 @@ function SaveShow(props) {
         title="Skip tags"
         onPress={() =>
           props.navigation.navigate('Profile', {
-            uid: firebase.auth().currentUser.uid,
+            uid: props.userId,
           })
         }
       />
@@ -121,11 +108,13 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = (state) => ({
   userShows: state.userState.showList,
+  userId: state.userState.currentUser.id,
 });
 
 const mapDispatch = (dispatch) => {
   return {
     getUserShows: () => dispatch(getUserShows()),
+    addShow: (showInfo) => dispatch(addShow(showInfo)),
   };
 };
 export default connect(mapStateToProps, mapDispatch)(SaveShow);
