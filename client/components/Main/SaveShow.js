@@ -1,30 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, Text, Image, Button, StyleSheet } from 'react-native';
 import { connect } from 'react-redux';
-import { getUserShows, addShow } from '../../redux/actions';
+import { getCurrentUser, addShow } from '../../redux/actions';
 
 import { NavigationContainer } from '@react-navigation/native';
 
 function SaveShow(props) {
-  const { imageUrl, showName, streaming, purchase, description } =
+  const { imageUrl, showName, streaming, purchase, description, imdbId } =
     props.route.params || '';
 
   const [goBack, setGoBack] = useState(false);
 
   useEffect(() => {
     const saveShowData = async () => {
-      const showData = { showName, description, streaming, purchase, imageUrl };
+      const showData = {
+        showName,
+        description,
+        streaming,
+        purchase,
+        imageUrl,
+        imdbId,
+      };
       await props.addShow(showData);
     };
     if (!props.userShows.includes(showName)) {
       saveShowData();
-      getUserShows();
+      getCurrentUser();
     } else {
       setGoBack(true);
     }
   }, []);
 
-  console.log('here and', imageUrl);
   const image = { uri: imageUrl };
 
   if (goBack) {
@@ -69,7 +75,7 @@ function SaveShow(props) {
         title="Skip tags"
         onPress={() =>
           props.navigation.navigate('Profile', {
-            uid: props.userId,
+            uid: props.currentUser.id,
           })
         }
       />
@@ -108,12 +114,12 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = (state) => ({
   userShows: state.userState.showList,
-  userId: state.userState.currentUser.id,
+  currentUser: state.userState.currentUser,
 });
 
 const mapDispatch = (dispatch) => {
   return {
-    getUserShows: () => dispatch(getUserShows()),
+    getCurrentUser: () => dispatch(getCurrentUser()),
     addShow: (showInfo) => dispatch(addShow(showInfo)),
   };
 };

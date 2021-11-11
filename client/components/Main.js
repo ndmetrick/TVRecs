@@ -25,9 +25,8 @@ export class Main extends Component {
   componentDidMount() {
     this.props.clearData();
     this.props.getCurrentUser();
-    // this.props.getUserShows();
-    // this.props.getUserFollowing();
-    // this.props.getTags();
+    this.props.getUserFollowing();
+    this.props.getUserShows();
   }
 
   render() {
@@ -126,8 +125,8 @@ const mapDispatch = (dispatch) => {
   return {
     getCurrentUser: () => dispatch(getCurrentUser()),
     clearData: () => dispatch(clearData()),
-    // getUserShows: () => dispatch(getUserShows()),
-    // getUserFollowing: () => dispatch(getUserFollowing()),
+    getUserShows: () => dispatch(getUserShows()),
+    getUserFollowing: () => dispatch(getUserFollowing()),
     // getTags: () => dispatch(getTags()),
   };
 };

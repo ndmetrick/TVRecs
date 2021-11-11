@@ -10,73 +10,43 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import {
-  getUserSingleShow,
-  getUsersSingleShow,
-  getUserShows,
-} from '../../redux/actions';
-
-import firebase from 'firebase/app';
-require('firebase/firestore');
+import { addShow, deleteShow } from '../../redux/actions';
 
 function SingleShow(props) {
-  const [show, setShow] = useState({});
+  const [userShow, setUserShow] = useState({});
   const [user, setUser] = useState(null);
 
   // const [following, setFollowing] = useState(false);
 
   useEffect(() => {
-    console.log('insideUseEffect', props.route.params.showId);
-    const getSingleShow = async () => {
-      try {
-        const { currentUser, shows } = props;
-        const { showId, uid } = props.route.params;
+    const { currentUser } = props;
+    const { userShow, userInfo } = props.route.params;
 
-        if (uid === firebase.auth().currentUser.uid) {
-          setUser(currentUser);
-          await props.getUserSingleShow(showId);
-          setShow(props.show);
-        } else {
-          await props.getUsersSingleShow(uid, showId);
-          setShow(props.show);
-          firebase
-            .firestore()
-            .collection('users')
-            .doc(props.route.params.uid)
-            .get()
-            .then((userInfo) => {
-              if (userInfo.exists) {
-                const uid = props.route.params.uid;
-                const data = userInfo.data();
-                setUser({ uid, ...data });
-              } else {
-                console.log('That user does not exist');
-              }
-            });
-        }
-        return () => {
-          setShow({});
-        };
-      } catch (e) {
-        console.error(e);
-      }
+    if (userInfo.id === currentUser.id) {
+      setUser(currentUser);
+    } else {
+      setUser(userInfo);
+    }
+    setUserShow(userShow);
+  }, [props.route.params.userInfo]);
+
+  const addShow = async (
+    showName,
+    imageUrl,
+    streaming,
+    description,
+    purchase,
+    imdbId
+  ) => {
+    const showData = {
+      showName,
+      description,
+      streaming,
+      purchase,
+      imageUrl,
+      imdbId,
     };
-    getSingleShow();
-  }, [props.route.params.uid]);
-
-  const addShow = async (showName, imageUrl, streaming, purchase) => {
-    await firebase
-      .firestore()
-      .collection('shows')
-      .doc(firebase.auth().currentUser.uid)
-      .collection('userShows')
-      .add({
-        showName,
-        imageUrl,
-        streaming,
-        purchase,
-        creation: firebase.firestore.FieldValue.serverTimestamp(),
-      });
+    await props.addShow(showData);
     Alert.alert('Show added', `${showName} was added to your shows`, {
       text: 'OK',
     });
@@ -87,56 +57,52 @@ function SingleShow(props) {
   };
 
   const deleteShow = async () => {
-    await firebase
-      .firestore()
-      .collection('shows')
-      .doc(firebase.auth().currentUser.uid)
-      .collection('userShows')
-      .doc(props.route.params.showId)
-      .delete();
-    await getUserShows();
-    return props.navigation.navigate('Profile', {
-      uid: props.route.params.uid,
-      changedState: true,
-    });
+    try {
+      await props.deleteShow(userShow.show.id);
+      return props.navigation.navigate('Profile', {
+        uid: props.route.params.userInfo.id,
+        changedState: true,
+      });
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   if (user === null) {
     return <View />;
   }
 
-  console.log('SHOW IN SINGLE', props.show);
   return (
     <View style={styles.container}>
       <View style={styles.containerInfo}>
-        <Text style={styles.text}>
+        {/* <Text style={styles.text}>
           {user.firstName} {user.lastName}
-        </Text>
-        <Text style={styles.text}>{user.email}</Text>
+        </Text> */}
+        <Text style={styles.text}>{user.username}</Text>
       </View>
 
       <View style={styles.separator} />
 
-      <Image style={styles.image} source={{ uri: props.show.imageUrl }} />
+      <Image style={styles.image} source={{ uri: userShow.show.imageUrl }} />
       <Text style={{ fontWeight: 'bold', textAlign: 'center', fontSize: 18 }}>
-        {props.show.showName}
+        {userShow.show.showName}
       </Text>
       <View style={styles.extra}>
-        {props.show.description ? (
-          <Text style={styles.text}>Description: {props.show.description}</Text>
+        {userShow.description ? (
+          <Text style={styles.text}>Description: {userShow.description}</Text>
         ) : null}
-        {props.show.streaming ? (
+        {userShow.show.streaming ? (
           <Text style={styles.text}>
-            Streaming options: {props.show.streaming}
+            Streaming options: {userShow.show.streaming}
           </Text>
         ) : null}
-        {props.show.purchase ? (
+        {userShow.show.purchase ? (
           <Text style={styles.text}>
-            Purchase options: {props.show.purchase}
+            Purchase options: {userShow.show.purchase}
           </Text>
         ) : null}
 
-        {props.route.params.uid === firebase.auth().currentUser.uid ? (
+        {user.id === props.currentUser.id ? (
           <View>
             <Button
               title="Delete show"
@@ -156,16 +122,16 @@ function SingleShow(props) {
           </View>
         ) : null}
 
-        {props.showList.includes(props.show.showName) ? null : (
+        {props.showList.includes(userShow.show.showName) ? null : (
           <View>
             <Button
               title="Add show"
               onPress={() =>
                 addShow(
-                  show.showName,
-                  show.imageUrl,
-                  show.streaming,
-                  show.purchase
+                  userShow.show.showName,
+                  userShow.show.imageUrl,
+                  userShow.show.streaming,
+                  userShow.show.purchase
                 )
               }
             />
@@ -213,18 +179,15 @@ const styles = StyleSheet.create({
 });
 const mapState = (store) => ({
   currentUser: store.userState.currentUser,
-  userShows: store.userState.shows,
+  currentUserShows: store.userState.userShows,
   showList: store.userState.showList,
   following: store.userState.following,
-  show: store.singleShowState,
 });
 
 const mapDispatch = (dispatch) => {
   return {
-    getUserSingleShow: (showId) => dispatch(getUserSingleShow(showId)),
-    getUsersSingleShow: (uid, showId) =>
-      dispatch(getUsersSingleShow(uid, showId)),
-    getUserShows: () => dispatch(getUserShows()),
+    addShow: (showInfo) => dispatch(addShow(showInfo)),
+    deleteShow: (showId) => dispatch(deleteShow(showId)),
   };
 };
 

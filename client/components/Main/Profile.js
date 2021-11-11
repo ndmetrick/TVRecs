@@ -9,10 +9,14 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from 'react-native';
-import { getUserShows } from '../../redux/actions';
-
-import firebase from 'firebase/app';
-require('firebase/firestore');
+import {
+  getCurrentUser,
+  getUserShows,
+  getOtherUser,
+  follow,
+  unfollow,
+  getUserFollowing,
+} from '../../redux/actions';
 
 import { useIsFocused } from '@react-navigation/native';
 
@@ -24,42 +28,14 @@ function Profile(props) {
   const isFocused = useIsFocused();
 
   useEffect(() => {
-    const { currentUser, shows } = props;
-    getUserShows();
-    if (props.route.params.uid === firebase.auth().currentUser.uid) {
-      const uid = props.route.params.uid;
-      setUser({ uid, ...currentUser });
-      setUserShows(shows);
+    const { currentUser, currentUserShows, otherUser } = props;
+    if (props.route.params.uid === currentUser.id) {
+      setUser(currentUser);
+      setUserShows(currentUserShows);
     } else {
-      firebase
-        .firestore()
-        .collection('users')
-        .doc(props.route.params.uid)
-        .get()
-        .then((userInfo) => {
-          if (userInfo.exists) {
-            const uid = props.route.params.uid;
-            const data = userInfo.data();
-            setUser({ uid, ...data });
-          } else {
-            console.log('That user does not exist');
-          }
-        });
-      firebase
-        .firestore()
-        .collection('shows')
-        .doc(props.route.params.uid)
-        .collection('userShows')
-        .orderBy('creation', 'asc')
-        .get()
-        .then((showsInfo) => {
-          let shows = showsInfo.docs.map((doc) => {
-            const data = doc.data();
-            const id = doc.id;
-            return { id, ...data };
-          });
-          setUserShows(shows);
-        });
+      getUserShows(props.route.params.uid);
+      setUser(otherUser);
+      setUserShows(props.otherUserShows);
     }
     if (props.following.includes(props.route.params.uid)) {
       setFollowing(true);
@@ -71,52 +47,39 @@ function Profile(props) {
       setUser(null);
       setFollowing(false);
     };
-  }, [props.route.params.uid, props.following, isFocused]);
+  }, [props.route.params.uid, following, isFocused]);
 
-  const watch = () => {
-    firebase
-      .firestore()
-      .collection('following')
-      .doc(firebase.auth().currentUser.uid)
-      .collection('userFollowing')
-      .doc(props.route.params.uid)
-      .set({});
+  const follow = async () => {
+    await follow();
+    setFollowing(true);
   };
-  const stopWatching = () => {
-    firebase
-      .firestore()
-      .collection('following')
-      .doc(firebase.auth().currentUser.uid)
-      .collection('userFollowing')
-      .doc(props.route.params.uid)
-      .delete();
+  const unfollow = async () => {
+    await unfollow();
+    setFollowing(false);
   };
 
   const logout = () => {
-    firebase.auth().signOut();
+    // firebase.auth().signOut();
+    console.log('i have to figure logging out');
   };
 
   if (user === null) {
     return <View />;
   }
-  console.log('SHOWS', props.shows);
 
   return (
     <View style={styles.container}>
       <View style={styles.containerInfo}>
-        <Text style={styles.text}>
+        {/* <Text style={styles.text}>
           {user.firstName} {user.lastName}
-        </Text>
-        <Text style={styles.text}>{user.email}</Text>
-        {props.route.params.uid !== firebase.auth().currentUser.uid ? (
+        </Text> */}
+        <Text style={styles.text}>{user.username}</Text>
+        {props.route.params.uid !== props.currentUser.id ? (
           <View>
             {following ? (
-              <Button
-                title="stop receiving recs"
-                onPress={() => stopWatching()}
-              />
+              <Button title="stop receiving recs" onPress={() => unfollow()} />
             ) : (
-              <Button title="receive recs" onPress={() => watch()} />
+              <Button title="receive recs" onPress={() => follow()} />
             )}
           </View>
         ) : (
@@ -133,16 +96,20 @@ function Profile(props) {
               <TouchableOpacity
                 onPress={() =>
                   props.navigation.navigate('SingleShow', {
-                    uid: user.uid,
-                    showId: item.id,
+                    userInfo: user,
+                    userShow: item,
                   })
                 }
                 style={styles.catalogContainer}
               >
-                <Image style={styles.image} source={{ uri: item.imageUrl }} />
+                <Image
+                  style={styles.image}
+                  source={{ uri: item.show.imageUrl }}
+                />
               </TouchableOpacity>
             </View>
           )}
+          keyExtractor={(item, index) => index.toString()}
         />
       </View>
     </View>
@@ -177,12 +144,18 @@ const styles = StyleSheet.create({
 });
 const mapStateToProps = (store) => ({
   currentUser: store.userState.currentUser,
-  shows: store.userState.shows,
+  otherUser: store.usersState.user,
+  currentUserShows: store.userState.userShows,
+  otherUserShows: store.usersState.shows,
   following: store.userState.following,
 });
 const mapDispatch = (dispatch) => {
   return {
-    getUserShows: () => dispatch(getUserShows()),
+    getUserShows: (uid) => dispatch(getUserShows(uid)),
+    getCurrentUser: () => dispatch(getCurrentUser()),
+    unfollow: (uid) => dispatch(unfollow(uid)),
+    follow: (uid) => dispatch(follow(uid)),
+    getUserFollowing: () => dispatch(getUserFollowing()),
   };
 };
 export default connect(mapStateToProps, mapDispatch)(Profile);

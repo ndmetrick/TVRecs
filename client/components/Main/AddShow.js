@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, StyleSheet, TextInput, Image } from 'react-native';
+import {
+  View,
+  Text,
+  Button,
+  StyleSheet,
+  TextInput,
+  Image,
+  ScrollView,
+} from 'react-native';
 import axios from 'axios';
 import RNPickerSelect from 'react-native-picker-select';
 import AddShowTags from './AddShowTags';
@@ -10,6 +18,7 @@ export default function AddShow({ navigation }) {
   const [showName, setShowName] = useState('');
   const [description, setDescription] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [imdbId, setImdbId] = useState('');
   const [streaming, setStreaming] = useState('');
   const [purchase, setPurchase] = useState('');
   const [showOptions, setShowOptions] = useState(null);
@@ -35,6 +44,7 @@ export default function AddShow({ navigation }) {
         setShowOptions(showList);
       } else {
         const show = data.results[0];
+        setImdbId(show.id);
         setShowName(show.name);
         const getShow = `https://api.themoviedb.org/3/tv/${show.id}?api_key=${key}&language=en-US&append_to_response=watch%2Fproviders`;
         const thisShow = await axios.get(getShow);
@@ -65,6 +75,18 @@ export default function AddShow({ navigation }) {
     }
   };
 
+  const chooseNewShow = () => {
+    setAdded(false);
+    setShowInput('');
+    setShowName('');
+    setDescription('');
+    setImageUrl('');
+    setImdbId('');
+    setStreaming('');
+    setPurchase('');
+    setShowOptions('');
+  };
+
   const getShowData = async (id) => {
     try {
       const getShow = `https://api.themoviedb.org/3/tv/${id}?api_key=${key}&language=en-US&append_to_response=watch%2Fproviders`;
@@ -73,10 +95,10 @@ export default function AddShow({ navigation }) {
       setShowInput(data.name);
       setStreamingAndPurchase(data);
       setShowOptions(null);
+      setImdbId(id);
       const imageShowText = `http://www.omdbapi.com/?t=${data.name}&apikey=aa03da30`;
       const imageShow = await axios.get(imageShowText);
       const poster = imageShow.data.Poster;
-      console.log('got poster: ', poster);
       setImageUrl(poster);
       setAdded(true);
     } catch (e) {
@@ -132,63 +154,73 @@ export default function AddShow({ navigation }) {
           />
         </View>
       ) : null}
-
-      <View style={styles.button}>
-        <Button
-          color="white"
-          onPress={findShowOptions}
-          title="Add show"
-          backgroundColor="seagreen"
-        ></Button>
-      </View>
-
-      <View style={styles.separator} />
-
-      <TextInput
-        placeholder="Write your own description of the show. . ."
-        style={styles.inputText}
-        onChangeText={(description) => setDescription(description)}
-      />
-      {added ? (
-        <View>
-          <Text style={styles.text}>{showName}</Text>
-          <View style={styles.separator} />
-          {description ? (
-            <View>
-              <Text style={styles.text}>Description: {description}</Text>
-              <View style={styles.separator} />
-            </View>
-          ) : null}
-          {purchase ? (
-            <View>
-              <Text style={styles.text}>Streaming options: {streaming}</Text>
-              <View style={styles.separator} />
-            </View>
-          ) : null}
-          {streaming ? (
-            <View>
-              <Text style={styles.text}>Purchase options: {purchase}</Text>
-              <View style={styles.separator} />
-            </View>
-          ) : null}
-          <Image
-            source={image}
-            style={{ height: 300, resizeMode: 'contain', margin: 5 }}
-          />
+      {!added ? (
+        <View style={styles.button}>
           <Button
-            title="Save"
-            onPress={() =>
-              navigation.navigate('SaveShow', {
-                showName,
-                description,
-                imageUrl,
-                streaming,
-                purchase,
-              })
-            }
+            color="white"
+            onPress={findShowOptions}
+            title="Add show"
+            backgroundColor="seagreen"
           ></Button>
         </View>
-      ) : null}
+      ) : (
+        <View>
+          <View style={styles.saveButton}>
+            <Button
+              title="Save show"
+              color="white"
+              onPress={() =>
+                navigation.navigate('SaveShow', {
+                  showName,
+                  description,
+                  imageUrl,
+                  streaming,
+                  purchase,
+                  imdbId,
+                })
+              }
+            ></Button>
+          </View>
+          <View style={styles.button}>
+            <Button
+              color="white"
+              onPress={chooseNewShow}
+              title="Choose a new show"
+            ></Button>
+          </View>
+        </View>
+      )}
+      <View style={styles.separator} />
+      <ScrollView>
+        {added ? (
+          <View>
+            <TextInput
+              placeholder="Write your own description of the show. . ."
+              style={styles.inputText}
+              onChangeText={(description) => setDescription(description)}
+            />
+
+            <Text style={styles.text}>{showName}</Text>
+            <View style={styles.separator} />
+            {purchase ? (
+              <View>
+                <Text style={styles.text}>Streaming options: {streaming}</Text>
+                <View style={styles.separator} />
+              </View>
+            ) : null}
+            {streaming ? (
+              <View>
+                <Text style={styles.text}>Purchase options: {purchase}</Text>
+                <View style={styles.separator} />
+              </View>
+            ) : null}
+            <Image
+              source={image}
+              style={{ height: 300, resizeMode: 'contain', margin: 5 }}
+            />
+          </View>
+        ) : null}
+      </ScrollView>
     </View>
   );
 }
@@ -215,6 +247,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     backgroundColor: '#4281A4',
     marginVertical: 8,
+    marginBottom: 8,
+  },
+  saveButton: {
+    textAlign: 'center',
+    backgroundColor: 'seagreen',
+    marginVertical: 8,
+    marginBottom: 8,
   },
   separator: {
     marginVertical: 8,

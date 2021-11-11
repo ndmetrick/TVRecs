@@ -1,10 +1,8 @@
 import axios from 'axios';
 import types from '../constants';
-import jwtDecode from 'jwt-decode';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-// import { SnapshotViewIOSComponent } from 'react-native';
 
-const baseUrl = process.env.BASEURL;
+const baseUrl = 'http://10.0.0.94:8080';
 
 const getToken = async () => {
   try {
@@ -23,8 +21,8 @@ const getToken = async () => {
 export function getCurrentUser() {
   return async (dispatch) => {
     try {
-      const user = await axios.get(`${baseUrl}/auth/login`, getToken());
-      console.log('user on front end', user.data);
+      const headers = await getToken();
+      const user = await axios.get(`${baseUrl}/api/users/login`, headers);
       dispatch({
         type: types.GET_CURRENT_USER,
         currentUser: user.data,
@@ -35,16 +33,47 @@ export function getCurrentUser() {
   };
 }
 
+export function getUserShows() {
+  return async (dispatch) => {
+    try {
+      const headers = await getToken();
+      const user = await axios.get(`${baseUrl}/api/users/shows`, headers);
+      dispatch({
+        type: types.GET_USER_SHOWS,
+        userShows: user.data,
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+}
+
+export function getUserFollowing() {
+  return async (dispatch) => {
+    try {
+      const headers = await getToken();
+      const user = await axios.get(`${baseUrl}/api/users/following`, headers);
+      dispatch({
+        type: types.GET_USER_FOLLOWING,
+        following: user.data,
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+}
+
 export function addShow(showInfo) {
   return async (dispatch) => {
     try {
-      const showAdded = await axios.put(
-        `${baseUrl}/users/addShow`,
+      const headers = await getToken();
+      const addedShow = await axios.put(
+        `${baseUrl}/api/users/addShow`,
         showInfo,
-        getToken()
+        headers
       );
-      if (showAdded) {
-        dispatch({ type: types.ADD_SHOW, show: showAdded.data });
+      if (addedShow) {
+        dispatch({ type: types.ADD_SHOW, userShow: addedShow.data });
       } else {
         console.log('Something went wrong trying to add show');
       }
@@ -54,44 +83,63 @@ export function addShow(showInfo) {
   };
 }
 
-export function getUsersFollowing() {
+export function deleteShow(showId) {
   return async (dispatch) => {
     try {
-      const users = await axios.get(`/api/users/usersFollowing`);
-      dispatch({
-        type: types.GET_USERS_FOLLOWING,
-        usersFollowing: users.data(),
-      });
-    } catch (err) {
-      console.error(err);
+      console.log('showId in store', showId);
+      const headers = await getToken();
+      const deletedShow = await axios.put(
+        `${baseUrl}/api/users/deleteShow`,
+        { showId },
+        headers
+      );
+      if (deletedShow) {
+        dispatch({ type: types.DELETE_SHOW, userShow: deletedShow.data });
+      } else {
+        console.log('Something went wrong trying to delete show');
+      }
+    } catch (e) {
+      console.error(e);
     }
   };
 }
 
-export function getUserFollowers() {
+export function follow(uid) {
   return async (dispatch) => {
     try {
-      const user = await axios.get(`/api/users/userFollowers`);
-      dispatch({
-        type: types.GET_USER_FOLLOWERS,
-        currentUser: user.data(),
-      });
-    } catch (err) {
-      console.error(err);
+      const headers = await getToken();
+      const followed = await axios.put(
+        `${baseUrl}/api/users/follow`,
+        uid,
+        headers
+      );
+      if (followed) {
+        dispatch({ type: types.FOLLOW, followed: followed.data });
+      } else {
+        console.log('Something went wrong trying to follow this user');
+      }
+    } catch (e) {
+      console.error(e);
     }
   };
 }
 
-export function getCurrentUserShows() {
+export function unfollow(uid) {
   return async (dispatch) => {
     try {
-      const user = await axios.get(`/api/users/currentUser`);
-      dispatch({
-        type: types.GET_CURRENT_USER,
-        currentUser: user.data(),
-      });
-    } catch (err) {
-      console.error(err);
+      const headers = await getToken();
+      const unfollowed = await axios.delete(
+        `${baseUrl}/api/users/unfollow`,
+        uid,
+        headers
+      );
+      if (unfollowed) {
+        dispatch({ type: types.UNFOLLOW, unfollowed: unfollowed.data });
+      } else {
+        console.log('Something went wrong trying to unfollow this user');
+      }
+    } catch (e) {
+      console.error(e);
     }
   };
 }
@@ -116,8 +164,9 @@ export function getSingleUser(userId) {
 export default {
   getCurrentUser,
   getSingleUser,
-  getUsersFollowing,
-  getUserFollowers,
-  getCurrentUserShows,
+  addShow,
+  deleteShow,
+  follow,
+  unfollow,
   clearData,
 };

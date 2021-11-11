@@ -47,37 +47,33 @@ const Start = (props) => {
   );
 
   useEffect(() => {
-    if (result) {
-      if (result.error) {
-        Alert.alert(
-          'Authentication error',
-          result.params.error_description || 'something went wrong'
-        );
-        return;
-      }
-      if (result.type === 'success') {
-        //ADD TRY/CATCH and async
-        // Retrieve the JWT token and decode it
-        const jwtToken = result.params.id_token;
-
-        const user = jwtDecode(jwtToken);
-
-        const { name } = user;
-        setName(name);
-        setUser(user);
-        const userId = user.sub.slice(6);
-        console.log('user', user, userId);
-        AsyncStorage.setItem('token', jwtToken);
-
-        if (user['https://mynamespace/loginsCount'] < 2) {
-          props.login();
-          console.log('i am new');
-        } else if (user['https://mynamespace/loginsCount'] > 1) {
-          console.log('i am returning');
-          props.login();
+    const getUser = async () => {
+      try {
+        if (result) {
+          if (result.error) {
+            Alert.alert(
+              'Authentication error',
+              result.params.error_description || 'something went wrong'
+            );
+            return;
+          }
+          if (result.type === 'success') {
+            //ADD TRY/CATCH and async
+            // Retrieve the JWT token and decode it
+            const jwtToken = result.params.id_token;
+            const user = jwtDecode(jwtToken);
+            const { name } = user;
+            setName(name);
+            setUser(user);
+            await AsyncStorage.setItem('token', jwtToken);
+            await props.login();
+          }
         }
+      } catch (err) {
+        console.error(err);
       }
-    }
+    };
+    getUser();
   }, [result]);
 
   return (
