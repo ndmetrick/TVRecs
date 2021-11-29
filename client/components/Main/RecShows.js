@@ -10,30 +10,42 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
-import { addShow } from '../../redux/actions';
+import {
+  addShow,
+  getUserFollowing,
+  getUsersFollowingRecs,
+} from '../../redux/actions';
 
 import { connect } from 'react-redux';
 import { useIsFocused } from '@react-navigation/native';
 
-// const isFocused = useIsFocused();
-
 const RecShows = (props) => {
-  const [shows, setShows] = useState([]);
+  const [userShows, setUserShows] = useState([]);
+
+  const isFocused = useIsFocused();
 
   useEffect(() => {
-    if (
-      props.usersFollowingLoaded === props.following.length &&
-      props.following.length !== 0
-    ) {
-      props.recShows.sort(function (x, y) {
-        return x.creation - y.creation;
-      });
-      setShows(props.recShows);
-    }
-    return () => {
-      setShows([]);
+    const getRecShows = async () => {
+      try {
+        console.log('i got to recshows and this is them', props.recShows);
+        if (props.recShows) {
+          console.log('i got inside here');
+          const shows = props.recShows;
+          shows.sort(function (x, y) {
+            return y.createdAt - x.createdAt;
+          });
+          setUserShows(shows);
+          console.log('shows', shows);
+          return () => {
+            setUserShows([]);
+          };
+        }
+      } catch (err) {
+        console.log(err);
+      }
     };
-  }, [props.usersFollowingLoaded, props.recShows]);
+    getRecShows();
+  }, [isFocused, props.following, props.recShows]);
 
   const addShow = async (showName, imageUrl, streaming, purchase) => {
     await props.addShow(showName, imageUrl, streaming, purchase);
@@ -59,67 +71,71 @@ const RecShows = (props) => {
         <FlatList
           numColumns={1}
           horizontal={false}
-          data={shows}
+          data={userShows}
           renderItem={({ item }) => (
             <View style={styles.containerImage}>
               <TouchableOpacity
                 onPress={() =>
                   props.navigation.navigate('SingleShow', {
-                    uid: item.user.uid,
-                    showId: item.id,
+                    userInfo: item.user,
+                    userShow: item,
                   })
                 }
                 style={styles.catalogContainer}
               >
-                <Image source={{ uri: item.imageUrl }} style={styles.image} />
+                <Image
+                  source={{ uri: item.show.imageUrl }}
+                  style={styles.image}
+                />
               </TouchableOpacity>
               <View>
-                <Text style={{ fontWeight: 'bold' }}>{item.showName}</Text>
+                <Text style={{ fontWeight: 'bold' }}>{item.show.showName}</Text>
                 <View style={styles.rowContainer}>
                   <Text>Rec'er: </Text>
                   <TouchableOpacity
                     onPress={() =>
                       props.navigation.navigate('Profile', {
-                        uid: item.user.uid,
+                        uid: item.user.id,
                       })
                     }
                   >
                     <Text
                       style={{ color: 'blue' }}
-                    >{`${item.user.firstName} ${item.user.lastName}`}</Text>
+                    >{`${item.user.username}`}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
 
-              {item.streaming ? (
-                <Text>Streams on: {item.streaming}</Text>
+              {item.show.streaming ? (
+                <Text>Streams on: {item.show.streaming}</Text>
               ) : null}
-              {item.purchase ? (
-                <Text>Available to buy on: {item.purchase}</Text>
+              {item.show.purchase ? (
+                <Text>Available to buy on: {item.show.purchase}</Text>
               ) : null}
-              {props.userShows.some(
-                (show) => show.showName === item.showName
+              {props.showList.some(
+                (showName) => showName === item.show.showName
               ) ? null : (
                 <View>
                   {/* <Button
                   title="Add show to your recs"
                   onPress={() => addShow(item.showName, item.imageUrl, item.streaming, item.purchase)}
                 /> */}
-                  <Button
+                  {/* <Button
                     title="Add show"
                     onPress={() =>
-                      addShow(
-                        item.showName,
-                        item.imageUrl,
-                        item.streaming,
-                        item.purchase
-                      )
-                    }
-                  />
+                      // addShow(
+                      //   item.show.showName,
+                      //   item.show.imageUrl,
+                      //   item.show.streaming,
+                      //   item.show.purchase
+                      // )
+                    } */}
+                  {/* /> */}
                 </View>
               )}
             </View>
           )}
+          keyExtractor={(item, index) => index.toString()}
         />
       </View>
     </View>
@@ -153,17 +169,19 @@ const styles = StyleSheet.create({
   },
 });
 const mapStateToProps = (store) => ({
-  currentUser: store.userState.currentUser,
-  following: store.userState.following,
-  recShows: store.usersState.recShows,
-  usersFollowingLoaded: store.usersState.usersFollowingLoaded,
-  userShows: store.userState.shows,
+  currentUser: store.currentUser.userInfo,
+  following: store.currentUser.following,
+  recShows: store.currentUser.recShows,
+  userShows: store.currentUser.shows,
+  showList: store.currentUser.showList,
 });
 
 const mapDispatchToProps = (dispatch) => {
   return {
     addShow: (showName, imageUrl, streaming, purchase) =>
       dispatch(addShow(showName, imageUrl, streaming, purchase)),
+    getUserFollowing: () => dispatch(getUserFollowing()),
+    getUsersFollowingRecs: () => dispatch(getUsersFollowingRecs()),
   };
 };
 

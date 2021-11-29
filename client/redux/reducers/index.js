@@ -1,12 +1,12 @@
 import { combineReducers } from 'redux';
 import userReducer from './user';
 import usersReducer from './users';
-import singleShowReducer from './singleShow';
+import otherUserReducer from './otherUser';
 
 const Reducers = combineReducers({
-  userState: userReducer,
-  usersState: usersReducer,
-  singleShowState: singleShowReducer,
+  currentUser: userReducer,
+  allOtherUsers: usersReducer,
+  otherUser: otherUserReducer,
 });
 
 export default Reducers;

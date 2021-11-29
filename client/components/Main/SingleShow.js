@@ -178,10 +178,10 @@ const styles = StyleSheet.create({
   },
 });
 const mapState = (store) => ({
-  currentUser: store.userState.currentUser,
-  currentUserShows: store.userState.userShows,
-  showList: store.userState.showList,
-  following: store.userState.following,
+  currentUser: store.currentUser.userInfo,
+  currentUserShows: store.currentUser.userShows,
+  showList: store.currentUser.showList,
+  following: store.currentUser.following,
 });
 
 const mapDispatch = (dispatch) => {

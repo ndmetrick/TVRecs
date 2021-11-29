@@ -113,13 +113,12 @@ const styles = StyleSheet.create({
 });
 
 const mapStateToProps = (state) => ({
-  userShows: state.userState.showList,
-  currentUser: state.userState.currentUser,
+  userShows: state.currentUser.showList,
+  currentUser: state.currentUser.userInfo,
 });
 
 const mapDispatch = (dispatch) => {
   return {
-    getCurrentUser: () => dispatch(getCurrentUser()),
     addShow: (showInfo) => dispatch(addShow(showInfo)),
   };
 };

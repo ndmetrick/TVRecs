@@ -7,6 +7,8 @@ import {
   getUserShows,
   getUserFollowing,
   getTags,
+  getUsersFollowingRecs,
+  getAllOtherUsers,
 } from '../redux/actions';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -27,6 +29,8 @@ export class Main extends Component {
     this.props.getCurrentUser();
     this.props.getUserFollowing();
     this.props.getUserShows();
+    this.props.getUsersFollowingRecs();
+    this.props.getAllOtherUsers();
   }
 
   render() {
@@ -113,11 +117,11 @@ export class Main extends Component {
 
 const mapState = (state) => {
   return {
-    user: state.userState.currentUser,
-    following: state.userState.following,
-    recShows: state.usersState.recShows,
-    usersFollowingLoaded: state.usersState.usersFollowingLoaded,
-    userShows: state.userState.shows,
+    user: state.currentUser.userInfo,
+    following: state.currentUser.following,
+    recShows: state.currentUser.recShows,
+    usersFollowingLoaded: state.currentUser.usersFollowingLoaded,
+    userShows: state.currentUser.shows,
   };
 };
 
@@ -127,6 +131,8 @@ const mapDispatch = (dispatch) => {
     clearData: () => dispatch(clearData()),
     getUserShows: () => dispatch(getUserShows()),
     getUserFollowing: () => dispatch(getUserFollowing()),
+    getUsersFollowingRecs: () => dispatch(getUsersFollowingRecs()),
+    getAllOtherUsers: () => dispatch(getAllOtherUsers()),
     // getTags: () => dispatch(getTags()),
   };
 };

@@ -23,6 +23,7 @@ export function getCurrentUser() {
     try {
       const headers = await getToken();
       const user = await axios.get(`${baseUrl}/api/users/login`, headers);
+      console.log('user', user.data);
       dispatch({
         type: types.GET_CURRENT_USER,
         currentUser: user.data,
@@ -33,15 +34,29 @@ export function getCurrentUser() {
   };
 }
 
-export function getUserShows() {
+export function getUserShows(uid) {
   return async (dispatch) => {
     try {
       const headers = await getToken();
-      const user = await axios.get(`${baseUrl}/api/users/shows`, headers);
-      dispatch({
-        type: types.GET_USER_SHOWS,
-        userShows: user.data,
-      });
+      const userShows = await axios.get(
+        `${baseUrl}/api/users/shows/${uid}`,
+        headers
+      );
+      if (userShows.data != -1) {
+        console.log('userShows.data = ', userShows.data);
+        if (uid === undefined) {
+          dispatch({
+            type: types.GET_CURRENT_USER_SHOWS,
+            userShows: userShows.data,
+          });
+        } else {
+          dispatch({
+            type: types.GET_OTHER_USER_SHOWS,
+            userShows: userShows.data,
+          });
+          return userShows.data;
+        }
+      }
     } catch (err) {
       console.error(err);
     }
@@ -59,6 +74,19 @@ export function getUserFollowing() {
       });
     } catch (err) {
       console.error(err);
+    }
+  };
+}
+
+export function getUsersFollowingRecs() {
+  return async (dispatch) => {
+    try {
+      const headers = await getToken();
+      const recs = await axios.get(`${baseUrl}/api/users/recs`, headers);
+      console.log('recs on front end', recs.data);
+      dispatch({ type: types.GET_FOLLOWING_RECS, recs: recs.data });
+    } catch (e) {
+      console.error(e);
     }
   };
 }
@@ -86,7 +114,6 @@ export function addShow(showInfo) {
 export function deleteShow(showId) {
   return async (dispatch) => {
     try {
-      console.log('showId in store', showId);
       const headers = await getToken();
       const deletedShow = await axios.put(
         `${baseUrl}/api/users/deleteShow`,
@@ -107,14 +134,15 @@ export function deleteShow(showId) {
 export function follow(uid) {
   return async (dispatch) => {
     try {
+      console.log('uid', uid);
       const headers = await getToken();
       const followed = await axios.put(
         `${baseUrl}/api/users/follow`,
-        uid,
+        { uid: uid },
         headers
       );
       if (followed) {
-        dispatch({ type: types.FOLLOW, followed: followed.data });
+        dispatch({ type: types.FOLLOW, following: followed.data });
       } else {
         console.log('Something went wrong trying to follow this user');
       }
@@ -128,9 +156,9 @@ export function unfollow(uid) {
   return async (dispatch) => {
     try {
       const headers = await getToken();
-      const unfollowed = await axios.delete(
+      const unfollowed = await axios.put(
         `${baseUrl}/api/users/unfollow`,
-        uid,
+        { uid: uid },
         headers
       );
       if (unfollowed) {
@@ -144,17 +172,34 @@ export function unfollow(uid) {
   };
 }
 
+export function getAllOtherUsers() {
+  return async (dispatch) => {
+    try {
+      const headers = await getToken();
+      const users = await axios.get(`${baseUrl}/api/users/all`, headers);
+      dispatch({ type: types.GET_ALL_OTHER_USERS, users: users.data });
+    } catch (e) {
+      console.error(e);
+    }
+  };
+}
+
 export function clearData() {
   return (dispatch) => {
     dispatch({ type: types.CLEAR_DATA });
   };
 }
 
-export function getSingleUser(userId) {
+export function getOtherUser(userId) {
   return async (dispatch) => {
     try {
-      const user = await axios.get(`/api/users/${userId}`);
-      dispatch({ type: types.GET_SINGLE_USER, user });
+      const headers = await getToken();
+      const user = await axios.get(
+        `${baseUrl}/api/users/otherUser/${userId}`,
+        headers
+      );
+      dispatch({ type: types.GET_OTHER_USER, user: user.data });
+      return user.data;
     } catch (e) {
       console.error(e);
     }
@@ -163,10 +208,14 @@ export function getSingleUser(userId) {
 
 export default {
   getCurrentUser,
-  getSingleUser,
+  getOtherUser,
   addShow,
   deleteShow,
   follow,
   unfollow,
   clearData,
+  getAllOtherUsers,
+  getUserFollowing,
+  getUserShows,
+  getUsersFollowingRecs,
 };

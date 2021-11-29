@@ -10,12 +10,12 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import {
-  getCurrentUser,
   getUserShows,
   getOtherUser,
   follow,
   unfollow,
-  getUserFollowing,
+  getAllOtherUsers,
+  getUsersFollowingRecs,
 } from '../../redux/actions';
 
 import { useIsFocused } from '@react-navigation/native';
@@ -28,34 +28,66 @@ function Profile(props) {
   const isFocused = useIsFocused();
 
   useEffect(() => {
-    const { currentUser, currentUserShows, otherUser } = props;
-    if (props.route.params.uid === currentUser.id) {
-      setUser(currentUser);
-      setUserShows(currentUserShows);
-    } else {
-      getUserShows(props.route.params.uid);
-      setUser(otherUser);
-      setUserShows(props.otherUserShows);
-    }
-    if (props.following.includes(props.route.params.uid)) {
-      setFollowing(true);
-    } else {
-      setFollowing(false);
-    }
+    const { currentUser, currentUserShows } = props;
+    const { uid } = props.route.params ?? {};
+    console.log(
+      'props in useEffect',
+      props.whatIsUp,
+      'following',
+      props.following
+    );
+
+    const getUser = async () => {
+      try {
+        if (uid === currentUser.id) {
+          setUser(currentUser);
+          setUserShows(currentUserShows);
+        } else if (uid) {
+          console.log('another user', uid);
+          const otherUser = await props.getOtherUser(uid);
+          const otherUserShows = await props.getUserShows(uid);
+          setUser(otherUser);
+          setUserShows(otherUserShows);
+          console.log('here is who i am following', props.following);
+          if (
+            props.following.filter((followed) => followed.id === uid).length
+          ) {
+            // if (props.following.includes(uid)) {
+            console.log('i got in here', props.following);
+            setFollowing(true);
+          } else {
+            console.log('i know im not following');
+            setFollowing(false);
+          }
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    getUser();
     return () => {
       setUserShows([]);
       setUser(null);
       setFollowing(false);
     };
-  }, [props.route.params.uid, following, isFocused]);
+  }, [props.route.params.uid, props.following, isFocused]);
 
   const follow = async () => {
-    await follow();
-    setFollowing(true);
+    try {
+      await props.follow(user.id);
+      await props.getUsersFollowingRecs();
+      setFollowing(true);
+    } catch (err) {
+      console.log(err);
+    }
   };
   const unfollow = async () => {
-    await unfollow();
-    setFollowing(false);
+    try {
+      await props.unfollow(user.id);
+      setFollowing(false);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const logout = () => {
@@ -64,9 +96,11 @@ function Profile(props) {
   };
 
   if (user === null) {
+    console.log('this is where I am');
     return <View />;
   }
 
+  const { uid } = props.route.params ? props.route.params : {};
   return (
     <View style={styles.container}>
       <View style={styles.containerInfo}>
@@ -74,7 +108,7 @@ function Profile(props) {
           {user.firstName} {user.lastName}
         </Text> */}
         <Text style={styles.text}>{user.username}</Text>
-        {props.route.params.uid !== props.currentUser.id ? (
+        {user.id !== props.currentUser.id ? (
           <View>
             {following ? (
               <Button title="stop receiving recs" onPress={() => unfollow()} />
@@ -143,19 +177,21 @@ const styles = StyleSheet.create({
   },
 });
 const mapStateToProps = (store) => ({
-  currentUser: store.userState.currentUser,
-  otherUser: store.usersState.user,
-  currentUserShows: store.userState.userShows,
-  otherUserShows: store.usersState.shows,
-  following: store.userState.following,
+  currentUser: store.currentUser.userInfo,
+  otherUser: store.otherUser.userInfo,
+  currentUserShows: store.currentUser.userShows,
+  otherUserShows: store.otherUser.userShows,
+  following: store.currentUser.following,
+  otherUsers: store.allOtherUsers.usersInfo,
+  whatIsUp: store.otherUser,
 });
 const mapDispatch = (dispatch) => {
   return {
+    getOtherUser: (uid) => dispatch(getOtherUser(uid)),
     getUserShows: (uid) => dispatch(getUserShows(uid)),
-    getCurrentUser: () => dispatch(getCurrentUser()),
     unfollow: (uid) => dispatch(unfollow(uid)),
     follow: (uid) => dispatch(follow(uid)),
-    getUserFollowing: () => dispatch(getUserFollowing()),
+    getUsersFollowingRecs: () => dispatch(getUsersFollowingRecs()),
   };
 };
 export default connect(mapStateToProps, mapDispatch)(Profile);

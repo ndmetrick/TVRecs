@@ -5,14 +5,16 @@ import {
   DELETE_SHOW,
   FOLLOW,
   UNFOLLOW,
-  GET_USER_SHOWS,
+  GET_CURRENT_USER_SHOWS,
   GET_USER_FOLLOWING,
+  GET_FOLLOWING_RECS,
 } from '../constants';
 
 const initialState = {
-  currentUser: null,
+  userInfo: null,
   userShows: [],
   following: [],
+  recShows: [],
   showList: [],
   tags: [],
 };
@@ -22,9 +24,9 @@ export default function userReducer(state = initialState, action) {
     case GET_CURRENT_USER:
       return {
         ...state,
-        currentUser: action.currentUser,
+        userInfo: action.currentUser,
       };
-    case GET_USER_SHOWS:
+    case GET_CURRENT_USER_SHOWS:
       return {
         ...state,
         userShows: action.userShows,
@@ -54,14 +56,22 @@ export default function userReducer(state = initialState, action) {
     case FOLLOW:
       return {
         ...state,
-        following: [...state.following, action.followed],
+        following: [...state.following, action.following],
       };
     case UNFOLLOW:
       return {
         ...state,
         following: state.following.filter(
-          (followed) => followed.id !== action.followed.id
+          (followed) => followed.id !== action.unfollowed.id
         ),
+        recShows: state.recShows.filter(
+          (userShow) => userShow.user.id !== action.unfollowed.id
+        ),
+      };
+    case GET_FOLLOWING_RECS:
+      return {
+        ...state,
+        recShows: action.recs,
       };
     // case GET_TAGS:
     //   return {

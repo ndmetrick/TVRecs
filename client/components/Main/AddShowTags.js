@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
 });
 
 const mapStateToProps = (store) => ({
-  tags: store.userState.tags,
+  tags: store.currentUser.tags,
 });
 
 const mapDispatchToProps = (dispatch) => {

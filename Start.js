@@ -13,7 +13,7 @@ import SaveShow from './client/components/Main/SaveShow';
 import AddShow from './client/components/Main/AddShow';
 import SingleShow from './client/components/Main/SingleShow';
 import Login from './client/components/auth/Login';
-import { addUser, getCurrentUser } from './client/redux/actions';
+import { getCurrentUser } from './client/redux/actions';
 
 const auth0ClientId = 'rMIdw36DYTg1ZmOuux0xDfUvj0rbO6u3';
 const authorizationEndpoint = 'https://dev--5p-bz53.us.auth0.com/authorize';
@@ -137,7 +137,6 @@ const styles = StyleSheet.create({
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    addUser: () => dispatch(addUser()),
     login: () => dispatch(getCurrentUser()),
   };
 };
