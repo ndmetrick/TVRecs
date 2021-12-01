@@ -9,6 +9,7 @@ import {
   getTags,
   getUsersFollowingRecs,
   getAllOtherUsers,
+  getUserShowsToWatch,
 } from '../redux/actions';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -16,6 +17,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import RecShows from './Main/RecShows';
 import Search from './Main/Search';
 import Profile from './Main/Profile';
+import AddShow from './Main/AddShow';
 
 const Tab = createMaterialBottomTabNavigator();
 
@@ -31,6 +33,7 @@ export class Main extends Component {
     this.props.getUserShows();
     this.props.getUsersFollowingRecs();
     this.props.getAllOtherUsers();
+    this.props.getUserShowsToWatch();
   }
 
   render() {
@@ -47,15 +50,28 @@ export class Main extends Component {
             ),
           }}
         />
-        <Tab.Screen
+        {/* <Tab.Screen
           name="AddShowContainer"
           component={EmptyScreen}
           listeners={({ navigation }) => ({
             tabPress: (event) => {
               event.preventDefault();
-              navigation.navigate('AddShow');
+              navigation.navigate('AddShow', {
+                navigation: this.props.navigation,
+              });
             },
           })}
+          options={{
+            tabBarIcon: ({ color, size }) => (
+              <MaterialCommunityIcons name="plus-box" color={color} size={26} />
+            ),
+          }}
+        /> */}
+
+        <Tab.Screen
+          name="AddScreen"
+          component={AddShow}
+          navigation={this.props.navigation}
           options={{
             tabBarIcon: ({ color, size }) => (
               <MaterialCommunityIcons name="plus-box" color={color} size={26} />
@@ -95,9 +111,7 @@ export class Main extends Component {
           listeners={({ navigation }) => ({
             tabPress: (event) => {
               event.preventDefault();
-              navigation.navigate('Profile', {
-                uid: user.id,
-              });
+              navigation.navigate('Profile');
             },
           })}
           options={{
@@ -134,6 +148,7 @@ const mapDispatch = (dispatch) => {
     getUsersFollowingRecs: () => dispatch(getUsersFollowingRecs()),
     getAllOtherUsers: () => dispatch(getAllOtherUsers()),
     // getTags: () => dispatch(getTags()),
+    getUserShowsToWatch: () => dispatch(getUserShowsToWatch()),
   };
 };
 

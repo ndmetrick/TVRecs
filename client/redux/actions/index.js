@@ -63,6 +63,26 @@ export function getUserShows(uid) {
   };
 }
 
+export function getUserShowsToWatch() {
+  return async (dispatch) => {
+    try {
+      const headers = await getToken();
+      const toWatch = await axios.get(
+        `${baseUrl}/api/users/showsToWatch`,
+        headers
+      );
+      if (toWatch.data != -1) {
+        dispatch({
+          type: types.GET_TO_WATCH,
+          toWatch: toWatch.data,
+        });
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+}
+
 export function getUserFollowing() {
   return async (dispatch) => {
     try {
@@ -91,13 +111,33 @@ export function getUsersFollowingRecs() {
   };
 }
 
-export function addShow(showInfo) {
+export function addShow(showInfo, toWatch) {
   return async (dispatch) => {
     try {
       const headers = await getToken();
       const addedShow = await axios.put(
-        `${baseUrl}/api/users/addShow`,
+        `${baseUrl}/api/users/addShow/${toWatch}`,
         showInfo,
+        headers
+      );
+      if (addedShow) {
+        dispatch({ type: types.ADD_SHOW, userShow: addedShow.data, toWatch });
+      } else {
+        console.log('Something went wrong trying to add show');
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+}
+
+export function switchShow(userShowId, description) {
+  return async (dispatch) => {
+    try {
+      const headers = await getToken();
+      const addedShow = await axios.put(
+        `${baseUrl}/api/users/switchShow`,
+        { userShowId, description },
         headers
       );
       if (addedShow) {
@@ -111,17 +151,21 @@ export function addShow(showInfo) {
   };
 }
 
-export function deleteShow(showId) {
+export function deleteShow(showId, toWatch) {
   return async (dispatch) => {
     try {
       const headers = await getToken();
       const deletedShow = await axios.put(
-        `${baseUrl}/api/users/deleteShow`,
+        `${baseUrl}/api/users/deleteShow/`,
         { showId },
         headers
       );
       if (deletedShow) {
-        dispatch({ type: types.DELETE_SHOW, userShow: deletedShow.data });
+        dispatch({
+          type: types.DELETE_SHOW,
+          userShow: deletedShow.data,
+          toWatch,
+        });
       } else {
         console.log('Something went wrong trying to delete show');
       }

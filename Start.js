@@ -11,8 +11,8 @@ import Main from './client/components/Main';
 import AddShowTags from './client/components/Main/AddShowTags';
 import SaveShow from './client/components/Main/SaveShow';
 import AddShow from './client/components/Main/AddShow';
+import OtherUser from './client/components/Main/OtherUser';
 import SingleShow from './client/components/Main/SingleShow';
-import Login from './client/components/auth/Login';
 import { getCurrentUser } from './client/redux/actions';
 
 const auth0ClientId = 'rMIdw36DYTg1ZmOuux0xDfUvj0rbO6u3';
@@ -86,11 +86,11 @@ const Start = (props) => {
               component={Main}
               option={{ headerShown: false }}
             />
-            <Stack.Screen
+            {/* <Stack.Screen
               name="AddShow"
               component={AddShow}
               navigation={props.navigation}
-            />
+            /> */}
             <Stack.Screen
               name="AddShowTags"
               component={AddShowTags}
@@ -104,6 +104,11 @@ const Start = (props) => {
             <Stack.Screen
               name="SingleShow"
               component={SingleShow}
+              navigation={props.navigation}
+            />
+            <Stack.Screen
+              name="OtherUser"
+              component={OtherUser}
               navigation={props.navigation}
             />
           </Stack.Navigator>

@@ -10,9 +10,6 @@ import {
 } from 'react-native';
 import { setTags } from '../../redux/actions';
 
-import firebase from 'firebase/app';
-require('firebase/firestore');
-
 import TagGroup, { Tag } from 'react-native-tag-group';
 
 class AddShowTags extends Component {

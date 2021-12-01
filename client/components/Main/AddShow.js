@@ -13,7 +13,7 @@ import RNPickerSelect from 'react-native-picker-select';
 import AddShowTags from './AddShowTags';
 import SaveShow from './SaveShow';
 
-export default function AddShow({ navigation }) {
+export default function AddShow(props) {
   const [showInput, setShowInput] = useState('');
   const [showName, setShowName] = useState('');
   const [description, setDescription] = useState('');
@@ -23,6 +23,7 @@ export default function AddShow({ navigation }) {
   const [purchase, setPurchase] = useState('');
   const [showOptions, setShowOptions] = useState(null);
   const [added, setAdded] = useState(false);
+  const [toWatch, setToWatch] = useState(null);
   const key = 'e7eaca48bd580f966d3d14526c3ddff0';
 
   // https://api.themoviedb.org/4/search/tv?api_key=e7eaca48bd580f966d3d14526c3ddff0&query=we+are+lady+parts
@@ -111,7 +112,18 @@ export default function AddShow({ navigation }) {
   };
 
   useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
+    // if the user got here by adding an existing show from their own watch list or from someone else's rec list
+    if (props.route.params) {
+      const { userShow, toWatch } = props.route.params;
+      setShowName(userShow.show.showName);
+      setImageUrl(userShow.show.imageUrl);
+      setImdbId(userShow.show.imageUrl);
+      setStreaming(userShow.show.streaming);
+      setPurchase(userShow.show.purchase);
+      setToWatch(toWatch);
+      setAdded(true);
+    }
+    const unsubscribe = props.navigation.addListener('focus', () => {
       setShowInput('');
       setShowName('');
       setDescription('');
@@ -122,9 +134,10 @@ export default function AddShow({ navigation }) {
       setAdded('');
     });
     return unsubscribe;
-  }, [navigation]);
+  }, [props.navigation]);
 
   const image = { uri: imageUrl };
+  console.log('to watch is', toWatch);
   return (
     <View style={styles.container}>
       <Text style={styles.text}>What show do you want to add?</Text>
@@ -165,21 +178,46 @@ export default function AddShow({ navigation }) {
         </View>
       ) : (
         <View>
-          <View style={styles.saveButton}>
-            <Button
-              title="Save show"
-              color="white"
-              onPress={() =>
-                navigation.navigate('SaveShow', {
-                  showName,
-                  description,
-                  imageUrl,
-                  streaming,
-                  purchase,
-                  imdbId,
-                })
-              }
-            ></Button>
+          <View style={{ flexDirection: 'row' }}>
+            {(toWatch === null || toWatch === false) && (
+              <View style={styles.saveButton}>
+                <Button
+                  style={styles.saveButton}
+                  title="Rec show"
+                  color="white"
+                  onPress={() =>
+                    props.navigation.navigate('SaveShow', {
+                      showName,
+                      description,
+                      imageUrl,
+                      streaming,
+                      purchase,
+                      imdbId,
+                      toWatch: false,
+                    })
+                  }
+                ></Button>
+              </View>
+            )}
+            {(toWatch === null || toWatch === true) && (
+              <View style={styles.saveButton}>
+                <Button
+                  title="Save show to watch list"
+                  color="white"
+                  onPress={() =>
+                    props.navigation.navigate('SaveShow', {
+                      showName,
+                      description,
+                      imageUrl,
+                      streaming,
+                      purchase,
+                      imdbId,
+                      toWatch: true,
+                    })
+                  }
+                ></Button>
+              </View>
+            )}
           </View>
           <View style={styles.button}>
             <Button
@@ -248,12 +286,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#4281A4',
     marginVertical: 8,
     marginBottom: 8,
+    marginRight: 10,
+    marginLeft: 10,
   },
   saveButton: {
     textAlign: 'center',
     backgroundColor: 'seagreen',
     marginVertical: 8,
     marginBottom: 8,
+    marginRight: 10,
+    marginLeft: 10,
   },
   separator: {
     marginVertical: 8,

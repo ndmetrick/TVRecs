@@ -27,15 +27,13 @@ const RecShows = (props) => {
   useEffect(() => {
     const getRecShows = async () => {
       try {
-        console.log('i got to recshows and this is them', props.recShows);
         if (props.recShows) {
           console.log('i got inside here');
           const shows = props.recShows;
           shows.sort(function (x, y) {
-            return y.createdAt - x.createdAt;
+            return new Date(y.createdAt) - new Date(x.createdAt);
           });
           setUserShows(shows);
-          console.log('shows', shows);
           return () => {
             setUserShows([]);
           };
@@ -94,7 +92,7 @@ const RecShows = (props) => {
                   <Text>Rec'er: </Text>
                   <TouchableOpacity
                     onPress={() =>
-                      props.navigation.navigate('Profile', {
+                      props.navigation.navigate('otherUser', {
                         uid: item.user.id,
                       })
                     }

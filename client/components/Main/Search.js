@@ -18,6 +18,7 @@ const Search = (props) => {
     const getUsers = async () => {
       try {
         await getAllOtherUsers();
+        console.log('other users', users);
         setUsers(props.otherUsers);
       } catch (err) {
         console.error(err);
@@ -55,7 +56,7 @@ const Search = (props) => {
         renderItem={({ item }) => (
           <TouchableOpacity
             onPress={() =>
-              props.navigation.navigate('Profile', { uid: item.id })
+              props.navigation.navigate('OtherUser', { uid: item.id })
             }
           >
             <Text>{item.username}</Text>

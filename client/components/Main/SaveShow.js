@@ -1,15 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Text, Image, Button, StyleSheet } from 'react-native';
+import {
+  View,
+  TextInput,
+  Text,
+  Image,
+  Button,
+  StyleSheet,
+  Alert,
+} from 'react-native';
 import { connect } from 'react-redux';
-import { getCurrentUser, addShow } from '../../redux/actions';
+import { getCurrentUser, addShow, switchShow } from '../../redux/actions';
 
 import { NavigationContainer } from '@react-navigation/native';
 
 function SaveShow(props) {
-  const { imageUrl, showName, streaming, purchase, description, imdbId } =
-    props.route.params || '';
+  const {
+    imageUrl,
+    showName,
+    streaming,
+    purchase,
+    description,
+    imdbId,
+    toWatch,
+  } = props.route.params || '';
 
   const [goBack, setGoBack] = useState(false);
+  const [switching, setSwitching] = useState(false);
 
   useEffect(() => {
     const saveShowData = async () => {
@@ -21,15 +37,32 @@ function SaveShow(props) {
         imageUrl,
         imdbId,
       };
-      await props.addShow(showData);
+      if (typeof toWatch !== 'boolean') {
+        console.log('i know i am switching and toWatch equals', typeof toWatch);
+        setSwitching(true);
+      } else {
+        await props.addShow(showData, toWatch);
+      }
     };
     if (!props.userShows.includes(showName)) {
       saveShowData();
-      getCurrentUser();
     } else {
       setGoBack(true);
     }
+    // RETURN CLEAR HERE?
   }, []);
+
+  const switchShow = async (userShowId, description, showName) => {
+    await props.switchShow(userShowId, description);
+    Alert.alert(
+      'Show added',
+      `${showName} was added to your rec'd shows and removed from your watch list`,
+      {
+        text: 'OK',
+      }
+    );
+    return props.navigation.navigate('Profile');
+  };
 
   const image = { uri: imageUrl };
 
@@ -71,12 +104,13 @@ function SaveShow(props) {
         title="Next: add descriptive tags"
         onPress={() => props.navigation.navigate('AddShowTags', { showName })}
       />
+      {/* DEAL WITH THIS FOR SWITCHED OPTIONS */}
       <Button
         title="Skip tags"
-        onPress={() =>
-          props.navigation.navigate('Profile', {
-            uid: props.currentUser.id,
-          })
+        onPress={
+          switching === true
+            ? () => switchShow(toWatch, description, showName)
+            : () => props.navigation.navigate('Profile')
         }
       />
     </View>
@@ -119,7 +153,9 @@ const mapStateToProps = (state) => ({
 
 const mapDispatch = (dispatch) => {
   return {
-    addShow: (showInfo) => dispatch(addShow(showInfo)),
+    addShow: (showInfo, toWatch) => dispatch(addShow(showInfo, toWatch)),
+    switchShow: (userShowId, description) =>
+      dispatch(switchShow(userShowId, description)),
   };
 };
 export default connect(mapStateToProps, mapDispatch)(SaveShow);
