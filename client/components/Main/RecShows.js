@@ -28,7 +28,6 @@ const RecShows = (props) => {
     const getRecShows = async () => {
       try {
         if (props.recShows) {
-          console.log('i got inside here');
           const shows = props.recShows;
           shows.sort(function (x, y) {
             return new Date(y.createdAt) - new Date(x.createdAt);
@@ -87,7 +86,7 @@ const RecShows = (props) => {
                 />
               </TouchableOpacity>
               <View>
-                <Text style={{ fontWeight: 'bold' }}>{item.show.showName}</Text>
+                <Text style={{ fontWeight: 'bold' }}>{item.show.name}</Text>
                 <View style={styles.rowContainer}>
                   <Text>Rec'er: </Text>
                   <TouchableOpacity
@@ -111,7 +110,7 @@ const RecShows = (props) => {
                 <Text>Available to buy on: {item.show.purchase}</Text>
               ) : null}
               {props.showList.some(
-                (showName) => showName === item.show.showName
+                (showName) => showName === item.show.name
               ) ? null : (
                 <View>
                   {/* <Button
@@ -122,7 +121,7 @@ const RecShows = (props) => {
                     title="Add show"
                     onPress={() =>
                       // addShow(
-                      //   item.show.showName,
+                      //   item.show.name,
                       //   item.show.imageUrl,
                       //   item.show.streaming,
                       //   item.show.purchase

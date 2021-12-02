@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { View, Text, StyleSheet } from 'react-native';
 import {
@@ -21,36 +21,37 @@ import AddShow from './Main/AddShow';
 
 const Tab = createMaterialBottomTabNavigator();
 
-const EmptyScreen = () => {
-  return null;
-};
+function Main(props) {
+  useEffect(() => {
+    props.clearData();
+    props.getCurrentUser();
+    props.getUserFollowing();
+    props.getUserShows();
+    props.getUsersFollowingRecs();
+    props.getAllOtherUsers();
+    props.getUserShowsToWatch();
+  }, []);
 
-export class Main extends Component {
-  componentDidMount() {
-    this.props.clearData();
-    this.props.getCurrentUser();
-    this.props.getUserFollowing();
-    this.props.getUserShows();
-    this.props.getUsersFollowingRecs();
-    this.props.getAllOtherUsers();
-    this.props.getUserShowsToWatch();
-  }
+  // componentWillUnmount() {
+  //   console.log('i got into this one');
+  //   this.props.navigation.setParams({ toWatch: null });
+  // }
 
-  render() {
-    const { user } = this.props;
+  // render() {
+  const { user } = props;
 
-    return (
-      <Tab.Navigator initialRouteName="Feed" labeled={false}>
-        <Tab.Screen
-          name="RecShows"
-          component={RecShows}
-          options={{
-            tabBarIcon: ({ color, size }) => (
-              <MaterialCommunityIcons name="home" color={color} size={26} />
-            ),
-          }}
-        />
-        {/* <Tab.Screen
+  return (
+    <Tab.Navigator initialRouteName="Feed" labeled={false}>
+      <Tab.Screen
+        name="RecShows"
+        component={RecShows}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="home" color={color} size={26} />
+          ),
+        }}
+      />
+      {/* <Tab.Screen
           name="AddShowContainer"
           component={EmptyScreen}
           listeners={({ navigation }) => ({
@@ -68,18 +69,22 @@ export class Main extends Component {
           }}
         /> */}
 
-        <Tab.Screen
-          name="AddScreen"
-          component={AddShow}
-          navigation={this.props.navigation}
-          options={{
-            tabBarIcon: ({ color, size }) => (
-              <MaterialCommunityIcons name="plus-box" color={color} size={26} />
-            ),
-          }}
-        />
+      <Tab.Screen
+        name="AddShow"
+        children={() => (
+          <AddShow
+            previous={props.navigation.getState().routes}
+            navigation={props.navigation}
+          />
+        )}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="plus-box" color={color} size={26} />
+          ),
+        }}
+      />
 
-        {/* <Tab.Screen
+      {/* <Tab.Screen
         name="AddShow"
         component={AddShow}
         listeners={({ navigation }) => ({
@@ -94,40 +99,40 @@ export class Main extends Component {
           ),
         }}
       /> */}
-        <Tab.Screen
-          name="Search"
-          component={Search}
-          navigation={this.props.navigation}
-          options={{
-            tabBarIcon: ({ color, size }) => (
-              <MaterialCommunityIcons name="magnify" color={color} size={26} />
-            ),
-          }}
-        />
+      <Tab.Screen
+        name="Search"
+        component={Search}
+        navigation={props.navigation}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="magnify" color={color} size={26} />
+          ),
+        }}
+      />
 
-        <Tab.Screen
-          name="Profile"
-          component={Profile}
-          listeners={({ navigation }) => ({
-            tabPress: (event) => {
-              event.preventDefault();
-              navigation.navigate('Profile');
-            },
-          })}
-          options={{
-            tabBarIcon: ({ color, size }) => (
-              <MaterialCommunityIcons
-                name="account-circle"
-                color={color}
-                size={26}
-              />
-            ),
-          }}
-        />
-      </Tab.Navigator>
-    );
-  }
+      <Tab.Screen
+        name="Profile"
+        component={Profile}
+        listeners={({ navigation }) => ({
+          tabPress: (event) => {
+            event.preventDefault();
+            navigation.navigate('Profile');
+          },
+        })}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons
+              name="account-circle"
+              color={color}
+              size={26}
+            />
+          ),
+        }}
+      />
+    </Tab.Navigator>
+  );
 }
+// }
 
 const mapState = (state) => {
   return {
@@ -136,6 +141,8 @@ const mapState = (state) => {
     recShows: state.currentUser.recShows,
     usersFollowingLoaded: state.currentUser.usersFollowingLoaded,
     userShows: state.currentUser.shows,
+    showList: state.currentUser.showList,
+    watchList: state.currentUser.watchList,
   };
 };
 

@@ -18,7 +18,6 @@ const Search = (props) => {
     const getUsers = async () => {
       try {
         await getAllOtherUsers();
-        console.log('other users', users);
         setUsers(props.otherUsers);
       } catch (err) {
         console.error(err);
@@ -34,11 +33,9 @@ const Search = (props) => {
 
   const { currentUser } = props;
   const getMatchingUsers = (searchInput) => {
-    console.log('users', users);
     const matches = users.filter((user) =>
       user.username.includes(searchInput.toLowerCase())
     );
-    console.log('matches', matches);
     setMatchingUsers(matches);
   };
 

@@ -30,6 +30,7 @@ function OtherUser(props) {
   const [userShows, setUserShows] = useState([]);
   const [user, setUser] = useState(null);
   const [following, setFollowing] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // const isFocused = useIsFocused();
 
@@ -45,7 +46,7 @@ function OtherUser(props) {
           const otherUserShows = await props.getUserShows(uid);
           setUser(otherUser);
           setUserShows(otherUserShows);
-          console.log('here is who i am following', props.following);
+          setLoading(false);
           if (
             props.following.filter((followed) => followed.id === uid).length
           ) {
@@ -88,12 +89,13 @@ function OtherUser(props) {
     }
   };
 
-  if (user === null) {
+  if (loading) {
     console.log('this is where I am');
     return <View />;
   }
 
   const { uid } = props.route.params ? props.route.params : {};
+
   return (
     <View style={styles.container}>
       <View style={styles.containerInfo}>
@@ -106,6 +108,13 @@ function OtherUser(props) {
         </Text> */}
         {/* Add in who is following */}
         <Text style={styles.text}>Recommending {userShows.length} shows</Text>
+        <View>
+          {following ? (
+            <Button title="stop receiving recs" onPress={() => unfollow()} />
+          ) : (
+            <Button title="receive recs" onPress={() => follow()} />
+          )}
+        </View>
       </View>
       <Tab.Navigator
         initialRouteName="Feed"
@@ -127,7 +136,7 @@ function OtherUser(props) {
         <Tab.Screen
           name="Recs"
           component={ViewShows}
-          initialParams={{ user, type: 'recs', userShows }}
+          initialParams={{ userToView: user, type: 'recs', userShows }}
           options={{
             tabBarLabel: 'Recs',
           }}

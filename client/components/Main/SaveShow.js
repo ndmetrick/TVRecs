@@ -22,6 +22,7 @@ function SaveShow(props) {
     description,
     imdbId,
     toWatch,
+    userShowId,
   } = props.route.params || '';
 
   const [goBack, setGoBack] = useState(false);
@@ -37,8 +38,8 @@ function SaveShow(props) {
         imageUrl,
         imdbId,
       };
-      if (typeof toWatch !== 'boolean') {
-        console.log('i know i am switching and toWatch equals', typeof toWatch);
+      if (userShowId) {
+        console.log('i know i am switching and userShowId equals', userShowId);
         setSwitching(true);
       } else {
         await props.addShow(showData, toWatch);
@@ -109,7 +110,7 @@ function SaveShow(props) {
         title="Skip tags"
         onPress={
           switching === true
-            ? () => switchShow(toWatch, description, showName)
+            ? () => switchShow(userShowId, description, showName)
             : () => props.navigation.navigate('Profile')
         }
       />

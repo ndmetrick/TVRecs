@@ -8,6 +8,7 @@ import {
   Button,
   StyleSheet,
   TouchableOpacity,
+  ScrollView,
   Alert,
 } from 'react-native';
 import { addShow, deleteShow, switchShow } from '../../redux/actions';
@@ -34,49 +35,56 @@ function SingleShow(props) {
 
   const addShow = async (userShow, currentToWatch) => {
     // if the toWatch variable is being changed (i.e. the show is moving from to-watch to recommended),
-    if (currentToWatch !== userShow.toWatch) {
-      await props.switchShow(userShow.id, userShow.description);
+    if (typeof currentToWatch !== 'boolean') {
+      await props.switchShow(currentToWatch, userShow.description);
       Alert.alert(
         'Show added',
-        `${userShow.show.showName} was added to your rec'd shows and removed from your watch list`,
+        `${userShow.show.name} was added to your rec'd shows and removed from your watch list`,
         {
           text: 'OK',
         }
       );
       setToWatch(false);
-    }
-    const showData = {
-      showName: userShow.show.showName,
-      streaming: userShow.show.streaming,
-      purchase: userShow.show.purchase,
-      imageUrl: userShow.show.imageUrl,
-      imdbId: userShow.show.imdbId,
-    };
-    if (currentToWatch === true) {
-      showData.description = userShow.description;
-    }
-    await props.addShow(showData, toWatch);
-    Alert.alert(
-      'Show added',
-      `${userShow.show.showName} was added to your rec'd shows`,
-      {
-        text: 'OK',
+      return props.navigation.goBack();
+    } else {
+      const showData = {
+        showName: userShow.show.name,
+        streaming: userShow.show.streaming,
+        purchase: userShow.show.purchase,
+        imageUrl: userShow.show.imageUrl,
+        imdbId: userShow.show.imdbId,
+      };
+      if (currentToWatch === true) {
+        showData.description = userShow.description;
+      } else {
+        showData.description = '';
       }
-    );
-    // WE JUST WANT TO GO BACK ACTUALLY
-    // return props.navigation.navigate('OtherUser', {
-    //   uid: user.id,
-    //   changedState: true,
-    // });
-    return props.navigation.goBack();
+      await props.addShow(showData, currentToWatch);
+      Alert.alert(
+        'Show added',
+        `${userShow.show.name} was added to your ${
+          currentToWatch === false ? "rec'd shows" : 'watch list'
+        }`,
+        {
+          text: 'OK',
+        }
+      );
+      // WE JUST WANT TO GO BACK ACTUALLY
+      // return props.navigation.navigate('OtherUser', {
+      //   uid: user.id,
+      //   changedState: true,
+      // });
+      return props.navigation.goBack();
+    }
   };
 
   const deleteShow = async () => {
     try {
       await props.deleteShow(userShow.show.id);
-      return props.navigation.navigate('Profile', {
-        changedState: true,
-      });
+      // return props.navigation.navigate('Profile', {
+      //   changedState: true,
+      // });
+      return props.navigation.goBack();
     } catch (err) {
       console.error(err);
     }
@@ -96,37 +104,129 @@ function SingleShow(props) {
       </View>
 
       <View style={styles.separator} />
+      <ScrollView contentContainerStyle={{ flex: 1 }}>
+        <Image style={styles.image} source={{ uri: userShow.show.imageUrl }} />
+        <Text style={{ fontWeight: 'bold', textAlign: 'center', fontSize: 18 }}>
+          {userShow.show.name}
+        </Text>
+        <View style={styles.extra}>
+          {userShow.description ? (
+            <Text style={styles.text}>Description: {userShow.description}</Text>
+          ) : null}
+          {userShow.show.streaming ? (
+            <Text style={styles.text}>
+              Streaming options: {userShow.show.streaming}
+            </Text>
+          ) : null}
+          {userShow.show.purchase ? (
+            <Text style={styles.text}>
+              Purchase options: {userShow.show.purchase}
+            </Text>
+          ) : null}
 
-      <Image style={styles.image} source={{ uri: userShow.show.imageUrl }} />
-      <Text style={{ fontWeight: 'bold', textAlign: 'center', fontSize: 18 }}>
-        {userShow.show.showName}
-      </Text>
-      <View style={styles.extra}>
-        {userShow.description ? (
-          <Text style={styles.text}>Description: {userShow.description}</Text>
-        ) : null}
-        {userShow.show.streaming ? (
-          <Text style={styles.text}>
-            Streaming options: {userShow.show.streaming}
-          </Text>
-        ) : null}
-        {userShow.show.purchase ? (
-          <Text style={styles.text}>
-            Purchase options: {userShow.show.purchase}
-          </Text>
-        ) : null}
+          {user.id === props.currentUser.id ? (
+            <View>
+              <View>
+                <Button
+                  title="Delete show"
+                  onPress={() =>
+                    Alert.alert(
+                      'About to delete show',
+                      'Are you sure you want to delete this show?',
+                      [
+                        { text: 'Yes', onPress: () => deleteShow() },
+                        {
+                          text: 'Cancel',
+                        },
+                      ]
+                    )
+                  }
+                />
+              </View>
+              {/* If the show is currently in the watch list, give the user the option to switch it to a recommended show */}
+              {toWatch === true ? (
+                <View>
+                  <Button
+                    title="Rec show"
+                    onPress={() =>
+                      Alert.alert(
+                        'About to remove show',
+                        "About to remove show from your watch list and add to rec'd shows. Do you want to save current description and tags?",
+                        [
+                          {
+                            text: 'Yes',
+                            onPress: () => addShow(userShow, userShow.id),
+                          },
+                          {
+                            // if we're switching, we will need the userShow id on the back end
+                            text: 'Change descripion and/or tags',
+                            onPress: () =>
+                              props.navigation.navigate('AddShow', {
+                                userShow,
+                                toWatch: false,
+                                userShowId: userShow.id,
+                              }),
+                          },
+                          {
+                            text: 'Cancel',
+                          },
+                        ]
+                      )
+                    }
+                  />
+                </View>
+              ) : null}
+            </View>
+          ) : null}
 
-        {user.id === props.currentUser.id ? (
-          <View>
+          {props.showList.includes(userShow.show.name) ||
+          props.watchList.includes(userShow.show.name) ? null : (
             <View>
               <Button
-                title="Delete show"
+                title="Rec show"
                 onPress={() =>
                   Alert.alert(
-                    'About to delete show',
-                    'Are you sure you want to delete this show?',
+                    'Rec show choices',
+                    "Do you want to add description/tags now? You can choose YES to add them now, NO to rec the show and add them later, or Cancel to continue without rec'ing this show",
                     [
-                      { text: 'Yes', onPress: () => deleteShow() },
+                      {
+                        text: 'YES',
+                        onPress: () =>
+                          props.navigation.navigate('AddShow', {
+                            userShow,
+                            toWatch: false,
+                          }),
+                      },
+                      {
+                        text: 'NO',
+                        onPress: () => addShow(userShow, false),
+                      },
+                      {
+                        text: 'Cancel',
+                      },
+                    ]
+                  )
+                }
+              />
+              <Button
+                title="Add show to watch list"
+                onPress={() =>
+                  Alert.alert(
+                    'Add show to watch list choices',
+                    `Do you want to keep ${user.username}'s description and tags? You can choose YES to keep them, NO to write your own, or Cancel to continue without saving this show to your watch list`,
+                    [
+                      {
+                        text: 'YES',
+                        onPress: () => addShow(userShow, true),
+                      },
+                      {
+                        text: 'NO',
+                        onPress: () =>
+                          props.navigation.navigate('AddShow', {
+                            userShow,
+                            toWatch: true,
+                          }),
+                      },
                       {
                         text: 'Cancel',
                       },
@@ -135,97 +235,9 @@ function SingleShow(props) {
                 }
               />
             </View>
-            {/* If the show is currently in the watch list, give the user the option to switch it to a recommended show */}
-            {toWatch === true &&
-              View >
-              (
-                <Button
-                  title="Rec show"
-                  onPress={() =>
-                    Alert.alert(
-                      'About to remove show',
-                      "About to remove show from your watch list and add to rec'd shows. Do you want to save current description and tags?",
-                      [
-                        {
-                          text: 'Yes',
-                          onPress: () => addShow(userShow, !toWatch),
-                        },
-                        {
-                          text: 'Change descripion and/or tags',
-                          onPress: () =>
-                            props.navigation.navigate('AddShow', {
-                              userShow,
-                              toWatch: userShow.id,
-                            }),
-                        },
-                        {
-                          text: 'Cancel',
-                        },
-                      ]
-                    )
-                  }
-                />
-              )}
-          </View>
-        ) : null}
-
-        {props.showList.includes(userShow.show.showName) ? null : (
-          <View>
-            <Button
-              title="Rec show"
-              onPress={() =>
-                Alert.alert(
-                  'Rec show choices',
-                  "Do you want to add description/tags now? You can choose YES to add them now, NO to rec the show and add them later, or Cancel to continue without rec'ing this show",
-                  [
-                    {
-                      text: 'YES',
-                      onPress: () =>
-                        props.navigation.navigate('AddShow', {
-                          userShow,
-                          toWatch: false,
-                        }),
-                    },
-                    {
-                      text: 'NO',
-                      onPress: () => addShow(userShow, false),
-                    },
-                    {
-                      text: 'Cancel',
-                    },
-                  ]
-                )
-              }
-            />
-            <Button
-              title="Add show to watch list"
-              onPress={() =>
-                Alert.alert(
-                  'Add show to watch list choices',
-                  `Do you want to keep ${user.username}'s description and tags? You can choose YES to keep them, NO to write your own, or Cancel to continue without saving this show to your watch list`,
-                  [
-                    {
-                      text: 'YES',
-                      onPress: () => addShow(userShow, true),
-                    },
-                    {
-                      text: 'NO',
-                      onPress: () =>
-                        props.navigation.navigate('AddShow', {
-                          userShow,
-                          toWatch: true,
-                        }),
-                    },
-                    {
-                      text: 'Cancel',
-                    },
-                  ]
-                )
-              }
-            />
-          </View>
-        )}
-      </View>
+          )}
+        </View>
+      </ScrollView>
     </View>
   );
 }
@@ -269,6 +281,7 @@ const mapState = (store) => ({
   currentUser: store.currentUser.userInfo,
   currentUserShows: store.currentUser.userShows,
   showList: store.currentUser.showList,
+  watchList: store.currentUser.watchList,
   following: store.currentUser.following,
 });
 

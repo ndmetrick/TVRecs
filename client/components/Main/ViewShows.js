@@ -15,37 +15,36 @@ import { useIsFocused } from '@react-navigation/native';
 function ViewShows(props) {
   const [userShows, setUserShows] = useState([]);
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const isFocused = useIsFocused();
 
   useEffect(() => {
-    console.log('i got to ViewShows');
-    const { currentUser, currentUserShows, toWatch } = props;
-    const { otherUserShows } = props.route.params;
-    setUser(props.route.params.user);
-    if (user) {
+    const { currentUser, currentUserShows, toWatch, otherUserShows } = props;
+    const { userToView, userShows } = props.route.params;
+    setUser(userToView);
+    if (userToView) {
       if (props.route.params.type === 'toWatch') {
         setUserShows(toWatch);
-        console.log('i got in here and will set them watch');
-      } else if (user.id === currentUser.id) {
-        console.log('i got in here and will set them');
+        setLoading(false);
+      } else if (userToView.id === currentUser.id) {
         setUserShows(currentUserShows);
-      } else if (user.id) {
+        setLoading(false);
+      } else if (userToView.id) {
         setUserShows(otherUserShows);
+        setLoading(false);
       }
     }
     return () => {
       setUserShows([]);
       setUser(null);
     };
-  }, [props.route.params.type, isFocused]);
+  }, [props.route.params.type, isFocused, props.otherUserShows]);
 
-  if (user === null) {
-    console.log('this is where I am');
+  if (loading) {
     return <View />;
   }
 
-  console.log('these are usershows', userShows, 'this is user', user);
   return (
     <View style={styles.container}>
       <View>

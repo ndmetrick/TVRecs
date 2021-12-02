@@ -12,6 +12,7 @@ import axios from 'axios';
 import RNPickerSelect from 'react-native-picker-select';
 import AddShowTags from './AddShowTags';
 import SaveShow from './SaveShow';
+import { useIsFocused } from '@react-navigation/native';
 
 export default function AddShow(props) {
   const [showInput, setShowInput] = useState('');
@@ -24,11 +25,48 @@ export default function AddShow(props) {
   const [showOptions, setShowOptions] = useState(null);
   const [added, setAdded] = useState(false);
   const [toWatch, setToWatch] = useState(null);
+  const [fromSingleShow, setFromSingleShow] = useState(false);
+  const [userShowId, setUserShowId] = useState(null);
   const key = 'e7eaca48bd580f966d3d14526c3ddff0';
+  const isFocused = useIsFocused();
 
   // https://api.themoviedb.org/4/search/tv?api_key=e7eaca48bd580f966d3d14526c3ddff0&query=we+are+lady+parts
   // 100351;
   // https://api.themoviedb.org/3/tv/70493?api_key=e7eaca48bd580f966d3d14526c3ddff0&language=en-US&append_to_response=watch%2Fproviders,images
+
+  useEffect(() => {
+    // if the user got here by adding an existing show from their own watch list or from someone else's rec list
+    // console.log('props in addShow', props);
+    if (props.previous.length > 1) {
+      const { userShow, toWatch, userShowId } =
+        props.previous[0].state.routes[1].params;
+      console.log('toWatch', toWatch);
+      console.log('userShowId', userShowId);
+      setShowName(userShow.show.name);
+      setImageUrl(userShow.show.imageUrl);
+      setImdbId(userShow.show.imdbId);
+      setStreaming(userShow.show.streaming);
+      setPurchase(userShow.show.purchase);
+      setToWatch(toWatch);
+      setAdded(true);
+      setFromSingleShow(true);
+      if (userShowId) {
+        setUserShowId(userShowId);
+      }
+      return () => {
+        setShowInput('');
+        setShowName('');
+        setDescription('');
+        setShowOptions(null);
+        setImageUrl('');
+        setStreaming('');
+        setPurchase('');
+        setAdded('');
+        setToWatch(null);
+        setFromSingleShow(false);
+      };
+    }
+  }, [props.navigation, isFocused]);
 
   const findShowOptions = async () => {
     try {
@@ -111,151 +149,132 @@ export default function AddShow(props) {
     setShowInput('');
   };
 
-  useEffect(() => {
-    // if the user got here by adding an existing show from their own watch list or from someone else's rec list
-    if (props.route.params) {
-      const { userShow, toWatch } = props.route.params;
-      setShowName(userShow.show.showName);
-      setImageUrl(userShow.show.imageUrl);
-      setImdbId(userShow.show.imageUrl);
-      setStreaming(userShow.show.streaming);
-      setPurchase(userShow.show.purchase);
-      setToWatch(toWatch);
-      setAdded(true);
-    }
-    const unsubscribe = props.navigation.addListener('focus', () => {
-      setShowInput('');
-      setShowName('');
-      setDescription('');
-      setShowOptions(null);
-      setImageUrl('');
-      setStreaming('');
-      setPurchase('');
-      setAdded('');
-    });
-    return unsubscribe;
-  }, [props.navigation]);
-
   const image = { uri: imageUrl };
-  console.log('to watch is', toWatch);
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>What show do you want to add?</Text>
-      <TextInput
-        style={styles.inputText}
-        placeholder="Show Title"
-        onChangeText={(showInput) => setShowInput(showInput)}
-        value={showInput}
-      />
-
-      {showOptions ? (
-        <View>
-          <RNPickerSelect
-            onValueChange={(value) => getShowData(value)}
-            items={showOptions}
-            style={{
-              fontSize: 26,
-              paddingVertical: 12,
-              paddingHorizontal: 10,
-              borderWidth: 1,
-              borderColor: 'blue',
-              borderRadius: 4,
-              color: 'black',
-              paddingRight: 30,
-              placeholder: 26,
-            }}
-          />
-        </View>
-      ) : null}
       {!added ? (
-        <View style={styles.button}>
-          <Button
-            color="white"
-            onPress={findShowOptions}
-            title="Add show"
-            backgroundColor="seagreen"
-          ></Button>
-        </View>
-      ) : (
         <View>
-          <View style={{ flexDirection: 'row' }}>
-            {(toWatch === null || toWatch === false) && (
-              <View style={styles.saveButton}>
-                <Button
-                  style={styles.saveButton}
-                  title="Rec show"
-                  color="white"
-                  onPress={() =>
-                    props.navigation.navigate('SaveShow', {
-                      showName,
-                      description,
-                      imageUrl,
-                      streaming,
-                      purchase,
-                      imdbId,
-                      toWatch: false,
-                    })
-                  }
-                ></Button>
-              </View>
-            )}
-            {(toWatch === null || toWatch === true) && (
-              <View style={styles.saveButton}>
-                <Button
-                  title="Save show to watch list"
-                  color="white"
-                  onPress={() =>
-                    props.navigation.navigate('SaveShow', {
-                      showName,
-                      description,
-                      imageUrl,
-                      streaming,
-                      purchase,
-                      imdbId,
-                      toWatch: true,
-                    })
-                  }
-                ></Button>
-              </View>
-            )}
-          </View>
+          <Text style={styles.text}>What show do you want to add?</Text>
+          <TextInput
+            style={styles.inputText}
+            placeholder="Show Title"
+            onChangeText={(showInput) => setShowInput(showInput)}
+            value={showInput}
+          />
+
+          {showOptions ? (
+            <View>
+              <RNPickerSelect
+                onValueChange={(value) => getShowData(value)}
+                items={showOptions}
+                style={{
+                  fontSize: 26,
+                  paddingVertical: 12,
+                  paddingHorizontal: 10,
+                  borderWidth: 1,
+                  borderColor: 'blue',
+                  borderRadius: 4,
+                  color: 'black',
+                  paddingRight: 30,
+                  placeholder: 26,
+                }}
+              />
+            </View>
+          ) : null}
+
           <View style={styles.button}>
             <Button
               color="white"
-              onPress={chooseNewShow}
-              title="Choose a new show"
+              onPress={findShowOptions}
+              title="Add show"
+              backgroundColor="seagreen"
             ></Button>
           </View>
         </View>
-      )}
-      <View style={styles.separator} />
+      ) : null}
+      {!fromSingleShow ? (
+        <View style={styles.button}>
+          <Button
+            color="white"
+            onPress={chooseNewShow}
+            title="Choose a new show"
+          ></Button>
+        </View>
+      ) : null}
       <ScrollView>
         {added ? (
           <View>
-            <TextInput
-              placeholder="Write your own description of the show. . ."
-              style={styles.inputText}
-              onChangeText={(description) => setDescription(description)}
-            />
+            <View>
+              <TextInput
+                placeholder="Write your own description of the show. . ."
+                style={styles.inputText}
+                onChangeText={(description) => setDescription(description)}
+              />
 
-            <Text style={styles.text}>{showName}</Text>
-            <View style={styles.separator} />
-            {purchase ? (
-              <View>
-                <Text style={styles.text}>Streaming options: {streaming}</Text>
-                <View style={styles.separator} />
+              <Text style={styles.text}>{showName}</Text>
+              <View style={styles.separator} />
+              <Image
+                source={image}
+                style={{ height: 300, resizeMode: 'contain', margin: 5 }}
+              />
+              <View style={{ flexDirection: 'row' }}>
+                {/* if we're getting here by searching for the show, toWatch will be null. If we got here because we were looking at an instance of a userShow (our own or someone else's) it will be set to true (we're adding it to toWatch), or false (we're adding it to recs); depending on how it's set, we want to show the appropriate button options */}
+                {toWatch === true ? null : (
+                  <View style={styles.saveButton}>
+                    <Button
+                      style={styles.saveButton}
+                      title="Rec show"
+                      color="white"
+                      onPress={() =>
+                        props.navigation.navigate('SaveShow', {
+                          showName,
+                          description,
+                          imageUrl,
+                          streaming,
+                          purchase,
+                          imdbId,
+                          toWatch: false,
+                          userShowId,
+                        })
+                      }
+                    ></Button>
+                  </View>
+                )}
+                {toWatch === null || toWatch === true ? (
+                  <View style={styles.saveButton}>
+                    <Button
+                      title="Save show to watch list"
+                      color="white"
+                      onPress={() =>
+                        props.navigation.navigate('SaveShow', {
+                          showName,
+                          description,
+                          imageUrl,
+                          streaming,
+                          purchase,
+                          imdbId,
+                          toWatch: true,
+                        })
+                      }
+                    ></Button>
+                  </View>
+                ) : null}
               </View>
-            ) : null}
-            {streaming ? (
-              <View>
-                <Text style={styles.text}>Purchase options: {purchase}</Text>
-                <View style={styles.separator} />
-              </View>
-            ) : null}
-            <Image
-              source={image}
-              style={{ height: 300, resizeMode: 'contain', margin: 5 }}
-            />
+              {purchase ? (
+                <View>
+                  <Text style={styles.text}>
+                    Streaming options: {streaming}
+                  </Text>
+                  <View style={styles.separator} />
+                </View>
+              ) : null}
+              {streaming ? (
+                <View>
+                  <Text style={styles.text}>Purchase options: {purchase}</Text>
+                  <View style={styles.separator} />
+                </View>
+              ) : null}
+            </View>
           </View>
         ) : null}
       </ScrollView>

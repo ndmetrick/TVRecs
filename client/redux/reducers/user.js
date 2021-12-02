@@ -20,6 +20,7 @@ const initialState = {
   showList: [],
   tags: [],
   toWatch: [],
+  watchList: [],
 };
 
 export default function userReducer(state = initialState, action) {
@@ -33,12 +34,13 @@ export default function userReducer(state = initialState, action) {
       return {
         ...state,
         userShows: action.userShows,
-        showList: action.userShows.map((userShow) => userShow.show.showName),
+        showList: action.userShows.map((userShow) => userShow.show.name),
       };
     case GET_TO_WATCH:
       return {
         ...state,
         toWatch: action.toWatch,
+        watchList: action.toWatch.map((userShow) => userShow.show.name),
       };
     case GET_USER_FOLLOWING:
       return {
@@ -50,18 +52,22 @@ export default function userReducer(state = initialState, action) {
         ? {
             ...state,
             userShows: [...state.userShows, action.userShow],
-            showList: [...state.showList, action.userShow.show.showName],
+            showList: [...state.showList, action.userShow.show.name],
           }
-        : { ...state, toWatch: [...state.toWatch, action.userShow] };
+        : {
+            ...state,
+            toWatch: [...state.toWatch, action.userShow],
+            watchList: [...state.watchList, action.userShow.show.name],
+          };
     case DELETE_SHOW:
-      return action.toWatch === false
+      return action.userShow.toWatch === false
         ? {
             ...state,
             userShows: state.userShows.filter(
               (userShow) => userShow.show.id !== action.userShow.show.id
             ),
             showList: state.showList.filter(
-              (showName) => showName !== action.userShow.show.showName
+              (showName) => showName !== action.userShow.show.name
             ),
           }
         : {
@@ -69,15 +75,23 @@ export default function userReducer(state = initialState, action) {
             toWatch: state.toWatch.filter(
               (toWatch) => toWatch.show.id !== action.userShow.show.id
             ),
+            watchList: state.watchList.filter(
+              (showName) => showName !== action.userShow.show.name
+            ),
           };
     case SWITCH_SHOW:
       return {
         ...state,
         userShows: [...state.userShows, action.userShow],
-        showList: [...state.showList, action.userShow.show.showName],
+        showList: [...state.showList, action.userShow.show.name],
         toWatch: state.toWatch.filter(
-          (toWatch) => toWatch.show.id !== action.userShow.show.id
+          (userShow) => userShow.show.id !== action.userShow.show.id
         ),
+        watchList: [
+          ...state.watchList.filter(
+            (showName) => showName !== action.userShow.show.name
+          ),
+        ],
       };
     case FOLLOW:
       return {

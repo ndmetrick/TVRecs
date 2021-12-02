@@ -23,7 +23,6 @@ export function getCurrentUser() {
     try {
       const headers = await getToken();
       const user = await axios.get(`${baseUrl}/api/users/login`, headers);
-      console.log('user', user.data);
       dispatch({
         type: types.GET_CURRENT_USER,
         currentUser: user.data,
@@ -43,7 +42,6 @@ export function getUserShows(uid) {
         headers
       );
       if (userShows.data != -1) {
-        console.log('userShows.data = ', userShows.data);
         if (uid === undefined) {
           dispatch({
             type: types.GET_CURRENT_USER_SHOWS,
@@ -103,7 +101,6 @@ export function getUsersFollowingRecs() {
     try {
       const headers = await getToken();
       const recs = await axios.get(`${baseUrl}/api/users/recs`, headers);
-      console.log('recs on front end', recs.data);
       dispatch({ type: types.GET_FOLLOWING_RECS, recs: recs.data });
     } catch (e) {
       console.error(e);
@@ -135,13 +132,17 @@ export function switchShow(userShowId, description) {
   return async (dispatch) => {
     try {
       const headers = await getToken();
-      const addedShow = await axios.put(
+      const switchedShow = await axios.put(
         `${baseUrl}/api/users/switchShow`,
         { userShowId, description },
         headers
       );
-      if (addedShow) {
-        dispatch({ type: types.ADD_SHOW, userShow: addedShow.data });
+      if (switchedShow) {
+        console.log(
+          'i got to this same place and switchd show is',
+          switchedShow.data
+        );
+        dispatch({ type: types.SWITCH_SHOW, userShow: switchedShow.data });
       } else {
         console.log('Something went wrong trying to add show');
       }
@@ -164,7 +165,6 @@ export function deleteShow(showId, toWatch) {
         dispatch({
           type: types.DELETE_SHOW,
           userShow: deletedShow.data,
-          toWatch,
         });
       } else {
         console.log('Something went wrong trying to delete show');

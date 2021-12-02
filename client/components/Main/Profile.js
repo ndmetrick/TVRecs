@@ -72,7 +72,7 @@ function Profile(props) {
         <Tab.Screen
           name="Recs"
           component={ViewShows}
-          initialParams={{ user: currentUser, type: 'recs' }}
+          initialParams={{ userToView: currentUser, type: 'recs' }}
           options={{
             tabBarLabel: 'Recs',
           }}
@@ -80,7 +80,7 @@ function Profile(props) {
         <Tab.Screen
           name="To Watch"
           component={ViewShows}
-          initialParams={{ user: currentUser, type: 'toWatch' }}
+          initialParams={{ userToView: currentUser, type: 'toWatch' }}
           options={{
             tabBarLabel: 'To Watch',
           }}

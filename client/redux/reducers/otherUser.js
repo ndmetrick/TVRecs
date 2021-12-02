@@ -26,7 +26,7 @@ export default function otherUserReducer(state = initialState, action) {
       return {
         ...state,
         userShows: action.userShows,
-        showList: action.userShows.map((userShow) => userShow.show.showName),
+        showList: action.userShows.map((userShow) => userShow.show.name),
       };
     case GET_OTHER_USER_FOLLOWING:
       return {
