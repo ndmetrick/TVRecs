@@ -91,7 +91,7 @@ const RecShows = (props) => {
                   <Text>Rec'er: </Text>
                   <TouchableOpacity
                     onPress={() =>
-                      props.navigation.navigate('otherUser', {
+                      props.navigation.navigate('OtherUser', {
                         uid: item.user.id,
                       })
                     }
@@ -156,8 +156,14 @@ const styles = StyleSheet.create({
     flex: 1 / 3,
   },
   image: {
+    // height: undefined,
+    // width: '100%',
     flex: 1,
     aspectRatio: 1 / 1,
+    // flex: 1,
+    // width: '100%',
+    // height: '100%',
+    // resizeMode: 'contain',
   },
   text: {
     margin: 5,

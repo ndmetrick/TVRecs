@@ -3,6 +3,7 @@ import {
   GET_OTHER_USER,
   GET_OTHER_USER_FOLLOWING,
   CLEAR_OTHER_USER,
+  GET_OTHER_USER_TAGS,
 } from '../constants';
 
 const initialState = {
@@ -10,7 +11,7 @@ const initialState = {
   userShows: [],
   following: [],
   showList: [],
-  tags: [],
+  userTags: [],
 };
 
 export default function otherUserReducer(state = initialState, action) {
@@ -32,6 +33,11 @@ export default function otherUserReducer(state = initialState, action) {
       return {
         ...state,
         following: action.following,
+      };
+    case GET_OTHER_USER_TAGS:
+      return {
+        ...state,
+        userTags: action.tags,
       };
     case CLEAR_OTHER_USER:
       return {

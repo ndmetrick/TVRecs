@@ -1,11 +1,8 @@
-import {
-  GET_ALL_OTHER_USERS,
-  GET_FOLLOWING_REC_SHOWS,
-  CLEAR_DATA,
-} from '../constants';
+import { GET_ALL_OTHER_USERS, GET_ALL_TAGS } from '../constants';
 
 const initialState = {
   usersInfo: [],
+  allTags: [],
 };
 
 export default function usersReducer(state = initialState, action) {
@@ -14,6 +11,11 @@ export default function usersReducer(state = initialState, action) {
       return {
         ...state,
         usersInfo: action.users,
+      };
+    case GET_ALL_TAGS:
+      return {
+        ...state,
+        allTags: action.tags,
       };
     default:
       return state;

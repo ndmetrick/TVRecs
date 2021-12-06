@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { connect } from 'react-redux';
 import {
   View,
@@ -7,22 +7,76 @@ import {
   Text,
   Switch,
   SafeAreaView,
+  Alert,
 } from 'react-native';
-import { setTags } from '../../redux/actions';
+import { changeShowTags } from '../../redux/actions';
 
 import TagGroup, { Tag } from 'react-native-tag-group';
 
-class AddShowTags extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      tags: [],
-      selected: [],
+function AddShowTags(props) {
+  const temp = [
+    'romantic comedy',
+    'action',
+    'thriller',
+    'queer',
+    'cute',
+    'warm',
+    'suspenseful',
+    'mystery',
+    'complex',
+    'comforting',
+    'about parenthood',
+    'lesbian',
+    'transgender',
+    'non-binary',
+    'gay',
+    'bisexual',
+    'unusual',
+    'funny',
+    'music',
+    'diverse cast',
+    'verisimilar',
+    'silly',
+    'smart',
+    'give me all the silliness',
+    'serious',
+    'drama',
+  ];
+  const [warningTagNames, setWarningTagNames] = useState([]);
+  const [tvTagNames, setTVTagNames] = useState([]);
+  const [selectedTags, setSelectedTags] = useState([]);
+  const [userShow, setUserShow] = useState(null);
+  const [loaded, setLoaded] = useState(false);
+  const [allTags, setAllTags] = useState([]);
+  let tagGroup = useRef();
+
+  useEffect(() => {
+    setAllTags(props.allTags);
+    setUserShow(props.route.params.userShow);
+    const tvNames = [];
+    const warningNames = [];
+    for (let i = 0; i < allTags.length; i++) {
+      const tag = allTags[i];
+      if (tag.type === 'tv' || tag.type === 'unassigned') {
+        tvNames.push(tag.name);
+      }
+      if (tag.type === 'warning') {
+        warningNames.push(tag.name);
+      }
+    }
+    // const sortedTags = [tvNames, warningNames];
+    console.log('warningnames', warningNames);
+    console.log('tvnames', tvNames);
+    setWarningTagNames(warningNames);
+    setTVTagNames(tvNames);
+    setLoaded(true);
+    return () => {
+      setUserShow(null);
+      setWarningTagNames([]);
+      setTVTagNames([]);
+      setLoaded(false);
     };
-    // this.getSelectedTags = this.getSelectedTags.bind(this);
-    this.unselectAll = this.unselectAll.bind(this);
-    this.setTags = this.setTags.bind(this);
-  }
+  }, [userShow, loaded]);
 
   // onTagPress() {
   //   let selectedIndex = this.tagGroup.getSelectedIndex();
@@ -30,53 +84,76 @@ class AddShowTags extends Component {
   //     this.setState({ selectedTags: selectedIndex });
   //   }
   // }
-  componentDidMount() {
-    const tags = this.props.tags.map((tag) => tag.name);
-    this.setState({ tags });
-  }
 
-  unselectAll() {
-    if (this.tagGroup.getSelectedIndex() !== -1) {
-      for (let i = 0; i < this.state.tags.length; i++) {
-        this.tagGroup.unselect(i);
+  const unselectAll = () => {
+    if (TagGroup.getSelectedIndex() !== -1) {
+      for (let i = 0; i < tvTagNames.length; i++) {
+        tagGroup.unselect(i);
       }
     }
-  }
+  };
 
-  async setTags() {
-    // const tagList = [];
-    // this.state.selected.map((tagIndex) => {
-    //   const tagId = tagKey[tagIndex];
-    //   tagList.push(tagId);
-    // });
-    await this.props.setTags(
-      this.state.selected,
-      this.props.route.params.showName
+  const chooseTags = async () => {
+    const chosenTagIds = selectedTags
+      .map((tagName) => {
+        console.log('tagName', tagName);
+        console.log(allTags);
+        return allTags.filter((tag) => {
+          console.log(tag.name, tagName);
+          return tag.name === tagName;
+        })[0];
+      })
+      .map((tag) => tag.id);
+    console.log('chosenTags', chosenTagIds);
+    await props.changeShowTags(chosenTagIds, userShow.id);
+    Alert.alert(
+      'Show added',
+      `${userShow.show.name} was added to your ${
+        userShow.show.toWatch === false ? "rec'd shows" : 'watch list'
+      }`,
+      {
+        text: 'OK',
+      }
     );
-    this.props.navigation.navigate('Profile', {
-      uid: firebase.auth().currentUser.uid,
-    });
+    return props.navigation.navigate('Profile');
+  };
+
+  // const tags = this.props.tags.map((tag) => tag.name);
+  // const tagKey = this.props.tags.map((tag, index) => {
+  //   index: tag.id;
+  // });
+
+  if (!warningTagNames) {
+    return (
+      <View>
+        <Text>We're finding your tags</Text>
+      </View>
+    );
+  } else if (!warningTagNames.length) {
+    return (
+      <View>
+        <Text>We inding your tags</Text>
+      </View>
+    );
+  } else {
+    console.log('loaded', loaded, warningTagNames, userShow);
   }
 
-  render() {
-    // const tags = this.props.tags.map((tag) => tag.name);
-    // const tagKey = this.props.tags.map((tag, index) => {
-    //   index: tag.id;
-    // });
-
-    return (
+  return (
+    <View>
+      <Text>Pick some tags</Text>
       <SafeAreaView style={styles.container}>
         <TagGroup
-          ref={(ref) => (this.tagGroup = ref)}
+          ref={(ref) => (tagGroup = ref)}
           style={styles.tagGroup}
-          source={this.state.tags}
-          onSelectedTagChange={(selected) => this.setState({ selected })}
+          source={tvTagNames}
+          onSelectedTagChange={(selected) => setSelectedTags(selected)}
         />
 
         <View style={styles.controller}></View>
 
         <Tag
-          onPress={this.unselectAll}
+          onPress={unselectAll}
           text={'Unselect All'}
           touchableOpacity
           tagStyle={styles.buttonContainer}
@@ -84,15 +161,15 @@ class AddShowTags extends Component {
         />
 
         <Tag
-          onPress={this.setTags}
+          onPress={chooseTags}
           text={'Save tags'}
           touchableOpacity
           tagStyle={styles.buttonContainer}
           textStyle={styles.buttonText}
         />
       </SafeAreaView>
-    );
-  }
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -153,12 +230,15 @@ const styles = StyleSheet.create({
 });
 
 const mapStateToProps = (store) => ({
-  tags: store.currentUser.tags,
+  allTags: store.allOtherUsers.allTags,
+  currentUser: store.currentUser.userInfo,
+  userShows: store.currentUser.userShows,
 });
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    setTags: (tags, showName) => dispatch(setTags(tags, showName)),
+    changeShowTags: (tagIds, userShowId) =>
+      dispatch(changeShowTags(tagIds, userShowId)),
   };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(AddShowTags);

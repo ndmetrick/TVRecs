@@ -27,6 +27,8 @@ function SaveShow(props) {
 
   const [goBack, setGoBack] = useState(false);
   const [switching, setSwitching] = useState(false);
+  const [userShow, setUserShow] = useState({});
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const saveShowData = async () => {
@@ -42,10 +44,15 @@ function SaveShow(props) {
         console.log('i know i am switching and userShowId equals', userShowId);
         setSwitching(true);
       } else {
-        await props.addShow(showData, toWatch);
+        const show = await props.addShow(showData, toWatch);
+        setUserShow(show);
+        setLoading(false);
       }
     };
-    if (!props.userShows.includes(showName)) {
+    if (
+      !props.showList.includes(showName) &&
+      !props.watchList.includes(showName)
+    ) {
       saveShowData();
     } else {
       setGoBack(true);
@@ -68,10 +75,35 @@ function SaveShow(props) {
   const image = { uri: imageUrl };
 
   if (goBack) {
+    const whichList = props.watchList.includes(showName)
+      ? 'watch list'
+      : 'rec list';
     return (
       <View>
-        <Text style={styles.text}>You've already added that show.</Text>
-        <Button title="Go back" onPress={() => props.navigation.popToTop()} />
+        <Text style={styles.text}>
+          You've already added {showName} to your {whichList}.
+        </Text>
+        <Button
+          title="Oops, go back"
+          onPress={() => props.navigation.popToTop()}
+        />
+      </View>
+    );
+  }
+  //   props.navigation.navigate('Profile');
+  //   }
+  //   return (
+  //     <View>
+  //       <Text style={styles.text}>You've already added that show.</Text>
+  //       <Button title="Go back" onPress={() => props.navigation.popToTop()} />
+  //     </View>
+  //   );
+  // }
+
+  if (loading) {
+    return (
+      <View>
+        <Text>Please be patient while we load...</Text>
       </View>
     );
   }
@@ -103,7 +135,9 @@ function SaveShow(props) {
       />
       <Button
         title="Next: add descriptive tags"
-        onPress={() => props.navigation.navigate('AddShowTags', { showName })}
+        onPress={() =>
+          props.navigation.navigate('AddShowTags', { userShow, imdbId })
+        }
       />
       {/* DEAL WITH THIS FOR SWITCHED OPTIONS */}
       <Button
@@ -148,7 +182,8 @@ const styles = StyleSheet.create({
 });
 
 const mapStateToProps = (state) => ({
-  userShows: state.currentUser.showList,
+  showList: state.currentUser.showList,
+  watchList: state.currentUser.watchList,
   currentUser: state.currentUser.userInfo,
 });
 

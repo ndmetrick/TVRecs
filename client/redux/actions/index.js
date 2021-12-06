@@ -81,15 +81,28 @@ export function getUserShowsToWatch() {
   };
 }
 
-export function getUserFollowing() {
+export function getUserFollowing(uid) {
   return async (dispatch) => {
     try {
       const headers = await getToken();
-      const user = await axios.get(`${baseUrl}/api/users/following`, headers);
-      dispatch({
-        type: types.GET_USER_FOLLOWING,
-        following: user.data,
-      });
+      console.log('here is uid in following', uid);
+      const followed = await axios.get(
+        `${baseUrl}/api/users/following/${uid}`,
+        headers
+      );
+      if (followed) {
+        if (uid) {
+          dispatch({
+            type: types.GET_OTHER_USER_FOLLOWING,
+            following: followed.data,
+          });
+        } else {
+          dispatch({
+            type: types.GET_USER_FOLLOWING,
+            following: followed.data,
+          });
+        }
+      }
     } catch (err) {
       console.error(err);
     }
@@ -119,6 +132,7 @@ export function addShow(showInfo, toWatch) {
       );
       if (addedShow) {
         dispatch({ type: types.ADD_SHOW, userShow: addedShow.data, toWatch });
+        return addedShow.data;
       } else {
         console.log('Something went wrong trying to add show');
       }
@@ -128,13 +142,97 @@ export function addShow(showInfo, toWatch) {
   };
 }
 
-export function switchShow(userShowId, description) {
+export function changeUserTags(userTagIds) {
+  return async (dispatch) => {
+    try {
+      const headers = await getToken();
+      const tags = await axios.put(
+        `${baseUrl}/api/users/changeUserTags/`,
+        userTagIds,
+        headers
+      );
+      if (tags) {
+        dispatch({ type: types.CHANGE_USER_TAGS, tags: tags.data });
+      } else {
+        console.log('Something went wrong trying to add tags');
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+}
+
+export function getUserTags(uid) {
+  return async (dispatch) => {
+    try {
+      const headers = await getToken();
+      console.log('here is uid', uid);
+      const tags = await axios.get(
+        `${baseUrl}/api/users/getUserTags/${uid}`,
+        headers
+      );
+      if (tags) {
+        if (uid) {
+          dispatch({ type: types.GET_OTHER_USER_TAGS, tags: tags.data });
+        } else {
+          dispatch({ type: types.GET_USER_TAGS, tags: tags.data });
+        }
+      } else {
+        console.log('Something went wrong trying to add tags');
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+}
+
+export function getAllTags() {
+  return async (dispatch) => {
+    try {
+      const headers = await getToken();
+      const tags = await axios.get(`${baseUrl}/api/users/getAllTags/`, headers);
+      if (tags) {
+        dispatch({ type: types.GET_ALL_TAGS, tags: tags.data });
+      } else {
+        console.log('Something went wrong trying to get tags');
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+}
+
+export function changeShowTags(tagIds, userShowId) {
+  return async (dispatch) => {
+    try {
+      const headers = await getToken();
+      const changedUserShow = await axios.put(
+        `${baseUrl}/api/users/changeShowTags/`,
+        { tagIds, userShowId },
+        headers
+      );
+      if (changedUserShow) {
+        console.log('front end userShow', changedUserShow);
+        dispatch({
+          type: types.CHANGE_SHOW_TAGS,
+          userShow: changedUserShow.data,
+        });
+      } else {
+        console.log('Something went wrong trying to add tags');
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+}
+
+export function switchShow(userShowId, description, tags) {
   return async (dispatch) => {
     try {
       const headers = await getToken();
       const switchedShow = await axios.put(
         `${baseUrl}/api/users/switchShow`,
-        { userShowId, description },
+        { userShowId, description, tags },
         headers
       );
       if (switchedShow) {
@@ -262,4 +360,7 @@ export default {
   getUserFollowing,
   getUserShows,
   getUsersFollowingRecs,
+  getUserTags,
+  changeUserTags,
+  changeShowTags,
 };

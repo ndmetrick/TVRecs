@@ -10,6 +10,9 @@ import {
   GET_FOLLOWING_RECS,
   GET_TO_WATCH,
   SWITCH_SHOW,
+  GET_USER_TAGS,
+  CHANGE_USER_TAGS,
+  CHANGE_SHOW_TAGS,
 } from '../constants';
 
 const initialState = {
@@ -18,7 +21,7 @@ const initialState = {
   following: [],
   recShows: [],
   showList: [],
-  tags: [],
+  userTags: [],
   toWatch: [],
   watchList: [],
 };
@@ -93,6 +96,36 @@ export default function userReducer(state = initialState, action) {
           ),
         ],
       };
+    case GET_USER_TAGS:
+      return {
+        ...state,
+        userTags: action.tags,
+      };
+    case CHANGE_USER_TAGS:
+      return {
+        ...state,
+        userTags: action.tags,
+      };
+    case CHANGE_SHOW_TAGS:
+      return action.userShow.toWatch === false
+        ? {
+            ...state,
+            userShows: [
+              ...state.userShows.filter(
+                (userShow) => userShow.show.id !== action.userShow.show.id
+              ),
+              action.userShow,
+            ],
+          }
+        : {
+            ...state,
+            toWatch: [
+              ...state.toWatch.filter(
+                (toWatch) => toWatch.show.id !== action.userShow.show.id
+              ),
+              action.userShow,
+            ],
+          };
     case FOLLOW:
       return {
         ...state,

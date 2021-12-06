@@ -46,16 +46,17 @@ function OtherUser(props) {
           const otherUserShows = await props.getUserShows(uid);
           setUser(otherUser);
           setUserShows(otherUserShows);
-          setLoading(false);
           if (
             props.following.filter((followed) => followed.id === uid).length
           ) {
             // if (props.following.includes(uid)) {
             console.log('i got in here', props.following);
             setFollowing(true);
+            setLoading(false);
           } else {
             console.log('i know im not following');
             setFollowing(false);
+            setLoading(false);
           }
         }
       } catch (err) {
@@ -89,7 +90,7 @@ function OtherUser(props) {
     }
   };
 
-  if (loading) {
+  if (loading || user === null) {
     console.log('this is where I am');
     return <View />;
   }

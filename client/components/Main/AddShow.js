@@ -38,33 +38,35 @@ export default function AddShow(props) {
     // if the user got here by adding an existing show from their own watch list or from someone else's rec list
     // console.log('props in addShow', props);
     if (props.previous.length > 1) {
-      const { userShow, toWatch, userShowId } =
-        props.previous[0].state.routes[1].params;
-      console.log('toWatch', toWatch);
-      console.log('userShowId', userShowId);
-      setShowName(userShow.show.name);
-      setImageUrl(userShow.show.imageUrl);
-      setImdbId(userShow.show.imdbId);
-      setStreaming(userShow.show.streaming);
-      setPurchase(userShow.show.purchase);
-      setToWatch(toWatch);
-      setAdded(true);
-      setFromSingleShow(true);
-      if (userShowId) {
-        setUserShowId(userShowId);
+      if (props.previous[1].name === 'SingleShow') {
+        const { userShow, toWatch, userShowId } =
+          props.previous[0].state.routes[1].params;
+        console.log('toWatch', toWatch);
+        console.log('userShowId', userShowId);
+        setShowName(userShow.show.name);
+        setImageUrl(userShow.show.imageUrl);
+        setImdbId(userShow.show.imdbId);
+        setStreaming(userShow.show.streaming);
+        setPurchase(userShow.show.purchase);
+        setToWatch(toWatch);
+        setAdded(true);
+        setFromSingleShow(true);
+        if (userShowId) {
+          setUserShowId(userShowId);
+        }
+        return () => {
+          setShowInput('');
+          setShowName('');
+          setDescription('');
+          setShowOptions(null);
+          setImageUrl('');
+          setStreaming('');
+          setPurchase('');
+          setAdded('');
+          setToWatch(null);
+          setFromSingleShow(false);
+        };
       }
-      return () => {
-        setShowInput('');
-        setShowName('');
-        setDescription('');
-        setShowOptions(null);
-        setImageUrl('');
-        setStreaming('');
-        setPurchase('');
-        setAdded('');
-        setToWatch(null);
-        setFromSingleShow(false);
-      };
     }
   }, [props.navigation, isFocused]);
 

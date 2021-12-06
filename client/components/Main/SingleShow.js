@@ -17,6 +17,8 @@ function SingleShow(props) {
   const [userShow, setUserShow] = useState({});
   const [user, setUser] = useState(null);
   const [toWatch, setToWatch] = useState(null);
+  const [warningTags, setWarningTags] = useState([]);
+  const [tvTags, setTVTags] = useState([]);
 
   // const [following, setFollowing] = useState(false);
 
@@ -29,6 +31,14 @@ function SingleShow(props) {
     } else {
       setUser(userInfo);
     }
+    const warnings = userShow.tags.filter((tag) => {
+      return tag.type === 'warning';
+    });
+    const tv = userShow.tags.filter((tag) => {
+      return tag.type === 'tv' || tag.type === 'unassigned';
+    });
+    setTVTags(tv);
+    setWarningTags(warnings);
     setUserShow(userShow);
     setToWatch(userShow.toWatch);
   }, [props.route.params.userInfo, toWatch]);
@@ -90,6 +100,16 @@ function SingleShow(props) {
     }
   };
 
+  const displayTags = (tags) => {
+    return tags.map((tag, key) => {
+      return (
+        <View key={key} style={styles.btnColor}>
+          <Text>{tag.name}</Text>
+        </View>
+      );
+    });
+  };
+
   if (user === null) {
     return <View />;
   }
@@ -109,19 +129,53 @@ function SingleShow(props) {
         <Text style={{ fontWeight: 'bold', textAlign: 'center', fontSize: 18 }}>
           {userShow.show.name}
         </Text>
+
         <View style={styles.extra}>
           {userShow.description ? (
-            <Text style={styles.text}>Description: {userShow.description}</Text>
+            <View>
+              <Text style={{ fontWeight: 'bold' }}>Description: </Text>
+              <Text style={styles.text}>{userShow.description}</Text>
+            </View>
           ) : null}
+
+          {userShow.tags.length ? (
+            <View>
+              {tvTags.length ? (
+                <View>
+                  <Text style={styles.text}>
+                    I think these tags describe some important things about the
+                    show and its themes:
+                  </Text>
+                  <View style={[styles.cardContent, styles.tagsContent]}>
+                    {displayTags(tvTags)}
+                  </View>
+                </View>
+              ) : null}
+
+              {warningTags.length ? (
+                <View>
+                  <Text style={styles.text}>
+                    I would describe this show as:
+                  </Text>
+                  <View style={[styles.cardContent, styles.tagsContent]}>
+                    {displayTags(warningTags)}
+                  </View>
+                </View>
+              ) : null}
+            </View>
+          ) : null}
+
           {userShow.show.streaming ? (
-            <Text style={styles.text}>
-              Streaming options: {userShow.show.streaming}
-            </Text>
+            <View>
+              <Text style={{ fontWeight: 'bold' }}>Streaming options: </Text>
+              <Text style={styles.text}>{userShow.show.streaming}</Text>
+            </View>
           ) : null}
           {userShow.show.purchase ? (
-            <Text style={styles.text}>
-              Purchase options: {userShow.show.purchase}
-            </Text>
+            <View>
+              <Text style={{ fontWeight: 'bold' }}>Purchase options:</Text>
+              <Text style={styles.text}>{userShow.show.purchase}</Text>
+            </View>
           ) : null}
 
           {user.id === props.currentUser.id ? (
@@ -140,6 +194,14 @@ function SingleShow(props) {
                         },
                       ]
                     )
+                  }
+                />
+              </View>
+              <View>
+                <Button
+                  title="Add/change tags"
+                  onPress={() =>
+                    props.navigation.navigate('AddShowTags', { userShow })
                   }
                 />
               </View>
@@ -276,6 +338,68 @@ const styles = StyleSheet.create({
     textAlign: 'left',
     fontSize: 18,
   },
+  cardContent: {
+    flexDirection: 'row',
+    marginLeft: 10,
+  },
+  tagsContent: {
+    marginTop: 10,
+    flexWrap: 'wrap',
+  },
+  btnColor: {
+    padding: 10,
+    borderRadius: 40,
+    marginHorizontal: 3,
+    backgroundColor: 'lightgreen',
+    marginTop: 5,
+  },
+  // tagGroup: {
+  //   marginTop: 16,
+  //   marginHorizontal: 10,
+  //   marginBottom: 8,
+  // },
+
+  // controller: {
+  //   borderTopColor: '#ddd',
+  //   borderTopWidth: 0.8,
+  //   paddingTop: 10,
+  //   marginHorizontal: 12,
+  // },
+  // modeSwitcher: {
+  //   height: 30,
+  //   flexDirection: 'row',
+  //   alignItems: 'center',
+  //   marginBottom: 8,
+  // },
+  // modeText: {
+  //   color: '#333',
+  //   fontSize: 18,
+  // },
+
+  // tagStyle: {
+  //   marginTop: 4,
+  //   marginHorizontal: 8,
+  //   backgroundColor: '#FF3F00',
+  //   borderWidth: 0,
+  //   marginRight: 12,
+  //   paddingHorizontal: 24,
+  //   paddingVertical: 8,
+  // },
+
+  // textStyle: {
+  //   color: 'black',
+  //   fontSize: 14,
+  //   fontWeight: 'bold',
+  // },
+  // buttonContainer: {
+  //   height: 30,
+  //   alignSelf: 'center',
+  //   marginRight: 8,
+  // },
+  // buttonText: {
+  //   color: '#FF7F11',
+  //   fontSize: 16,
+  // },
 });
 const mapState = (store) => ({
   currentUser: store.currentUser.userInfo,

@@ -20,6 +20,16 @@ function ViewShows(props) {
   const isFocused = useIsFocused();
 
   useEffect(() => {
+    console.log(
+      'props1',
+      props.route.params.userToView,
+      '2',
+      props.currentUser,
+      '3',
+      props.currentUserShows,
+      '4',
+      props.toWatch
+    );
     const { currentUser, currentUserShows, toWatch, otherUserShows } = props;
     const { userToView, userShows } = props.route.params;
     setUser(userToView);

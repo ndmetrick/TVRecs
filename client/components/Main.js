@@ -6,10 +6,11 @@ import {
   clearData,
   getUserShows,
   getUserFollowing,
-  getTags,
+  getUserTags,
   getUsersFollowingRecs,
   getAllOtherUsers,
   getUserShowsToWatch,
+  getAllTags,
 } from '../redux/actions';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -30,6 +31,8 @@ function Main(props) {
     props.getUsersFollowingRecs();
     props.getAllOtherUsers();
     props.getUserShowsToWatch();
+    props.getUserTags();
+    props.getAllTags();
   }, []);
 
   // componentWillUnmount() {
@@ -154,8 +157,9 @@ const mapDispatch = (dispatch) => {
     getUserFollowing: () => dispatch(getUserFollowing()),
     getUsersFollowingRecs: () => dispatch(getUsersFollowingRecs()),
     getAllOtherUsers: () => dispatch(getAllOtherUsers()),
-    // getTags: () => dispatch(getTags()),
+    getUserTags: () => dispatch(getUserTags()),
     getUserShowsToWatch: () => dispatch(getUserShowsToWatch()),
+    getAllTags: () => dispatch(getAllTags()),
   };
 };
 
