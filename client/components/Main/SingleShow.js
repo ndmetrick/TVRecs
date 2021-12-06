@@ -13,12 +13,16 @@ import {
 } from 'react-native';
 import { addShow, deleteShow, switchShow } from '../../redux/actions';
 
+import { useIsFocused } from '@react-navigation/native';
+
 function SingleShow(props) {
   const [userShow, setUserShow] = useState({});
   const [user, setUser] = useState(null);
   const [toWatch, setToWatch] = useState(null);
   const [warningTags, setWarningTags] = useState([]);
   const [tvTags, setTVTags] = useState([]);
+
+  const isFocused = useIsFocused();
 
   // const [following, setFollowing] = useState(false);
 
@@ -41,7 +45,7 @@ function SingleShow(props) {
     setWarningTags(warnings);
     setUserShow(userShow);
     setToWatch(userShow.toWatch);
-  }, [props.route.params.userInfo, toWatch]);
+  }, [props.route.params.userInfo, toWatch, isFocused]);
 
   const addShow = async (userShow, currentToWatch) => {
     // if the toWatch variable is being changed (i.e. the show is moving from to-watch to recommended),
@@ -102,8 +106,10 @@ function SingleShow(props) {
 
   const displayTags = (tags) => {
     return tags.map((tag, key) => {
+      const tagStyle =
+        tag.type === 'warning' ? styles.warningTag : styles.tvTag;
       return (
-        <View key={key} style={styles.btnColor}>
+        <View key={key} style={tagStyle}>
           <Text>{tag.name}</Text>
         </View>
       );
@@ -201,7 +207,10 @@ function SingleShow(props) {
                 <Button
                   title="Add/change tags"
                   onPress={() =>
-                    props.navigation.navigate('AddShowTags', { userShow })
+                    props.navigation.navigate('AddShowTags', {
+                      userShow,
+                      previous: 'SingleShow',
+                    })
                   }
                 />
               </View>
@@ -346,60 +355,20 @@ const styles = StyleSheet.create({
     marginTop: 10,
     flexWrap: 'wrap',
   },
-  btnColor: {
+  tvTag: {
     padding: 10,
     borderRadius: 40,
     marginHorizontal: 3,
     backgroundColor: 'lightgreen',
     marginTop: 5,
   },
-  // tagGroup: {
-  //   marginTop: 16,
-  //   marginHorizontal: 10,
-  //   marginBottom: 8,
-  // },
-
-  // controller: {
-  //   borderTopColor: '#ddd',
-  //   borderTopWidth: 0.8,
-  //   paddingTop: 10,
-  //   marginHorizontal: 12,
-  // },
-  // modeSwitcher: {
-  //   height: 30,
-  //   flexDirection: 'row',
-  //   alignItems: 'center',
-  //   marginBottom: 8,
-  // },
-  // modeText: {
-  //   color: '#333',
-  //   fontSize: 18,
-  // },
-
-  // tagStyle: {
-  //   marginTop: 4,
-  //   marginHorizontal: 8,
-  //   backgroundColor: '#FF3F00',
-  //   borderWidth: 0,
-  //   marginRight: 12,
-  //   paddingHorizontal: 24,
-  //   paddingVertical: 8,
-  // },
-
-  // textStyle: {
-  //   color: 'black',
-  //   fontSize: 14,
-  //   fontWeight: 'bold',
-  // },
-  // buttonContainer: {
-  //   height: 30,
-  //   alignSelf: 'center',
-  //   marginRight: 8,
-  // },
-  // buttonText: {
-  //   color: '#FF7F11',
-  //   fontSize: 16,
-  // },
+  warningTag: {
+    padding: 10,
+    borderRadius: 40,
+    marginHorizontal: 3,
+    backgroundColor: 'red',
+    marginTop: 5,
+  },
 });
 const mapState = (store) => ({
   currentUser: store.currentUser.userInfo,

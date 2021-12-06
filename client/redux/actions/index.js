@@ -206,13 +206,14 @@ export function changeShowTags(tagIds, userShowId) {
   return async (dispatch) => {
     try {
       const headers = await getToken();
+      console.log('i got in here');
       const changedUserShow = await axios.put(
         `${baseUrl}/api/users/changeShowTags/`,
         { tagIds, userShowId },
         headers
       );
       if (changedUserShow) {
-        console.log('front end userShow', changedUserShow);
+        console.log('front end userShow', changedUserShow.data);
         dispatch({
           type: types.CHANGE_SHOW_TAGS,
           userShow: changedUserShow.data,

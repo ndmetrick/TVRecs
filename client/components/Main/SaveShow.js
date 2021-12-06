@@ -136,7 +136,10 @@ function SaveShow(props) {
       <Button
         title="Next: add descriptive tags"
         onPress={() =>
-          props.navigation.navigate('AddShowTags', { userShow, imdbId })
+          props.navigation.navigate('AddShowTags', {
+            userShow,
+            previous: 'SaveShow',
+          })
         }
       />
       {/* DEAL WITH THIS FOR SWITCHED OPTIONS */}

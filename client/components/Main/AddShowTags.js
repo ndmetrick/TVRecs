@@ -1,186 +1,188 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useReducer } from 'react';
 import { connect } from 'react-redux';
 import {
   View,
   StyleSheet,
   ScrollView,
   Text,
-  Switch,
-  SafeAreaView,
+  TouchableOpacity,
+  FlatList,
+  Button,
   Alert,
 } from 'react-native';
 import { changeShowTags } from '../../redux/actions';
 
-import TagGroup, { Tag } from 'react-native-tag-group';
-
 function AddShowTags(props) {
-  const temp = [
-    'romantic comedy',
-    'action',
-    'thriller',
-    'queer',
-    'cute',
-    'warm',
-    'suspenseful',
-    'mystery',
-    'complex',
-    'comforting',
-    'about parenthood',
-    'lesbian',
-    'transgender',
-    'non-binary',
-    'gay',
-    'bisexual',
-    'unusual',
-    'funny',
-    'music',
-    'diverse cast',
-    'verisimilar',
-    'silly',
-    'smart',
-    'give me all the silliness',
-    'serious',
-    'drama',
-  ];
-  const [warningTagNames, setWarningTagNames] = useState([]);
-  const [tvTagNames, setTVTagNames] = useState([]);
-  const [selectedTags, setSelectedTags] = useState([]);
+  const [warningTags, setWarningTags] = useState([]);
+  const [tvTags, setTVTags] = useState([]);
+  const [selectedTags, setSelectedTags] = useState({});
   const [userShow, setUserShow] = useState(null);
   const [loaded, setLoaded] = useState(false);
   const [allTags, setAllTags] = useState([]);
-  let tagGroup = useRef();
 
   useEffect(() => {
     setAllTags(props.allTags);
     setUserShow(props.route.params.userShow);
-    const tvNames = [];
-    const warningNames = [];
+    const selected = {};
+    props.route.params.userShow.tags.forEach((tag) => {
+      selected[tag.id] = true;
+    });
+    setSelectedTags(selected);
+    const tv = [];
+    const warnings = [];
     for (let i = 0; i < allTags.length; i++) {
       const tag = allTags[i];
       if (tag.type === 'tv' || tag.type === 'unassigned') {
-        tvNames.push(tag.name);
+        tv.push(tag);
       }
       if (tag.type === 'warning') {
-        warningNames.push(tag.name);
+        warnings.push(tag);
       }
     }
-    // const sortedTags = [tvNames, warningNames];
-    console.log('warningnames', warningNames);
-    console.log('tvnames', tvNames);
-    setWarningTagNames(warningNames);
-    setTVTagNames(tvNames);
+
+    setLoaded(true);
+    setWarningTags(warnings);
+    setTVTags(tv);
     setLoaded(true);
     return () => {
       setUserShow(null);
-      setWarningTagNames([]);
-      setTVTagNames([]);
+      setWarningTags([]);
+      setTVTags([]);
       setLoaded(false);
+      setSelectedTags({});
     };
   }, [userShow, loaded]);
 
-  // onTagPress() {
-  //   let selectedIndex = this.tagGroup.getSelectedIndex();
-  //   if (selectedIndex !== -1) {
-  //     this.setState({ selectedTags: selectedIndex });
+  // const unselectAll = () => {
+  //   if (TagGroup.getSelectedIndex() !== -1) {
+  //     for (let i = 0; i < tvTagNames.length; i++) {
+  //       tagGroup.unselect(i);
+  //     }
   //   }
-  // }
+  // };
 
-  const unselectAll = () => {
-    if (TagGroup.getSelectedIndex() !== -1) {
-      for (let i = 0; i < tvTagNames.length; i++) {
-        tagGroup.unselect(i);
-      }
+  const selectTag = (tag) => {
+    if (selectedTags[tag.id] === true) {
+      const swap = { ...selectedTags, [tag.id]: false };
+      setSelectedTags(swap);
+    } else {
+      const swap = { ...selectedTags, [tag.id]: true };
+      setSelectedTags(swap);
     }
   };
 
+  const displayTags = (tags) => {
+    return tags.map((tag, key) => {
+      const tagStyle =
+        selectedTags[tag.id] !== true &&
+        (tag.type === 'tv' || tag.type === 'unassigned')
+          ? styles.tvTag
+          : selectedTags[tag.id] === true &&
+            (tag.type === 'tv' || tag.type === 'unassigned')
+          ? styles.highlightTvTag
+          : selectedTags[tag.id] !== true && tag.type === 'warning'
+          ? styles.warningTag
+          : styles.highlightWarningTag;
+
+      return (
+        <TouchableOpacity
+          key={key}
+          style={tagStyle}
+          onPress={() => selectTag(tag)}
+        >
+          <Text>{tag.name}</Text>
+        </TouchableOpacity>
+      );
+    });
+  };
+
   const chooseTags = async () => {
-    const chosenTagIds = selectedTags
-      .map((tagName) => {
-        console.log('tagName', tagName);
-        console.log(allTags);
-        return allTags.filter((tag) => {
-          console.log(tag.name, tagName);
-          return tag.name === tagName;
-        })[0];
-      })
-      .map((tag) => tag.id);
-    console.log('chosenTags', chosenTagIds);
-    await props.changeShowTags(chosenTagIds, userShow.id);
-    Alert.alert(
-      'Show added',
-      `${userShow.show.name} was added to your ${
-        userShow.show.toWatch === false ? "rec'd shows" : 'watch list'
-      }`,
-      {
-        text: 'OK',
+    const chosenTags = [];
+    for (const tagId in selectedTags) {
+      if (selectedTags[tagId] === true) {
+        chosenTags.push(tagId);
       }
-    );
+    }
+    const message =
+      props.route.params.previous === 'SaveShow'
+        ? `${userShow.show.name} was added to your ${
+            userShow.toWatch === false ? "rec'd shows" : 'watch list'
+          }`
+        : `Your tags for ${userShow.show.name} were updated`;
+    await props.changeShowTags(chosenTags, userShow.id);
+    Alert.alert('Show added/changed', message, {
+      text: 'OK',
+    });
     return props.navigation.navigate('Profile');
   };
 
-  // const tags = this.props.tags.map((tag) => tag.name);
-  // const tagKey = this.props.tags.map((tag, index) => {
-  //   index: tag.id;
-  // });
-
-  if (!warningTagNames) {
+  if (!loaded || !tvTags) {
     return (
       <View>
         <Text>We're finding your tags</Text>
       </View>
     );
-  } else if (!warningTagNames.length) {
+  } else if (!tvTags.length || !selectedTags) {
     return (
       <View>
         <Text>We inding your tags</Text>
       </View>
     );
   } else {
-    console.log('loaded', loaded, warningTagNames, userShow);
+    console.log('loaded', selectedTags);
   }
 
   return (
-    <View>
-      <Text>Pick some tags</Text>
-      <SafeAreaView style={styles.container}>
-        <TagGroup
-          ref={(ref) => (tagGroup = ref)}
-          style={styles.tagGroup}
-          source={tvTagNames}
-          onSelectedTagChange={(selected) => setSelectedTags(selected)}
-        />
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={{ flex: 1 }}>
+        <Text>
+          Pick some tags that you feel describe the show how you experience it
+        </Text>
+        <View style={[styles.cardContent, styles.tagsContent]}>
+          {displayTags(tvTags)}
+        </View>
 
-        <View style={styles.controller}></View>
+        <Text>Pick some warning tags</Text>
+        <View style={[styles.cardContent, styles.tagsContent]}>
+          {displayTags(warningTags)}
+        </View>
 
-        <Tag
-          onPress={unselectAll}
-          text={'Unselect All'}
-          touchableOpacity
-          tagStyle={styles.buttonContainer}
-          textStyle={styles.buttonText}
-        />
-
-        <Tag
-          onPress={chooseTags}
-          text={'Save tags'}
-          touchableOpacity
-          tagStyle={styles.buttonContainer}
-          textStyle={styles.buttonText}
-        />
-      </SafeAreaView>
+        {/* <Tag
+        onPress={unselectAll}
+        text={'Unselect All'}
+        touchableOpacity
+        tagStyle={styles.buttonContainer}
+        textStyle={styles.buttonText}
+      /> */}
+        <View style={styles.button}>
+          <Button onPress={chooseTags} title="Save tags" color="white" />
+        </View>
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {},
+  container: {
+    marginTop: 15,
+    flex: 1,
+    // justifyContent: 'center',
+    marginHorizontal: 2,
+  },
 
   title: {
     color: '#FF3F00',
     fontSize: 20,
     textAlign: 'center',
   },
-
+  button: {
+    textAlign: 'center',
+    backgroundColor: '#4281A4',
+    marginVertical: 8,
+    marginBottom: 8,
+    marginRight: 10,
+    marginLeft: 10,
+  },
   tagGroup: {
     marginTop: 16,
     marginHorizontal: 10,
@@ -226,6 +228,43 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#FF7F11',
     fontSize: 16,
+  },
+  cardContent: {
+    flexDirection: 'row',
+    marginLeft: 10,
+  },
+
+  tagsContent: {
+    marginTop: 10,
+    flexWrap: 'wrap',
+  },
+  tvTag: {
+    padding: 10,
+    borderRadius: 40,
+    marginHorizontal: 3,
+    backgroundColor: 'lightgreen',
+    marginTop: 5,
+  },
+  warningTag: {
+    padding: 10,
+    borderRadius: 40,
+    marginHorizontal: 3,
+    backgroundColor: 'yellow',
+    marginTop: 5,
+  },
+  highlightTvTag: {
+    padding: 10,
+    borderRadius: 40,
+    marginHorizontal: 3,
+    backgroundColor: 'darkgreen',
+    marginTop: 5,
+  },
+  highlightWarningTag: {
+    padding: 10,
+    borderRadius: 40,
+    marginHorizontal: 3,
+    backgroundColor: 'red',
+    marginTop: 5,
   },
 });
 

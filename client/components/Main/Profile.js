@@ -18,22 +18,36 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 
 import ViewShows from './ViewShows';
+import { useIsFocused } from '@react-navigation/native';
 
 const Tab = createMaterialTopTabNavigator();
 const Stack = createStackNavigator();
 
 function Profile(props) {
+  // const isFocused = useIsFocused();
+  // const [currentUser, setCurrentUser] = useState(null);
+  // const [currentUserShows, setCurrentUserShows] = useState([]);
+
+  // useEffect(() => {
+  //   console.log('here we are in profile UE');
+  //   setCurrentUser(props.currentUser);
+  //   setCurrentUserShows(props.currentUserShows);
+  // }, [isFocused]);
   const logout = () => {
     // firebase.auth().signOut();
     console.log('i have to figure logging out');
   };
 
-  if (props.currentUser === null) {
+  const { currentUser, currentUserShows } = props;
+  if (currentUser === null) {
     console.log('this is where I am');
     return <View />;
   }
 
-  const { currentUser, currentUserShows } = props;
+  console.log('here we are in profile');
+  currentUserShows.forEach((show) =>
+    show.tags.forEach((tag) => console.log(tag.name))
+  );
   return (
     <View style={styles.container}>
       <View style={styles.containerInfo}>

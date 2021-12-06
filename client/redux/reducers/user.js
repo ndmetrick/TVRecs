@@ -112,7 +112,7 @@ export default function userReducer(state = initialState, action) {
             ...state,
             userShows: [
               ...state.userShows.filter(
-                (userShow) => userShow.show.id !== action.userShow.show.id
+                (userShow) => userShow.id !== action.userShow.id
               ),
               action.userShow,
             ],
@@ -121,7 +121,7 @@ export default function userReducer(state = initialState, action) {
             ...state,
             toWatch: [
               ...state.toWatch.filter(
-                (toWatch) => toWatch.show.id !== action.userShow.show.id
+                (toWatch) => toWatch.id !== action.userShow.id
               ),
               action.userShow,
             ],
