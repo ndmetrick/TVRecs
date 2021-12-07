@@ -31,7 +31,6 @@ const Search = (props) => {
     };
   }, []);
 
-  const { currentUser } = props;
   const getMatchingUsers = (searchInput) => {
     const matches = users.filter((user) =>
       user.username.includes(searchInput.toLowerCase())
@@ -66,7 +65,6 @@ const Search = (props) => {
 };
 
 const mapStateToProps = (store) => ({
-  currentUser: store.currentUser.userInfo,
   otherUsers: store.allOtherUsers.usersInfo,
 });
 const mapDispatch = (dispatch) => {

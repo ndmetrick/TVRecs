@@ -9,11 +9,7 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from 'react-native';
-import {
-  getUserShows,
-  getOtherUser,
-  getUsersFollowingRecs,
-} from '../../redux/actions';
+import { getUserTags, changeUserTags } from '../../redux/actions';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 
@@ -23,7 +19,7 @@ import { useIsFocused } from '@react-navigation/native';
 const Tab = createMaterialTopTabNavigator();
 const Stack = createStackNavigator();
 
-function Profile(props) {
+function Settings(props) {
   // const isFocused = useIsFocused();
   // const [currentUser, setCurrentUser] = useState(null);
   // const [currentUserShows, setCurrentUserShows] = useState([]);
@@ -40,14 +36,9 @@ function Profile(props) {
 
   const { currentUser, currentUserShows } = props;
   if (currentUser === null) {
-    console.log('this is where I am');
     return <View />;
   }
 
-  console.log('here we are in profile');
-  currentUserShows.forEach((show) =>
-    show.tags.forEach((tag) => console.log(tag.name))
-  );
   return (
     <View style={styles.container}>
       <View style={styles.containerInfo}>
@@ -76,7 +67,7 @@ function Profile(props) {
           },
           tabBarIndicatorStyle: {
             borderBottomColor: '#87B56A',
-            borderBottomWidth: 7,
+            borderBottomWidth: 2,
           },
           tabBarStyle: {
             backgroundColor: '#633689',
@@ -122,17 +113,14 @@ const styles = StyleSheet.create({
 });
 const mapStateToProps = (store) => ({
   currentUser: store.currentUser.userInfo,
-  otherUser: store.otherUser.userInfo,
   currentUserShows: store.currentUser.userShows,
-  otherUserShows: store.otherUser.userShows,
   following: store.currentUser.following,
-  otherUsers: store.allOtherUsers.usersInfo,
+  userTags: store.currentUser.userTags,
 });
 const mapDispatch = (dispatch) => {
   return {
-    getOtherUser: (uid) => dispatch(getOtherUser(uid)),
-    getUserShows: (uid) => dispatch(getUserShows(uid)),
-    getUsersFollowingRecs: () => dispatch(getUsersFollowingRecs()),
+    getUserTags: (uid) => dispatch(getUserTags(uid)),
+    changeUserTags: (tagIds) => dispatch(changeUserTags(tagIds)),
   };
 };
-export default connect(mapStateToProps, mapDispatch)(Profile);
+export default connect(mapStateToProps, mapDispatch)(Settings);

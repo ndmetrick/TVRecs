@@ -14,11 +14,13 @@ import {
 } from '../redux/actions';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 import RecShows from './Main/RecShows';
 import Search from './Main/Search';
 import Profile from './Main/Profile';
 import AddShow from './Main/AddShow';
+import Settings from './Main/Settings';
 
 const Tab = createMaterialBottomTabNavigator();
 
@@ -35,12 +37,6 @@ function Main(props) {
     props.getAllTags();
   }, []);
 
-  // componentWillUnmount() {
-  //   console.log('i got into this one');
-  //   this.props.navigation.setParams({ toWatch: null });
-  // }
-
-  // render() {
   const { user } = props;
 
   return (
@@ -54,23 +50,6 @@ function Main(props) {
           ),
         }}
       />
-      {/* <Tab.Screen
-          name="AddShowContainer"
-          component={EmptyScreen}
-          listeners={({ navigation }) => ({
-            tabPress: (event) => {
-              event.preventDefault();
-              navigation.navigate('AddShow', {
-                navigation: this.props.navigation,
-              });
-            },
-          })}
-          options={{
-            tabBarIcon: ({ color, size }) => (
-              <MaterialCommunityIcons name="plus-box" color={color} size={26} />
-            ),
-          }}
-        /> */}
 
       <Tab.Screen
         name="AddShow"
@@ -81,34 +60,22 @@ function Main(props) {
           />
         )}
         options={{
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="plus-box" color={color} size={26} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <MaterialCommunityIcons
+              name="television-classic"
+              color={color}
+              size={26}
+            />
           ),
         }}
       />
-
-      {/* <Tab.Screen
-        name="AddShow"
-        component={AddShow}
-        listeners={({ navigation }) => ({
-          tabPress: (event) => {
-            event.preventDefault();
-            navigation.navigate('AddShow');
-          },
-        })}
-        options={{
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="plus-box" color={color} size={26} />
-          ),
-        }}
-      /> */}
       <Tab.Screen
         name="Search"
         component={Search}
         navigation={props.navigation}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="magnify" color={color} size={26} />
+            <MaterialIcons name="person-add" color={color} size={26} />
           ),
         }}
       />
@@ -132,6 +99,16 @@ function Main(props) {
           ),
         }}
       />
+      <Tab.Screen
+        name="Settings"
+        component={Settings}
+        navigation={props.navigation}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="settings" color={color} size={26} />
+          ),
+        }}
+      />
     </Tab.Navigator>
   );
 }
@@ -140,12 +117,6 @@ function Main(props) {
 const mapState = (state) => {
   return {
     user: state.currentUser.userInfo,
-    following: state.currentUser.following,
-    recShows: state.currentUser.recShows,
-    usersFollowingLoaded: state.currentUser.usersFollowingLoaded,
-    userShows: state.currentUser.shows,
-    showList: state.currentUser.showList,
-    watchList: state.currentUser.watchList,
   };
 };
 

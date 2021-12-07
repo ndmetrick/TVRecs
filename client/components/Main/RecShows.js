@@ -30,7 +30,7 @@ const RecShows = (props) => {
         if (props.recShows) {
           const shows = props.recShows;
           shows.sort(function (x, y) {
-            return new Date(y.createdAt) - new Date(x.createdAt);
+            return new Date(y.updatedAt) - new Date(x.updatedAt);
           });
           setUserShows(shows);
           return () => {
@@ -156,14 +156,8 @@ const styles = StyleSheet.create({
     flex: 1 / 3,
   },
   image: {
-    // height: undefined,
-    // width: '100%',
     flex: 1,
-    aspectRatio: 1 / 1,
-    // flex: 1,
-    // width: '100%',
-    // height: '100%',
-    // resizeMode: 'contain',
+    aspectRatio: 2 / 3,
   },
   text: {
     margin: 5,

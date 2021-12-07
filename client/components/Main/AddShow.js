@@ -7,6 +7,8 @@ import {
   TextInput,
   Image,
   ScrollView,
+  FlatList,
+  TouchableOpacity,
 } from 'react-native';
 import axios from 'axios';
 import RNPickerSelect from 'react-native-picker-select';
@@ -27,6 +29,7 @@ export default function AddShow(props) {
   const [toWatch, setToWatch] = useState(null);
   const [fromSingleShow, setFromSingleShow] = useState(false);
   const [userShowId, setUserShowId] = useState(null);
+  const [showPosterPreview, setShowPosterPreview] = useState(false);
   const key = 'e7eaca48bd580f966d3d14526c3ddff0';
   const isFocused = useIsFocused();
 
@@ -36,13 +39,10 @@ export default function AddShow(props) {
 
   useEffect(() => {
     // if the user got here by adding an existing show from their own watch list or from someone else's rec list
-    // console.log('props in addShow', props);
     if (props.previous.length > 1) {
       if (props.previous[1].name === 'SingleShow') {
         const { userShow, toWatch, userShowId } =
           props.previous[0].state.routes[1].params;
-        console.log('toWatch', toWatch);
-        console.log('userShowId', userShowId);
         setShowName(userShow.show.name);
         setImageUrl(userShow.show.imageUrl);
         setImdbId(userShow.show.imdbId);
@@ -54,20 +54,21 @@ export default function AddShow(props) {
         if (userShowId) {
           setUserShowId(userShowId);
         }
-        return () => {
-          setShowInput('');
-          setShowName('');
-          setDescription('');
-          setShowOptions(null);
-          setImageUrl('');
-          setStreaming('');
-          setPurchase('');
-          setAdded('');
-          setToWatch(null);
-          setFromSingleShow(false);
-        };
       }
     }
+    return () => {
+      setShowInput('');
+      setShowName('');
+      setDescription('');
+      setShowOptions(null);
+      setImageUrl('');
+      setStreaming('');
+      setPurchase('');
+      setAdded('');
+      setToWatch(null);
+      setFromSingleShow(false);
+      setShowPosterPreview(false);
+    };
   }, [props.navigation, isFocused]);
 
   const findShowOptions = async () => {
@@ -75,11 +76,25 @@ export default function AddShow(props) {
       const titleString = showInput.split(' ').join('+');
       const getShowOptions = `https://api.themoviedb.org/4/search/tv?api_key=${key}&query=${titleString}`;
       const { data } = await axios.get(getShowOptions);
+      if (!data.results.length) {
+        return (
+          <View>
+            <Text>
+              I'm so sorry. We can't find that TV show in the database. Check to
+              see if there's a spelling error and try again.
+            </Text>
+          </View>
+        );
+      }
       if (data.results.length > 1) {
-        const showList = data.results.map((show) => {
+        const showList = data.results.map((show, index) => {
           return {
-            label: show.name,
-            value: show.id,
+            index: index,
+            year: show.first_air_date,
+            name: show.name,
+            id: show.id,
+            poster: show.poster_path,
+            overview: show.overview,
           };
         });
         setShowOptions(showList);
@@ -88,12 +103,22 @@ export default function AddShow(props) {
         setImdbId(show.id);
         setShowName(show.name);
         const getShow = `https://api.themoviedb.org/3/tv/${show.id}?api_key=${key}&language=en-US&append_to_response=watch%2Fproviders`;
-        const thisShow = await axios.get(getShow);
-        setStreamingAndPurchase(thisShow.data);
-        const imageShowText = `http://www.omdbapi.com/?t=${titleString}&apikey=aa03da30`;
-        const imageShow = await axios.get(imageShowText);
-        const poster = imageShow.data.Poster;
-        setImageUrl(poster);
+        const watchProviders = await axios.get(getShow);
+        if (watchProviders) {
+          setStreamingAndPurchase(watchProviders.data);
+        }
+        if (show.poster_path) {
+          setImageUrl('https://image.tmdb.org/t/p/original' + show.poster_path);
+        } else {
+          const imageShowText = `http://www.omdbapi.com/?t=${titleString}&apikey=aa03da30`;
+          const imageShow = await axios.get(imageShowText);
+          const poster = imageShow.data.Poster;
+          if (!poster) {
+            console.log('I need a plan here');
+          }
+          setImageUrl(poster);
+        }
+
         setAdded(true);
       }
     } catch (e) {
@@ -102,18 +127,27 @@ export default function AddShow(props) {
   };
 
   const setStreamingAndPurchase = (data) => {
+    // FIGURE THIS OUTqq      `
     const stream = data['watch/providers'].results.US.flatrate;
     const buy = data['watch/providers'].results.US.buy;
-    const streamingOptions =
-      stream && stream.map((option) => option.provider_name).join(', ');
-    const purchaseOptions =
-      buy && buy.map((option) => option.provider_name).join(', ');
-    if (streamingOptions) {
-      setStreaming(streamingOptions);
+    if (stream) {
+      const streamingOptions =
+        stream && stream.map((option) => option.provider_name).join(', ');
+      if (streamingOptions) {
+        setStreaming(streamingOptions);
+      }
     }
-    if (purchaseOptions) {
-      setPurchase(purchaseOptions);
+    if (purchase) {
+      const purchaseOptions =
+        buy && buy.map((option) => option.provider_name).join(', ');
+      if (purchaseOptions) {
+        setPurchase(purchaseOptions);
+      }
     }
+  };
+
+  const viewPoster = () => {
+    setShowPosterPreview(!showPosterPreview);
   };
 
   const chooseNewShow = () => {
@@ -137,10 +171,14 @@ export default function AddShow(props) {
       setStreamingAndPurchase(data);
       setShowOptions(null);
       setImdbId(id);
-      const imageShowText = `http://www.omdbapi.com/?t=${data.name}&apikey=aa03da30`;
-      const imageShow = await axios.get(imageShowText);
-      const poster = imageShow.data.Poster;
-      setImageUrl(poster);
+      if (data.poster_path) {
+        setImageUrl('https://image.tmdb.org/t/p/original' + data.poster_path);
+      } else {
+        const imageShowText = `http://www.omdbapi.com/?t=${data.name}&apikey=aa03da30`;
+        const imageShow = await axios.get(imageShowText);
+        const poster = imageShow.data.Poster;
+        setImageUrl(poster);
+      }
       setAdded(true);
     } catch (e) {
       console.error(e);
@@ -155,57 +193,157 @@ export default function AddShow(props) {
   return (
     <View style={styles.container}>
       {!added ? (
-        <View>
-          <Text style={styles.text}>What show do you want to add?</Text>
-          <TextInput
-            style={styles.inputText}
-            placeholder="Show Title"
-            onChangeText={(showInput) => setShowInput(showInput)}
-            value={showInput}
-          />
-
+        <View style={{ flex: 1 }}>
+          <View>
+            <Text style={styles.text}>What show do you want to add?</Text>
+            <TextInput
+              style={styles.inputText}
+              placeholder="Show Title"
+              onChangeText={(showInput) => setShowInput(showInput)}
+              value={showInput}
+            />
+          </View>
           {showOptions ? (
-            <View>
-              <RNPickerSelect
-                onValueChange={(value) => getShowData(value)}
-                items={showOptions}
-                style={{
-                  fontSize: 26,
-                  paddingVertical: 12,
-                  paddingHorizontal: 10,
-                  borderWidth: 1,
-                  borderColor: 'blue',
-                  borderRadius: 4,
-                  color: 'black',
-                  paddingRight: 30,
-                  placeholder: 26,
-                }}
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 18 }}>
+                Is one of these the show you're looking for? Click anywhere in
+                the show area to select it or click "Search for a different
+                show" to try your search again.
+              </Text>
+              <View style={styles.button}>
+                <Button
+                  color="white"
+                  onPress={chooseNewShow}
+                  title="Search for a different show"
+                ></Button>
+              </View>
+              {/* The show posters take up a lot of space, so the default is not to show them, but users can decide to turn them on or back off */}
+              {!showPosterPreview ? (
+                <View style={styles.button}>
+                  <Button
+                    color="white"
+                    onPress={() => viewPoster()}
+                    title="Click to see show posters"
+                    backgroundColor="seagreen"
+                  ></Button>
+                </View>
+              ) : (
+                <View style={styles.button}>
+                  <Button
+                    color="white"
+                    onPress={() => viewPoster()}
+                    title="Click to hide posters"
+                    backgroundColor="seagreen"
+                  ></Button>
+                </View>
+              )}
+              <FlatList
+                horizontal={false}
+                data={showOptions}
+                renderItem={({ item }) => (
+                  <View style={styles.containerImage}>
+                    <View style={styles.separator} />
+                    <Text style={{ fontWeight: 'bold' }}></Text>
+                    <TouchableOpacity
+                      onPress={() => getShowData(item.id)}
+                      style={styles.catalogContainer}
+                    >
+                      <View>
+                        <Text>
+                          <Text style={{ fontWeight: 'bold' }}>
+                            Show title:
+                          </Text>{' '}
+                          {item.name}
+                        </Text>
+                        {item.year ? (
+                          <View>
+                            <Text>
+                              <Text style={{ fontWeight: 'bold' }}>
+                                First began airing in:
+                              </Text>{' '}
+                              {item.year.slice(0, 4)}
+                            </Text>
+                          </View>
+                        ) : (
+                          <View>
+                            <Text style={{ fontWeight: 'bold' }}>
+                              No air date available
+                            </Text>
+                          </View>
+                        )}
+                        {item.overview ? (
+                          <View>
+                            <Text>
+                              <Text style={{ fontWeight: 'bold' }}>
+                                Overview:
+                              </Text>{' '}
+                              {item.overview}
+                            </Text>
+                          </View>
+                        ) : (
+                          <View>
+                            <Text style={{ fontWeight: 'bold' }}>
+                              No overview available
+                            </Text>
+                          </View>
+                        )}
+                      </View>
+                      {/* If the user chose to view poster previews, they'll go here if they were found */}
+                      {showPosterPreview ? (
+                        <View>
+                          {item.poster ? (
+                            <View>
+                              <Image
+                                source={{
+                                  uri:
+                                    'https://image.tmdb.org/t/p/original' +
+                                    item.poster,
+                                }}
+                                style={styles.image}
+                              />
+                            </View>
+                          ) : (
+                            <View>
+                              <Text style={{ fontWeight: 'bold' }}>
+                                No preview poster available for this show
+                              </Text>
+                            </View>
+                          )}
+                        </View>
+                      ) : null}
+                    </TouchableOpacity>
+                  </View>
+                )}
+                keyExtractor={(item, index) => index.toString()}
               />
             </View>
+          ) : (
+            <View style={styles.button}>
+              <Button
+                color="white"
+                onPress={findShowOptions}
+                title="Find show"
+                backgroundColor="seagreen"
+              ></Button>
+            </View>
+          )}
+        </View>
+      ) : (
+        <View>
+          {!fromSingleShow ? (
+            <View style={styles.button}>
+              <Button
+                color="white"
+                onPress={chooseNewShow}
+                title="Search for a different show"
+              ></Button>
+            </View>
           ) : null}
-
-          <View style={styles.button}>
-            <Button
-              color="white"
-              onPress={findShowOptions}
-              title="Add show"
-              backgroundColor="seagreen"
-            ></Button>
-          </View>
         </View>
-      ) : null}
-      {!fromSingleShow ? (
-        <View style={styles.button}>
-          <Button
-            color="white"
-            onPress={chooseNewShow}
-            title="Choose a new show"
-          ></Button>
-        </View>
-      ) : null}
-      <ScrollView>
+      )}
+      <View>
         {added ? (
-          <View>
+          <ScrollView>
             <View>
               <TextInput
                 placeholder="Write your own description of the show. . ."
@@ -262,7 +400,7 @@ export default function AddShow(props) {
                   </View>
                 ) : null}
               </View>
-              {purchase ? (
+              {streaming ? (
                 <View>
                   <Text style={styles.text}>
                     Streaming options: {streaming}
@@ -270,16 +408,16 @@ export default function AddShow(props) {
                   <View style={styles.separator} />
                 </View>
               ) : null}
-              {streaming ? (
+              {purchase ? (
                 <View>
                   <Text style={styles.text}>Purchase options: {purchase}</Text>
                   <View style={styles.separator} />
                 </View>
               ) : null}
             </View>
-          </View>
+          </ScrollView>
         ) : null}
-      </ScrollView>
+      </View>
     </View>
   );
 }
@@ -309,6 +447,10 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     marginRight: 10,
     marginLeft: 10,
+  },
+  image: {
+    flex: 1,
+    aspectRatio: 2 / 3,
   },
   saveButton: {
     textAlign: 'center',

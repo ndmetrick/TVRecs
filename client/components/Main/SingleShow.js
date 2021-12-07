@@ -21,6 +21,7 @@ function SingleShow(props) {
   const [toWatch, setToWatch] = useState(null);
   const [warningTags, setWarningTags] = useState([]);
   const [tvTags, setTVTags] = useState([]);
+  const [isCurrentUser, setIsCurrentUser] = useState(false);
 
   const isFocused = useIsFocused();
 
@@ -30,10 +31,15 @@ function SingleShow(props) {
     const { currentUser } = props;
     const { userShow, userInfo } = props.route.params;
 
-    if (userInfo.id === currentUser.id) {
-      setUser(currentUser);
-    } else {
+    if (currentUser === null && userInfo !== null) {
       setUser(userInfo);
+    } else {
+      if (userInfo.id === currentUser.id) {
+        setUser(currentUser);
+        setIsCurrentUser(true);
+      } else {
+        setUser(userInfo);
+      }
     }
     const warnings = userShow.tags.filter((tag) => {
       return tag.type === 'warning';
@@ -184,7 +190,7 @@ function SingleShow(props) {
             </View>
           ) : null}
 
-          {user.id === props.currentUser.id ? (
+          {isCurrentUser ? (
             <View>
               <View>
                 <Button

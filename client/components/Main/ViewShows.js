@@ -24,14 +24,21 @@ function ViewShows(props) {
     const { userToView } = props.route.params;
     setUser(userToView);
     if (userToView) {
-      if (props.route.params.type === 'toWatch') {
-        setUserShows(toWatch);
-        setLoading(false);
-      } else if (userToView.id === currentUser.id) {
-        setUserShows(currentUserShows);
-        setLoading(false);
-      } else if (userToView.id) {
-        setUserShows(otherUserShows);
+      const shows =
+        currentUser === null
+          ? otherUserShows
+          : props.route.params.type === 'toWatch'
+          ? toWatch
+          : userToView.id === currentUser.id
+          ? currentUserShows
+          : userToView.id
+          ? otherUserShows
+          : null;
+      if (shows) {
+        shows.sort(function (x, y) {
+          return new Date(y.updatedAt) - new Date(x.updatedAt);
+        });
+        setUserShows(shows);
         setLoading(false);
       }
     }
@@ -93,7 +100,8 @@ const styles = StyleSheet.create({
   },
   image: {
     flex: 1,
-    aspectRatio: 1 / 1,
+    aspectRatio: 2 / 3,
+    // resizeMode: 'cover',
   },
 });
 const mapStateToProps = (store) => ({

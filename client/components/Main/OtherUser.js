@@ -31,11 +31,16 @@ function OtherUser(props) {
   const [user, setUser] = useState(null);
   const [following, setFollowing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [loggedIn, setLoggedIn] = useState(false);
 
   // const isFocused = useIsFocused();
 
   useEffect(() => {
     const { currentUser, currentUserShows } = props;
+    if (currentUser) {
+      setLoggedIn(true);
+      console.log('i got here to this thing in otherUser');
+    }
     const { uid } = props.route.params ?? {};
 
     const getUser = async () => {
