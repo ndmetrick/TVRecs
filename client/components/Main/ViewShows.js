@@ -8,6 +8,7 @@ import {
   Button,
   StyleSheet,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 
 import { useIsFocused } from '@react-navigation/native';
@@ -49,7 +50,11 @@ function ViewShows(props) {
   }, [props.route.params.type, isFocused, props.otherUserShows]);
 
   if (loading) {
-    return <View />;
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#5500dc" />
+      </View>
+    );
   }
 
   return (

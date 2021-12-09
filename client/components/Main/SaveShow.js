@@ -7,9 +7,10 @@ import {
   Button,
   StyleSheet,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { connect } from 'react-redux';
-import { getCurrentUser, addShow, switchShow } from '../../redux/actions';
+import { addShow, switchShow } from '../../redux/actions';
 
 import { NavigationContainer } from '@react-navigation/native';
 
@@ -102,8 +103,8 @@ function SaveShow(props) {
 
   if (loading) {
     return (
-      <View>
-        <Text>Please be patient while we load...</Text>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#5500dc" />
       </View>
     );
   }
@@ -117,13 +118,13 @@ function SaveShow(props) {
           <View style={styles.separator} />
         </View>
       ) : null}
-      {purchase ? (
+      {streaming ? (
         <View>
           <Text style={styles.text}>Streaming options: {streaming}</Text>
           <View style={styles.separator} />
         </View>
       ) : null}
-      {streaming ? (
+      {purchase ? (
         <View>
           <Text style={styles.text}>Purchase options: {purchase}</Text>
           <View style={styles.separator} />

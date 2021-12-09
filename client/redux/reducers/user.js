@@ -13,6 +13,7 @@ import {
   GET_USER_TAGS,
   CHANGE_USER_TAGS,
   CHANGE_SHOW_TAGS,
+  LOGGING_OUT,
 } from '../constants';
 
 const initialState = {
@@ -24,6 +25,7 @@ const initialState = {
   userTags: [],
   toWatch: [],
   watchList: [],
+  loggingOut: false,
 };
 
 export default function userReducer(state = initialState, action) {
@@ -151,6 +153,8 @@ export default function userReducer(state = initialState, action) {
     //     ...state,
     //     tags: action.tags,
     //   };
+    case LOGGING_OUT:
+      return { ...initialState, loggingOut: true };
     case CLEAR_DATA:
       return initialState;
     default:

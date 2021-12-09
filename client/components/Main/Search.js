@@ -3,10 +3,11 @@ import { connect } from 'react-redux';
 import {
   View,
   Text,
-  TextInput,
   FlatList,
   TouchableOpacity,
+  StyleSheet,
 } from 'react-native';
+import { TextInput } from 'react-native-paper';
 import { getAllOtherUsers } from '../../redux/actions';
 import Profile from './Profile';
 
@@ -24,7 +25,6 @@ const Search = (props) => {
       }
     };
     getUsers();
-    console.log('other users', users, props.otherUsers);
     return () => {
       setUsers([]);
       setMatchingUsers([]);
@@ -32,37 +32,84 @@ const Search = (props) => {
   }, []);
 
   const getMatchingUsers = (searchInput) => {
-    const matches = users.filter((user) =>
-      user.username.includes(searchInput.toLowerCase())
-    );
+    const matches = users.filter((user) => {
+      return user.username.includes(searchInput.toLowerCase());
+    });
     setMatchingUsers(matches);
   };
 
   return (
-    <View>
+    <View style={styles.container}>
+      <Text style={styles.boldText}>Search for any user</Text>
       <TextInput
-        placeholder="Type in a new TV friend..."
+        style={styles.inputText}
+        label="Enter username here"
         onChangeText={(searchInput) => getMatchingUsers(searchInput)}
+        mode="outlined"
+        outlineColor="#586BA4"
+        activeOutlineColor="#586BA4"
       />
-
-      <FlatList
-        numColumns={1}
-        horizontal={false}
-        data={matchingUsers}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            onPress={() =>
-              props.navigation.navigate('OtherUser', { uid: item.id })
-            }
-          >
-            <Text>{item.username}</Text>
-          </TouchableOpacity>
-        )}
-        keyExtractor={(item, index) => index.toString()}
-      />
+      <View style={styles.optionContainer}>
+        <FlatList
+          horizontal={false}
+          data={matchingUsers}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              onPress={() =>
+                props.navigation.navigate('OtherUser', { uid: item.id })
+              }
+            >
+              <View style={styles.otherUser}>
+                <Text style={styles.optionsText}>{item.username}</Text>
+              </View>
+            </TouchableOpacity>
+          )}
+          keyExtractor={(item, index) => index.toString()}
+        />
+      </View>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    marginTop: 15,
+    flex: 1,
+    marginHorizontal: 2,
+  },
+  optionContainer: {
+    flex: 1,
+    justifyContent: 'space-between',
+    marginRight: 10,
+    marginLeft: 10,
+  },
+  text: {
+    margin: 5,
+    textAlign: 'center',
+    fontSize: 20,
+  },
+  boldText: {
+    margin: 5,
+    textAlign: 'center',
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  inputText: {
+    margin: 10,
+    textAlign: 'center',
+    fontSize: 20,
+  },
+  optionsText: {
+    marginRight: 10,
+    marginLeft: 10,
+    fontSize: 18,
+  },
+  otherUser: {
+    marginBottom: 5,
+    marginTop: 5,
+    padding: 2,
+  },
+});
 
 const mapStateToProps = (store) => ({
   otherUsers: store.allOtherUsers.usersInfo,

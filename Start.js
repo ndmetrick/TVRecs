@@ -15,6 +15,7 @@ import OtherUser from './client/components/Main/OtherUser';
 import SingleShow from './client/components/Main/SingleShow';
 import MainLoggedOut from './client/components/MainLoggedOut';
 import Login from './client/components/auth/Login';
+import { clearData } from './client/redux/actions';
 
 const Start = (props) => {
   const Stack = createStackNavigator();
@@ -22,10 +23,20 @@ const Start = (props) => {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    if (props.currentUser) {
-      setUser(props.currentUser);
-    }
-  }, [props.currentUser]);
+    const getUser = async () => {
+      if (props.currentUser) {
+        setUser(props.currentUser);
+      } else {
+        if (props.loggingOut) {
+          setUser(null);
+          await props.clearData();
+        }
+      }
+    };
+    getUser();
+  }, [props.currentUser, props.loggingOut]);
+
+  // const { isLoggedIn } = props;
 
   return (
     <>
@@ -105,6 +116,13 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = (store) => ({
   currentUser: store.currentUser.userInfo,
+  loggingOut: store.currentUser.loggingOut,
 });
 
-export default connect(mapStateToProps)(Start);
+const mapDispatchToProps = (dispatch) => {
+  return {
+    clearData: () => dispatch(clearData()),
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Start);

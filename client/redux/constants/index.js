@@ -22,6 +22,7 @@ export const GET_OTHER_USER_TAGS = 'GET_OTHER_USER_TAGS';
 export const CHANGE_USER_TAGS = 'CHANGE_USER_TAGS';
 
 export const GET_FOLLOWING_RECS = 'GET_FOLLOWING_RECS';
+export const LOGGING_OUT = 'LOGGING_OUT';
 
 export default {
   ADD_SHOW,
@@ -45,4 +46,5 @@ export default {
   CLEAR_OTHER_USER,
   GET_TO_WATCH,
   SWITCH_SHOW,
+  LOGGING_OUT,
 };

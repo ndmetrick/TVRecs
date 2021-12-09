@@ -1,21 +1,22 @@
 import * as AuthSession from 'expo-auth-session';
 import { connect } from 'react-redux';
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Alert, Button, Platform, StyleSheet, Text, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getCurrentUser } from '../../redux/actions';
-
-const auth0ClientId = 'rMIdw36DYTg1ZmOuux0xDfUvj0rbO6u3';
-const authorizationEndpoint = 'https://dev--5p-bz53.us.auth0.com/authorize';
+import { getCurrentUser, getAuthInfo } from '../../redux/actions';
 
 const useProxy = Platform.select({ web: false, default: true });
 const redirectUri = AuthSession.makeRedirectUri({ useProxy });
 
 const Login = (props) => {
+  const [clientId, setClientId] = useState(null);
+  const [endpoint, setEndpoint] = useState(null);
+  const authorizationEndpoint = 'https://dev--5p-bz53.us.auth0.com/authorize';
+
   const [request, result, promptAsync] = AuthSession.useAuthRequest(
     {
       redirectUri,
-      clientId: auth0ClientId,
+      clientId: clientId,
       // id_token will return a JWT token
       responseType: 'id_token',
       // retrieve the user's profile
@@ -30,6 +31,16 @@ const Login = (props) => {
   );
 
   useEffect(() => {
+    const getAuth = async () => {
+      try {
+        const authInfo = await props.getAuthInfo();
+        setClientId(authInfo[0]);
+        setEndpoint(authInfo[1]);
+      } catch (e) {
+        console.log(e);
+      }
+    };
+    getAuth();
     const getUser = async () => {
       try {
         if (result) {
@@ -92,6 +103,7 @@ const styles = StyleSheet.create({
 const mapDispatchToProps = (dispatch) => {
   return {
     login: () => dispatch(getCurrentUser()),
+    getAuthInfo: () => dispatch(getAuthInfo()),
   };
 };
 

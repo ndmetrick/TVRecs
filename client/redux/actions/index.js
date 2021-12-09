@@ -2,21 +2,59 @@ import axios from 'axios';
 import types from '../constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const baseUrl = 'http://10.0.0.94:8080';
+const baseUrl = 'https://tvrecs.herokuapp.com';
 
 const getToken = async () => {
   try {
     const token = await AsyncStorage.getItem('token');
-    const headers = {
-      headers: {
-        authorization: `Bearer ${token}`,
-      },
-    };
-    return headers;
+    if (token) {
+      const headers = {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      };
+      return headers;
+    }
+    return null;
   } catch (err) {
     console.error(err);
   }
 };
+
+AsyncStorage.removeItem('token');
+
+export function logout() {
+  return async (dispatch) => {
+    try {
+      await AsyncStorage.removeItem('token');
+      dispatch({ type: types.LOGGING_OUT });
+    } catch (e) {
+      console.log(e);
+    }
+  };
+}
+
+export function getAPIKey(api) {
+  return async () => {
+    try {
+      const key = await axios.get(`${baseUrl}/api/users/keys/${api}`);
+      return key.data;
+    } catch (e) {
+      console.log(e);
+    }
+  };
+}
+
+export function getAuthInfo() {
+  return async () => {
+    try {
+      const authInfo = await axios.get(`${baseUrl}/api/users/authInfo`);
+      return authInfo.data;
+    } catch (e) {
+      console.log(e);
+    }
+  };
+}
 
 export function getCurrentUser() {
   return async (dispatch) => {
@@ -364,4 +402,7 @@ export default {
   getUserTags,
   changeUserTags,
   changeShowTags,
+  getAuthInfo,
+  getAPIKey,
+  logout,
 };

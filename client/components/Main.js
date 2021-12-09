@@ -26,6 +26,7 @@ const Tab = createMaterialBottomTabNavigator();
 
 function Main(props) {
   useEffect(() => {
+    console.log('i got into useeffect on main');
     props.clearData();
     props.getCurrentUser();
     props.getUserFollowing();

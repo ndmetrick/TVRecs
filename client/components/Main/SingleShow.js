@@ -257,7 +257,8 @@ function SingleShow(props) {
           ) : null}
 
           {props.showList.includes(userShow.show.name) ||
-          props.watchList.includes(userShow.show.name) ? null : (
+          props.watchList.includes(userShow.show.name) ||
+          props.currentUser === null ? null : (
             <View>
               <Button
                 title="Rec show"
@@ -313,6 +314,15 @@ function SingleShow(props) {
               />
             </View>
           )}
+          {props.currentUser === null ? (
+            <View style={styles.button}>
+              <Button
+                title="Log in / Sign up"
+                color="white"
+                onPress={() => props.navigation.navigate('Login')}
+              ></Button>
+            </View>
+          ) : null}
         </View>
       </ScrollView>
     </View>

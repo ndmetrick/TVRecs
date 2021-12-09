@@ -128,13 +128,11 @@ function AddShowTags(props) {
         <Text>We inding your tags</Text>
       </View>
     );
-  } else {
-    console.log('loaded', selectedTags);
   }
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={{ flex: 1 }}>
+      <ScrollView showsVerticalScrollIndicator={false}>
         <Text>
           Pick some tags that you feel describe the show how you experience it
         </Text>
@@ -188,24 +186,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     marginBottom: 8,
   },
-
-  controller: {
-    borderTopColor: '#ddd',
-    borderTopWidth: 0.8,
-    paddingTop: 10,
-    marginHorizontal: 12,
-  },
-  modeSwitcher: {
-    height: 30,
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  modeText: {
-    color: '#333',
-    fontSize: 18,
-  },
-
   tagStyle: {
     marginTop: 4,
     marginHorizontal: 8,

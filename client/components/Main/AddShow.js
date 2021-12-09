@@ -1,22 +1,24 @@
 import React, { useState, useEffect } from 'react';
+import { connect } from 'react-redux';
 import {
   View,
   Text,
   Button,
   StyleSheet,
-  TextInput,
   Image,
   ScrollView,
   FlatList,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
+import { TextInput } from 'react-native-paper';
 import axios from 'axios';
-import RNPickerSelect from 'react-native-picker-select';
 import AddShowTags from './AddShowTags';
 import SaveShow from './SaveShow';
+import { getAPIKey } from '../../redux/actions';
 import { useIsFocused } from '@react-navigation/native';
 
-export default function AddShow(props) {
+const AddShow = (props) => {
   const [showInput, setShowInput] = useState('');
   const [showName, setShowName] = useState('');
   const [description, setDescription] = useState('');
@@ -30,14 +32,22 @@ export default function AddShow(props) {
   const [fromSingleShow, setFromSingleShow] = useState(false);
   const [userShowId, setUserShowId] = useState(null);
   const [showPosterPreview, setShowPosterPreview] = useState(false);
-  const key = 'e7eaca48bd580f966d3d14526c3ddff0';
+  const [OMDBKey, setOMDBKey] = useState(null);
+  const [TMDBKey, setTMDBKey] = useState(null);
   const isFocused = useIsFocused();
 
-  // https://api.themoviedb.org/4/search/tv?api_key=e7eaca48bd580f966d3d14526c3ddff0&query=we+are+lady+parts
-  // 100351;
-  // https://api.themoviedb.org/3/tv/70493?api_key=e7eaca48bd580f966d3d14526c3ddff0&language=en-US&append_to_response=watch%2Fproviders,images
-
   useEffect(() => {
+    const getAPIKeys = async () => {
+      try {
+        const oKey = await props.getAPIKey('omdb');
+        const tKey = await props.getAPIKey('tmdb');
+        setOMDBKey(oKey);
+        setTMDBKey(tKey);
+      } catch (e) {
+        console.log(e);
+      }
+    };
+    getAPIKeys();
     // if the user got here by adding an existing show from their own watch list or from someone else's rec list
     if (props.previous.length > 1) {
       if (props.previous[1].name === 'SingleShow') {
@@ -73,53 +83,62 @@ export default function AddShow(props) {
 
   const findShowOptions = async () => {
     try {
-      const titleString = showInput.split(' ').join('+');
-      const getShowOptions = `https://api.themoviedb.org/4/search/tv?api_key=${key}&query=${titleString}`;
-      const { data } = await axios.get(getShowOptions);
-      if (!data.results.length) {
-        return (
-          <View>
-            <Text>
-              I'm so sorry. We can't find that TV show in the database. Check to
-              see if there's a spelling error and try again.
-            </Text>
-          </View>
-        );
-      }
-      if (data.results.length > 1) {
-        const showList = data.results.map((show, index) => {
-          return {
-            index: index,
-            year: show.first_air_date,
-            name: show.name,
-            id: show.id,
-            poster: show.poster_path,
-            overview: show.overview,
-          };
+      if (!showInput.length) {
+        Alert.alert('No show entered', 'Please enter some text to search', {
+          text: 'OK',
         });
-        setShowOptions(showList);
       } else {
-        const show = data.results[0];
-        setImdbId(show.id);
-        setShowName(show.name);
-        const getShow = `https://api.themoviedb.org/3/tv/${show.id}?api_key=${key}&language=en-US&append_to_response=watch%2Fproviders`;
-        const watchProviders = await axios.get(getShow);
-        if (watchProviders) {
-          setStreamingAndPurchase(watchProviders.data);
+        const titleString = showInput.split(' ').join('+');
+        console.log('i got in and this is title string', titleString);
+        const getShowOptions = `https://api.themoviedb.org/4/search/tv?api_key=${TMDBKey}&query=${titleString}`;
+        const { data } = await axios.get(getShowOptions);
+        if (!data.results.length) {
+          return (
+            <View>
+              <Text>
+                I'm so sorry. We can't find that TV show in the database. Check
+                to see if there's a spelling error and try again.
+              </Text>
+            </View>
+          );
         }
-        if (show.poster_path) {
-          setImageUrl('https://image.tmdb.org/t/p/original' + show.poster_path);
+        if (data.results.length > 1) {
+          const showList = data.results.map((show, index) => {
+            return {
+              index: index,
+              year: show.first_air_date,
+              name: show.name,
+              id: show.id,
+              poster: show.poster_path,
+              overview: show.overview,
+            };
+          });
+          setShowOptions(showList);
         } else {
-          const imageShowText = `http://www.omdbapi.com/?t=${titleString}&apikey=aa03da30`;
-          const imageShow = await axios.get(imageShowText);
-          const poster = imageShow.data.Poster;
-          if (!poster) {
-            console.log('I need a plan here');
+          const show = data.results[0];
+          setImdbId(show.id);
+          setShowName(show.name);
+          const getShow = `https://api.themoviedb.org/3/tv/${show.id}?api_key=${TMDBKey}&language=en-US&append_to_response=watch%2Fproviders`;
+          const watchProviders = await axios.get(getShow);
+          if (watchProviders) {
+            setStreamingAndPurchase(watchProviders.data);
           }
-          setImageUrl(poster);
-        }
+          if (show.poster_path) {
+            setImageUrl(
+              'https://image.tmdb.org/t/p/original' + show.poster_path
+            );
+          } else {
+            const imageShowText = `http://www.omdbapi.com/?t=${titleString}&apikey=${OMDBKey}`;
+            const imageShow = await axios.get(imageShowText);
+            const poster = imageShow.data.Poster;
+            if (!poster) {
+              console.log('I need a plan here');
+            }
+            setImageUrl(poster);
+          }
 
-        setAdded(true);
+          setAdded(true);
+        }
       }
     } catch (e) {
       console.error(e);
@@ -127,7 +146,7 @@ export default function AddShow(props) {
   };
 
   const setStreamingAndPurchase = (data) => {
-    // FIGURE THIS OUTqq      `
+    // FIGURE THIS OUT      `
     const stream = data['watch/providers'].results.US.flatrate;
     const buy = data['watch/providers'].results.US.buy;
     if (stream) {
@@ -164,7 +183,7 @@ export default function AddShow(props) {
 
   const getShowData = async (id) => {
     try {
-      const getShow = `https://api.themoviedb.org/3/tv/${id}?api_key=${key}&language=en-US&append_to_response=watch%2Fproviders`;
+      const getShow = `https://api.themoviedb.org/3/tv/${id}?api_key=${TMDBKey}&language=en-US&append_to_response=watch%2Fproviders`;
       const { data } = await axios.get(getShow);
       setShowName(data.name);
       setShowInput(data.name);
@@ -174,7 +193,7 @@ export default function AddShow(props) {
       if (data.poster_path) {
         setImageUrl('https://image.tmdb.org/t/p/original' + data.poster_path);
       } else {
-        const imageShowText = `http://www.omdbapi.com/?t=${data.name}&apikey=aa03da30`;
+        const imageShowText = `http://www.omdbapi.com/?t=${data.name}&apikey=${OMDBKey}`;
         const imageShow = await axios.get(imageShowText);
         const poster = imageShow.data.Poster;
         setImageUrl(poster);
@@ -195,21 +214,19 @@ export default function AddShow(props) {
       {!added ? (
         <View style={{ flex: 1 }}>
           <View>
-            <Text style={styles.text}>What show do you want to add?</Text>
+            <Text style={styles.boldText}>What show do you want to add?</Text>
             <TextInput
               style={styles.inputText}
-              placeholder="Show Title"
+              label="Enter show title here"
               onChangeText={(showInput) => setShowInput(showInput)}
+              mode="outlined"
+              outlineColor="#586BA4"
+              activeOutlineColor="#586BA4"
               value={showInput}
             />
           </View>
           {showOptions ? (
             <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 18 }}>
-                Is one of these the show you're looking for? Click anywhere in
-                the show area to select it or click "Search for a different
-                show" to try your search again.
-              </Text>
               <View style={styles.button}>
                 <Button
                   color="white"
@@ -219,103 +236,105 @@ export default function AddShow(props) {
               </View>
               {/* The show posters take up a lot of space, so the default is not to show them, but users can decide to turn them on or back off */}
               {!showPosterPreview ? (
-                <View style={styles.button}>
+                <View style={styles.addPosterButton}>
                   <Button
                     color="white"
                     onPress={() => viewPoster()}
                     title="Click to see show posters"
-                    backgroundColor="seagreen"
                   ></Button>
                 </View>
               ) : (
-                <View style={styles.button}>
+                <View style={styles.removePosterButton}>
                   <Button
                     color="white"
                     onPress={() => viewPoster()}
                     title="Click to hide posters"
-                    backgroundColor="seagreen"
                   ></Button>
                 </View>
               )}
-              <FlatList
-                horizontal={false}
-                data={showOptions}
-                renderItem={({ item }) => (
-                  <View style={styles.containerImage}>
-                    <View style={styles.separator} />
-                    <Text style={{ fontWeight: 'bold' }}></Text>
-                    <TouchableOpacity
-                      onPress={() => getShowData(item.id)}
-                      style={styles.catalogContainer}
-                    >
-                      <View>
-                        <Text>
-                          <Text style={{ fontWeight: 'bold' }}>
-                            Show title:
-                          </Text>{' '}
-                          {item.name}
-                        </Text>
-                        {item.year ? (
-                          <View>
-                            <Text>
+              <Text
+                style={{
+                  fontSize: 18,
+                  fontWeight: 'bold',
+                  marginLeft: 10,
+                  marginRight: 10,
+                }}
+              >
+                Is one of these the show you're looking for? (Click inside the
+                box to choose the show)
+              </Text>
+              <View style={styles.optionContainer}>
+                <FlatList
+                  horizontal={false}
+                  data={showOptions}
+                  renderItem={({ item }) => (
+                    <View style={styles.box}>
+                      <TouchableOpacity onPress={() => getShowData(item.id)}>
+                        <View>
+                          <Text style={styles.optionsText}>
+                            <Text style={{ fontWeight: 'bold' }}>
+                              Show title:
+                            </Text>{' '}
+                            {item.name}
+                          </Text>
+                          {item.year ? (
+                            <Text style={styles.optionsText}>
                               <Text style={{ fontWeight: 'bold' }}>
                                 First began airing in:
                               </Text>{' '}
                               {item.year.slice(0, 4)}
                             </Text>
-                          </View>
-                        ) : (
-                          <View>
-                            <Text style={{ fontWeight: 'bold' }}>
-                              No air date available
+                          ) : (
+                            <Text style={styles.optionsText}>
+                              <Text style={{ fontWeight: 'bold' }}>
+                                No air date available
+                              </Text>
                             </Text>
-                          </View>
-                        )}
-                        {item.overview ? (
-                          <View>
-                            <Text>
+                          )}
+                          {item.overview ? (
+                            <Text style={styles.optionsText}>
                               <Text style={{ fontWeight: 'bold' }}>
                                 Overview:
                               </Text>{' '}
                               {item.overview}
                             </Text>
-                          </View>
-                        ) : (
-                          <View>
-                            <Text style={{ fontWeight: 'bold' }}>
-                              No overview available
-                            </Text>
-                          </View>
-                        )}
-                      </View>
-                      {/* If the user chose to view poster previews, they'll go here if they were found */}
-                      {showPosterPreview ? (
-                        <View>
-                          {item.poster ? (
-                            <View>
-                              <Image
-                                source={{
-                                  uri:
-                                    'https://image.tmdb.org/t/p/original' +
-                                    item.poster,
-                                }}
-                                style={styles.image}
-                              />
-                            </View>
                           ) : (
-                            <View>
+                            <Text style={styles.optionsText}>
                               <Text style={{ fontWeight: 'bold' }}>
-                                No preview poster available for this show
+                                No overview available
                               </Text>
-                            </View>
+                            </Text>
                           )}
                         </View>
-                      ) : null}
-                    </TouchableOpacity>
-                  </View>
-                )}
-                keyExtractor={(item, index) => index.toString()}
-              />
+                        {/* If the user chose to view poster previews, they'll go here if they were found */}
+                        {showPosterPreview ? (
+                          <View>
+                            {item.poster ? (
+                              <View>
+                                <Image
+                                  source={{
+                                    uri:
+                                      'https://image.tmdb.org/t/p/original' +
+                                      item.poster,
+                                  }}
+                                  style={styles.image}
+                                />
+                              </View>
+                            ) : (
+                              <View>
+                                <Text style={{ fontWeight: 'bold' }}>
+                                  No preview poster available for this show
+                                </Text>
+                              </View>
+                            )}
+                          </View>
+                        ) : null}
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                  keyExtractor={(item, index) => index.toString()}
+                />
+              </View>
             </View>
           ) : (
             <View style={styles.button}>
@@ -342,16 +361,20 @@ export default function AddShow(props) {
         </View>
       )}
       <View>
-        {added ? (
-          <ScrollView>
+        <ScrollView>
+          {added ? (
             <View>
               <TextInput
-                placeholder="Write your own description of the show. . ."
                 style={styles.inputText}
+                label="description (optional)"
+                placeholder="Write a description of the show. . ."
                 onChangeText={(description) => setDescription(description)}
+                mode="outlined"
+                outlineColor="#586BA4"
+                activeOutlineColor="#586BA4"
+                value={description}
               />
-
-              <Text style={styles.text}>{showName}</Text>
+              <Text style={styles.boldText}>{showName}</Text>
               <View style={styles.separator} />
               <Image
                 source={image}
@@ -359,7 +382,7 @@ export default function AddShow(props) {
               />
               <View style={{ flexDirection: 'row' }}>
                 {/* if we're getting here by searching for the show, toWatch will be null. If we got here because we were looking at an instance of a userShow (our own or someone else's) it will be set to true (we're adding it to toWatch), or false (we're adding it to recs); depending on how it's set, we want to show the appropriate button options */}
-                {toWatch === true ? null : (
+                {toWatch === true || props.currentUser === null ? null : (
                   <View style={styles.saveButton}>
                     <Button
                       style={styles.saveButton}
@@ -380,7 +403,8 @@ export default function AddShow(props) {
                     ></Button>
                   </View>
                 )}
-                {toWatch === null || toWatch === true ? (
+                {(toWatch === null && props.currentUser !== null) ||
+                toWatch === true ? (
                   <View style={styles.saveButton}>
                     <Button
                       title="Save show to watch list"
@@ -399,6 +423,21 @@ export default function AddShow(props) {
                     ></Button>
                   </View>
                 ) : null}
+                {props.currentUser === null ? (
+                  <View>
+                    <Text style={styles.text}>
+                      Log in or Sign up to recommend this show or add it to your
+                      watch list
+                    </Text>
+                    <View style={styles.button}>
+                      <Button
+                        title="Log in / Sign up"
+                        color="white"
+                        onPress={() => props.navigation.navigate('Login')}
+                      ></Button>
+                    </View>
+                  </View>
+                ) : null}
               </View>
               {streaming ? (
                 <View>
@@ -415,12 +454,12 @@ export default function AddShow(props) {
                 </View>
               ) : null}
             </View>
-          </ScrollView>
-        ) : null}
+          ) : null}
+        </ScrollView>
       </View>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -429,24 +468,64 @@ const styles = StyleSheet.create({
     // justifyContent: 'center',
     marginHorizontal: 2,
   },
+  optionContainer: {
+    flex: 1,
+    justifyContent: 'space-between',
+    marginRight: 10,
+    marginLeft: 10,
+  },
   text: {
+    margin: 5,
+    textAlign: 'center',
+    fontSize: 20,
+  },
+  boldText: {
     margin: 5,
     textAlign: 'center',
     fontSize: 20,
     fontWeight: 'bold',
   },
   inputText: {
-    margin: 5,
+    margin: 10,
     textAlign: 'center',
     fontSize: 20,
   },
-  button: {
-    textAlign: 'center',
-    backgroundColor: '#4281A4',
-    marginVertical: 8,
-    marginBottom: 8,
+  optionsText: {
     marginRight: 10,
     marginLeft: 10,
+    fontSize: 15,
+  },
+  button: {
+    textAlign: 'center',
+    backgroundColor: '#586BA4',
+    marginVertical: 2,
+    marginBottom: 2,
+    marginRight: 10,
+    marginLeft: 10,
+  },
+  addPosterButton: {
+    textAlign: 'center',
+    marginVertical: 2,
+    marginBottom: 2,
+    marginRight: 10,
+    marginLeft: 10,
+    backgroundColor: '#324376',
+  },
+  box: {
+    backgroundColor: 'white',
+    borderWidth: 2,
+    borderColor: '#324376',
+    marginBottom: 2,
+    marginTop: 2,
+    padding: 2,
+  },
+  removePosterButton: {
+    textAlign: 'center',
+    marginVertical: 2,
+    marginBottom: 2,
+    marginRight: 10,
+    marginLeft: 10,
+    backgroundColor: '#636A7D',
   },
   image: {
     flex: 1,
@@ -466,3 +545,14 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
   },
 });
+const mapStateToProps = (store) => ({
+  currentUser: store.currentUser.userInfo,
+});
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    getAPIKey: (API) => dispatch(getAPIKey(API)),
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(AddShow);

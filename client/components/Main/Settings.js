@@ -41,56 +41,10 @@ function Settings(props) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.containerInfo}>
-        {/* <Text style={styles.text}>
-          {user.firstName} {user.lastName}
-        </Text> */}
-        <Text style={styles.text}>{currentUser.username}</Text>
-        <Text style={styles.text}>
-          Receiving recs from {props.following.length}{' '}
-          {props.following.length === 1 ? 'person' : 'people'}
-        </Text>
-        {/* Add in who is following */}
-        <Text style={styles.text}>
-          Recommending {currentUserShows.length}{' '}
-          {currentUserShows.length === 1 ? 'show' : 'shows'}
-        </Text>
-        <Button title="Logout" onPress={() => logout()} />
-      </View>
-      <Tab.Navigator
-        initialRouteName="Feed"
-        screenOptions={{
-          tabBarActiveTintColor: '#FFFFFF',
-          tabBarInactiveTintColor: '#F8F8F8',
-          tabBarLabelStyle: {
-            textAlign: 'center',
-          },
-          tabBarIndicatorStyle: {
-            borderBottomColor: '#87B56A',
-            borderBottomWidth: 2,
-          },
-          tabBarStyle: {
-            backgroundColor: '#633689',
-          },
-        }}
-      >
-        <Tab.Screen
-          name="Recs"
-          component={ViewShows}
-          initialParams={{ userToView: currentUser, type: 'recs' }}
-          options={{
-            tabBarLabel: 'Recs',
-          }}
-        />
-        <Tab.Screen
-          name="To Watch"
-          component={ViewShows}
-          initialParams={{ userToView: currentUser, type: 'toWatch' }}
-          options={{
-            tabBarLabel: 'To Watch',
-          }}
-        />
-      </Tab.Navigator>
+      <Text style={styles.text}>
+        settings coming soon (how to filter your recs, what country you're
+        watching in (currently everything is set to US), user tags, etc)
+      </Text>
     </View>
   );
 }
@@ -98,6 +52,9 @@ function Settings(props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    marginTop: 15,
+    marginRight: 10,
+    marginLeft: 10,
   },
   containerInfo: {
     margin: 5,

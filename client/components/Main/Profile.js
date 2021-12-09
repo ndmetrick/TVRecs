@@ -9,13 +9,16 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from 'react-native';
+import * as AuthSession from 'expo-auth-session';
 import {
   getUserShows,
   getOtherUser,
   getUsersFollowingRecs,
+  logout,
 } from '../../redux/actions';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import ViewShows from './ViewShows';
 import { useIsFocused } from '@react-navigation/native';
@@ -33,14 +36,19 @@ function Profile(props) {
   //   setCurrentUser(props.currentUser);
   //   setCurrentUserShows(props.currentUserShows);
   // }, [isFocused]);
-  const logout = () => {
-    // firebase.auth().signOut();
-    console.log('i have to figure logging out');
+  const logout = async () => {
+    try {
+      await AuthSession.dismiss();
+      await props.logout();
+      console.log('current user in Profile', props.currentUser);
+      return props.navigation.navigate('AddShow');
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   const { currentUser, currentUserShows } = props;
   if (currentUser === null) {
-    console.log('this is where I am');
     return <View />;
   }
 
@@ -64,7 +72,7 @@ function Profile(props) {
           Recommending {currentUserShows.length}{' '}
           {currentUserShows.length === 1 ? 'show' : 'shows'}
         </Text>
-        <Button title="Logout" onPress={() => logout()} />
+        <Button title="Logout" onPress={logout} />
       </View>
       <Tab.Navigator
         initialRouteName="Feed"
@@ -133,6 +141,7 @@ const mapDispatch = (dispatch) => {
     getOtherUser: (uid) => dispatch(getOtherUser(uid)),
     getUserShows: (uid) => dispatch(getUserShows(uid)),
     getUsersFollowingRecs: () => dispatch(getUsersFollowingRecs()),
+    logout: () => dispatch(logout()),
   };
 };
 export default connect(mapStateToProps, mapDispatch)(Profile);
