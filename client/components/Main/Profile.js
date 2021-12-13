@@ -5,7 +5,6 @@ import {
   Text,
   Image,
   FlatList,
-  Button,
   StyleSheet,
   TouchableOpacity,
 } from 'react-native';
@@ -62,17 +61,21 @@ function Profile(props) {
         {/* <Text style={styles.text}>
           {user.firstName} {user.lastName}
         </Text> */}
-        <Text style={styles.text}>{currentUser.username}</Text>
+        {/* <Text style={styles.text}>{currentUser.username}</Text> */}
         <Text style={styles.text}>
-          Receiving recs from {props.following.length}{' '}
+          You are receiving recs from {props.following.length}{' '}
           {props.following.length === 1 ? 'person' : 'people'}
         </Text>
         {/* Add in who is following */}
         <Text style={styles.text}>
-          Recommending {currentUserShows.length}{' '}
+          You are recommending {currentUserShows.length}{' '}
           {currentUserShows.length === 1 ? 'show' : 'shows'}
         </Text>
-        <Button title="Logout" onPress={logout} />
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.button} onPress={logout}>
+            <Text style={styles.buttonText}>Logout</Text>
+          </TouchableOpacity>
+        </View>
       </View>
       <Tab.Navigator
         initialRouteName="Feed"
@@ -83,11 +86,11 @@ function Profile(props) {
             textAlign: 'center',
           },
           tabBarIndicatorStyle: {
-            borderBottomColor: '#87B56A',
+            borderBottomColor: '#21A179',
             borderBottomWidth: 7,
           },
           tabBarStyle: {
-            backgroundColor: '#633689',
+            backgroundColor: '#586BA4',
           },
         }}
       >
@@ -119,13 +122,28 @@ const styles = StyleSheet.create({
   containerInfo: {
     margin: 5,
     padding: 5,
-    borderStyle: 'solid',
-    borderColor: 'blue',
-    borderWidth: 2,
   },
   text: {
     textAlign: 'left',
     fontSize: 18,
+  },
+  buttonText: {
+    textAlign: 'center',
+    fontSize: 18,
+    margin: 5,
+    fontWeight: '500',
+    color: 'white',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  button: {
+    padding: 10,
+    borderRadius: 40,
+    marginHorizontal: 3,
+    backgroundColor: '#586BA4',
+    marginTop: 5,
   },
 });
 const mapStateToProps = (store) => ({

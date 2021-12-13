@@ -5,9 +5,9 @@ import {
   Text,
   Image,
   FlatList,
-  Button,
   StyleSheet,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import {
   getUserShows,
@@ -97,7 +97,11 @@ function OtherUser(props) {
 
   if (loading || user === null) {
     console.log('this is where I am');
-    return <View />;
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#5500dc" />
+      </View>
+    );
   }
 
   const { uid } = props.route.params ? props.route.params : {};
@@ -116,9 +120,20 @@ function OtherUser(props) {
         <Text style={styles.text}>Recommending {userShows.length} shows</Text>
         <View>
           {following ? (
-            <Button title="stop receiving recs" onPress={() => unfollow()} />
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => unfollow()}
+              >
+                <Text style={styles.buttonText}>stop receiving recs</Text>
+              </TouchableOpacity>
+            </View>
           ) : (
-            <Button title="receive recs" onPress={() => follow()} />
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity style={styles.button} onPress={() => follow()}>
+                <Text style={styles.buttonText}>receive recs</Text>
+              </TouchableOpacity>
+            </View>
           )}
         </View>
       </View>
@@ -131,11 +146,11 @@ function OtherUser(props) {
             textAlign: 'center',
           },
           tabBarIndicatorStyle: {
-            borderBottomColor: '#87B56A',
+            borderBottomColor: '#21A179',
             borderBottomWidth: 2,
           },
           tabBarStyle: {
-            backgroundColor: '#633689',
+            backgroundColor: '#586BA4',
           },
         }}
       >
@@ -169,6 +184,24 @@ const styles = StyleSheet.create({
   text: {
     textAlign: 'left',
     fontSize: 18,
+  },
+  buttonText: {
+    textAlign: 'center',
+    fontSize: 18,
+    margin: 5,
+    fontWeight: '500',
+    color: 'white',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  button: {
+    padding: 10,
+    borderRadius: 40,
+    marginHorizontal: 3,
+    backgroundColor: '#586BA4',
+    marginTop: 5,
   },
 });
 const mapStateToProps = (store) => ({

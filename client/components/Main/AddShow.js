@@ -3,18 +3,15 @@ import { connect } from 'react-redux';
 import {
   View,
   Text,
-  Button,
   StyleSheet,
   Image,
   ScrollView,
-  FlatList,
   TouchableOpacity,
   Alert,
 } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import axios from 'axios';
-import AddShowTags from './AddShowTags';
-import SaveShow from './SaveShow';
+import StreamingAndPurchase from './StreamingAndPurchase';
 import { getAPIKey } from '../../redux/actions';
 import { useIsFocused } from '@react-navigation/native';
 
@@ -24,16 +21,15 @@ const AddShow = (props) => {
   const [description, setDescription] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [imdbId, setImdbId] = useState('');
-  const [streaming, setStreaming] = useState('');
-  const [purchase, setPurchase] = useState('');
   const [showOptions, setShowOptions] = useState(null);
   const [added, setAdded] = useState(false);
-  const [toWatch, setToWatch] = useState(null);
+  const [type, setType] = useState(null);
   const [fromSingleShow, setFromSingleShow] = useState(false);
   const [userShowId, setUserShowId] = useState(null);
   const [showPosterPreview, setShowPosterPreview] = useState(false);
   const [OMDBKey, setOMDBKey] = useState(null);
   const [TMDBKey, setTMDBKey] = useState(null);
+  const [streamingAndPurchase, setStreamingAndPurchase] = useState(false);
   const isFocused = useIsFocused();
 
   useEffect(() => {
@@ -50,15 +46,13 @@ const AddShow = (props) => {
     getAPIKeys();
     // if the user got here by adding an existing show from their own watch list or from someone else's rec list
     if (props.previous.length > 1) {
-      if (props.previous[1].name === 'SingleShow') {
-        const { userShow, toWatch, userShowId } =
+      if (props.previous[1].name === 'Show') {
+        const { userShow, type, userShowId } =
           props.previous[0].state.routes[1].params;
         setShowName(userShow.show.name);
         setImageUrl(userShow.show.imageUrl);
         setImdbId(userShow.show.imdbId);
-        setStreaming(userShow.show.streaming);
-        setPurchase(userShow.show.purchase);
-        setToWatch(toWatch);
+        setType(type);
         setAdded(true);
         setFromSingleShow(true);
         if (userShowId) {
@@ -72,12 +66,11 @@ const AddShow = (props) => {
       setDescription('');
       setShowOptions(null);
       setImageUrl('');
-      setStreaming('');
-      setPurchase('');
       setAdded('');
-      setToWatch(null);
+      setType(null);
       setFromSingleShow(false);
       setShowPosterPreview(false);
+      setStreamingAndPurchase(false);
     };
   }, [props.navigation, isFocused]);
 
@@ -89,7 +82,6 @@ const AddShow = (props) => {
         });
       } else {
         const titleString = showInput.split(' ').join('+');
-        console.log('i got in and this is title string', titleString);
         const getShowOptions = `https://api.themoviedb.org/4/search/tv?api_key=${TMDBKey}&query=${titleString}`;
         const { data } = await axios.get(getShowOptions);
         if (!data.results.length) {
@@ -118,11 +110,6 @@ const AddShow = (props) => {
           const show = data.results[0];
           setImdbId(show.id);
           setShowName(show.name);
-          const getShow = `https://api.themoviedb.org/3/tv/${show.id}?api_key=${TMDBKey}&language=en-US&append_to_response=watch%2Fproviders`;
-          const watchProviders = await axios.get(getShow);
-          if (watchProviders) {
-            setStreamingAndPurchase(watchProviders.data);
-          }
           if (show.poster_path) {
             setImageUrl(
               'https://image.tmdb.org/t/p/original' + show.poster_path
@@ -145,26 +132,6 @@ const AddShow = (props) => {
     }
   };
 
-  const setStreamingAndPurchase = (data) => {
-    // FIGURE THIS OUT      `
-    const stream = data['watch/providers'].results.US.flatrate;
-    const buy = data['watch/providers'].results.US.buy;
-    if (stream) {
-      const streamingOptions =
-        stream && stream.map((option) => option.provider_name).join(', ');
-      if (streamingOptions) {
-        setStreaming(streamingOptions);
-      }
-    }
-    if (purchase) {
-      const purchaseOptions =
-        buy && buy.map((option) => option.provider_name).join(', ');
-      if (purchaseOptions) {
-        setPurchase(purchaseOptions);
-      }
-    }
-  };
-
   const viewPoster = () => {
     setShowPosterPreview(!showPosterPreview);
   };
@@ -176,7 +143,6 @@ const AddShow = (props) => {
     setDescription('');
     setImageUrl('');
     setImdbId('');
-    setStreaming('');
     setPurchase('');
     setShowOptions('');
   };
@@ -187,7 +153,6 @@ const AddShow = (props) => {
       const { data } = await axios.get(getShow);
       setShowName(data.name);
       setShowInput(data.name);
-      setStreamingAndPurchase(data);
       setShowOptions(null);
       setImdbId(id);
       if (data.poster_path) {
@@ -210,14 +175,14 @@ const AddShow = (props) => {
 
   const image = { uri: imageUrl };
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       {!added ? (
         <View style={{ flex: 1 }}>
           <View>
             <Text style={styles.boldText}>What show do you want to add?</Text>
             <TextInput
               style={styles.inputText}
-              label="Enter show title here"
+              label="Enter show title"
               onChangeText={(showInput) => setShowInput(showInput)}
               mode="outlined"
               outlineColor="#586BA4"
@@ -227,29 +192,33 @@ const AddShow = (props) => {
           </View>
           {showOptions ? (
             <View style={{ flex: 1 }}>
-              <View style={styles.button}>
-                <Button
-                  color="white"
-                  onPress={chooseNewShow}
-                  title="Search for a different show"
-                ></Button>
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity style={styles.button} onPress={chooseNewShow}>
+                  <Text style={styles.buttonText}>
+                    Search for a different show
+                  </Text>
+                </TouchableOpacity>
               </View>
               {/* The show posters take up a lot of space, so the default is not to show them, but users can decide to turn them on or back off */}
               {!showPosterPreview ? (
-                <View style={styles.addPosterButton}>
-                  <Button
-                    color="white"
+                <View style={styles.buttonContainer}>
+                  <TouchableOpacity
+                    style={styles.addPosterButton}
                     onPress={() => viewPoster()}
-                    title="Click to see show posters"
-                  ></Button>
+                  >
+                    <Text style={styles.buttonText}>
+                      Click to see show posters
+                    </Text>
+                  </TouchableOpacity>
                 </View>
               ) : (
-                <View style={styles.removePosterButton}>
-                  <Button
-                    color="white"
+                <View style={styles.buttonContainer}>
+                  <TouchableOpacity
+                    style={styles.removePosterButton}
                     onPress={() => viewPoster()}
-                    title="Click to hide posters"
-                  ></Button>
+                  >
+                    <Text style={styles.buttonText}>Click to hide posters</Text>
+                  </TouchableOpacity>
                 </View>
               )}
               <Text
@@ -264,11 +233,9 @@ const AddShow = (props) => {
                 box to choose the show)
               </Text>
               <View style={styles.optionContainer}>
-                <FlatList
-                  horizontal={false}
-                  data={showOptions}
-                  renderItem={({ item }) => (
-                    <View style={styles.box}>
+                {showOptions.map((item, index) => {
+                  return (
+                    <View style={styles.box} key={index}>
                       <TouchableOpacity onPress={() => getShowData(item.id)}>
                         <View>
                           <Text style={styles.optionsText}>
@@ -331,133 +298,144 @@ const AddShow = (props) => {
                         ) : null}
                       </TouchableOpacity>
                     </View>
-                  )}
-                  keyExtractor={(item, index) => index.toString()}
-                />
+                  );
+                })}
               </View>
             </View>
           ) : (
-            <View style={styles.button}>
-              <Button
-                color="white"
-                onPress={findShowOptions}
-                title="Find show"
-                backgroundColor="seagreen"
-              ></Button>
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity style={styles.button} onPress={findShowOptions}>
+                <Text style={styles.buttonText}>Find show</Text>
+              </TouchableOpacity>
             </View>
           )}
         </View>
       ) : (
         <View>
           {!fromSingleShow ? (
-            <View style={styles.button}>
-              <Button
-                color="white"
-                onPress={chooseNewShow}
-                title="Search for a different show"
-              ></Button>
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity style={styles.button} onPress={chooseNewShow}>
+                <Text style={styles.buttonText}>
+                  Search for a different show
+                </Text>
+              </TouchableOpacity>
             </View>
           ) : null}
         </View>
       )}
       <View>
-        <ScrollView>
-          {added ? (
-            <View>
-              <TextInput
-                style={styles.inputText}
-                label="description (optional)"
-                placeholder="Write a description of the show. . ."
-                onChangeText={(description) => setDescription(description)}
-                mode="outlined"
-                outlineColor="#586BA4"
-                activeOutlineColor="#586BA4"
-                value={description}
-              />
-              <Text style={styles.boldText}>{showName}</Text>
-              <View style={styles.separator} />
-              <Image
-                source={image}
-                style={{ height: 300, resizeMode: 'contain', margin: 5 }}
-              />
-              <View style={{ flexDirection: 'row' }}>
-                {/* if we're getting here by searching for the show, toWatch will be null. If we got here because we were looking at an instance of a userShow (our own or someone else's) it will be set to true (we're adding it to toWatch), or false (we're adding it to recs); depending on how it's set, we want to show the appropriate button options */}
-                {toWatch === true || props.currentUser === null ? null : (
-                  <View style={styles.saveButton}>
-                    <Button
-                      style={styles.saveButton}
-                      title="Rec show"
-                      color="white"
-                      onPress={() =>
-                        props.navigation.navigate('SaveShow', {
-                          showName,
-                          description,
-                          imageUrl,
-                          streaming,
-                          purchase,
-                          imdbId,
-                          toWatch: false,
-                          userShowId,
-                        })
-                      }
-                    ></Button>
-                  </View>
-                )}
-                {(toWatch === null && props.currentUser !== null) ||
-                toWatch === true ? (
-                  <View style={styles.saveButton}>
-                    <Button
-                      title="Save show to watch list"
-                      color="white"
-                      onPress={() =>
-                        props.navigation.navigate('SaveShow', {
-                          showName,
-                          description,
-                          imageUrl,
-                          streaming,
-                          purchase,
-                          imdbId,
-                          toWatch: true,
-                        })
-                      }
-                    ></Button>
-                  </View>
-                ) : null}
-                {props.currentUser === null ? (
-                  <View>
-                    <Text style={styles.text}>
-                      Log in or Sign up to recommend this show or add it to your
-                      watch list
-                    </Text>
-                    <View style={styles.button}>
-                      <Button
-                        title="Log in / Sign up"
-                        color="white"
-                        onPress={() => props.navigation.navigate('Login')}
-                      ></Button>
-                    </View>
-                  </View>
-                ) : null}
-              </View>
-              {streaming ? (
-                <View>
-                  <Text style={styles.text}>
-                    Streaming options: {streaming}
+        {added ? (
+          <View>
+            <TextInput
+              style={styles.inputText}
+              label="description (optional)"
+              placeholder="Write a description of the show. . ."
+              onChangeText={(description) => setDescription(description)}
+              mode="outlined"
+              outlineColor="#586BA4"
+              activeOutlineColor="#586BA4"
+              value={description}
+            />
+            <Text style={styles.boldText}>{showName}</Text>
+
+            <Image
+              source={image}
+              style={{ height: 300, resizeMode: 'contain', margin: 5 }}
+            />
+
+            {!streamingAndPurchase && props.currentUser ? (
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={() => setStreamingAndPurchase(true)}
+                >
+                  <Text style={styles.buttonText}>
+                    Show streaming and purchase options
                   </Text>
-                  <View style={styles.separator} />
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View>
+                <View style={styles.buttonContainer}>
+                  <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => setStreamingAndPurchase(false)}
+                  >
+                    <Text style={styles.buttonText}>
+                      Hide streaming and purchase options
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+                <StreamingAndPurchase
+                  showId={imdbId}
+                  currentUser={props.currentUser}
+                />
+              </View>
+            )}
+
+            <View style={{ flexDirection: 'column' }}>
+              {/* if we're getting here by searching for the show, type will be null. If we got here because we were looking at an instance of a userShow (our own or someone else's) it will be set to 'watch' (we're adding it to toWatch), or 'rec' (we're adding it to recs), or 'seen' (we're adding it to our seen list); depending on how it's set, we want to show the appropriate button options */}
+              {type === 'seen' || props.currentUser === null ? null : (
+                <View style={styles.buttonContainer}>
+                  <TouchableOpacity
+                    style={styles.saveButton}
+                    onPress={() =>
+                      props.navigation.navigate('Show added', {
+                        showName,
+                        description,
+                        imageUrl,
+                        imdbId,
+                        type: 'rec',
+                        userShowId,
+                      })
+                    }
+                  >
+                    <Text style={styles.buttonText}>Recommend show</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+              {(type === null && props.currentUser !== null) ||
+              type === 'watch' ? (
+                <View style={styles.buttonContainer}>
+                  <TouchableOpacity
+                    style={styles.saveButton}
+                    onPress={() =>
+                      props.navigation.navigate('Show added', {
+                        showName,
+                        description,
+                        imageUrl,
+                        imdbId,
+                        type: 'watch',
+                      })
+                    }
+                  >
+                    <Text style={styles.buttonText}>
+                      Save show to watch list
+                    </Text>
+                  </TouchableOpacity>
                 </View>
               ) : null}
-              {purchase ? (
+              {props.currentUser === null ? (
                 <View>
-                  <Text style={styles.text}>Purchase options: {purchase}</Text>
-                  <View style={styles.separator} />
+                  <Text style={styles.text}>
+                    Log in or Sign up to recommend this show or add it to your
+                    watch list
+                  </Text>
+                  <View style={styles.buttonContainer}>
+                    <TouchableOpacity
+                      style={styles.button}
+                      onPress={() => props.navigation.navigate('Login')}
+                    >
+                      <Text style={styles.buttonText}>Log in / Sign up</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
               ) : null}
             </View>
-          ) : null}
-        </ScrollView>
+          </View>
+        ) : null}
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -467,6 +445,7 @@ const styles = StyleSheet.create({
     flex: 1,
     // justifyContent: 'center',
     marginHorizontal: 2,
+    marginBottom: 30,
   },
   optionContainer: {
     flex: 1,
@@ -495,20 +474,29 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     fontSize: 15,
   },
-  button: {
+  buttonText: {
     textAlign: 'center',
+    fontSize: 18,
+    margin: 5,
+    fontWeight: '500',
+    color: 'white',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  button: {
+    padding: 10,
+    borderRadius: 40,
+    marginHorizontal: 3,
     backgroundColor: '#586BA4',
-    marginVertical: 2,
-    marginBottom: 2,
-    marginRight: 10,
-    marginLeft: 10,
+    marginTop: 5,
   },
   addPosterButton: {
-    textAlign: 'center',
-    marginVertical: 2,
-    marginBottom: 2,
-    marginRight: 10,
-    marginLeft: 10,
+    padding: 10,
+    borderRadius: 40,
+    marginHorizontal: 3,
+    marginTop: 5,
     backgroundColor: '#324376',
   },
   box: {
@@ -520,11 +508,10 @@ const styles = StyleSheet.create({
     padding: 2,
   },
   removePosterButton: {
-    textAlign: 'center',
-    marginVertical: 2,
-    marginBottom: 2,
-    marginRight: 10,
-    marginLeft: 10,
+    padding: 10,
+    borderRadius: 40,
+    marginHorizontal: 3,
+    marginTop: 5,
     backgroundColor: '#636A7D',
   },
   image: {
@@ -532,17 +519,11 @@ const styles = StyleSheet.create({
     aspectRatio: 2 / 3,
   },
   saveButton: {
-    textAlign: 'center',
-    backgroundColor: 'seagreen',
-    marginVertical: 8,
-    marginBottom: 8,
-    marginRight: 10,
-    marginLeft: 10,
-  },
-  separator: {
-    marginVertical: 8,
-    borderBottomColor: '#6F98AE',
-    borderBottomWidth: 2,
+    backgroundColor: '#0C7489',
+    padding: 10,
+    borderRadius: 40,
+    marginHorizontal: 3,
+    marginTop: 5,
   },
 });
 const mapStateToProps = (store) => ({

@@ -5,7 +5,6 @@ import {
   Text,
   Image,
   FlatList,
-  Button,
   Alert,
   TouchableOpacity,
 } from 'react-native';
@@ -44,13 +43,6 @@ const RecShows = (props) => {
     getRecShows();
   }, [isFocused, props.following, props.recShows]);
 
-  const addShow = async (showName, imageUrl, streaming, purchase) => {
-    await props.addShow(showName, imageUrl, streaming, purchase);
-    Alert.alert('Show added', `${showName} was added to your shows`, {
-      text: 'OK',
-    });
-  };
-
   if (props.following.length === 0) {
     return (
       <View>
@@ -73,7 +65,7 @@ const RecShows = (props) => {
             <View style={styles.containerImage}>
               <TouchableOpacity
                 onPress={() =>
-                  props.navigation.navigate('SingleShow', {
+                  props.navigation.navigate('Show', {
                     userInfo: item.user,
                     userShow: item,
                   })
@@ -91,7 +83,7 @@ const RecShows = (props) => {
                   <Text>Rec'er: </Text>
                   <TouchableOpacity
                     onPress={() =>
-                      props.navigation.navigate('OtherUser', {
+                      props.navigation.navigate("TV rec'er", {
                         uid: item.user.id,
                       })
                     }
@@ -102,34 +94,6 @@ const RecShows = (props) => {
                   </TouchableOpacity>
                 </View>
               </View>
-
-              {item.show.streaming ? (
-                <Text>Streams on: {item.show.streaming}</Text>
-              ) : null}
-              {item.show.purchase ? (
-                <Text>Available to buy on: {item.show.purchase}</Text>
-              ) : null}
-              {props.showList.some(
-                (showName) => showName === item.show.name
-              ) ? null : (
-                <View>
-                  {/* <Button
-                  title="Add show to your recs"
-                  onPress={() => addShow(item.showName, item.imageUrl, item.streaming, item.purchase)}
-                /> */}
-                  {/* <Button
-                    title="Add show"
-                    onPress={() =>
-                      // addShow(
-                      //   item.show.name,
-                      //   item.show.imageUrl,
-                      //   item.show.streaming,
-                      //   item.show.purchase
-                      // )
-                    } */}
-                  {/* /> */}
-                </View>
-              )}
             </View>
           )}
           keyExtractor={(item, index) => index.toString()}
@@ -175,8 +139,6 @@ const mapStateToProps = (store) => ({
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    addShow: (showName, imageUrl, streaming, purchase) =>
-      dispatch(addShow(showName, imageUrl, streaming, purchase)),
     getUserFollowing: () => dispatch(getUserFollowing()),
     getUsersFollowingRecs: () => dispatch(getUsersFollowingRecs()),
   };

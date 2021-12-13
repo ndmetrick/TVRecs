@@ -14,6 +14,7 @@ import {
   CHANGE_USER_TAGS,
   CHANGE_SHOW_TAGS,
   LOGGING_OUT,
+  CHANGE_COUNTRY,
 } from '../constants';
 
 const initialState = {
@@ -25,6 +26,8 @@ const initialState = {
   userTags: [],
   toWatch: [],
   watchList: [],
+  seen: [],
+  seenList: [],
   loggingOut: false,
 };
 
@@ -53,19 +56,25 @@ export default function userReducer(state = initialState, action) {
         following: action.following,
       };
     case ADD_SHOW:
-      return action.toWatch === false
+      return action.showType === 'rec'
         ? {
             ...state,
             userShows: [...state.userShows, action.userShow],
             showList: [...state.showList, action.userShow.show.name],
           }
-        : {
+        : action.showType === 'watch'
+        ? {
             ...state,
             toWatch: [...state.toWatch, action.userShow],
             watchList: [...state.watchList, action.userShow.show.name],
+          }
+        : {
+            ...state,
+            seen: [...state.seen, action.userShow],
+            seenList: [...state.seenList, action.userShow.show.name],
           };
     case DELETE_SHOW:
-      return action.userShow.toWatch === false
+      return action.userShow.type === 'rec'
         ? {
             ...state,
             userShows: state.userShows.filter(
@@ -75,12 +84,22 @@ export default function userReducer(state = initialState, action) {
               (showName) => showName !== action.userShow.show.name
             ),
           }
-        : {
+        : action.userShow.type === 'watch'
+        ? {
             ...state,
             toWatch: state.toWatch.filter(
               (toWatch) => toWatch.show.id !== action.userShow.show.id
             ),
             watchList: state.watchList.filter(
+              (showName) => showName !== action.userShow.show.name
+            ),
+          }
+        : {
+            ...state,
+            seen: state.userShows.filter(
+              (userShow) => userShow.show.id !== action.userShow.show.id
+            ),
+            seenList: state.seenList.filter(
               (showName) => showName !== action.userShow.show.name
             ),
           };
@@ -109,7 +128,7 @@ export default function userReducer(state = initialState, action) {
         userTags: action.tags,
       };
     case CHANGE_SHOW_TAGS:
-      return action.userShow.toWatch === false
+      return action.userShow.type === 'rec'
         ? {
             ...state,
             userShows: [

@@ -56,7 +56,7 @@ const Search = (props) => {
           renderItem={({ item }) => (
             <TouchableOpacity
               onPress={() =>
-                props.navigation.navigate('OtherUser', { uid: item.id })
+                props.navigation.navigate("TV rec'er", { uid: item.id })
               }
             >
               <View style={styles.otherUser}>

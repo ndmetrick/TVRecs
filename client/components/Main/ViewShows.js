@@ -68,7 +68,7 @@ function ViewShows(props) {
             <View style={styles.containerImage}>
               <TouchableOpacity
                 onPress={() =>
-                  props.navigation.navigate('SingleShow', {
+                  props.navigation.navigate('Show', {
                     userInfo: user,
                     userShow: item,
                   })

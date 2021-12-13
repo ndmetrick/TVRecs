@@ -4,24 +4,30 @@ import {
   View,
   Text,
   Image,
-  FlatList,
-  Button,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
   Alert,
 } from 'react-native';
-import { addShow, deleteShow, switchShow } from '../../redux/actions';
+import {
+  addShow,
+  deleteShow,
+  switchShow,
+  getAPIKey,
+} from '../../redux/actions';
+import StreamingAndPurchase from './StreamingAndPurchase';
 
 import { useIsFocused } from '@react-navigation/native';
 
 function SingleShow(props) {
   const [userShow, setUserShow] = useState({});
   const [user, setUser] = useState(null);
-  const [toWatch, setToWatch] = useState(null);
+  const [type, setType] = useState(null);
   const [warningTags, setWarningTags] = useState([]);
   const [tvTags, setTVTags] = useState([]);
   const [isCurrentUser, setIsCurrentUser] = useState(false);
+  const [country, setCountry] = useState(null);
+  const [streamingAndPurchase, setStreamingAndPurchase] = useState(false);
 
   const isFocused = useIsFocused();
 
@@ -33,12 +39,15 @@ function SingleShow(props) {
 
     if (currentUser === null && userInfo !== null) {
       setUser(userInfo);
+      setCountry(userInfo.country);
     } else {
       if (userInfo.id === currentUser.id) {
         setUser(currentUser);
         setIsCurrentUser(true);
+        setCountry(userInfo.country);
       } else {
         setUser(userInfo);
+        setCountry(userInfo.country);
       }
     }
     const warnings = userShow.tags.filter((tag) => {
@@ -50,51 +59,56 @@ function SingleShow(props) {
     setTVTags(tv);
     setWarningTags(warnings);
     setUserShow(userShow);
-    setToWatch(userShow.toWatch);
-  }, [props.route.params.userInfo, toWatch, isFocused]);
+    setType(userShow.type);
+    return () => {
+      setStreamingAndPurchase(false);
+    };
+  }, [props.route.params.userInfo, type, isFocused]);
 
-  const addShow = async (userShow, currentToWatch) => {
-    // if the toWatch variable is being changed (i.e. the show is moving from to-watch to recommended),
-    if (typeof currentToWatch !== 'boolean') {
-      await props.switchShow(currentToWatch, userShow.description);
-      Alert.alert(
-        'Show added',
-        `${userShow.show.name} was added to your rec'd shows and removed from your watch list`,
-        {
-          text: 'OK',
-        }
-      );
-      setToWatch(false);
-      return props.navigation.goBack();
-    } else {
-      const showData = {
-        showName: userShow.show.name,
-        streaming: userShow.show.streaming,
-        purchase: userShow.show.purchase,
-        imageUrl: userShow.show.imageUrl,
-        imdbId: userShow.show.imdbId,
-      };
-      if (currentToWatch === true) {
-        showData.description = userShow.description;
+  const addShow = async (userShow, currentType) => {
+    try {
+      // if the type variable is being changed (i.e. the show is moving from to-watch to recommended),
+      if (currentType !== 'rec' && currentType !== 'watch') {
+        await props.switchShow(currentType, userShow.description);
+        // Alert.alert(
+        //   'Show added',
+        //   `${userShow.show.name} was added to your rec'd shows and removed from your watch list`,
+        //   {
+        //     text: 'OK',
+        //   }
+        // );
+        setType('rec');
+        return props.navigation.goBack();
       } else {
-        showData.description = '';
-      }
-      await props.addShow(showData, currentToWatch);
-      Alert.alert(
-        'Show added',
-        `${userShow.show.name} was added to your ${
-          currentToWatch === false ? "rec'd shows" : 'watch list'
-        }`,
-        {
-          text: 'OK',
+        const showData = {
+          showName: userShow.show.name,
+          imageUrl: userShow.show.imageUrl,
+          imdbId: userShow.show.imdbId,
+        };
+        if (currentType === 'watch') {
+          showData.description = userShow.description;
+        } else {
+          showData.description = '';
         }
-      );
-      // WE JUST WANT TO GO BACK ACTUALLY
-      // return props.navigation.navigate('OtherUser', {
-      //   uid: user.id,
-      //   changedState: true,
-      // });
-      return props.navigation.goBack();
+        await props.addShow(showData, currentType);
+        // Alert.alert(
+        //   'Show added',
+        //   `${userShow.show.name} was added to your ${
+        //     currentType === 'rec' ? "rec'd shows" : 'watch list'
+        //   }`,
+        //   {
+        //     text: 'OK',
+        //   }
+        // );
+        // WE JUST WANT TO GO BACK ACTUALLY
+        // return props.navigation.navigate('OtherUser', {
+        //   uid: user.id,
+        //   changedState: true,
+        // });
+        return props.navigation.goBack();
+      }
+    } catch (err) {
+      console.log(err);
     }
   };
 
@@ -116,7 +130,7 @@ function SingleShow(props) {
         tag.type === 'warning' ? styles.warningTag : styles.tvTag;
       return (
         <View key={key} style={tagStyle}>
-          <Text>{tag.name}</Text>
+          <Text style={styles.tagText}>{tag.name}</Text>
         </View>
       );
     });
@@ -134,9 +148,7 @@ function SingleShow(props) {
         </Text> */}
         <Text style={styles.text}>{user.username}</Text>
       </View>
-
-      <View style={styles.separator} />
-      <ScrollView contentContainerStyle={{ flex: 1 }}>
+      <ScrollView>
         <Image style={styles.image} source={{ uri: userShow.show.imageUrl }} />
         <Text style={{ fontWeight: 'bold', textAlign: 'center', fontSize: 18 }}>
           {userShow.show.name}
@@ -149,15 +161,47 @@ function SingleShow(props) {
               <Text style={styles.text}>{userShow.description}</Text>
             </View>
           ) : null}
+          {!streamingAndPurchase && props.currentUser ? (
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => setStreamingAndPurchase(true)}
+              >
+                <Text style={styles.buttonText}>
+                  Show streaming and purchase options
+                </Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View>
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={() => setStreamingAndPurchase(false)}
+                >
+                  <Text style={styles.buttonText}>
+                    Hide streaming and purchase options
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              <StreamingAndPurchase
+                showId={userShow.show.imdbId}
+                currentUser={props.currentUser}
+              />
+            </View>
+          )}
 
           {userShow.tags.length ? (
             <View>
               {tvTags.length ? (
                 <View>
-                  <Text style={styles.text}>
-                    I think these tags describe some important things about the
-                    show and its themes:
-                  </Text>
+                  {isCurrentUser ? null : (
+                    <Text style={styles.text}>
+                      I think these tags describe some important things about
+                      the show and its themes:
+                    </Text>
+                  )}
+
                   <View style={[styles.cardContent, styles.tagsContent]}>
                     {displayTags(tvTags)}
                   </View>
@@ -166,9 +210,12 @@ function SingleShow(props) {
 
               {warningTags.length ? (
                 <View>
-                  <Text style={styles.text}>
-                    I would describe this show as:
-                  </Text>
+                  {isCurrentUser ? null : (
+                    <Text style={styles.text}>
+                      There is some content in this show I think potential
+                      viewers should be warned about:
+                    </Text>
+                  )}
                   <View style={[styles.cardContent, styles.tagsContent]}>
                     {displayTags(warningTags)}
                   </View>
@@ -176,25 +223,11 @@ function SingleShow(props) {
               ) : null}
             </View>
           ) : null}
-
-          {userShow.show.streaming ? (
-            <View>
-              <Text style={{ fontWeight: 'bold' }}>Streaming options: </Text>
-              <Text style={styles.text}>{userShow.show.streaming}</Text>
-            </View>
-          ) : null}
-          {userShow.show.purchase ? (
-            <View>
-              <Text style={{ fontWeight: 'bold' }}>Purchase options:</Text>
-              <Text style={styles.text}>{userShow.show.purchase}</Text>
-            </View>
-          ) : null}
-
           {isCurrentUser ? (
             <View>
-              <View>
-                <Button
-                  title="Delete show"
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  style={styles.button}
                   onPress={() =>
                     Alert.alert(
                       'About to delete show',
@@ -207,24 +240,28 @@ function SingleShow(props) {
                       ]
                     )
                   }
-                />
+                >
+                  <Text style={styles.buttonText}>Delete show</Text>
+                </TouchableOpacity>
               </View>
-              <View>
-                <Button
-                  title="Add/change tags"
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  style={styles.button}
                   onPress={() =>
-                    props.navigation.navigate('AddShowTags', {
+                    props.navigation.navigate('Add/Change Tags', {
                       userShow,
-                      previous: 'SingleShow',
+                      previous: 'Show',
                     })
                   }
-                />
+                >
+                  <Text style={styles.buttonText}>Add/change tags</Text>
+                </TouchableOpacity>
               </View>
               {/* If the show is currently in the watch list, give the user the option to switch it to a recommended show */}
-              {toWatch === true ? (
-                <View>
-                  <Button
-                    title="Rec show"
+              {type === 'watch' ? (
+                <View style={styles.buttonContainer}>
+                  <TouchableOpacity
+                    style={styles.button}
                     onPress={() =>
                       Alert.alert(
                         'About to remove show',
@@ -240,7 +277,7 @@ function SingleShow(props) {
                             onPress: () =>
                               props.navigation.navigate('AddShow', {
                                 userShow,
-                                toWatch: false,
+                                type: 'rec',
                                 userShowId: userShow.id,
                               }),
                           },
@@ -250,7 +287,9 @@ function SingleShow(props) {
                         ]
                       )
                     }
-                  />
+                  >
+                    <Text style={styles.buttonText}>Recommend show</Text>
+                  </TouchableOpacity>
                 </View>
               ) : null}
             </View>
@@ -260,67 +299,76 @@ function SingleShow(props) {
           props.watchList.includes(userShow.show.name) ||
           props.currentUser === null ? null : (
             <View>
-              <Button
-                title="Rec show"
-                onPress={() =>
-                  Alert.alert(
-                    'Rec show choices',
-                    "Do you want to add description/tags now? You can choose YES to add them now, NO to rec the show and add them later, or Cancel to continue without rec'ing this show",
-                    [
-                      {
-                        text: 'YES',
-                        onPress: () =>
-                          props.navigation.navigate('AddShow', {
-                            userShow,
-                            toWatch: false,
-                          }),
-                      },
-                      {
-                        text: 'NO',
-                        onPress: () => addShow(userShow, false),
-                      },
-                      {
-                        text: 'Cancel',
-                      },
-                    ]
-                  )
-                }
-              />
-              <Button
-                title="Add show to watch list"
-                onPress={() =>
-                  Alert.alert(
-                    'Add show to watch list choices',
-                    `Do you want to keep ${user.username}'s description and tags? You can choose YES to keep them, NO to write your own, or Cancel to continue without saving this show to your watch list`,
-                    [
-                      {
-                        text: 'YES',
-                        onPress: () => addShow(userShow, true),
-                      },
-                      {
-                        text: 'NO',
-                        onPress: () =>
-                          props.navigation.navigate('AddShow', {
-                            userShow,
-                            toWatch: true,
-                          }),
-                      },
-                      {
-                        text: 'Cancel',
-                      },
-                    ]
-                  )
-                }
-              />
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={() =>
+                    Alert.alert(
+                      'Rec show choices',
+                      "Do you want to add description/tags now? You can choose YES to add them now, NO to rec the show and add them later, or Cancel to continue without rec'ing this show",
+                      [
+                        {
+                          text: 'YES',
+                          onPress: () =>
+                            props.navigation.navigate('AddShow', {
+                              userShow,
+                              type: 'rec',
+                            }),
+                        },
+                        {
+                          text: 'NO',
+                          onPress: () => addShow(userShow, 'rec'),
+                        },
+                        {
+                          text: 'Cancel',
+                        },
+                      ]
+                    )
+                  }
+                >
+                  <Text style={styles.buttonText}>Recommend show</Text>
+                </TouchableOpacity>
+              </View>
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={() =>
+                    Alert.alert(
+                      'Add show to watch list choices',
+                      `Do you want to keep ${user.username}'s description and tags? You can choose YES to keep them, NO to write your own, or Cancel to continue without saving this show to your watch list`,
+                      [
+                        {
+                          text: 'YES',
+                          onPress: () => addShow(userShow, 'watch'),
+                        },
+                        {
+                          text: 'NO',
+                          onPress: () =>
+                            props.navigation.navigate('AddShow', {
+                              userShow,
+                              type: 'watch',
+                            }),
+                        },
+                        {
+                          text: 'Cancel',
+                        },
+                      ]
+                    )
+                  }
+                >
+                  <Text style={styles.buttonText}>Add show to watch list</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           )}
           {props.currentUser === null ? (
-            <View style={styles.button}>
-              <Button
-                title="Log in / Sign up"
-                color="white"
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                style={styles.button}
                 onPress={() => props.navigation.navigate('Login')}
-              ></Button>
+              >
+                <Text style={styles.buttonText}>Log in / Sign up</Text>
+              </TouchableOpacity>
             </View>
           ) : null}
         </View>
@@ -332,11 +380,12 @@ function SingleShow(props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    marginBottom: 30,
   },
-  extra: {
-    marginBottom: 25,
-    marginLeft: 15,
-  },
+  // extra: {
+  //   marginBottom: 25,
+  //   marginLeft: 15,
+  // },
   containerInfo: {
     margin: 5,
     padding: 5,
@@ -347,21 +396,20 @@ const styles = StyleSheet.create({
   showsList: {
     flex: 1,
   },
-  containerImage: {
-    flex: 1 / 2,
-  },
   separator: {
     marginVertical: 8,
     borderBottomColor: '#6F98AE',
     borderBottomWidth: 2,
   },
   image: {
-    flex: 1,
+    aspectRatio: 1,
     resizeMode: 'contain',
   },
   text: {
     textAlign: 'left',
     fontSize: 18,
+    marginLeft: 10,
+    fontWeight: '500',
   },
   cardContent: {
     flexDirection: 'row',
@@ -370,19 +418,42 @@ const styles = StyleSheet.create({
   tagsContent: {
     marginTop: 10,
     flexWrap: 'wrap',
+    marginBottom: 10,
   },
   tvTag: {
     padding: 10,
     borderRadius: 40,
     marginHorizontal: 3,
-    backgroundColor: 'lightgreen',
+    backgroundColor: '#21A179',
     marginTop: 5,
   },
   warningTag: {
     padding: 10,
     borderRadius: 40,
     marginHorizontal: 3,
-    backgroundColor: 'red',
+    backgroundColor: '#E24E1B',
+    marginTop: 5,
+  },
+  tagText: {
+    fontSize: 13.5,
+    fontWeight: '500',
+  },
+  buttonText: {
+    textAlign: 'center',
+    fontSize: 18,
+    margin: 5,
+    fontWeight: '500',
+    color: 'white',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  button: {
+    padding: 10,
+    borderRadius: 40,
+    marginHorizontal: 3,
+    backgroundColor: '#586BA4',
     marginTop: 5,
   },
 });
@@ -396,7 +467,7 @@ const mapState = (store) => ({
 
 const mapDispatch = (dispatch) => {
   return {
-    addShow: (showInfo, toWatch) => dispatch(addShow(showInfo, toWatch)),
+    addShow: (showInfo, type) => dispatch(addShow(showInfo, type)),
     deleteShow: (showId) => dispatch(deleteShow(showId)),
     switchShow: (userShowId, description) =>
       dispatch(switchShow(userShowId, description)),

@@ -2,6 +2,11 @@ import axios from 'axios';
 import types from '../constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+// const baseUrl = 'https://10.0.2.2:8080';
+
+// const baseUrl = 'http://10.0.0.171:8080';
+// const baseUrl = 'http://localhost:8080';
+
 const baseUrl = 'https://tvrecs.herokuapp.com';
 
 const getToken = async () => {
@@ -123,7 +128,6 @@ export function getUserFollowing(uid) {
   return async (dispatch) => {
     try {
       const headers = await getToken();
-      console.log('here is uid in following', uid);
       const followed = await axios.get(
         `${baseUrl}/api/users/following/${uid}`,
         headers
@@ -159,20 +163,45 @@ export function getUsersFollowingRecs() {
   };
 }
 
-export function addShow(showInfo, toWatch) {
+export function addShow(showInfo, type) {
   return async (dispatch) => {
     try {
       const headers = await getToken();
       const addedShow = await axios.put(
-        `${baseUrl}/api/users/addShow/${toWatch}`,
+        `${baseUrl}/api/users/addShow/${type}`,
         showInfo,
         headers
       );
       if (addedShow) {
-        dispatch({ type: types.ADD_SHOW, userShow: addedShow.data, toWatch });
+        dispatch({
+          type: types.ADD_SHOW,
+          userShow: addedShow.data,
+          showType: type,
+        });
         return addedShow.data;
       } else {
         console.log('Something went wrong trying to add show');
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+}
+
+export function changeCountry(newCountry) {
+  return async (dispatch) => {
+    try {
+      const headers = await getToken();
+      const updatedUser = await axios.put(
+        `${baseUrl}/api/users/changeCountry`,
+        { newCountry: newCountry },
+        headers
+      );
+      if (updatedUser) {
+        dispatch({
+          type: types.GET_CURRENT_USER,
+          currentUser: updatedUser.data,
+        });
       }
     } catch (e) {
       console.error(e);
@@ -204,7 +233,6 @@ export function getUserTags(uid) {
   return async (dispatch) => {
     try {
       const headers = await getToken();
-      console.log('here is uid', uid);
       const tags = await axios.get(
         `${baseUrl}/api/users/getUserTags/${uid}`,
         headers
@@ -289,7 +317,7 @@ export function switchShow(userShowId, description, tags) {
   };
 }
 
-export function deleteShow(showId, toWatch) {
+export function deleteShow(showId) {
   return async (dispatch) => {
     try {
       const headers = await getToken();

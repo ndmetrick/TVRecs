@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   TextInput,
+  ScrollView,
   Text,
   Image,
-  Button,
+  TouchableOpacity,
   StyleSheet,
   Alert,
   ActivityIndicator,
@@ -15,16 +16,8 @@ import { addShow, switchShow } from '../../redux/actions';
 import { NavigationContainer } from '@react-navigation/native';
 
 function SaveShow(props) {
-  const {
-    imageUrl,
-    showName,
-    streaming,
-    purchase,
-    description,
-    imdbId,
-    toWatch,
-    userShowId,
-  } = props.route.params || '';
+  const { imageUrl, showName, description, imdbId, type, userShowId } =
+    props.route.params || '';
 
   const [goBack, setGoBack] = useState(false);
   const [switching, setSwitching] = useState(false);
@@ -36,8 +29,6 @@ function SaveShow(props) {
       const showData = {
         showName,
         description,
-        streaming,
-        purchase,
         imageUrl,
         imdbId,
       };
@@ -45,7 +36,7 @@ function SaveShow(props) {
         console.log('i know i am switching and userShowId equals', userShowId);
         setSwitching(true);
       } else {
-        const show = await props.addShow(showData, toWatch);
+        const show = await props.addShow(showData, type);
         setUserShow(show);
         setLoading(false);
       }
@@ -84,22 +75,17 @@ function SaveShow(props) {
         <Text style={styles.text}>
           You've already added {showName} to your {whichList}.
         </Text>
-        <Button
-          title="Oops, go back"
-          onPress={() => props.navigation.popToTop()}
-        />
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => props.navigation.popToTop()}
+          >
+            <Text style={styles.buttonText}>Oops, go back</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }
-  //   props.navigation.navigate('Profile');
-  //   }
-  //   return (
-  //     <View>
-  //       <Text style={styles.text}>You've already added that show.</Text>
-  //       <Button title="Go back" onPress={() => props.navigation.popToTop()} />
-  //     </View>
-  //   );
-  // }
 
   if (loading) {
     return (
@@ -110,48 +96,46 @@ function SaveShow(props) {
   }
   return (
     <View>
-      <Text style={styles.text}>{showName}</Text>
-      <View style={styles.separator} />
-      {description ? (
-        <View>
-          <Text style={styles.text}>Description: {description}</Text>
-          <View style={styles.separator} />
+      <ScrollView>
+        <Text style={styles.text}>{showName}</Text>
+        <View style={styles.separator} />
+        {description ? (
+          <View>
+            <Text style={styles.text}>Description: {description}</Text>
+            <View style={styles.separator} />
+          </View>
+        ) : null}
+        <Image
+          source={image}
+          style={{ height: 300, resizeMode: 'contain', margin: 5 }}
+        />
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() =>
+              props.navigation.navigate('Add/Change Tags', {
+                userShow,
+                previous: 'Show added',
+              })
+            }
+          >
+            <Text style={styles.buttonText}>Next: add descriptive tags</Text>
+          </TouchableOpacity>
         </View>
-      ) : null}
-      {streaming ? (
-        <View>
-          <Text style={styles.text}>Streaming options: {streaming}</Text>
-          <View style={styles.separator} />
+        {/* DEAL WITH THIS FOR SWITCHED OPTIONS */}
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={
+              switching === true
+                ? () => switchShow(userShowId, description, showName)
+                : () => props.navigation.navigate('Profile')
+            }
+          >
+            <Text style={styles.buttonText}>Skip tags</Text>
+          </TouchableOpacity>
         </View>
-      ) : null}
-      {purchase ? (
-        <View>
-          <Text style={styles.text}>Purchase options: {purchase}</Text>
-          <View style={styles.separator} />
-        </View>
-      ) : null}
-      <Image
-        source={image}
-        style={{ height: 300, resizeMode: 'contain', margin: 5 }}
-      />
-      <Button
-        title="Next: add descriptive tags"
-        onPress={() =>
-          props.navigation.navigate('AddShowTags', {
-            userShow,
-            previous: 'SaveShow',
-          })
-        }
-      />
-      {/* DEAL WITH THIS FOR SWITCHED OPTIONS */}
-      <Button
-        title="Skip tags"
-        onPress={
-          switching === true
-            ? () => switchShow(userShowId, description, showName)
-            : () => props.navigation.navigate('Profile')
-        }
-      />
+      </ScrollView>
     </View>
   );
 }
@@ -173,15 +157,28 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 20,
   },
-  button: {
-    textAlign: 'center',
-    backgroundColor: '#4281A4',
-    marginVertical: 8,
-  },
   separator: {
     marginVertical: 8,
     borderBottomColor: '#6F98AE',
     borderBottomWidth: 2,
+  },
+  buttonText: {
+    textAlign: 'center',
+    fontSize: 18,
+    margin: 5,
+    fontWeight: '500',
+    color: 'white',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  button: {
+    padding: 10,
+    borderRadius: 40,
+    marginHorizontal: 3,
+    backgroundColor: '#586BA4',
+    marginTop: 5,
   },
 });
 
@@ -193,7 +190,7 @@ const mapStateToProps = (state) => ({
 
 const mapDispatch = (dispatch) => {
   return {
-    addShow: (showInfo, toWatch) => dispatch(addShow(showInfo, toWatch)),
+    addShow: (showInfo, type) => dispatch(addShow(showInfo, type)),
     switchShow: (userShowId, description) =>
       dispatch(switchShow(userShowId, description)),
   };

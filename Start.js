@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import jwtDecode from 'jwt-decode';
 import React, { useState, useEffect } from 'react';
 import 'react-native-gesture-handler';
-import { Alert, Button, Platform, StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, Text, View, Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -46,27 +46,84 @@ const Start = (props) => {
             <Stack.Screen
               name="Main"
               component={Main}
-              option={{ headerShown: false }}
+              options={{
+                // title: 'TV Recs',
+                // headerTitleStyle: {
+                //   fontWeight: 'bold',
+                // },
+                headerTitle: () => (
+                  <Image
+                    style={{ width: 40, height: 40, margin: 20 }}
+                    source={require('./tempTVRecsLogo.png')}
+                  />
+                ),
+              }}
+              // options={{
+              //   title: 'TV Recs',
+              //   headerTitleStyle: {
+              //     fontWeight: 'bold',
+              //   },
+              //   headerBackground: () => (
+              //     <Image
+              //       style={StyleSheet.absoluteFill}
+              //       source={{
+              //         uri: 'https://i.postimg.cc/rsVXTRfz/temp-TVRecs-Logo.png',
+              //       }}
+              //     />
+              //   ),
+              // }}
             />
             <Stack.Screen
-              name="AddShowTags"
+              name="Add/Change Tags"
               component={AddShowTags}
               navigation={props.navigation}
+              options={{
+                headerTitle: () => (
+                  <Image
+                    style={{ width: 40, height: 40, margin: 20 }}
+                    source={require('./tempTVRecsLogo.png')}
+                  />
+                ),
+              }}
             />
             <Stack.Screen
-              name="SaveShow"
+              name="Show added"
               component={SaveShow}
               navigation={props.navigation}
+              options={{
+                headerTitle: () => (
+                  <Image
+                    style={{ width: 40, height: 40, margin: 20 }}
+                    source={require('./tempTVRecsLogo.png')}
+                  />
+                ),
+              }}
             />
             <Stack.Screen
-              name="SingleShow"
+              name="Show"
               component={SingleShow}
               navigation={props.navigation}
+              options={{
+                headerTitle: () => (
+                  <Image
+                    style={{ width: 40, height: 40, margin: 20 }}
+                    source={require('./tempTVRecsLogo.png')}
+                  />
+                ),
+              }}
             />
             <Stack.Screen
-              name="OtherUser"
+              name="TV rec'er"
               component={OtherUser}
               navigation={props.navigation}
+              options={{
+                headerTitle: () => (
+                  <Image
+                    style={{ width: 40, height: 40, margin: 20 }}
+                    source={require('./tempTVRecsLogo.png')}
+                  />
+                ),
+              }}
             />
           </Stack.Navigator>
         </NavigationContainer>
@@ -76,22 +133,53 @@ const Start = (props) => {
             <Stack.Screen
               name="MainLoggedOut"
               component={MainLoggedOut}
-              option={{ headerShown: false }}
+              options={{
+                headerTitle: () => (
+                  <Image
+                    style={{ width: 40, height: 40, margin: 20 }}
+                    source={require('./tempTVRecsLogo.png')}
+                  />
+                ),
+              }}
             />
             <Stack.Screen
-              name="SingleShow"
+              name="Show"
               component={SingleShow}
               navigation={props.navigation}
+              options={{
+                headerTitle: () => (
+                  <Image
+                    style={{ width: 40, height: 40, margin: 20 }}
+                    source={require('./tempTVRecsLogo.png')}
+                  />
+                ),
+              }}
             />
             <Stack.Screen
-              name="OtherUser"
+              name="TV Rec'er"
               component={OtherUser}
               navigation={props.navigation}
+              options={{
+                headerTitle: () => (
+                  <Image
+                    style={{ width: 40, height: 40, margin: 20 }}
+                    source={require('./tempTVRecsLogo.png')}
+                  />
+                ),
+              }}
             />
             <Stack.Screen
               name="Login"
               component={Login}
               navigation={props.navigation}
+              options={{
+                headerTitle: () => (
+                  <Image
+                    style={{ width: 40, height: 40, margin: 20 }}
+                    source={require('./tempTVRecsLogo.png')}
+                  />
+                ),
+              }}
             />
           </Stack.Navigator>
         </NavigationContainer>

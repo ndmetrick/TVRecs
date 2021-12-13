@@ -5,14 +5,14 @@ import {
   Text,
   Image,
   FlatList,
-  Button,
   StyleSheet,
   TouchableOpacity,
+  ScrollView,
 } from 'react-native';
 
 function LoggedOutHome(props) {
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <Text style={styles.text}>
         This app is a lot more fun if you sign up for an account. If you have an
         account, you can follow other users to receive their recommendations,
@@ -34,14 +34,15 @@ function LoggedOutHome(props) {
         If you've got ideas for tags I'm missing that I should add, or have
         other ideas, feel free to email me at ndmetrick@gmail.com.
       </Text>
-      <View style={styles.button}>
-        <Button
-          title="Log in / Sign up"
-          color="white"
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={styles.button}
           onPress={() => props.navigation.navigate('Login')}
-        ></Button>
+        >
+          <Text style={styles.buttonText}>Log in / Sign up</Text>
+        </TouchableOpacity>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -61,13 +62,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     margin: 5,
   },
-  button: {
+  buttonText: {
     textAlign: 'center',
-    backgroundColor: '#4281A4',
-    marginVertical: 8,
-    marginBottom: 8,
-    marginRight: 10,
-    marginLeft: 10,
+    fontSize: 16,
+    margin: 5,
+    fontWeight: '500',
+    color: 'white',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  button: {
+    padding: 10,
+    borderRadius: 40,
+    marginHorizontal: 3,
+    backgroundColor: '#586BA4',
+    marginTop: 5,
+    marginBottom: 10,
   },
 });
 

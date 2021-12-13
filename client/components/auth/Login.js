@@ -1,7 +1,14 @@
 import * as AuthSession from 'expo-auth-session';
 import { connect } from 'react-redux';
 import React, { useState, useEffect } from 'react';
-import { Alert, Button, Platform, StyleSheet, Text, View } from 'react-native';
+import {
+  Alert,
+  Platform,
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getCurrentUser, getAuthInfo } from '../../redux/actions';
 
@@ -17,13 +24,10 @@ const Login = (props) => {
     {
       redirectUri,
       clientId: clientId,
-      // id_token will return a JWT token
       responseType: 'id_token',
-      // retrieve the user's profile
       scopes: ['openid', 'profile'],
       prompt: 'login',
       extraParams: {
-        // ideally, this will be a random value
         nonce: 'nonce',
       },
     },
@@ -67,36 +71,38 @@ const Login = (props) => {
   }, [result]);
 
   return (
-    <View style={styles.container}>
-      <Button
-        style={styles.button}
+    <View style={styles.buttonContainer}>
+      <TouchableOpacity
         disabled={!request}
-        title="Log in with Auth0"
+        style={styles.button}
         onPress={() => promptAsync({ useProxy })}
-      />
+      >
+        <Text style={styles.buttonText}>Log in with Auth0</Text>
+      </TouchableOpacity>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 20,
+  buttonText: {
     textAlign: 'center',
-    marginTop: 40,
+    fontSize: 16,
+    margin: 5,
+    fontWeight: '500',
+    color: 'white',
+  },
+  buttonContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   button: {
-    textAlign: 'center',
-    backgroundColor: '#4281A4',
-    marginVertical: 8,
-    marginBottom: 8,
-    marginRight: 10,
-    marginLeft: 10,
+    padding: 10,
+    borderRadius: 40,
+    marginHorizontal: 3,
+    backgroundColor: '#586BA4',
+    marginTop: 5,
+    marginBottom: 10,
   },
 });
 

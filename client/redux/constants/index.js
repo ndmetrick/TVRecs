@@ -4,6 +4,7 @@ export const GET_ALL_OTHER_USERS = 'GET_ALL_OTHER_USERS';
 
 export const GET_TO_WATCH = 'GET_TO_WATCH';
 export const SWITCH_SHOW = 'SWITCH_SHOW';
+export const CHANGE_COUNTRY = 'CHANGE_COUNTRY';
 
 export const GET_CURRENT_USER_SHOWS = 'GET_CURRENT_USER_SHOWS';
 export const GET_OTHER_USER_SHOWS = 'GET_OTHER_USER_SHOWS';
@@ -47,4 +48,5 @@ export default {
   GET_TO_WATCH,
   SWITCH_SHOW,
   LOGGING_OUT,
+  CHANGE_COUNTRY,
 };

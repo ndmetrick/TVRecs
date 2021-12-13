@@ -7,8 +7,8 @@ import {
   Text,
   TouchableOpacity,
   FlatList,
-  Button,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { changeShowTags } from '../../redux/actions';
 
@@ -90,7 +90,7 @@ function AddShowTags(props) {
           style={tagStyle}
           onPress={() => selectTag(tag)}
         >
-          <Text>{tag.name}</Text>
+          <Text style={styles.tagText}>{tag.name}</Text>
         </TouchableOpacity>
       );
     });
@@ -100,32 +100,36 @@ function AddShowTags(props) {
     const chosenTags = [];
     for (const tagId in selectedTags) {
       if (selectedTags[tagId] === true) {
+        console.log('here', tagId, selectedTags[tagId]);
         chosenTags.push(tagId);
       }
     }
-    const message =
-      props.route.params.previous === 'SaveShow'
-        ? `${userShow.show.name} was added to your ${
-            userShow.toWatch === false ? "rec'd shows" : 'watch list'
-          }`
-        : `Your tags for ${userShow.show.name} were updated`;
+    // Alert.alert('Show added/changed', 'testing', {
+    //   text: 'OK',
+    // });
+    // const message =
+    //   props.route.params.previous === 'Show added'
+    //     ? `${userShow.show.name} was added to your ${
+    //         userShow.type === 'rec' ? "rec'd shows" : 'watch list'
+    //       }`
+    //     : `Your tags for ${userShow.show.name} were updated`;
     await props.changeShowTags(chosenTags, userShow.id);
-    Alert.alert('Show added/changed', message, {
-      text: 'OK',
-    });
+    // Alert.alert('Show added/changed', message, {
+    //   text: 'OK',
+    // });
     return props.navigation.navigate('Profile');
   };
 
   if (!loaded || !tvTags) {
     return (
-      <View>
-        <Text>We're finding your tags</Text>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#5500dc" />
       </View>
     );
   } else if (!tvTags.length || !selectedTags) {
     return (
-      <View>
-        <Text>We inding your tags</Text>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#5500dc" />
       </View>
     );
   }
@@ -144,16 +148,10 @@ function AddShowTags(props) {
         <View style={[styles.cardContent, styles.tagsContent]}>
           {displayTags(warningTags)}
         </View>
-
-        {/* <Tag
-        onPress={unselectAll}
-        text={'Unselect All'}
-        touchableOpacity
-        tagStyle={styles.buttonContainer}
-        textStyle={styles.buttonText}
-      /> */}
-        <View style={styles.button}>
-          <Button onPress={chooseTags} title="Save tags" color="white" />
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.button} onPress={chooseTags}>
+            <Text style={styles.buttonText}>Save tags</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </View>
@@ -167,19 +165,23 @@ const styles = StyleSheet.create({
     // justifyContent: 'center',
     marginHorizontal: 2,
   },
-
+  tagText: {
+    fontSize: 13.5,
+    fontWeight: '500',
+    textAlign: 'center',
+  },
   title: {
     color: '#FF3F00',
     fontSize: 20,
     textAlign: 'center',
   },
   button: {
-    textAlign: 'center',
-    backgroundColor: '#4281A4',
-    marginVertical: 8,
-    marginBottom: 8,
-    marginRight: 10,
-    marginLeft: 10,
+    padding: 10,
+    borderRadius: 40,
+    marginHorizontal: 3,
+    backgroundColor: '#586BA4',
+    marginTop: 5,
+    marginBottom: 20,
   },
   tagGroup: {
     marginTop: 16,
@@ -201,13 +203,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   buttonContainer: {
-    height: 30,
-    alignSelf: 'center',
-    marginRight: 8,
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   buttonText: {
-    color: '#FF7F11',
-    fontSize: 16,
+    textAlign: 'center',
+    fontSize: 18,
+    margin: 5,
+    fontWeight: '500',
+    color: 'white',
   },
   cardContent: {
     flexDirection: 'row',
@@ -229,21 +233,21 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 40,
     marginHorizontal: 3,
-    backgroundColor: 'yellow',
+    backgroundColor: '#F2A541',
     marginTop: 5,
   },
   highlightTvTag: {
     padding: 10,
     borderRadius: 40,
     marginHorizontal: 3,
-    backgroundColor: 'darkgreen',
+    backgroundColor: '#21A179',
     marginTop: 5,
   },
   highlightWarningTag: {
     padding: 10,
     borderRadius: 40,
     marginHorizontal: 3,
-    backgroundColor: 'red',
+    backgroundColor: '#E24E1B',
     marginTop: 5,
   },
 });
