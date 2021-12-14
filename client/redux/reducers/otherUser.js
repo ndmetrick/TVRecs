@@ -10,7 +10,7 @@ const initialState = {
   userInfo: null,
   userShows: [],
   following: [],
-  showList: [],
+  // showList: [],
   userTags: [],
 };
 
@@ -27,7 +27,7 @@ export default function otherUserReducer(state = initialState, action) {
       return {
         ...state,
         userShows: action.userShows,
-        showList: action.userShows.map((userShow) => userShow.show.name),
+        //   showList: action.userShows.map((userShow) => userShow.show.name),
       };
     case GET_OTHER_USER_FOLLOWING:
       return {

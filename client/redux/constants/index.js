@@ -3,6 +3,7 @@ export const GET_OTHER_USER = 'GET_OTHER_USER';
 export const GET_ALL_OTHER_USERS = 'GET_ALL_OTHER_USERS';
 
 export const GET_TO_WATCH = 'GET_TO_WATCH';
+export const GET_SEEN = 'GET_SEEN';
 export const SWITCH_SHOW = 'SWITCH_SHOW';
 export const CHANGE_COUNTRY = 'CHANGE_COUNTRY';
 
@@ -49,4 +50,5 @@ export default {
   SWITCH_SHOW,
   LOGGING_OUT,
   CHANGE_COUNTRY,
+  GET_SEEN,
 };

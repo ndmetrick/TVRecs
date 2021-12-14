@@ -14,7 +14,7 @@ import {
   CHANGE_USER_TAGS,
   CHANGE_SHOW_TAGS,
   LOGGING_OUT,
-  CHANGE_COUNTRY,
+  GET_SEEN,
 } from '../constants';
 
 const initialState = {
@@ -22,12 +22,12 @@ const initialState = {
   userShows: [],
   following: [],
   recShows: [],
-  showList: [],
+  // showList: [],
   userTags: [],
   toWatch: [],
-  watchList: [],
+  // watchList: [],
   seen: [],
-  seenList: [],
+  // seenList: [],
   loggingOut: false,
 };
 
@@ -42,13 +42,19 @@ export default function userReducer(state = initialState, action) {
       return {
         ...state,
         userShows: action.userShows,
-        showList: action.userShows.map((userShow) => userShow.show.name),
+        // showList: action.userShows.map((userShow) => userShow.show.name),
       };
     case GET_TO_WATCH:
       return {
         ...state,
         toWatch: action.toWatch,
-        watchList: action.toWatch.map((userShow) => userShow.show.name),
+        // watchList: action.toWatch.map((userShow) => userShow.show.name),
+      };
+    case GET_SEEN:
+      return {
+        ...state,
+        seen: action.seen,
+        // watchList: action.toWatch.map((userShow) => userShow.show.name),
       };
     case GET_USER_FOLLOWING:
       return {
@@ -60,18 +66,18 @@ export default function userReducer(state = initialState, action) {
         ? {
             ...state,
             userShows: [...state.userShows, action.userShow],
-            showList: [...state.showList, action.userShow.show.name],
+            // showList: [...state.showList, action.userShow.show.name],
           }
         : action.showType === 'watch'
         ? {
             ...state,
             toWatch: [...state.toWatch, action.userShow],
-            watchList: [...state.watchList, action.userShow.show.name],
+            // watchList: [...state.watchList, action.userShow.show.name],
           }
         : {
             ...state,
             seen: [...state.seen, action.userShow],
-            seenList: [...state.seenList, action.userShow.show.name],
+            // seenList: [...state.seenList, action.userShow.show.name],
           };
     case DELETE_SHOW:
       return action.userShow.type === 'rec'
@@ -80,9 +86,9 @@ export default function userReducer(state = initialState, action) {
             userShows: state.userShows.filter(
               (userShow) => userShow.show.id !== action.userShow.show.id
             ),
-            showList: state.showList.filter(
-              (showName) => showName !== action.userShow.show.name
-            ),
+            // showList: state.showList.filter(
+            //   (showName) => showName !== action.userShow.show.name
+            // ),
           }
         : action.userShow.type === 'watch'
         ? {
@@ -90,33 +96,41 @@ export default function userReducer(state = initialState, action) {
             toWatch: state.toWatch.filter(
               (toWatch) => toWatch.show.id !== action.userShow.show.id
             ),
-            watchList: state.watchList.filter(
-              (showName) => showName !== action.userShow.show.name
+            // watchList: state.watchList.filter(
+            //   (showName) => showName !== action.userShow.show.name
+            // ),
+          }
+        : {
+            ...state,
+            seen: state.seen.filter(
+              (userShow) => userShow.show.id !== action.userShow.show.id
+            ),
+            // seenList: state.seenList.filter(
+            //   (showName) => showName !== action.userShow.show.name
+            // ),
+          };
+    case SWITCH_SHOW:
+      return action.oldType === 'toWatch'
+        ? {
+            ...state,
+            userShows: [...state.userShows, action.userShow],
+            // showList: [...state.showList, action.userShow.show.name],
+            toWatch: state.toWatch.filter(
+              (userShow) => userShow.show.id !== action.userShow.show.id
             ),
           }
         : {
             ...state,
-            seen: state.userShows.filter(
+            userShows: [...state.userShows, action.userShow],
+            seen: state.seen.filter(
               (userShow) => userShow.show.id !== action.userShow.show.id
             ),
-            seenList: state.seenList.filter(
-              (showName) => showName !== action.userShow.show.name
-            ),
+            // watchList: [
+            //   ...state.watchList.filter(
+            //     (showName) => showName !== action.userShow.show.name
+            //   ),
+            // ],
           };
-    case SWITCH_SHOW:
-      return {
-        ...state,
-        userShows: [...state.userShows, action.userShow],
-        showList: [...state.showList, action.userShow.show.name],
-        toWatch: state.toWatch.filter(
-          (userShow) => userShow.show.id !== action.userShow.show.id
-        ),
-        watchList: [
-          ...state.watchList.filter(
-            (showName) => showName !== action.userShow.show.name
-          ),
-        ],
-      };
     case GET_USER_TAGS:
       return {
         ...state,
@@ -138,12 +152,20 @@ export default function userReducer(state = initialState, action) {
               action.userShow,
             ],
           }
-        : {
+        : action.userShow.type === 'watch'
+        ? {
             ...state,
             toWatch: [
               ...state.toWatch.filter(
                 (toWatch) => toWatch.id !== action.userShow.id
               ),
+              action.userShow,
+            ],
+          }
+        : {
+            ...state,
+            seen: [
+              ...state.seen.filter((seen) => seen.id !== action.userShow.id),
               action.userShow,
             ],
           };

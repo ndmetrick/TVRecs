@@ -31,7 +31,7 @@ function Profile(props) {
   // const [currentUserShows, setCurrentUserShows] = useState([]);
 
   // useEffect(() => {
-  //   console.log('here we are in profile UE');
+
   //   setCurrentUser(props.currentUser);
   //   setCurrentUserShows(props.currentUserShows);
   // }, [isFocused]);
@@ -51,7 +51,6 @@ function Profile(props) {
     return <View />;
   }
 
-  console.log('here we are in profile');
   currentUserShows.forEach((show) =>
     show.tags.forEach((tag) => console.log(tag.name))
   );
@@ -108,6 +107,14 @@ function Profile(props) {
           initialParams={{ userToView: currentUser, type: 'toWatch' }}
           options={{
             tabBarLabel: 'To Watch',
+          }}
+        />
+        <Tab.Screen
+          name="Seen"
+          component={ViewShows}
+          initialParams={{ userToView: currentUser, type: 'seen' }}
+          options={{
+            tabBarLabel: 'Seen',
           }}
         />
       </Tab.Navigator>

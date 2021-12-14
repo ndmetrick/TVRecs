@@ -44,7 +44,7 @@ const AddShow = (props) => {
       }
     };
     getAPIKeys();
-    // if the user got here by adding an existing show from their own watch list or from someone else's rec list
+    // if the user got here by adding an existing show from their own watch or seen list or from someone else's rec list
     if (props.previous.length > 1) {
       if (props.previous[1].name === 'Show') {
         const { userShow, type, userShowId } =
@@ -175,23 +175,153 @@ const AddShow = (props) => {
 
   const image = { uri: imageUrl };
   return (
-    <ScrollView style={styles.container}>
-      {!added ? (
-        <View style={{ flex: 1 }}>
-          <View>
-            <Text style={styles.boldText}>What show do you want to add?</Text>
-            <TextInput
-              style={styles.inputText}
-              label="Enter show title"
-              onChangeText={(showInput) => setShowInput(showInput)}
-              mode="outlined"
-              outlineColor="#586BA4"
-              activeOutlineColor="#586BA4"
-              value={showInput}
-            />
+    <View style={styles.container}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {!added ? (
+          <View style={{ flex: 1 }}>
+            <View>
+              <Text style={styles.boldText}>What show do you want to add?</Text>
+              <TextInput
+                style={styles.inputText}
+                label="Enter show title"
+                onChangeText={(showInput) => setShowInput(showInput)}
+                mode="outlined"
+                outlineColor="#586BA4"
+                activeOutlineColor="#586BA4"
+                value={showInput}
+              />
+            </View>
+            {showOptions ? (
+              <View style={{ flex: 1 }}>
+                <View style={styles.buttonContainer}>
+                  <TouchableOpacity
+                    style={styles.button}
+                    onPress={chooseNewShow}
+                  >
+                    <Text style={styles.buttonText}>
+                      Search for a different show
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+                {/* The show posters take up a lot of space, so the default is not to show them, but users can decide to turn them on or back off */}
+                {!showPosterPreview ? (
+                  <View style={styles.buttonContainer}>
+                    <TouchableOpacity
+                      style={styles.addPosterButton}
+                      onPress={() => viewPoster()}
+                    >
+                      <Text style={styles.buttonText}>
+                        Click to see show posters
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <View style={styles.buttonContainer}>
+                    <TouchableOpacity
+                      style={styles.removePosterButton}
+                      onPress={() => viewPoster()}
+                    >
+                      <Text style={styles.buttonText}>
+                        Click to hide posters
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+                <Text
+                  style={{
+                    fontSize: 18,
+                    fontWeight: 'bold',
+                    marginLeft: 10,
+                    marginRight: 10,
+                  }}
+                >
+                  Is one of these the show you're looking for? (Click inside the
+                  box to choose the show)
+                </Text>
+                <View style={styles.optionContainer}>
+                  {showOptions.map((item, index) => {
+                    return (
+                      <View style={styles.box} key={index}>
+                        <TouchableOpacity onPress={() => getShowData(item.id)}>
+                          <View>
+                            <Text style={styles.optionsText}>
+                              <Text style={{ fontWeight: 'bold' }}>
+                                Show title:
+                              </Text>{' '}
+                              {item.name}
+                            </Text>
+                            {item.year ? (
+                              <Text style={styles.optionsText}>
+                                <Text style={{ fontWeight: 'bold' }}>
+                                  First began airing in:
+                                </Text>{' '}
+                                {item.year.slice(0, 4)}
+                              </Text>
+                            ) : (
+                              <Text style={styles.optionsText}>
+                                <Text style={{ fontWeight: 'bold' }}>
+                                  No air date available
+                                </Text>
+                              </Text>
+                            )}
+                            {item.overview ? (
+                              <Text style={styles.optionsText}>
+                                <Text style={{ fontWeight: 'bold' }}>
+                                  Overview:
+                                </Text>{' '}
+                                {item.overview}
+                              </Text>
+                            ) : (
+                              <Text style={styles.optionsText}>
+                                <Text style={{ fontWeight: 'bold' }}>
+                                  No overview available
+                                </Text>
+                              </Text>
+                            )}
+                          </View>
+                          {/* If the user chose to view poster previews, they'll go here if they were found */}
+                          {showPosterPreview ? (
+                            <View>
+                              {item.poster ? (
+                                <View>
+                                  <Image
+                                    source={{
+                                      uri:
+                                        'https://image.tmdb.org/t/p/original' +
+                                        item.poster,
+                                    }}
+                                    style={styles.image}
+                                  />
+                                </View>
+                              ) : (
+                                <View>
+                                  <Text style={{ fontWeight: 'bold' }}>
+                                    No preview poster available for this show
+                                  </Text>
+                                </View>
+                              )}
+                            </View>
+                          ) : null}
+                        </TouchableOpacity>
+                      </View>
+                    );
+                  })}
+                </View>
+              </View>
+            ) : (
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={findShowOptions}
+                >
+                  <Text style={styles.buttonText}>Find show</Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
-          {showOptions ? (
-            <View style={{ flex: 1 }}>
+        ) : (
+          <View>
+            {!fromSingleShow ? (
               <View style={styles.buttonContainer}>
                 <TouchableOpacity style={styles.button} onPress={chooseNewShow}>
                   <Text style={styles.buttonText}>
@@ -199,243 +329,144 @@ const AddShow = (props) => {
                   </Text>
                 </TouchableOpacity>
               </View>
-              {/* The show posters take up a lot of space, so the default is not to show them, but users can decide to turn them on or back off */}
-              {!showPosterPreview ? (
+            ) : null}
+          </View>
+        )}
+        <View>
+          {added ? (
+            <View>
+              <TextInput
+                style={styles.inputText}
+                label="description (optional)"
+                placeholder="Write a description of the show. . ."
+                onChangeText={(description) => setDescription(description)}
+                mode="outlined"
+                outlineColor="#586BA4"
+                activeOutlineColor="#586BA4"
+                value={description}
+              />
+              <Text style={styles.boldText}>{showName}</Text>
+
+              <Image
+                source={image}
+                style={{ height: 300, resizeMode: 'contain', margin: 5 }}
+              />
+
+              {!streamingAndPurchase && props.currentUser ? (
                 <View style={styles.buttonContainer}>
                   <TouchableOpacity
-                    style={styles.addPosterButton}
-                    onPress={() => viewPoster()}
+                    style={styles.button}
+                    onPress={() => setStreamingAndPurchase(true)}
                   >
                     <Text style={styles.buttonText}>
-                      Click to see show posters
+                      Show streaming and purchase options
                     </Text>
                   </TouchableOpacity>
                 </View>
               ) : (
-                <View style={styles.buttonContainer}>
-                  <TouchableOpacity
-                    style={styles.removePosterButton}
-                    onPress={() => viewPoster()}
-                  >
-                    <Text style={styles.buttonText}>Click to hide posters</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-              <Text
-                style={{
-                  fontSize: 18,
-                  fontWeight: 'bold',
-                  marginLeft: 10,
-                  marginRight: 10,
-                }}
-              >
-                Is one of these the show you're looking for? (Click inside the
-                box to choose the show)
-              </Text>
-              <View style={styles.optionContainer}>
-                {showOptions.map((item, index) => {
-                  return (
-                    <View style={styles.box} key={index}>
-                      <TouchableOpacity onPress={() => getShowData(item.id)}>
-                        <View>
-                          <Text style={styles.optionsText}>
-                            <Text style={{ fontWeight: 'bold' }}>
-                              Show title:
-                            </Text>{' '}
-                            {item.name}
-                          </Text>
-                          {item.year ? (
-                            <Text style={styles.optionsText}>
-                              <Text style={{ fontWeight: 'bold' }}>
-                                First began airing in:
-                              </Text>{' '}
-                              {item.year.slice(0, 4)}
-                            </Text>
-                          ) : (
-                            <Text style={styles.optionsText}>
-                              <Text style={{ fontWeight: 'bold' }}>
-                                No air date available
-                              </Text>
-                            </Text>
-                          )}
-                          {item.overview ? (
-                            <Text style={styles.optionsText}>
-                              <Text style={{ fontWeight: 'bold' }}>
-                                Overview:
-                              </Text>{' '}
-                              {item.overview}
-                            </Text>
-                          ) : (
-                            <Text style={styles.optionsText}>
-                              <Text style={{ fontWeight: 'bold' }}>
-                                No overview available
-                              </Text>
-                            </Text>
-                          )}
-                        </View>
-                        {/* If the user chose to view poster previews, they'll go here if they were found */}
-                        {showPosterPreview ? (
-                          <View>
-                            {item.poster ? (
-                              <View>
-                                <Image
-                                  source={{
-                                    uri:
-                                      'https://image.tmdb.org/t/p/original' +
-                                      item.poster,
-                                  }}
-                                  style={styles.image}
-                                />
-                              </View>
-                            ) : (
-                              <View>
-                                <Text style={{ fontWeight: 'bold' }}>
-                                  No preview poster available for this show
-                                </Text>
-                              </View>
-                            )}
-                          </View>
-                        ) : null}
-                      </TouchableOpacity>
-                    </View>
-                  );
-                })}
-              </View>
-            </View>
-          ) : (
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity style={styles.button} onPress={findShowOptions}>
-                <Text style={styles.buttonText}>Find show</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-        </View>
-      ) : (
-        <View>
-          {!fromSingleShow ? (
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity style={styles.button} onPress={chooseNewShow}>
-                <Text style={styles.buttonText}>
-                  Search for a different show
-                </Text>
-              </TouchableOpacity>
-            </View>
-          ) : null}
-        </View>
-      )}
-      <View>
-        {added ? (
-          <View>
-            <TextInput
-              style={styles.inputText}
-              label="description (optional)"
-              placeholder="Write a description of the show. . ."
-              onChangeText={(description) => setDescription(description)}
-              mode="outlined"
-              outlineColor="#586BA4"
-              activeOutlineColor="#586BA4"
-              value={description}
-            />
-            <Text style={styles.boldText}>{showName}</Text>
-
-            <Image
-              source={image}
-              style={{ height: 300, resizeMode: 'contain', margin: 5 }}
-            />
-
-            {!streamingAndPurchase && props.currentUser ? (
-              <View style={styles.buttonContainer}>
-                <TouchableOpacity
-                  style={styles.button}
-                  onPress={() => setStreamingAndPurchase(true)}
-                >
-                  <Text style={styles.buttonText}>
-                    Show streaming and purchase options
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            ) : (
-              <View>
-                <View style={styles.buttonContainer}>
-                  <TouchableOpacity
-                    style={styles.button}
-                    onPress={() => setStreamingAndPurchase(false)}
-                  >
-                    <Text style={styles.buttonText}>
-                      Hide streaming and purchase options
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-                <StreamingAndPurchase
-                  showId={imdbId}
-                  currentUser={props.currentUser}
-                />
-              </View>
-            )}
-
-            <View style={{ flexDirection: 'column' }}>
-              {/* if we're getting here by searching for the show, type will be null. If we got here because we were looking at an instance of a userShow (our own or someone else's) it will be set to 'watch' (we're adding it to toWatch), or 'rec' (we're adding it to recs), or 'seen' (we're adding it to our seen list); depending on how it's set, we want to show the appropriate button options */}
-              {type === 'seen' || props.currentUser === null ? null : (
-                <View style={styles.buttonContainer}>
-                  <TouchableOpacity
-                    style={styles.saveButton}
-                    onPress={() =>
-                      props.navigation.navigate('Show added', {
-                        showName,
-                        description,
-                        imageUrl,
-                        imdbId,
-                        type: 'rec',
-                        userShowId,
-                      })
-                    }
-                  >
-                    <Text style={styles.buttonText}>Recommend show</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-              {(type === null && props.currentUser !== null) ||
-              type === 'watch' ? (
-                <View style={styles.buttonContainer}>
-                  <TouchableOpacity
-                    style={styles.saveButton}
-                    onPress={() =>
-                      props.navigation.navigate('Show added', {
-                        showName,
-                        description,
-                        imageUrl,
-                        imdbId,
-                        type: 'watch',
-                      })
-                    }
-                  >
-                    <Text style={styles.buttonText}>
-                      Save show to watch list
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              ) : null}
-              {props.currentUser === null ? (
                 <View>
-                  <Text style={styles.text}>
-                    Log in or Sign up to recommend this show or add it to your
-                    watch list
-                  </Text>
                   <View style={styles.buttonContainer}>
                     <TouchableOpacity
                       style={styles.button}
-                      onPress={() => props.navigation.navigate('Login')}
+                      onPress={() => setStreamingAndPurchase(false)}
                     >
-                      <Text style={styles.buttonText}>Log in / Sign up</Text>
+                      <Text style={styles.buttonText}>
+                        Hide streaming and purchase options
+                      </Text>
                     </TouchableOpacity>
                   </View>
+                  <StreamingAndPurchase
+                    showId={imdbId}
+                    currentUser={props.currentUser}
+                  />
                 </View>
-              ) : null}
+              )}
+
+              <View style={{ flexDirection: 'column' }}>
+                {/* if we're getting here by searching for the show, type will be null (if currentUser is also null, we need to sign in to add the show to our profile and should only see the button to log in). If we got here because we were looking at an instance of a userShow (our own or someone else's) type will be set to 'watch' (we're adding it to toWatch), or 'rec' (we're adding it to recs), or 'seen' (we're adding it to our seen list); depending on how it's set, we want to see the appropriate button options. */}
+                {/* This first one also sends the userShowId (if there is one) because if we're switching from seen or toWatch to rec, a userShowId will already exist and we'll have sent it from the show page, and we can just update that already existing userShow on the back end */}
+                {type === 'rec' ||
+                (type === null && props.currentUser !== null) ? (
+                  <View style={styles.buttonContainer}>
+                    <TouchableOpacity
+                      style={styles.saveButton}
+                      onPress={() =>
+                        props.navigation.navigate('Show added', {
+                          showName,
+                          description,
+                          imageUrl,
+                          imdbId,
+                          type: 'rec',
+                          userShowId,
+                        })
+                      }
+                    >
+                      <Text style={styles.buttonText}>Recommend</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : null}
+                {type === 'watch' ||
+                (type === null && props.currentUser !== null) ? (
+                  <View style={styles.buttonContainer}>
+                    <TouchableOpacity
+                      style={styles.saveButton}
+                      onPress={() =>
+                        props.navigation.navigate('Show added', {
+                          showName,
+                          description,
+                          imageUrl,
+                          imdbId,
+                          type: 'watch',
+                        })
+                      }
+                    >
+                      <Text style={styles.buttonText}>Save to watch list</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : null}
+                {type === 'seen' ||
+                (type === null && props.currentUser !== null) ? (
+                  <View style={styles.buttonContainer}>
+                    <TouchableOpacity
+                      style={styles.saveButton}
+                      onPress={() =>
+                        props.navigation.navigate('Show added', {
+                          showName,
+                          description,
+                          imageUrl,
+                          imdbId,
+                          type: 'seen',
+                        })
+                      }
+                    >
+                      <Text style={styles.buttonText}>
+                        Save to seen list without recommending
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : null}
+                {props.currentUser === null ? (
+                  <View>
+                    <Text style={styles.text}>
+                      Log in or Sign up to recommend this show or add it to your
+                      watch list
+                    </Text>
+                    <View style={styles.buttonContainer}>
+                      <TouchableOpacity
+                        style={styles.button}
+                        onPress={() => props.navigation.navigate('Login')}
+                      >
+                        <Text style={styles.buttonText}>Log in / Sign up</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                ) : null}
+              </View>
             </View>
-          </View>
-        ) : null}
-      </View>
-    </ScrollView>
+          ) : null}
+        </View>
+      </ScrollView>
+    </View>
   );
 };
 

@@ -63,7 +63,7 @@ function Settings(props) {
 
   return (
     <View style={styles.container}>
-      <ScrollView>
+      <ScrollView showsVerticalScrollIndicator={false}>
         <Text style={styles.text}>
           settings coming soon (how to filter your recs, what country you're
           watching in (currently everything is set to US), user tags, etc).

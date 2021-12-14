@@ -100,7 +100,6 @@ function AddShowTags(props) {
     const chosenTags = [];
     for (const tagId in selectedTags) {
       if (selectedTags[tagId] === true) {
-        console.log('here', tagId, selectedTags[tagId]);
         chosenTags.push(tagId);
       }
     }

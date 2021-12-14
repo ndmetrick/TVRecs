@@ -4,10 +4,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // const baseUrl = 'https://10.0.2.2:8080';
 
-// const baseUrl = 'http://10.0.0.171:8080';
+const baseUrl = 'http://10.0.0.171:8080';
 // const baseUrl = 'http://localhost:8080';
 
-const baseUrl = 'https://tvrecs.herokuapp.com';
+// const baseUrl = 'https://tvrecs.herokuapp.com';
 
 const getToken = async () => {
   try {
@@ -116,6 +116,23 @@ export function getUserShowsToWatch() {
         dispatch({
           type: types.GET_TO_WATCH,
           toWatch: toWatch.data,
+        });
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+}
+
+export function getUserShowsSeen() {
+  return async (dispatch) => {
+    try {
+      const headers = await getToken();
+      const seen = await axios.get(`${baseUrl}/api/users/seenShows`, headers);
+      if (seen.data != -1) {
+        dispatch({
+          type: types.GET_SEEN,
+          seen: seen.data,
         });
       }
     } catch (err) {
@@ -293,13 +310,13 @@ export function changeShowTags(tagIds, userShowId) {
   };
 }
 
-export function switchShow(userShowId, description, tags) {
+export function switchShow(userShowId, description, newType) {
   return async (dispatch) => {
     try {
       const headers = await getToken();
       const switchedShow = await axios.put(
         `${baseUrl}/api/users/switchShow`,
-        { userShowId, description, tags },
+        { userShowId, description, newType },
         headers
       );
       if (switchedShow) {
@@ -307,7 +324,11 @@ export function switchShow(userShowId, description, tags) {
           'i got to this same place and switchd show is',
           switchedShow.data
         );
-        dispatch({ type: types.SWITCH_SHOW, userShow: switchedShow.data });
+        dispatch({
+          type: types.SWITCH_SHOW,
+          oldType: switchedShow.data.oldType,
+          userShow: switchedShow.data.updatedUserShow,
+        });
       } else {
         console.log('Something went wrong trying to add show');
       }

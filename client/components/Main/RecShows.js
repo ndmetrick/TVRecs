@@ -134,7 +134,6 @@ const mapStateToProps = (store) => ({
   following: store.currentUser.following,
   recShows: store.currentUser.recShows,
   userShows: store.currentUser.shows,
-  showList: store.currentUser.showList,
 });
 
 const mapDispatchToProps = (dispatch) => {

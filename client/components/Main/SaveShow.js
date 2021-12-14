@@ -20,7 +20,6 @@ function SaveShow(props) {
     props.route.params || '';
 
   const [goBack, setGoBack] = useState(false);
-  const [switching, setSwitching] = useState(false);
   const [userShow, setUserShow] = useState({});
   const [loading, setLoading] = useState(true);
 
@@ -34,7 +33,10 @@ function SaveShow(props) {
       };
       if (userShowId) {
         console.log('i know i am switching and userShowId equals', userShowId);
-        setSwitching(true);
+        // setSwitching(true);
+        const show = await props.switchShow(userShowId, description, type);
+        setUserShow(show);
+        setLoading(false);
       } else {
         const show = await props.addShow(showData, type);
         setUserShow(show);
@@ -42,38 +44,45 @@ function SaveShow(props) {
       }
     };
     if (
-      !props.showList.includes(showName) &&
-      !props.watchList.includes(showName)
+      !props.currentUserShows.find(
+        (currentUserShow) => currentUserShow.show.imdbId === imdbId
+      ) &&
+      !props.watchShows.find((watchShow) => watchShow.show.imdbId === imdbId) &&
+      !props.seenShows.find((seenShow) => seenShow.show.imdbId === imdbId)
     ) {
       saveShowData();
     } else {
       setGoBack(true);
     }
-    // RETURN CLEAR HERE?
+    return () => {
+      setUserShow({});
+      setLoading(true);
+      setGoBack(false);
+    };
   }, []);
 
-  const switchShow = async (userShowId, description, showName) => {
-    await props.switchShow(userShowId, description);
-    Alert.alert(
-      'Show added',
-      `${showName} was added to your rec'd shows and removed from your watch list`,
-      {
-        text: 'OK',
-      }
-    );
+  const switchShow = async () => {
+    await props.switchShow(userShowId, description, type);
+
+    // Alert.alert(
+    //   'Show added',
+    //   `${showName} was added to your rec'd shows and removed from your watch list`,
+    //   {
+    //     text: 'OK',
+    //   }
+    // );
     return props.navigation.navigate('Profile');
   };
 
   const image = { uri: imageUrl };
 
   if (goBack) {
-    const whichList = props.watchList.includes(showName)
-      ? 'watch list'
-      : 'rec list';
     return (
       <View>
         <Text style={styles.text}>
-          You've already added {showName} to your {whichList}.
+          You've already added {showName} to your profile. If you'd like to edit
+          your tags or description or switch the list it's on, go to your own
+          page for {showName}.
         </Text>
         <View style={styles.buttonContainer}>
           <TouchableOpacity
@@ -81,6 +90,14 @@ function SaveShow(props) {
             onPress={() => props.navigation.popToTop()}
           >
             <Text style={styles.buttonText}>Oops, go back</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => props.navigation.navigate('Profile')}
+          >
+            <Text style={styles.buttonText}>Go to my profile</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -96,13 +113,12 @@ function SaveShow(props) {
   }
   return (
     <View>
-      <ScrollView>
+      <ScrollView showsVerticalScrollIndicator={false}>
         <Text style={styles.text}>{showName}</Text>
-        <View style={styles.separator} />
+
         {description ? (
           <View>
             <Text style={styles.text}>Description: {description}</Text>
-            <View style={styles.separator} />
           </View>
         ) : null}
         <Image
@@ -126,11 +142,7 @@ function SaveShow(props) {
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={styles.button}
-            onPress={
-              switching === true
-                ? () => switchShow(userShowId, description, showName)
-                : () => props.navigation.navigate('Profile')
-            }
+            onPress={() => props.navigation.navigate('Profile')}
           >
             <Text style={styles.buttonText}>Skip tags</Text>
           </TouchableOpacity>
@@ -157,11 +169,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 20,
   },
-  separator: {
-    marginVertical: 8,
-    borderBottomColor: '#6F98AE',
-    borderBottomWidth: 2,
-  },
   buttonText: {
     textAlign: 'center',
     fontSize: 18,
@@ -183,16 +190,18 @@ const styles = StyleSheet.create({
 });
 
 const mapStateToProps = (state) => ({
-  showList: state.currentUser.showList,
-  watchList: state.currentUser.watchList,
+  recShows: state.currentUser.recShows,
+  watchShows: state.currentUser.toWatch,
+  seenShows: state.currentUser.seen,
   currentUser: state.currentUser.userInfo,
+  currentUserShows: state.currentUser.userShows,
 });
 
 const mapDispatch = (dispatch) => {
   return {
     addShow: (showInfo, type) => dispatch(addShow(showInfo, type)),
-    switchShow: (userShowId, description) =>
-      dispatch(switchShow(userShowId, description)),
+    switchShow: (userShowId, description, newType) =>
+      dispatch(switchShow(userShowId, description, newType)),
   };
 };
 export default connect(mapStateToProps, mapDispatch)(SaveShow);

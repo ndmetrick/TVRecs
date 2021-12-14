@@ -21,7 +21,8 @@ function ViewShows(props) {
   const isFocused = useIsFocused();
 
   useEffect(() => {
-    const { currentUser, currentUserShows, toWatch, otherUserShows } = props;
+    const { currentUser, currentUserShows, toWatch, otherUserShows, seen } =
+      props;
     const { userToView } = props.route.params;
     setUser(userToView);
     if (userToView) {
@@ -30,6 +31,8 @@ function ViewShows(props) {
           ? otherUserShows
           : props.route.params.type === 'toWatch'
           ? toWatch
+          : props.route.params.type === 'seen'
+          ? seen
           : userToView.id === currentUser.id
           ? currentUserShows
           : userToView.id
@@ -46,6 +49,7 @@ function ViewShows(props) {
     return () => {
       setUserShows([]);
       setUser(null);
+      setLoading(true);
     };
   }, [props.route.params.type, isFocused, props.otherUserShows]);
 
@@ -115,6 +119,7 @@ const mapStateToProps = (store) => ({
   currentUserShows: store.currentUser.userShows,
   otherUserShows: store.otherUser.userShows,
   toWatch: store.currentUser.toWatch,
+  seen: store.currentUser.seen,
 });
 
 export default connect(mapStateToProps, null)(ViewShows);
