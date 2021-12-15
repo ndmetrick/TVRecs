@@ -123,7 +123,6 @@ const AddShow = (props) => {
             }
             setImageUrl(poster);
           }
-
           setAdded(true);
         }
       }
@@ -383,68 +382,118 @@ const AddShow = (props) => {
               )}
 
               <View style={{ flexDirection: 'column' }}>
-                {/* if we're getting here by searching for the show, type will be null (if currentUser is also null, we need to sign in to add the show to our profile and should only see the button to log in). If we got here because we were looking at an instance of a userShow (our own or someone else's) type will be set to 'watch' (we're adding it to toWatch), or 'rec' (we're adding it to recs), or 'seen' (we're adding it to our seen list); depending on how it's set, we want to see the appropriate button options. */}
+                {/* if we're getting here by searching for the show, type will be null (if currentUser is also null, we need to sign in to add the show to our profile and should only see the button to log in). If we got here because we were looking at an instance of a userShow (our own or someone else's) type will be set to 'watch' (we're adding it to toWatch), or 'rec' (we're adding it to recs), or 'seen' (we're adding it to our seen list); depending on how it's set, we want to see the appropriate button options. If we're coming from SingleShow, we already checked to make sure the show isn't on the user's profile already; otherwise we have to check it here. */}
                 {/* This first one also sends the userShowId (if there is one) because if we're switching from seen or toWatch to rec, a userShowId will already exist and we'll have sent it from the show page, and we can just update that already existing userShow on the back end */}
-                {type === 'rec' ||
-                (type === null && props.currentUser !== null) ? (
-                  <View style={styles.buttonContainer}>
-                    <TouchableOpacity
-                      style={styles.saveButton}
-                      onPress={() =>
-                        props.navigation.navigate('Show added', {
-                          showName,
-                          description,
-                          imageUrl,
-                          imdbId,
-                          type: 'rec',
-                          userShowId,
-                        })
-                      }
-                    >
-                      <Text style={styles.buttonText}>Recommend</Text>
-                    </TouchableOpacity>
+                {props.currentUser === null ||
+                (!fromSingleShow &&
+                  (props.watchShows.find(
+                    (watchShow) => imdbId == watchShow.show.imdbId
+                  ) ||
+                    props.userShows.find(
+                      (userShow) => imdbId == userShow.show.imdbId
+                    ) ||
+                    props.seenShows.find(
+                      (seenShow) => imdbId == seenShow.show.imdbId
+                    ))) ? null : (
+                  <View>
+                    {type === 'rec' || type === null ? (
+                      <View style={styles.buttonContainer}>
+                        <TouchableOpacity
+                          style={styles.saveButton}
+                          onPress={() =>
+                            props.navigation.navigate('Show added', {
+                              showName,
+                              description,
+                              imageUrl,
+                              imdbId,
+                              type: 'rec',
+                              userShowId,
+                            })
+                          }
+                        >
+                          <Text style={styles.buttonText}>Recommend show</Text>
+                        </TouchableOpacity>
+                      </View>
+                    ) : null}
+                    {type === 'watch' || type === null ? (
+                      <View style={styles.buttonContainer}>
+                        <TouchableOpacity
+                          style={styles.saveButton}
+                          onPress={() =>
+                            props.navigation.navigate('Show added', {
+                              showName,
+                              description,
+                              imageUrl,
+                              imdbId,
+                              type: 'watch',
+                            })
+                          }
+                        >
+                          <Text style={styles.buttonText}>
+                            Save show to watch list
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    ) : null}
+                    {type === 'seen' || type === null ? (
+                      <View>
+                        <View style={styles.buttonContainer}>
+                          <TouchableOpacity
+                            style={styles.saveButton}
+                            onPress={() => props.navigation.navigate('Profile')}
+                          >
+                            <Text style={styles.buttonText}>
+                              Take me to my profile
+                            </Text>
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    ) : null}
+                  </View>
+                )}
+                {!fromSingleShow &&
+                props.watchShows.find((watchShow) => {
+                  return imdbId == watchShow.show.imdbId;
+                }) ? (
+                  <View>
+                    <Text style={styles.text}>
+                      This show is already on your watch list. If you'd like to
+                      switch it to Recommended or Seen, go to your profile,
+                      click on your Watch list, and open the show to make that
+                      change.
+                    </Text>
+                    <View style={styles.buttonContainer}>
+                      <TouchableOpacity
+                        style={styles.saveButton}
+                        onPress={() => props.navigation.navigate('Profile')}
+                      >
+                        <Text style={styles.buttonText}>
+                          Take me to my profile
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
                 ) : null}
-                {type === 'watch' ||
-                (type === null && props.currentUser !== null) ? (
-                  <View style={styles.buttonContainer}>
-                    <TouchableOpacity
-                      style={styles.saveButton}
-                      onPress={() =>
-                        props.navigation.navigate('Show added', {
-                          showName,
-                          description,
-                          imageUrl,
-                          imdbId,
-                          type: 'watch',
-                        })
-                      }
-                    >
-                      <Text style={styles.buttonText}>Save to watch list</Text>
-                    </TouchableOpacity>
-                  </View>
-                ) : null}
-                {type === 'seen' ||
-                (type === null && props.currentUser !== null) ? (
-                  <View style={styles.buttonContainer}>
-                    <TouchableOpacity
-                      style={styles.saveButton}
-                      onPress={() =>
-                        props.navigation.navigate('Show added', {
-                          showName,
-                          description,
-                          imageUrl,
-                          imdbId,
-                          type: 'seen',
-                        })
-                      }
-                    >
-                      <Text style={styles.buttonText}>
-                        Save to seen list without recommending
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                ) : null}
+                {/* // {isWatch ? (
+                //   <View style={styles.buttonContainer}>
+                //     <TouchableOpacity
+                //       style={styles.saveButton}
+                //       onPress={() =>
+                //         props.navigation.navigate('Show added', {
+                //           showName,
+                //           description,
+                //           imageUrl,
+                //           imdbId,
+                //           type: 'seen',
+                //         })
+                //       }
+                //     >
+                //       <Text style={styles.buttonText}>
+                //         Save show to seen list without recommending
+                //       </Text>
+                //     </TouchableOpacity>
+                //   </View>
+                // ) : null} */}
                 {props.currentUser === null ? (
                   <View>
                     <Text style={styles.text}>
@@ -559,6 +608,9 @@ const styles = StyleSheet.create({
 });
 const mapStateToProps = (store) => ({
   currentUser: store.currentUser.userInfo,
+  userShows: store.currentUser.userShows,
+  seenShows: store.currentUser.seen,
+  watchShows: store.currentUser.toWatch,
 });
 
 const mapDispatchToProps = (dispatch) => {

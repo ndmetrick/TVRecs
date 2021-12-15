@@ -6,14 +6,10 @@ import {
   Image,
   FlatList,
   TouchableOpacity,
-  Modal,
+  Switch,
 } from 'react-native';
 
-import {
-  addShow,
-  getUserFollowing,
-  getUsersFollowingRecs,
-} from '../../redux/actions';
+import { getUserFollowing, getUsersFollowingRecs } from '../../redux/actions';
 import OtherRecerModal from './OtherRecerModal';
 
 import { connect } from 'react-redux';
@@ -22,20 +18,37 @@ import { useIsFocused } from '@react-navigation/native';
 const RecShows = (props) => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [userShows, setUserShows] = useState([]);
+  const [recShows, setRecShows] = useState([]);
   const [filter, setFilter] = useState('default');
   const [multipleRecInfo, setMultipleRecInfo] = useState({});
+  const [noUserShows, setNoUserShows] = useState(false);
 
   const isFocused = useIsFocused();
 
   useEffect(() => {
     const getRecShows = async () => {
       try {
-        if (props.recShows) {
-          const shows = props.recShows;
+        if (props.allRecShows) {
+          let shows = props.allRecShows;
           shows.sort(function (x, y) {
             return new Date(y.updatedAt) - new Date(x.updatedAt);
           });
+          // if they toggled to only see shows not on their profile, remove shows that appear on their rec, watch, and seen lists
+          if (noUserShows) {
+            shows = shows.filter((recShow) => {
+              return (
+                !props.userShows.find(
+                  (userShow) => userShow.show.imdbId === recShow.show.imdbId
+                ) &&
+                !props.toWatch.find(
+                  (watchShow) => watchShow.show.imdbId === recShow.show.imdbId
+                ) &&
+                !props.seen.find(
+                  (seenShow) => seenShow.show.imdbId === recShow.show.imdbId
+                )
+              );
+            });
+          }
           // we only want to see a show recommended once on the timeline, but we want to be able to see how many times it was recommended and by which other users
           let visibleShows = [];
           let recCounts = {};
@@ -59,10 +72,10 @@ const RecShows = (props) => {
               }
             }
           }
-          setUserShows(visibleShows);
+          setRecShows(visibleShows);
           setMultipleRecInfo(recCounts);
           return () => {
-            setUserShows([]);
+            setRecShows([]);
           };
         }
       } catch (err) {
@@ -70,11 +83,15 @@ const RecShows = (props) => {
       }
     };
     getRecShows();
-  }, [isFocused, props.following, props.recShows, filter]);
+  }, [isFocused, props.following, props.allRecShows, filter, noUserShows]);
 
   const seeOtherRecers = (recInfo) => {
     setModalVisible(true);
     setSelectedItem(recInfo);
+  };
+
+  const toggleNoUserShows = () => {
+    setNoUserShows((previousState) => !previousState);
   };
 
   if (props.following.length === 0) {
@@ -90,11 +107,27 @@ const RecShows = (props) => {
 
   return (
     <View style={styles.container}>
+      <View style={styles.toggleContainer}>
+        {!noUserShows ? (
+          <Text>Toggle to hide shows you've already saved to your profile</Text>
+        ) : (
+          <Text>
+            Toggle to see include you've alreeady saved to your profile
+          </Text>
+        )}
+        <Switch
+          // trackColor={{ false: '#767577', true: '#81b0ff' }}
+          // thumbColor={isEnabled ? '#f5dd4b' : '#f4f3f4'}
+          ios_backgroundColor="#3e3e3e"
+          onValueChange={toggleNoUserShows}
+          value={noUserShows}
+        />
+      </View>
       <View style={styles.containerGallery}>
         <FlatList
           numColumns={1}
           horizontal={false}
-          data={userShows}
+          data={recShows}
           renderItem={({ item }) => (
             <View style={styles.containerImage}>
               <TouchableOpacity
@@ -195,12 +228,17 @@ const styles = StyleSheet.create({
     padding: 10,
     elevation: 2,
   },
+  toggleContainer: {
+    padding: 10,
+  },
 });
 const mapStateToProps = (store) => ({
   currentUser: store.currentUser.userInfo,
   following: store.currentUser.following,
-  recShows: store.currentUser.recShows,
-  userShows: store.currentUser.shows,
+  allRecShows: store.currentUser.recShows,
+  userShows: store.currentUser.userShows,
+  toWatch: store.currentUser.toWatch,
+  seen: store.currentUser.seen,
 });
 
 const mapDispatchToProps = (dispatch) => {

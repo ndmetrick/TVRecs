@@ -14,6 +14,7 @@ newApp.js
 notesForFollowing.js
 appcut.js
 FIND.env
+SaveToProfileButtons.js
 
 # macOS
 .DS_Store

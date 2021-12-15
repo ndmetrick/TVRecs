@@ -43,17 +43,10 @@ function SaveShow(props) {
         setLoading(false);
       }
     };
-    if (
-      !props.currentUserShows.find(
-        (currentUserShow) => currentUserShow.show.imdbId === imdbId
-      ) &&
-      !props.watchShows.find((watchShow) => watchShow.show.imdbId === imdbId) &&
-      !props.seenShows.find((seenShow) => seenShow.show.imdbId === imdbId)
-    ) {
-      saveShowData();
-    } else {
-      setGoBack(true);
-    }
+    saveShowData();
+    // } else {
+    //   setGoBack(true);
+    // }
     return () => {
       setUserShow({});
       setLoading(true);
