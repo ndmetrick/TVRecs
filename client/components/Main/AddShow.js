@@ -30,6 +30,8 @@ const AddShow = (props) => {
   const [OMDBKey, setOMDBKey] = useState(null);
   const [TMDBKey, setTMDBKey] = useState(null);
   const [streamingAndPurchase, setStreamingAndPurchase] = useState(false);
+  // const [watchShow, setWatchShow] = useState(null)
+
   const isFocused = useIsFocused();
 
   useEffect(() => {
@@ -435,18 +437,24 @@ const AddShow = (props) => {
                         </TouchableOpacity>
                       </View>
                     ) : null}
-                    {type === 'seen' || type === null ? (
-                      <View>
-                        <View style={styles.buttonContainer}>
-                          <TouchableOpacity
-                            style={styles.saveButton}
-                            onPress={() => props.navigation.navigate('Profile')}
-                          >
-                            <Text style={styles.buttonText}>
-                              Take me to my profile
-                            </Text>
-                          </TouchableOpacity>
-                        </View>
+                    {type === 'watch' || type === null ? (
+                      <View style={styles.buttonContainer}>
+                        <TouchableOpacity
+                          style={styles.saveButton}
+                          onPress={() =>
+                            props.navigation.navigate('Show added', {
+                              showName,
+                              description,
+                              imageUrl,
+                              imdbId,
+                              type: 'seen',
+                            })
+                          }
+                        >
+                          <Text style={styles.buttonText}>
+                            Save show to seen list
+                          </Text>
+                        </TouchableOpacity>
                       </View>
                     ) : null}
                   </View>
