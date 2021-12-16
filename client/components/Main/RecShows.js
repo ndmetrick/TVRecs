@@ -59,15 +59,13 @@ const RecShows = (props) => {
                 visibleShows.push(recShow);
                 recCounts[recShow.show.imdbId] = {
                   num: 1,
-                  recommenders: [
-                    { name: recShow.user.username, id: recShow.user.id },
-                  ],
+                  recommenders: [{ name: recShow.user.username, recShow }],
                 };
               } else {
                 recCounts[recShow.show.imdbId].num++;
                 recCounts[recShow.show.imdbId].recommenders.push({
                   name: recShow.user.username,
-                  id: recShow.user.id,
+                  recShow,
                 });
               }
             }
@@ -191,6 +189,7 @@ const RecShows = (props) => {
           modalVisible={modalVisible}
           setModalVisible={setModalVisible}
           selectedItem={selectedItem}
+          navigation={props.navigation}
         />
       </View>
     </View>

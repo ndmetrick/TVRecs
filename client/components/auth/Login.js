@@ -49,6 +49,7 @@ const Login = (props) => {
       try {
         if (result) {
           if (result.error) {
+            console.log(result.error);
             Alert.alert(
               'Authentication error',
               result.params.error_description || 'something went wrong'

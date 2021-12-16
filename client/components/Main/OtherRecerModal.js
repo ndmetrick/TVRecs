@@ -1,8 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, Pressable, Modal, Alert } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Text,
+  Pressable,
+  Modal,
+  Alert,
+  TouchableOpacity,
+} from 'react-native';
 
 export default function CustomModal(props) {
   const { modalVisible, selectedItem, setModalVisible } = props;
+
+  const otherRecerClicked = (item) => {
+    setModalVisible(!modalVisible);
+    props.navigation.navigate('Show', {
+      userInfo: item.recShow.user,
+      userShow: item.recShow,
+    });
+  };
 
   return (
     <Modal
@@ -15,13 +31,17 @@ export default function CustomModal(props) {
     >
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
+          <Text style={{ ...styles.text, fontWeight: 'bold' }}>
+            Other recommenders:
+          </Text>
           {selectedItem
             ? selectedItem.map((item, index) => {
                 if (index !== 0) {
                   return (
                     <View key={index}>
-                      <Text style={styles.modalText}>Other recommenders:</Text>
-                      <Text style={styles.modalText}>{item.name}</Text>
+                      <TouchableOpacity onPress={() => otherRecerClicked(item)}>
+                        <Text style={styles.text}>{item.name}</Text>
+                      </TouchableOpacity>
                     </View>
                   );
                 }
@@ -66,7 +86,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
   },
   text: {
-    margin: 3,
+    margin: 8,
     textAlign: 'center',
     fontSize: 20,
   },

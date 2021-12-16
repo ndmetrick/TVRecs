@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // const baseUrl = 'https://tvrecs.herokuapp.com';
 
-// const baseUrl = 'https://10.0.2.2:8080';
+// const baseUrl = 'https://10.0.0.98:8080';
 
 const baseUrl = 'http://10.0.0.171:8080';
 // const baseUrl = 'http://localhost:8080';

@@ -156,7 +156,7 @@ const Start = (props) => {
               }}
             />
             <Stack.Screen
-              name="TV Rec'er"
+              name="TV rec'er"
               component={OtherUser}
               navigation={props.navigation}
               options={{

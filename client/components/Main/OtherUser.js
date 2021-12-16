@@ -36,6 +36,7 @@ function OtherUser(props) {
   // const isFocused = useIsFocused();
 
   useEffect(() => {
+    console.log('i got in here to this other user');
     const { currentUser, currentUserShows } = props;
     if (currentUser) {
       setLoggedIn(true);
@@ -129,10 +130,31 @@ function OtherUser(props) {
               </TouchableOpacity>
             </View>
           ) : (
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity style={styles.button} onPress={() => follow()}>
-                <Text style={styles.buttonText}>receive recs</Text>
-              </TouchableOpacity>
+            <View>
+              {props.currentUser ? (
+                <View style={styles.buttonContainer}>
+                  <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => follow()}
+                  >
+                    <Text style={styles.buttonText}>receive recs</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <View>
+                  <Text style={styles.text}>
+                    {'\n'}Log in or Sign up to receive recs from this user
+                  </Text>
+                  <View style={styles.buttonContainer}>
+                    <TouchableOpacity
+                      style={styles.button}
+                      onPress={() => props.navigation.navigate('Login')}
+                    >
+                      <Text style={styles.buttonText}>Log in / Sign up</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
             </View>
           )}
         </View>
