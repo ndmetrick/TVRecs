@@ -7,10 +7,11 @@ import {
   Modal,
   Alert,
   TouchableOpacity,
+  ScrollView,
 } from 'react-native';
 
 export default function CustomModal(props) {
-  const { modalVisible, selectedItem, setModalVisible } = props;
+  const { modalVisible, selectedItem, setModalVisible, previous } = props;
 
   const otherRecerClicked = (item) => {
     setModalVisible(!modalVisible);
@@ -29,32 +30,36 @@ export default function CustomModal(props) {
         Alert.alert('Modal has been closed.');
       }}
     >
-      <View style={styles.centeredView}>
-        <View style={styles.modalView}>
-          <Text style={{ ...styles.text, fontWeight: 'bold' }}>
-            Other recommenders:
-          </Text>
-          {selectedItem
-            ? selectedItem.map((item, index) => {
-                if (index !== 0) {
-                  return (
-                    <View key={index}>
-                      <TouchableOpacity onPress={() => otherRecerClicked(item)}>
-                        <Text style={styles.text}>{item.name}</Text>
-                      </TouchableOpacity>
-                    </View>
-                  );
-                }
-              })
-            : null}
-          <Pressable
-            style={styles.closeButton}
-            onPress={() => setModalVisible(!modalVisible)}
-          >
-            <Text style={styles.text}>x</Text>
-          </Pressable>
+      <ScrollView>
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={{ ...styles.text, fontWeight: 'bold' }}>
+              Other recommenders:
+            </Text>
+            {selectedItem
+              ? selectedItem.map((item, index) => {
+                  if (previous === 'RecShows' || index !== 0) {
+                    return (
+                      <View key={index}>
+                        <TouchableOpacity
+                          onPress={() => otherRecerClicked(item)}
+                        >
+                          <Text style={styles.text}>{item.name}</Text>
+                        </TouchableOpacity>
+                      </View>
+                    );
+                  }
+                })
+              : null}
+            <Pressable
+              style={styles.closeButton}
+              onPress={() => setModalVisible(!modalVisible)}
+            >
+              <Text style={styles.text}>x</Text>
+            </Pressable>
+          </View>
         </View>
-      </View>
+      </ScrollView>
     </Modal>
   );
 }

@@ -143,24 +143,27 @@ const RecShows = (props) => {
                 />
               </TouchableOpacity>
               <View>
-                <Text style={{ fontWeight: 'bold' }}>{item.show.name}</Text>
-                <View style={styles.rowContainer}>
-                  <Text>Rec'er: </Text>
-                  <TouchableOpacity
-                    onPress={() =>
-                      props.navigation.navigate("TV rec'er", {
-                        uid: item.user.id,
-                      })
-                    }
-                  >
-                    <Text
-                      style={{ color: 'blue' }}
-                    >{`${item.user.username}`}</Text>
-                  </TouchableOpacity>
-                </View>
-                {multipleRecInfo[item.show.imdbId].num > 1 ? (
+                {multipleRecInfo[item.show.imdbId].num < 2 ? (
                   <View>
-                    <Text>Also rec'd by: </Text>
+                    <Text style={{ fontWeight: 'bold' }}>{item.show.name}</Text>
+                    <View style={styles.rowContainer}>
+                      <Text>Recommended by: </Text>
+                      <TouchableOpacity
+                        onPress={() =>
+                          props.navigation.navigate("TV rec'er", {
+                            uid: item.user.id,
+                          })
+                        }
+                      >
+                        <Text
+                          style={{ color: 'blue' }}
+                        >{`${item.user.username}`}</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                ) : (
+                  <View>
+                    <Text>Recommended by:</Text>
                     <TouchableOpacity
                       onPress={() =>
                         seeOtherRecers(
@@ -169,17 +172,13 @@ const RecShows = (props) => {
                       }
                     >
                       <Text style={{ color: 'blue' }}>
-                        {multipleRecInfo[item.show.imdbId].num > 2
-                          ? `${
-                              multipleRecInfo[item.show.imdbId].num - 1
-                            } others you follow`
-                          : `${
-                              multipleRecInfo[item.show.imdbId].num - 1
-                            } other person you follow`}
+                        {`${
+                          multipleRecInfo[item.show.imdbId].num
+                        } people you follow`}
                       </Text>
                     </TouchableOpacity>
                   </View>
-                ) : null}
+                )}
               </View>
             </View>
           )}
@@ -190,6 +189,7 @@ const RecShows = (props) => {
           setModalVisible={setModalVisible}
           selectedItem={selectedItem}
           navigation={props.navigation}
+          previous="RecShows"
         />
       </View>
     </View>

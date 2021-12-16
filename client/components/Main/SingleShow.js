@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import {
   addShow,
@@ -16,6 +17,7 @@ import {
   getAPIKey,
 } from '../../redux/actions';
 import StreamingAndPurchase from './StreamingAndPurchase';
+import OtherRecerModal from './OtherRecerModal';
 
 import { useIsFocused } from '@react-navigation/native';
 
@@ -32,6 +34,8 @@ function SingleShow(props) {
   const isFocused = useIsFocused();
 
   // const [following, setFollowing] = useState(false);
+  const [multipleRecInfo, setMultipleRecInfo] = useState({});
+  const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
     const { currentUser } = props;
@@ -46,6 +50,26 @@ function SingleShow(props) {
         setIsCurrentUser(true);
         setCountry(userInfo.country);
       } else {
+        const imdbId = userShow.show.imdbId;
+        let recCounts = {};
+        recCounts[imdbId] = {
+          num: 1,
+          recommenders: [{ name: userInfo.username, recShow: userShow }],
+        };
+
+        props.recShows.forEach((recShow) => {
+          if (
+            recShow.show.imdbId == imdbId &&
+            recShow.user.username !== userInfo.username
+          ) {
+            recCounts[imdbId].num++;
+            recCounts[imdbId].recommenders.push({
+              name: recShow.user.username,
+              recShow,
+            });
+          }
+        });
+        setMultipleRecInfo(recCounts);
         setUser(userInfo);
         setCountry(userInfo.country);
       }
@@ -69,6 +93,8 @@ function SingleShow(props) {
       setTVTags([]);
       setIsCurrentUser(false);
       setCountry(null);
+      setMultipleRecInfo({});
+      setModalVisible(false);
     };
   }, [props.route.params.userInfo, type, isFocused]);
 
@@ -155,8 +181,14 @@ function SingleShow(props) {
     });
   };
 
-  if (user === null) {
-    return <View />;
+  if (user === null || multipleRecInfo.length === 0) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#5500dc" />
+      </View>
+    );
+  } else {
+    console.log('i got here and it is', multipleRecInfo);
   }
 
   return (
@@ -167,6 +199,26 @@ function SingleShow(props) {
         </Text> */}
         <Text style={styles.text}>{user.username}</Text>
       </View>
+      {multipleRecInfo[userShow.show.imdbId].num < 2 ? null : (
+        <View>
+          <Text>Also recommended by:</Text>
+          <TouchableOpacity onPress={() => setModalVisible(true)}>
+            <Text style={{ color: 'blue' }}>
+              {`${multipleRecInfo[userShow.show.imdbId].num - 1}`}{' '}
+              {multipleRecInfo[userShow.show.imdbId].num > 2
+                ? 'other people you follow'
+                : 'other person you follow'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
+      <OtherRecerModal
+        modalVisible={modalVisible}
+        setModalVisible={setModalVisible}
+        selectedItem={multipleRecInfo[userShow.show.imdbId].recommenders}
+        navigation={props.navigation}
+        previous="SingleShow"
+      />
       <ScrollView showsVerticalScrollIndicator={false}>
         <View>
           <Image
@@ -560,6 +612,7 @@ const mapState = (store) => ({
   watchShows: store.currentUser.toWatch,
   seenShows: store.currentUser.seen,
   following: store.currentUser.following,
+  recShows: store.currentUser.recShows,
 });
 
 const mapDispatch = (dispatch) => {
