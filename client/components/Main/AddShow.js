@@ -144,7 +144,6 @@ const AddShow = (props) => {
     setDescription('');
     setImageUrl('');
     setImdbId('');
-    setPurchase('');
     setShowOptions('');
   };
 

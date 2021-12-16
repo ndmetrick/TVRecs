@@ -3,7 +3,14 @@ import { connect } from 'react-redux';
 import jwtDecode from 'jwt-decode';
 import React, { useState, useEffect } from 'react';
 import 'react-native-gesture-handler';
-import { Alert, StyleSheet, Text, View, Image } from 'react-native';
+import {
+  Alert,
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  TouchableOpacity,
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -19,6 +26,7 @@ import { clearData } from './client/redux/actions';
 
 const Start = (props) => {
   const Stack = createStackNavigator();
+  console.log('props', props);
 
   const [user, setUser] = useState(null);
 
@@ -46,18 +54,16 @@ const Start = (props) => {
             <Stack.Screen
               name="Main"
               component={Main}
-              options={{
-                // title: 'TV Recs',
-                // headerTitleStyle: {
-                //   fontWeight: 'bold',
-                // },
+              options={({ navigation }) => ({
                 headerTitle: () => (
-                  <Image
-                    style={{ width: 40, height: 40, margin: 20 }}
-                    source={require('./tempTVRecsLogo.png')}
-                  />
+                  <TouchableOpacity onPress={() => navigation.navigate('Main')}>
+                    <Image
+                      style={{ width: 40, height: 40, margin: 20 }}
+                      source={require('./tempTVRecsLogo.png')}
+                    />
+                  </TouchableOpacity>
                 ),
-              }}
+              })}
               // options={{
               //   title: 'TV Recs',
               //   headerTitleStyle: {
@@ -77,53 +83,61 @@ const Start = (props) => {
               name="Add/Change Tags"
               component={AddShowTags}
               navigation={props.navigation}
-              options={{
+              options={({ navigation }) => ({
                 headerTitle: () => (
-                  <Image
-                    style={{ width: 40, height: 40, margin: 20 }}
-                    source={require('./tempTVRecsLogo.png')}
-                  />
+                  <TouchableOpacity onPress={() => navigation.navigate('Main')}>
+                    <Image
+                      style={{ width: 40, height: 40, margin: 20 }}
+                      source={require('./tempTVRecsLogo.png')}
+                    />
+                  </TouchableOpacity>
                 ),
-              }}
+              })}
             />
             <Stack.Screen
               name="Show added"
               component={SaveShow}
               navigation={props.navigation}
-              options={{
+              options={({ navigation }) => ({
                 headerTitle: () => (
-                  <Image
-                    style={{ width: 40, height: 40, margin: 20 }}
-                    source={require('./tempTVRecsLogo.png')}
-                  />
+                  <TouchableOpacity onPress={() => navigation.navigate('Main')}>
+                    <Image
+                      style={{ width: 40, height: 40, margin: 20 }}
+                      source={require('./tempTVRecsLogo.png')}
+                    />
+                  </TouchableOpacity>
                 ),
-              }}
+              })}
             />
             <Stack.Screen
               name="Show"
               component={SingleShow}
               navigation={props.navigation}
-              options={{
+              options={({ navigation }) => ({
                 headerTitle: () => (
-                  <Image
-                    style={{ width: 40, height: 40, margin: 20 }}
-                    source={require('./tempTVRecsLogo.png')}
-                  />
+                  <TouchableOpacity onPress={() => navigation.navigate('Main')}>
+                    <Image
+                      style={{ width: 40, height: 40, margin: 20 }}
+                      source={require('./tempTVRecsLogo.png')}
+                    />
+                  </TouchableOpacity>
                 ),
-              }}
+              })}
             />
             <Stack.Screen
               name="TV rec'er"
               component={OtherUser}
               navigation={props.navigation}
-              options={{
+              options={({ navigation }) => ({
                 headerTitle: () => (
-                  <Image
-                    style={{ width: 40, height: 40, margin: 20 }}
-                    source={require('./tempTVRecsLogo.png')}
-                  />
+                  <TouchableOpacity onPress={() => navigation.navigate('Main')}>
+                    <Image
+                      style={{ width: 40, height: 40, margin: 20 }}
+                      source={require('./tempTVRecsLogo.png')}
+                    />
+                  </TouchableOpacity>
                 ),
-              }}
+              })}
             />
           </Stack.Navigator>
         </NavigationContainer>
