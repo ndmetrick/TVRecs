@@ -26,6 +26,14 @@ const Tab = createMaterialTopTabNavigator();
 const Stack = createStackNavigator();
 
 function Profile(props) {
+  const [userFollowing, setUserFollowing] = useState({});
+
+  useEffect(() => {
+    if (props.currentUser) {
+      setUserFollowing(props.following);
+    }
+  }, [props.currentUser]);
+
   // const isFocused = useIsFocused();
   // const [currentUser, setCurrentUser] = useState(null);
   // const [currentUserShows, setCurrentUserShows] = useState([]);
@@ -39,7 +47,6 @@ function Profile(props) {
     try {
       await AuthSession.dismiss();
       await props.logout();
-      console.log('current user in Profile', props.currentUser);
       return props.navigation.navigate('AddShow');
     } catch (e) {
       console.log(e);
@@ -61,10 +68,31 @@ function Profile(props) {
           {user.firstName} {user.lastName}
         </Text> */}
         {/* <Text style={styles.text}>{currentUser.username}</Text> */}
-        <Text style={styles.text}>
-          You are receiving recs from {props.following.length}{' '}
-          {props.following.length === 1 ? 'person' : 'people'}
-        </Text>
+        {userFollowing.length > 0 ? (
+          <View>
+            <TouchableOpacity
+              onPress={() =>
+                props.navigation.navigate('UsersFollowing', {
+                  previous: 'Profile',
+                  userInfo: props.currentUser,
+                  userFollowing: userFollowing,
+                })
+              }
+            >
+              <Text style={styles.text}>
+                Receiving recs from{' '}
+                <Text style={{ color: 'blue' }}>{props.following.length}</Text>{' '}
+                {props.following.length === 1 ? 'person' : 'people'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View>
+            <Text style={styles.text}>
+              Receiving recs from {userFollowing.length} people
+            </Text>
+          </View>
+        )}
         {/* Add in who is following */}
         <Text style={styles.text}>
           You are recommending {currentUserShows.length}{' '}

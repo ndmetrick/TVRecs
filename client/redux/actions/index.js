@@ -155,6 +155,7 @@ export function getUserFollowing(uid) {
             type: types.GET_OTHER_USER_FOLLOWING,
             following: followed.data,
           });
+          return followed.data;
         } else {
           dispatch({
             type: types.GET_USER_FOLLOWING,

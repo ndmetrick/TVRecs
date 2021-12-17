@@ -22,11 +22,11 @@ import OtherUser from './client/components/Main/OtherUser';
 import SingleShow from './client/components/Main/SingleShow';
 import MainLoggedOut from './client/components/MainLoggedOut';
 import Login from './client/components/auth/Login';
+import UsersFollowing from './client/components/Main/UsersFollowing/';
 import { clearData } from './client/redux/actions';
 
 const Start = (props) => {
   const Stack = createStackNavigator();
-  console.log('props', props);
 
   const [user, setUser] = useState(null);
 
@@ -139,6 +139,21 @@ const Start = (props) => {
                 ),
               })}
             />
+            <Stack.Screen
+              name="UsersFollowing"
+              component={UsersFollowing}
+              navigation={props.navigation}
+              options={({ navigation }) => ({
+                headerTitle: () => (
+                  <TouchableOpacity onPress={() => navigation.navigate('Main')}>
+                    <Image
+                      style={{ width: 40, height: 40, margin: 20 }}
+                      source={require('./tempTVRecsLogo.png')}
+                    />
+                  </TouchableOpacity>
+                ),
+              })}
+            />
           </Stack.Navigator>
         </NavigationContainer>
       ) : (
@@ -192,6 +207,21 @@ const Start = (props) => {
                     style={{ width: 40, height: 40, margin: 20 }}
                     source={require('./tempTVRecsLogo.png')}
                   />
+                ),
+              }}
+            />
+            <Stack.Screen
+              name="UsersFollowing"
+              component={UsersFollowing}
+              navigation={props.navigation}
+              options={{
+                headerTitle: () => (
+                  <TouchableOpacity onPress={() => navigation.navigate('Main')}>
+                    <Image
+                      style={{ width: 40, height: 40, margin: 20 }}
+                      source={require('./tempTVRecsLogo.png')}
+                    />
+                  </TouchableOpacity>
                 ),
               }}
             />

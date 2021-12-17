@@ -110,7 +110,7 @@ export default function userReducer(state = initialState, action) {
             // ),
           };
     case SWITCH_SHOW:
-      return action.oldType === 'toWatch'
+      return action.oldType === 'watch'
         ? {
             ...state,
             userShows: [...state.userShows, action.userShow],

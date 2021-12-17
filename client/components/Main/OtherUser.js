@@ -15,6 +15,7 @@ import {
   follow,
   unfollow,
   getUsersFollowingRecs,
+  getUserFollowing,
 } from '../../redux/actions';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
@@ -32,6 +33,7 @@ function OtherUser(props) {
   const [following, setFollowing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loggedIn, setLoggedIn] = useState(false);
+  const [userFollowing, setUserFollowing] = useState({});
 
   // const isFocused = useIsFocused();
 
@@ -47,11 +49,13 @@ function OtherUser(props) {
     const getUser = async () => {
       try {
         if (uid) {
-          console.log('another user', uid);
           const otherUser = await props.getOtherUser(uid);
           const otherUserShows = await props.getUserShows(uid);
+          const otherUserFollowing = await props.getUserFollowing(uid);
+          console.log('otherUserFollowing', otherUserFollowing);
           setUser(otherUser);
           setUserShows(otherUserShows);
+          setUserFollowing(otherUserFollowing);
           if (
             props.following.filter((followed) => followed.id === uid).length
           ) {
@@ -75,6 +79,7 @@ function OtherUser(props) {
       setUserShows([]);
       setUser(null);
       setFollowing(false);
+      setUserFollowing({});
     };
   }, [props.route.params.uid, props.following]);
 
@@ -110,15 +115,41 @@ function OtherUser(props) {
   return (
     <View style={styles.container}>
       <View style={styles.containerInfo}>
-        {/* <Text style={styles.text}>
-          {user.firstName} {user.lastName}
-        </Text> */}
         <Text style={styles.text}>{user.username}</Text>
-        {/* <Text style={styles.text}>
-          Receiving recs from {props.following.length} people
-        </Text> */}
+
+        {userFollowing.length > 0 ? (
+          <View>
+            <TouchableOpacity
+              onPress={() =>
+                props.navigation.navigate('UsersFollowing', {
+                  previous: 'OtherUser',
+                  userInfo: user,
+                  userFollowing: userFollowing,
+                })
+              }
+            >
+              <Text style={styles.text}>
+                Receiving recs from{' '}
+                <Text style={{ color: 'blue' }}>{userFollowing.length}</Text>{' '}
+                {userFollowing.length === 1 ? 'person' : 'people'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View>
+            <Text style={styles.text}>
+              Receiving recs from {userFollowing.length} people
+            </Text>
+          </View>
+        )}
+
         {/* Add in who is following */}
-        <Text style={styles.text}>Recommending {userShows.length} shows</Text>
+
+        <Text style={styles.text}>
+          Recommending {userShows.length}{' '}
+          {userShows.length === 1 ? 'show' : 'shows'}
+        </Text>
+
         <View>
           {following ? (
             <View style={styles.buttonContainer}>
@@ -231,7 +262,6 @@ const mapStateToProps = (store) => ({
   otherUser: store.otherUser.userInfo,
   currentUserShows: store.currentUser.userShows,
   otherUserShows: store.otherUser.userShows,
-
   following: store.currentUser.following,
   otherUsers: store.allOtherUsers.usersInfo,
 });
@@ -241,6 +271,7 @@ const mapDispatch = (dispatch) => {
     getUserShows: (uid) => dispatch(getUserShows(uid)),
     unfollow: (uid) => dispatch(unfollow(uid)),
     follow: (uid) => dispatch(follow(uid)),
+    getUserFollowing: (uid) => dispatch(getUserFollowing(uid)),
     getUsersFollowingRecs: () => dispatch(getUsersFollowingRecs()),
   };
 };

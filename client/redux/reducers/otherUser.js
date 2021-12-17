@@ -23,7 +23,6 @@ export default function otherUserReducer(state = initialState, action) {
         userInfo: action.user,
       };
     case GET_OTHER_USER_SHOWS:
-      console.log('i got this far and usershowsare: ', action.userShows);
       return {
         ...state,
         userShows: action.userShows,

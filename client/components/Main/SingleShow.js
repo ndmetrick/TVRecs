@@ -45,11 +45,7 @@ function SingleShow(props) {
       setUser(userInfo);
       setCountry(userInfo.country);
     } else {
-      if (userInfo.id === currentUser.id) {
-        setUser(currentUser);
-        setIsCurrentUser(true);
-        setCountry(userInfo.country);
-      } else {
+      if (userInfo !== null) {
         const imdbId = userShow.show.imdbId;
         let recCounts = {};
         recCounts[imdbId] = {
@@ -70,6 +66,12 @@ function SingleShow(props) {
           }
         });
         setMultipleRecInfo(recCounts);
+      }
+      if (userInfo.id === currentUser.id) {
+        setUser(currentUser);
+        setIsCurrentUser(true);
+        setCountry(userInfo.country);
+      } else {
         setUser(userInfo);
         setCountry(userInfo.country);
       }
@@ -111,6 +113,7 @@ function SingleShow(props) {
 
   const addShow = async (userShow, currentType, userShowId) => {
     try {
+      console.log('this is userShowId', userShowId);
       // if the type variable is being changed (i.e. the show is moving from to-watch to recommended),
       if (userShowId) {
         console.log('i got in here and userShowId is:', userShowId);
@@ -197,7 +200,19 @@ function SingleShow(props) {
         {/* <Text style={styles.text}>
           {user.firstName} {user.lastName}
         </Text> */}
-        <Text style={styles.text}>{user.username}</Text>
+        {isCurrentUser ? (
+          <Text style={styles.text}>{user.username}</Text>
+        ) : (
+          <TouchableOpacity
+            onPress={() =>
+              props.navigation.navigate("TV rec'er", {
+                uid: user.id,
+              })
+            }
+          >
+            <Text style={styles.text}>{user.username}</Text>
+          </TouchableOpacity>
+        )}
       </View>
       {multipleRecInfo[userShow.show.imdbId].num < 2 ? null : (
         <View>
@@ -205,8 +220,13 @@ function SingleShow(props) {
           <TouchableOpacity onPress={() => setModalVisible(true)}>
             <Text style={{ color: 'blue' }}>
               {`${multipleRecInfo[userShow.show.imdbId].num - 1}`}{' '}
-              {multipleRecInfo[userShow.show.imdbId].num > 2
+              {multipleRecInfo[userShow.show.imdbId].num > 2 && isCurrentUser
+                ? 'people you follow'
+                : multipleRecInfo[userShow.show.imdbId].num > 2 &&
+                  !isCurrentUser
                 ? 'other people you follow'
+                : multipleRecInfo[userShow.show.imdbId].num < 3 && isCurrentUser
+                ? 'person you follow'
                 : 'other person you follow'}
             </Text>
           </TouchableOpacity>
