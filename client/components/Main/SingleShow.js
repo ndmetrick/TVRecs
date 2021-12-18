@@ -566,11 +566,6 @@ const styles = StyleSheet.create({
   showsList: {
     flex: 1,
   },
-  separator: {
-    marginVertical: 8,
-    borderBottomColor: '#6F98AE',
-    borderBottomWidth: 2,
-  },
   image: {
     aspectRatio: 1,
     resizeMode: 'contain',

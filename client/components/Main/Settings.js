@@ -13,6 +13,7 @@ import { logout, changeCountry } from '../../redux/actions';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import * as AuthSession from 'expo-auth-session';
+import UserTagsAndDescription from './UserTagsAndDescription';
 
 import ViewShows from './ViewShows';
 
@@ -61,6 +62,16 @@ function Settings(props) {
     setSaveCountry(false);
   };
 
+  const displayTags = (tags) => {
+    return tags.map((tag, key) => {
+      return (
+        <View key={key} style={styles.userTags}>
+          <Text style={styles.tagText}>{tag.name}</Text>
+        </View>
+      );
+    });
+  };
+
   return (
     <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -104,6 +115,32 @@ function Settings(props) {
             </View>
           </View>
         ) : null}
+
+        <View>
+          <Text style={styles.text}>
+            Just as you can add tags and descriptions to a TV show, you can add
+            them to your own profile. Other users looking at your profile will
+            see these tags and description along with all the shows you're
+            recommending. These will give others a view into what kinds of shows
+            you like and why, and will help them decide if your recommendations
+            might be a good match for them. People you don't know will also be
+            able to search for you based on these tags (for instance if they
+            want to receive recommendations from others who also like TV shows
+            with the 'town comes together' theme or they also like really silly
+            shows.
+          </Text>
+          <UserTagsAndDescription previous="Settings" />
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => props.navigation.navigate('User Tags')}
+            >
+              <Text style={styles.buttonText}>
+                Add/change user tags and description
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </ScrollView>
     </View>
   );
@@ -113,6 +150,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     marginBottom: 30,
+    marginRight: 10,
+    marginLeft: 10,
   },
   containerInfo: {
     margin: 5,
@@ -132,6 +171,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
+    margin: 10,
   },
   button: {
     padding: 10,
@@ -139,6 +179,26 @@ const styles = StyleSheet.create({
     marginHorizontal: 3,
     backgroundColor: '#586BA4',
     marginTop: 5,
+  },
+  cardContent: {
+    flexDirection: 'row',
+    marginLeft: 10,
+  },
+  tagsContent: {
+    marginTop: 10,
+    flexWrap: 'wrap',
+    marginBottom: 10,
+  },
+  userTags: {
+    padding: 10,
+    borderRadius: 40,
+    marginHorizontal: 3,
+    backgroundColor: '#36C9C6',
+    marginTop: 5,
+  },
+  tagText: {
+    fontSize: 13.5,
+    fontWeight: '500',
   },
 });
 
@@ -149,6 +209,7 @@ const mapStateToProps = (store) => ({
   otherUserShows: store.otherUser.userShows,
   following: store.currentUser.following,
   otherUsers: store.allOtherUsers.usersInfo,
+  userTags: store.currentUser.userTags,
 });
 const mapDispatch = (dispatch) => {
   return {

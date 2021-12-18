@@ -40,7 +40,6 @@ function AddShowTags(props) {
       }
     }
 
-    setLoaded(true);
     setWarningTags(warnings);
     setTVTags(tv);
     setLoaded(true);

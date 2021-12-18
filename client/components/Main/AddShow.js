@@ -176,7 +176,10 @@ const AddShow = (props) => {
   const image = { uri: imageUrl };
   return (
     <View style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
         {!added ? (
           <View style={{ flex: 1 }}>
             <View>

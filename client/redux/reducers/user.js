@@ -140,6 +140,7 @@ export default function userReducer(state = initialState, action) {
       return {
         ...state,
         userTags: action.tags,
+        userInfo: { ...state.userInfo, description: action.description },
       };
     case CHANGE_SHOW_TAGS:
       return action.userShow.type === 'rec'
@@ -189,11 +190,6 @@ export default function userReducer(state = initialState, action) {
         ...state,
         recShows: action.recs,
       };
-    // case GET_TAGS:
-    //   return {
-    //     ...state,
-    //     tags: action.tags,
-    //   };
     case LOGGING_OUT:
       return { ...initialState, loggingOut: true };
     case CLEAR_DATA:

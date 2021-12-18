@@ -94,7 +94,6 @@ function UsersFollowing(props) {
   };
 
   if (user === null || following.length === 0) {
-    console.log('this is where I am');
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#5500dc" />

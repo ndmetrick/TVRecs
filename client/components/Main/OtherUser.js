@@ -16,10 +16,11 @@ import {
   unfollow,
   getUsersFollowingRecs,
   getUserFollowing,
+  getUserTags,
 } from '../../redux/actions';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-
+import UserTagsAndDescription from './UserTagsAndDescription';
 import ViewShows from './ViewShows';
 
 const Tab = createMaterialTopTabNavigator();
@@ -34,6 +35,7 @@ function OtherUser(props) {
   const [loading, setLoading] = useState(true);
   const [loggedIn, setLoggedIn] = useState(false);
   const [userFollowing, setUserFollowing] = useState({});
+  const [userTags, setUserTags] = useState(null);
 
   // const isFocused = useIsFocused();
 
@@ -52,15 +54,15 @@ function OtherUser(props) {
           const otherUser = await props.getOtherUser(uid);
           const otherUserShows = await props.getUserShows(uid);
           const otherUserFollowing = await props.getUserFollowing(uid);
-          console.log('otherUserFollowing', otherUserFollowing);
+          const otherUserTags = await props.getUserTags(uid);
           setUser(otherUser);
           setUserShows(otherUserShows);
           setUserFollowing(otherUserFollowing);
+          setUserTags(otherUserTags);
           if (
             props.following.filter((followed) => followed.id === uid).length
           ) {
             // if (props.following.includes(uid)) {
-            console.log('i got in here', props.following);
             setFollowing(true);
             setLoading(false);
           } else {
@@ -80,6 +82,7 @@ function OtherUser(props) {
       setUser(null);
       setFollowing(false);
       setUserFollowing({});
+      setUserTags(null);
     };
   }, [props.route.params.uid, props.following]);
 
@@ -101,8 +104,7 @@ function OtherUser(props) {
     }
   };
 
-  if (loading || user === null) {
-    console.log('this is where I am');
+  if (loading === null || userTags === null || user === null) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#5500dc" />
@@ -215,6 +217,16 @@ function OtherUser(props) {
             tabBarLabel: 'Recs',
           }}
         />
+        {user.description || userTags.length ? (
+          <Tab.Screen
+            name="Tags/Description"
+            component={UserTagsAndDescription}
+            initialParams={{ user, userTags }}
+            options={{
+              tabBarLabel: 'Tags/Description',
+            }}
+          />
+        ) : null}
       </Tab.Navigator>
     </View>
   );
@@ -273,6 +285,7 @@ const mapDispatch = (dispatch) => {
     follow: (uid) => dispatch(follow(uid)),
     getUserFollowing: (uid) => dispatch(getUserFollowing(uid)),
     getUsersFollowingRecs: () => dispatch(getUsersFollowingRecs()),
+    getUserTags: (uid) => dispatch(getUserTags(uid)),
   };
 };
 export default connect(mapStateToProps, mapDispatch)(OtherUser);

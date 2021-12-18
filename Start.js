@@ -23,6 +23,7 @@ import SingleShow from './client/components/Main/SingleShow';
 import MainLoggedOut from './client/components/MainLoggedOut';
 import Login from './client/components/auth/Login';
 import UsersFollowing from './client/components/Main/UsersFollowing/';
+import PickUserTags from './client/components/Main/PickUserTags/';
 import { clearData } from './client/redux/actions';
 
 const Start = (props) => {
@@ -142,6 +143,21 @@ const Start = (props) => {
             <Stack.Screen
               name="UsersFollowing"
               component={UsersFollowing}
+              navigation={props.navigation}
+              options={({ navigation }) => ({
+                headerTitle: () => (
+                  <TouchableOpacity onPress={() => navigation.navigate('Main')}>
+                    <Image
+                      style={{ width: 40, height: 40, margin: 20 }}
+                      source={require('./tempTVRecsLogo.png')}
+                    />
+                  </TouchableOpacity>
+                ),
+              })}
+            />
+            <Stack.Screen
+              name="User Tags"
+              component={PickUserTags}
               navigation={props.navigation}
               options={({ navigation }) => ({
                 headerTitle: () => (

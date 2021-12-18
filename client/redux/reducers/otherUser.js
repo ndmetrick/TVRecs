@@ -17,7 +17,6 @@ const initialState = {
 export default function otherUserReducer(state = initialState, action) {
   switch (action.type) {
     case GET_OTHER_USER:
-      console.log('i got to this part and otherUser is:', action.user);
       return {
         ...state,
         userInfo: action.user,

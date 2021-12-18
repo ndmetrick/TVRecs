@@ -2,11 +2,11 @@ import axios from 'axios';
 import types from '../constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const baseUrl = 'https://tvrecs.herokuapp.com';
+// const baseUrl = 'https://tvrecs.herokuapp.com';
 
 // const baseUrl = 'https://10.0.0.98:8080';
 
-// const baseUrl = 'http://10.0.0.171:8080';
+const baseUrl = 'http://10.0.0.171:8080';
 // const baseUrl = 'http://localhost:8080';
 
 const getToken = async () => {
@@ -227,17 +227,21 @@ export function changeCountry(newCountry) {
   };
 }
 
-export function changeUserTags(userTagIds) {
+export function changeUserTagsAndDescription(userTagIds, description) {
   return async (dispatch) => {
     try {
       const headers = await getToken();
-      const tags = await axios.put(
+      const changedInfo = await axios.put(
         `${baseUrl}/api/users/changeUserTags/`,
-        userTagIds,
+        { userTagIds, description },
         headers
       );
-      if (tags) {
-        dispatch({ type: types.CHANGE_USER_TAGS, tags: tags.data });
+      if (changedInfo) {
+        dispatch({
+          type: types.CHANGE_USER_TAGS,
+          tags: changedInfo.data.tags,
+          description: changedInfo.data.description,
+        });
       } else {
         console.log('Something went wrong trying to add tags');
       }
@@ -258,6 +262,7 @@ export function getUserTags(uid) {
       if (tags) {
         if (uid) {
           dispatch({ type: types.GET_OTHER_USER_TAGS, tags: tags.data });
+          return tags.data;
         } else {
           dispatch({ type: types.GET_USER_TAGS, tags: tags.data });
         }
@@ -450,7 +455,7 @@ export default {
   getUserShows,
   getUsersFollowingRecs,
   getUserTags,
-  changeUserTags,
+  changeUserTagsAndDescription,
   changeShowTags,
   getAuthInfo,
   getAPIKey,
