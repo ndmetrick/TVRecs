@@ -100,72 +100,9 @@ function SingleShow(props) {
     };
   }, [props.route.params.userInfo, type, isFocused]);
 
-  // console.log('current', props.currentUser);
-  // console.log(
-  //   'bool',
-  //   props.currentUserShows
-  //     .concat(props.watchShows)
-  //     .concat(props.seenShows)
-  //     .find((currentUserShow) => {
-  //       return currentUserShow.show.imdbId === userShow.show.imdbId;
-  //     })
-  // );
-
-  const addShow = async (userShow, currentType, userShowId) => {
-    try {
-      console.log('this is userShowId', userShowId);
-      // if the type variable is being changed (i.e. the show is moving from to-watch to recommended),
-      if (userShowId) {
-        console.log('i got in here and userShowId is:', userShowId);
-        await props.switchShow(userShowId, userShow.description, currentType);
-        // Alert.alert(
-        //   'Show added',
-        //   `${userShow.show.name} was added to your rec'd shows and removed from your watch list`,
-        //   {
-        //     text: 'OK',
-        //   }
-        // );
-        setType('rec');
-        return props.navigation.goBack();
-      } else {
-        const showData = {
-          showName: userShow.show.name,
-          imageUrl: userShow.show.imageUrl,
-          imdbId: userShow.show.imdbId,
-        };
-        if (currentType === 'watch') {
-          showData.description = userShow.description;
-        } else {
-          showData.description = '';
-        }
-        await props.addShow(showData, currentType);
-        // Alert.alert(
-        //   'Show added',
-        //   `${userShow.show.name} was added to your ${
-        //     currentType === 'rec' ? "rec'd shows" : 'watch list'
-        //   }`,
-        //   {
-        //     text: 'OK',
-        //   }
-        // );
-        // WE JUST WANT TO GO BACK ACTUALLY
-        // return props.navigation.navigate('OtherUser', {
-        //   uid: user.id,
-        //   changedState: true,
-        // });
-        return props.navigation.goBack();
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
   const deleteShow = async () => {
     try {
       await props.deleteShow(userShow.show.id);
-      // return props.navigation.navigate('Profile', {
-      //   changedState: true,
-      // });
       return props.navigation.goBack();
     } catch (err) {
       console.error(err);
@@ -197,9 +134,6 @@ function SingleShow(props) {
   return (
     <View style={styles.container}>
       <View style={styles.containerInfo}>
-        {/* <Text style={styles.text}>
-          {user.firstName} {user.lastName}
-        </Text> */}
         {isCurrentUser ? (
           <Text style={styles.text}>{user.username}</Text>
         ) : (
@@ -258,6 +192,41 @@ function SingleShow(props) {
                 {userShow.description}
               </Text>
             ) : null}
+            {userShow.tags.length ? (
+              <View>
+                {tvTags.length ? (
+                  <View>
+                    {isCurrentUser ? (
+                      <Text style={{ ...styles.text, fontWeight: 'bold' }}>
+                        My tags:
+                      </Text>
+                    ) : (
+                      <Text style={styles.text}>
+                        I think these tags describe some important things about
+                        the show and its themes:
+                      </Text>
+                    )}
+                    <View style={[styles.cardContent, styles.tagsContent]}>
+                      {displayTags(tvTags)}
+                    </View>
+                  </View>
+                ) : null}
+
+                {warningTags.length ? (
+                  <View>
+                    {isCurrentUser ? null : (
+                      <Text style={styles.text}>
+                        There is some content in this show I think potential
+                        viewers should be warned about:
+                      </Text>
+                    )}
+                    <View style={[styles.cardContent, styles.tagsContent]}>
+                      {displayTags(warningTags)}
+                    </View>
+                  </View>
+                ) : null}
+              </View>
+            ) : null}
             {!streamingAndPurchase && props.currentUser ? (
               <View style={styles.buttonContainer}>
                 <TouchableOpacity
@@ -287,38 +256,6 @@ function SingleShow(props) {
                 />
               </View>
             )}
-            {userShow.tags.length ? (
-              <View>
-                {tvTags.length ? (
-                  <View>
-                    {isCurrentUser ? null : (
-                      <Text style={styles.text}>
-                        I think these tags describe some important things about
-                        the show and its themes:
-                      </Text>
-                    )}
-
-                    <View style={[styles.cardContent, styles.tagsContent]}>
-                      {displayTags(tvTags)}
-                    </View>
-                  </View>
-                ) : null}
-
-                {warningTags.length ? (
-                  <View>
-                    {isCurrentUser ? null : (
-                      <Text style={styles.text}>
-                        There is some content in this show I think potential
-                        viewers should be warned about:
-                      </Text>
-                    )}
-                    <View style={[styles.cardContent, styles.tagsContent]}>
-                      {displayTags(warningTags)}
-                    </View>
-                  </View>
-                ) : null}
-              </View>
-            ) : null}
             {isCurrentUser ? (
               <View
                 style={{
@@ -365,29 +302,46 @@ function SingleShow(props) {
                     <TouchableOpacity
                       style={styles.button}
                       onPress={() =>
-                        Alert.alert('Save current description and tags?', '', [
-                          {
-                            text: 'Save description/tags',
-                            onPress: () =>
-                              addShow(userShow, 'rec', userShow.id),
-                          },
-                          {
-                            // if we're switching, we will need the userShow id on the back end
-                            text: 'Change descripion and/or tags',
-                            onPress: () =>
-                              props.navigation.navigate('AddShow', {
-                                userShow,
-                                type: 'rec',
-                                userShowId: userShow.id,
-                              }),
-                          },
-                          {
-                            text: 'Cancel',
-                          },
-                        ])
+                        Alert.alert(
+                          `Save your current description and tags?`,
+                          '',
+                          [
+                            {
+                              text: 'Yes',
+                              onPress: () =>
+                                props.navigation.navigate('Save show', {
+                                  showData: {
+                                    userShow,
+                                    type: 'rec',
+                                    keep: true,
+                                  },
+                                  previous: 'SingleShow',
+                                  fromCurrentUserShow: true,
+                                }),
+                            },
+                            {
+                              text: 'No',
+                              onPress: () =>
+                                props.navigation.navigate('Save show', {
+                                  showData: {
+                                    userShow,
+                                    type: 'rec',
+                                    keep: false,
+                                  },
+                                  previous: 'SingleShow',
+                                  fromCurrentUserShow: true,
+                                }),
+                            },
+                            {
+                              text: 'Cancel',
+                            },
+                          ]
+                        )
                       }
                     >
-                      <Text style={styles.buttonText}>Recommend</Text>
+                      <Text style={styles.buttonText}>
+                        Switch to recommended
+                      </Text>
                     </TouchableOpacity>
                   </View>
                 ) : null}
@@ -397,29 +351,44 @@ function SingleShow(props) {
                     <TouchableOpacity
                       style={styles.button}
                       onPress={() =>
-                        Alert.alert('Save current description/tags?', '', [
-                          {
-                            text: 'Save description/tags',
-                            onPress: () =>
-                              addShow(userShow, 'rec', userShow.id),
-                          },
-                          {
-                            // if we're switching, we will need the userShow id on the back end
-                            text: 'Write new description and/or tags',
-                            onPress: () =>
-                              props.navigation.navigate('AddShow', {
-                                userShow,
-                                type: 'rec',
-                                userShowId: userShow.id,
-                              }),
-                          },
-                          {
-                            text: 'Cancel',
-                          },
-                        ])
+                        Alert.alert(
+                          `Save your current description and tags?`,
+                          '',
+                          [
+                            {
+                              text: 'Yes',
+                              onPress: () =>
+                                props.navigation.navigate('Save show', {
+                                  showData: {
+                                    userShow,
+                                    type: 'seen',
+                                    keep: true,
+                                  },
+                                  previous: 'SingleShow',
+                                  fromCurrentUserShow: true,
+                                }),
+                            },
+                            {
+                              text: 'No',
+                              onPress: () =>
+                                props.navigation.navigate('Save show', {
+                                  showData: {
+                                    userShow,
+                                    type: 'seen',
+                                    keep: false,
+                                  },
+                                  previous: 'SingleShow',
+                                  fromCurrentUserShow: true,
+                                }),
+                            },
+                            {
+                              text: 'Cancel',
+                            },
+                          ]
+                        )
                       }
                     >
-                      <Text style={styles.buttonText}>Add to seen list</Text>
+                      <Text style={styles.buttonText}>Switch to seen list</Text>
                     </TouchableOpacity>
                   </View>
                 ) : null}
@@ -443,23 +412,45 @@ function SingleShow(props) {
                       <TouchableOpacity
                         style={styles.button}
                         onPress={() =>
-                          Alert.alert('Add description/tags now?', '', [
-                            {
-                              text: 'Add tags',
-                              onPress: () =>
-                                props.navigation.navigate('AddShow', {
-                                  userShow,
-                                  type: 'Skip',
-                                }),
-                            },
-                            {
-                              text: 'Skip tags',
-                              onPress: () => addShow(userShow, 'rec'),
-                            },
-                            {
-                              text: 'Cancel',
-                            },
-                          ])
+                          Alert.alert(
+                            `Save this user's description and tags?`,
+                            '',
+                            [
+                              {
+                                text: 'Yes',
+                                onPress: () =>
+                                  props.navigation.navigate('Save show', {
+                                    showData: {
+                                      showName: userShow.show.name,
+                                      imageUrl: userShow.show.imageUrl,
+                                      imdbId: userShow.show.imdbId,
+                                      description: userShow.description,
+                                      tags: userShow.tags,
+                                      type: 'rec',
+                                    },
+                                    previous: 'SingleShow',
+                                    fromCurrentUserShow: false,
+                                  }),
+                              },
+                              {
+                                text: 'No',
+                                onPress: () =>
+                                  props.navigation.navigate('Save show', {
+                                    showData: {
+                                      showName: userShow.show.name,
+                                      imageUrl: userShow.show.imageUrl,
+                                      imdbId: userShow.show.imdbId,
+                                      type: 'rec',
+                                    },
+                                    previous: 'SingleShow',
+                                    fromCurrentUserShow: false,
+                                  }),
+                              },
+                              {
+                                text: 'Cancel',
+                              },
+                            ]
+                          )
                         }
                       >
                         <Text style={styles.buttonText}>Recommend</Text>
@@ -470,19 +461,37 @@ function SingleShow(props) {
                         style={styles.button}
                         onPress={() =>
                           Alert.alert(
-                            `Keep this user's description/tags?`,
+                            `Save this user's description and tags?`,
                             '',
                             [
                               {
                                 text: 'Yes',
-                                onPress: () => addShow(userShow, 'watch'),
+                                onPress: () =>
+                                  props.navigation.navigate('Save show', {
+                                    showData: {
+                                      showName: userShow.show.name,
+                                      imageUrl: userShow.show.imageUrl,
+                                      imdbId: userShow.show.imdbId,
+                                      description: userShow.description,
+                                      tags: userShow.tags,
+                                      type: 'watch',
+                                    },
+                                    previous: 'SingleShow',
+                                    fromCurrentUserShow: false,
+                                  }),
                               },
                               {
-                                text: 'Write my own',
+                                text: 'No',
                                 onPress: () =>
-                                  props.navigation.navigate('AddShow', {
-                                    userShow,
-                                    type: 'watch',
+                                  props.navigation.navigate('Save show', {
+                                    showData: {
+                                      showName: userShow.show.name,
+                                      imageUrl: userShow.show.imageUrl,
+                                      imdbId: userShow.show.imdbId,
+                                      type: 'watch',
+                                    },
+                                    previous: 'SingleShow',
+                                    fromCurrentUserShow: false,
                                   }),
                               },
                               {
@@ -500,20 +509,37 @@ function SingleShow(props) {
                         style={styles.button}
                         onPress={() =>
                           Alert.alert(
-                            `keep this user's description/tags?`,
+                            `Save this user's description and tags?`,
                             '',
                             [
                               {
                                 text: 'Yes',
-                                onPress: () => addShow(userShow, 'seen'),
+                                onPress: () =>
+                                  props.navigation.navigate('Save show', {
+                                    showData: {
+                                      showName: userShow.show.name,
+                                      imageUrl: userShow.show.imageUrl,
+                                      imdbId: userShow.show.imdbId,
+                                      description: userShow.description,
+                                      tags: userShow.tags,
+                                      type: 'seen',
+                                    },
+                                    previous: 'SingleShow',
+                                    fromCurrentUserShow: false,
+                                  }),
                               },
                               {
-                                // if we're switching, we will need the userShow id on the back end
-                                text: 'Write my own',
+                                text: 'No',
                                 onPress: () =>
-                                  props.navigation.navigate('AddShow', {
-                                    userShow,
-                                    type: 'seen',
+                                  props.navigation.navigate('Save show', {
+                                    showData: {
+                                      showName: userShow.show.name,
+                                      imageUrl: userShow.show.imageUrl,
+                                      imdbId: userShow.show.imdbId,
+                                      type: 'seen',
+                                    },
+                                    previous: 'SingleShow',
+                                    fromCurrentUserShow: false,
                                   }),
                               },
                               {
@@ -572,7 +598,7 @@ const styles = StyleSheet.create({
   },
   text: {
     textAlign: 'left',
-    fontSize: 16,
+    fontSize: 18,
     margin: 10,
   },
   cardContent: {
@@ -580,7 +606,6 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   tagsContent: {
-    marginTop: 10,
     flexWrap: 'wrap',
     marginBottom: 10,
   },
@@ -634,8 +659,8 @@ const mapDispatch = (dispatch) => {
   return {
     addShow: (showInfo, type) => dispatch(addShow(showInfo, type)),
     deleteShow: (showId) => dispatch(deleteShow(showId)),
-    switchShow: (userShowId, description, newType, tags) =>
-      dispatch(switchShow(userShowId, description, newType, tags)),
+    switchShow: (userShowId, newType) =>
+      dispatch(switchShow(userShowId, newType)),
   };
 };
 

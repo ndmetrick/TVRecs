@@ -11,91 +11,122 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { connect } from 'react-redux';
-import { addShow, switchShow } from '../../redux/actions';
+import {
+  addShow,
+  switchShow,
+  changeShowTagsAndDescription,
+} from '../../redux/actions';
 
 import { NavigationContainer } from '@react-navigation/native';
 
 function SaveShow(props) {
-  const { imageUrl, showName, description, imdbId, type, userShowId } =
-    props.route.params || '';
-
-  const [goBack, setGoBack] = useState(false);
   const [userShow, setUserShow] = useState({});
   const [loading, setLoading] = useState(true);
+  const [previous, setPrevious] = useState(null);
+  const [fromCurrentUserShow, setFromCurrentUserShow] = useState(false);
+  const [showInfo, setShowInfo] = useState(null);
+  const [tags, setTags] = useState(null);
+  const [description, setDescription] = useState(null);
 
   useEffect(() => {
+    const { showData } = props.route.params;
+    if (props.route.params.previous === 'SingleShow') {
+      const { fromCurrentUserShow } = props.route.params;
+      if (!fromCurrentUserShow) {
+        setFromCurrentUserShow(false);
+        setPrevious('SingleShow');
+        setShowInfo(showData);
+        if (showData.keep === true) {
+          setDescription(showData.description);
+          setTags(showData.tags);
+        }
+      } else if (fromCurrentUserShow) {
+        setFromCurrentUserShow(true);
+        setPrevious('SingleShow');
+        setShowInfo(showData);
+        if (showData.keep === false) {
+          setDescription('');
+          setTags([]);
+        }
+      }
+    } else if (props.route.params.previous === 'AddShow') {
+      setFromCurrentUserShow(true);
+      setPrevious('AddShow');
+      setShowInfo(showData);
+    }
     const saveShowData = async () => {
-      const showData = {
-        showName,
-        description,
-        imageUrl,
-        imdbId,
-      };
-      if (userShowId) {
-        console.log('i know i am switching and userShowId equals', userShowId);
-        // setSwitching(true);
-        const show = await props.switchShow(userShowId, description, type);
-        setUserShow(show);
-        setLoading(false);
-      } else {
-        const show = await props.addShow(showData, type);
-        setUserShow(show);
-        setLoading(false);
+      try {
+        if (props.route.params.fromCurrentUserShow === true) {
+          const show = await props.switchShow(
+            showData.userShow.id,
+            showData.type
+          );
+          console.log('show in switch', show);
+          setUserShow(show);
+          setLoading(false);
+        } else {
+          const show = await props.addShow(showData, showData.type);
+          console.log('show here', show);
+          setUserShow(show);
+          setLoading(false);
+        }
+      } catch (err) {
+        console.log(err);
       }
     };
     saveShowData();
-    // } else {
-    //   setGoBack(true);
-    // }
     return () => {
       setUserShow({});
       setLoading(true);
-      setGoBack(false);
+      setShowInfo(null);
+      setFromCurrentUserShow(false);
+      setPrevious(null);
+      setDescription(null);
+      setTags(null);
     };
-  }, []);
+  }, [props.route.params]);
 
-  const switchShow = async () => {
-    await props.switchShow(userShowId, description, type);
-
-    // Alert.alert(
-    //   'Show added',
-    //   `${showName} was added to your rec'd shows and removed from your watch list`,
-    //   {
-    //     text: 'OK',
-    //   }
-    // );
-    return props.navigation.navigate('Profile');
+  const skipTags = async () => {
+    try {
+      if (previous === 'AddShow') {
+        props.navigation.navigate('Profile');
+      } else if (fromCurrentUserShow) {
+        if (showInfo.keep === true) {
+          props.navigation.navigate('Profile');
+        } else {
+          await changeShowTagsAndDescription(tags, userShow.id, description);
+        }
+      } else {
+        if (showInfo.keep === false) {
+          props.navigation.goBack();
+        } else {
+          const tagIds = tags.map((tag) => tag.id);
+          await changeShowTagsAndDescription(
+            tagIds,
+            userShow.id,
+            showInfo.description
+          );
+        }
+      }
+    } catch (err) {
+      console.log(err);
+    }
   };
 
-  const image = { uri: imageUrl };
-
-  if (goBack) {
+  const displayUserShowInfo = () => {
     return (
-      <View>
-        <Text style={styles.text}>
-          You've already added {showName} to your profile. If you'd like to edit
-          your tags or description or switch the list it's on, go to your own
-          page for {showName}.
-        </Text>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => props.navigation.popToTop()}
-          >
-            <Text style={styles.buttonText}>Oops, go back</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => props.navigation.navigate('Profile')}
-          >
-            <Text style={styles.buttonText}>Go to my profile</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      <Text style={styles.text}>
+        <Text style={{ fontWeight: 'bold' }}>{userShow.show.name}</Text> has
+        been added to your{' '}
+        {userShow.type === 'watch'
+          ? 'Watch'
+          : userShow.type === 'seen'
+          ? 'Seen'
+          : 'Rec'}{' '}
+        list{' '}
+      </Text>
     );
-  }
+  };
 
   if (loading) {
     return (
@@ -104,16 +135,12 @@ function SaveShow(props) {
       </View>
     );
   }
+
+  const image = { uri: userShow.show.imageUrl };
   return (
     <View>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <Text style={styles.text}>{showName}</Text>
-
-        {description ? (
-          <View>
-            <Text style={styles.text}>Description: {description}</Text>
-          </View>
-        ) : null}
+        {displayUserShowInfo()}
         <Image
           source={image}
           style={{ height: 300, resizeMode: 'contain', margin: 5 }}
@@ -124,20 +151,21 @@ function SaveShow(props) {
             onPress={() =>
               props.navigation.navigate('Add/Change Tags', {
                 userShow,
-                previous: 'Show added',
+                tags,
+                description,
+                previous: 'SaveShow',
               })
             }
           >
-            <Text style={styles.buttonText}>Next: add descriptive tags</Text>
+            <Text style={styles.buttonText}>
+              Next: add description and tags
+            </Text>
           </TouchableOpacity>
         </View>
-        {/* DEAL WITH THIS FOR SWITCHED OPTIONS */}
+
         <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => props.navigation.navigate('Profile')}
-          >
-            <Text style={styles.buttonText}>Skip tags</Text>
+          <TouchableOpacity style={styles.button} onPress={skipTags}>
+            <Text style={styles.buttonText}>Skip description/tags</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -155,7 +183,6 @@ const styles = StyleSheet.create({
     margin: 5,
     textAlign: 'center',
     fontSize: 20,
-    fontWeight: 'bold',
   },
   inputText: {
     margin: 5,
@@ -193,8 +220,10 @@ const mapStateToProps = (state) => ({
 const mapDispatch = (dispatch) => {
   return {
     addShow: (showInfo, type) => dispatch(addShow(showInfo, type)),
-    switchShow: (userShowId, description, newType) =>
-      dispatch(switchShow(userShowId, description, newType)),
+    switchShow: (userShowId, newType) =>
+      dispatch(switchShow(userShowId, newType)),
+    changeShowTagsAndDescription: (tagIds, userShowId, description) =>
+      dispatch(changeShowTagsAndDescription(tagIds, userShowId, description)),
   };
 };
 export default connect(mapStateToProps, mapDispatch)(SaveShow);

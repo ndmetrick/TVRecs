@@ -2,11 +2,11 @@ import axios from 'axios';
 import types from '../constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// const baseUrl = 'https://tvrecs.herokuapp.com';
+const baseUrl = 'https://tvrecs.herokuapp.com';
 
 // const baseUrl = 'https://10.0.0.98:8080';
 
-const baseUrl = 'http://10.0.0.171:8080';
+// const baseUrl = 'http://10.0.0.171:8080';
 // const baseUrl = 'http://localhost:8080';
 
 const getToken = async () => {
@@ -227,13 +227,17 @@ export function changeCountry(newCountry) {
   };
 }
 
-export function changeUserTagsAndDescription(userTagIds, description) {
+export function changeUserTagsAndDescription(
+  userTagIds,
+  userShowId,
+  description
+) {
   return async (dispatch) => {
     try {
       const headers = await getToken();
       const changedInfo = await axios.put(
         `${baseUrl}/api/users/changeUserTags/`,
-        { userTagIds, description },
+        { userTagIds, userShowId, description },
         headers
       );
       if (changedInfo) {
@@ -291,14 +295,14 @@ export function getAllTags() {
   };
 }
 
-export function changeShowTags(tagIds, userShowId) {
+export function changeShowTagsAndDescription(tagIds, userShowId, description) {
   return async (dispatch) => {
     try {
       const headers = await getToken();
       console.log('i got in here');
       const changedUserShow = await axios.put(
         `${baseUrl}/api/users/changeShowTags/`,
-        { tagIds, userShowId },
+        { tagIds, userShowId, description },
         headers
       );
       if (changedUserShow) {
@@ -316,13 +320,13 @@ export function changeShowTags(tagIds, userShowId) {
   };
 }
 
-export function switchShow(userShowId, description, newType) {
+export function switchShow(userShowId, newType) {
   return async (dispatch) => {
     try {
       const headers = await getToken();
       const switchedShow = await axios.put(
         `${baseUrl}/api/users/switchShow`,
-        { userShowId, description, newType },
+        { userShowId, newType },
         headers
       );
       if (switchedShow) {
@@ -333,8 +337,9 @@ export function switchShow(userShowId, description, newType) {
         dispatch({
           type: types.SWITCH_SHOW,
           oldType: switchedShow.data.oldType,
-          userShow: switchedShow.data.updatedUserShow,
+          userShow: switchedShow.data.userShow,
         });
+        return switchedShow.data.userShow;
       } else {
         console.log('Something went wrong trying to add show');
       }
@@ -456,7 +461,7 @@ export default {
   getUsersFollowingRecs,
   getUserTags,
   changeUserTagsAndDescription,
-  changeShowTags,
+  changeShowTagsAndDescription,
   getAuthInfo,
   getAPIKey,
   logout,

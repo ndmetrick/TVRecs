@@ -96,7 +96,7 @@ const Start = (props) => {
               })}
             />
             <Stack.Screen
-              name="Show added"
+              name="Save show"
               component={SaveShow}
               navigation={props.navigation}
               options={({ navigation }) => ({

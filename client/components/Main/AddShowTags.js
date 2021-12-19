@@ -6,11 +6,10 @@ import {
   ScrollView,
   Text,
   TouchableOpacity,
-  FlatList,
-  Alert,
   ActivityIndicator,
 } from 'react-native';
-import { changeShowTags } from '../../redux/actions';
+import { TextInput } from 'react-native-paper';
+import { changeShowTagsAndDescription } from '../../redux/actions';
 
 function AddShowTags(props) {
   const [warningTags, setWarningTags] = useState([]);
@@ -19,15 +18,26 @@ function AddShowTags(props) {
   const [userShow, setUserShow] = useState(null);
   const [loaded, setLoaded] = useState(false);
   const [allTags, setAllTags] = useState([]);
+  const [description, setDescription] = useState('');
 
   useEffect(() => {
+    const { previous } = props.route.params;
     setAllTags(props.allTags);
     setUserShow(props.route.params.userShow);
+    const tags =
+      previous === 'SaveShow' && props.route.params.tags
+        ? props.route.params.tags
+        : props.route.params.userShow.tags;
     const selected = {};
-    props.route.params.userShow.tags.forEach((tag) => {
+    tags.forEach((tag) => {
       selected[tag.id] = true;
     });
     setSelectedTags(selected);
+    const prevDescription =
+      previous === 'SaveShow' && props.route.params.description
+        ? props.route.params.description
+        : props.route.params.userShow.description;
+    setDescription(prevDescription);
     const tv = [];
     const warnings = [];
     for (let i = 0; i < allTags.length; i++) {
@@ -49,6 +59,7 @@ function AddShowTags(props) {
       setTVTags([]);
       setLoaded(false);
       setSelectedTags({});
+      setDescription('');
     };
   }, [userShow, loaded]);
 
@@ -102,19 +113,11 @@ function AddShowTags(props) {
         chosenTags.push(tagId);
       }
     }
-    // Alert.alert('Show added/changed', 'testing', {
-    //   text: 'OK',
-    // });
-    // const message =
-    //   props.route.params.previous === 'Show added'
-    //     ? `${userShow.show.name} was added to your ${
-    //         userShow.type === 'rec' ? "rec'd shows" : 'watch list'
-    //       }`
-    //     : `Your tags for ${userShow.show.name} were updated`;
-    await props.changeShowTags(chosenTags, userShow.id);
-    // Alert.alert('Show added/changed', message, {
-    //   text: 'OK',
-    // });
+    await props.changeShowTagsAndDescription(
+      chosenTags,
+      userShow.id,
+      description
+    );
     return props.navigation.navigate('Profile');
   };
 
@@ -134,21 +137,38 @@ function AddShowTags(props) {
 
   return (
     <View style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <Text>
-          Pick some tags that you feel describe the show how you experience it
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Text style={styles.text}>
+          Describe anything about the show you would like potential viewers to
+          know in addition to the tag options below
+        </Text>
+        <TextInput
+          style={styles.inputText}
+          label="description (optional)"
+          placeholder="Write a description of the show. . ."
+          onChangeText={(description) => setDescription(description)}
+          mode="outlined"
+          outlineColor="#586BA4"
+          activeOutlineColor="#586BA4"
+          value={description}
+        />
+        <Text style={styles.text}>
+          Pick some tags that you feel describe the show how you experience it:
         </Text>
         <View style={[styles.cardContent, styles.tagsContent]}>
           {displayTags(tvTags)}
         </View>
 
-        <Text>Pick some warning tags</Text>
+        <Text style={styles.text}>Pick some warning tags:</Text>
         <View style={[styles.cardContent, styles.tagsContent]}>
           {displayTags(warningTags)}
         </View>
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.button} onPress={chooseTags}>
-            <Text style={styles.buttonText}>Save tags</Text>
+            <Text style={styles.buttonText}>Save description and tags</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -162,6 +182,11 @@ const styles = StyleSheet.create({
     flex: 1,
     // justifyContent: 'center',
     marginHorizontal: 2,
+    marginBottom: 20,
+  },
+  text: {
+    fontSize: 20,
+    margin: 10,
   },
   tagText: {
     fontSize: 13.5,
@@ -203,6 +228,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
+    margin: 10,
   },
   buttonText: {
     textAlign: 'center',
@@ -217,7 +243,6 @@ const styles = StyleSheet.create({
   },
 
   tagsContent: {
-    marginTop: 10,
     flexWrap: 'wrap',
   },
   tvTag: {
@@ -258,8 +283,8 @@ const mapStateToProps = (store) => ({
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    changeShowTags: (tagIds, userShowId) =>
-      dispatch(changeShowTags(tagIds, userShowId)),
+    changeShowTagsAndDescription: (tagIds, userShowId, description) =>
+      dispatch(changeShowTagsAndDescription(tagIds, userShowId, description)),
   };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(AddShowTags);
