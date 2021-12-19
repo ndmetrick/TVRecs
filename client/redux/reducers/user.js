@@ -110,7 +110,7 @@ export default function userReducer(state = initialState, action) {
             // ),
           };
     case SWITCH_SHOW:
-      return action.oldType === 'watch'
+      return action.userShow.type === 'rec'
         ? {
             ...state,
             userShows: [...state.userShows, action.userShow],
@@ -121,15 +121,11 @@ export default function userReducer(state = initialState, action) {
           }
         : {
             ...state,
-            userShows: [...state.userShows, action.userShow],
-            seen: state.seen.filter(
+            seen: [...state.seen, action.userShow],
+            // showList: [...state.showList, action.userShow.show.name],
+            toWatch: state.toWatch.filter(
               (userShow) => userShow.show.id !== action.userShow.show.id
             ),
-            // watchList: [
-            //   ...state.watchList.filter(
-            //     (showName) => showName !== action.userShow.show.name
-            //   ),
-            // ],
           };
     case GET_USER_TAGS:
       return {
