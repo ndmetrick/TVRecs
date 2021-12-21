@@ -25,6 +25,7 @@ import Login from './client/components/auth/Login';
 import UsersFollowing from './client/components/Main/UsersFollowing/';
 import PickUserTags from './client/components/Main/PickUserTags/';
 import { clearData } from './client/redux/actions';
+import FAQ from './client/components/Main/FAQ';
 
 const Start = (props) => {
   const Stack = createStackNavigator();
@@ -158,6 +159,21 @@ const Start = (props) => {
             <Stack.Screen
               name="User Tags"
               component={PickUserTags}
+              navigation={props.navigation}
+              options={({ navigation }) => ({
+                headerTitle: () => (
+                  <TouchableOpacity onPress={() => navigation.navigate('Main')}>
+                    <Image
+                      style={{ width: 40, height: 40, margin: 20 }}
+                      source={require('./tempTVRecsLogo.png')}
+                    />
+                  </TouchableOpacity>
+                ),
+              })}
+            />
+            <Stack.Screen
+              name="FAQ"
+              component={FAQ}
               navigation={props.navigation}
               options={({ navigation }) => ({
                 headerTitle: () => (

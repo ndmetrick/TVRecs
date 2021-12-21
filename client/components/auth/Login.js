@@ -17,7 +17,6 @@ const redirectUri = AuthSession.makeRedirectUri({ useProxy });
 
 const Login = (props) => {
   const [clientId, setClientId] = useState(null);
-  const [endpoint, setEndpoint] = useState(null);
   const authorizationEndpoint = 'https://dev--5p-bz53.us.auth0.com/authorize';
 
   const [request, result, promptAsync] = AuthSession.useAuthRequest(
@@ -39,7 +38,6 @@ const Login = (props) => {
       try {
         const authInfo = await props.getAuthInfo();
         setClientId(authInfo[0]);
-        setEndpoint(authInfo[1]);
       } catch (e) {
         console.log(e);
       }
@@ -70,6 +68,8 @@ const Login = (props) => {
     };
     getUser();
   }, [result]);
+
+  console.log('here in login', clientId);
 
   return (
     <View style={styles.buttonContainer}>

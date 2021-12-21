@@ -80,6 +80,7 @@ export function getUserShows(uid) {
   return async (dispatch) => {
     try {
       const headers = await getToken();
+      console.log('auth', headers);
       const userShows = await axios.get(
         `${baseUrl}/api/users/shows/${uid}`,
         headers

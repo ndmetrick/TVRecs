@@ -14,6 +14,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import * as AuthSession from 'expo-auth-session';
 import UserTagsAndDescription from './UserTagsAndDescription';
+import FAQ from './FAQ';
 
 import ViewShows from './ViewShows';
 
@@ -78,8 +79,15 @@ function Settings(props) {
         <Text style={styles.text}>
           settings coming soon (how to filter your recs, what country you're
           watching in (currently everything is set to US), user tags, etc).
-          {'\n'}
         </Text>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => props.navigation.navigate('FAQ')}
+          >
+            <Text style={styles.buttonText}>Click to see app instructions</Text>
+          </TouchableOpacity>
+        </View>
         {!changeCountry && !saveCountry ? (
           <Text style={styles.text}>
             Your country is currently set to {countryCode}. That means that when

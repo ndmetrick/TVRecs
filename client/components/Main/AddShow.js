@@ -162,18 +162,8 @@ const AddShow = (props) => {
       >
         {!added ? (
           <View style={{ flex: 1 }}>
-            <View>
-              <Text style={styles.boldText}>What show do you want to add?</Text>
-              <TextInput
-                style={styles.inputText}
-                label="Enter show title"
-                onChangeText={(showInput) => setShowInput(showInput)}
-                mode="outlined"
-                outlineColor="#586BA4"
-                activeOutlineColor="#586BA4"
-                value={showInput}
-              />
-            </View>
+            <Text style={styles.boldText}>What show do you want to add?</Text>
+
             {showOptions ? (
               <View style={{ flex: 1 }}>
                 <View style={styles.buttonContainer}>
@@ -292,13 +282,24 @@ const AddShow = (props) => {
                 </View>
               </View>
             ) : (
-              <View style={styles.buttonContainer}>
-                <TouchableOpacity
-                  style={styles.button}
-                  onPress={findShowOptions}
-                >
-                  <Text style={styles.buttonText}>Find show</Text>
-                </TouchableOpacity>
+              <View>
+                <TextInput
+                  style={styles.inputText}
+                  label="Enter show title"
+                  onChangeText={(showInput) => setShowInput(showInput)}
+                  mode="outlined"
+                  outlineColor="#586BA4"
+                  activeOutlineColor="#586BA4"
+                  value={showInput}
+                />
+                <View style={styles.buttonContainer}>
+                  <TouchableOpacity
+                    style={styles.button}
+                    onPress={findShowOptions}
+                  >
+                    <Text style={styles.buttonText}>Find show</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             )}
           </View>
@@ -322,7 +323,7 @@ const AddShow = (props) => {
                 style={{ height: 300, resizeMode: 'contain', margin: 5 }}
               />
 
-              {!streamingAndPurchase && props.currentUser ? (
+              {!streamingAndPurchase ? (
                 <View style={styles.buttonContainer}>
                   <TouchableOpacity
                     style={styles.button}
@@ -353,8 +354,6 @@ const AddShow = (props) => {
               )}
 
               <View style={{ flexDirection: 'column' }}>
-                {/* if we're getting here by searching for the show, type will be null (if currentUser is also null, we need to sign in to add the show to our profile and should only see the button to log in). If we got here because we were looking at an instance of a userShow (our own or someone else's) type will be set to 'watch' (we're adding it to toWatch), or 'rec' (we're adding it to recs), or 'seen' (we're adding it to our seen list); depending on how it's set, we want to see the appropriate button options. If we're coming from SingleShow, we already checked to make sure the show isn't on the user's profile already; otherwise we have to check it here. */}
-                {/* This first one also sends the userShowId (if there is one) because if we're switching from seen or toWatch to rec, a userShowId will already exist and we'll have sent it from the show page, and we can just update that already existing userShow on the back end */}
                 {props.currentUser === null ||
                 props.watchShows.find(
                   (watchShow) => imdbId == watchShow.show.imdbId
