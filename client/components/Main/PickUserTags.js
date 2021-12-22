@@ -116,14 +116,14 @@ function PickUserTags(props) {
     <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <Text style={styles.text}>
-          If you'd like, add a description of anything you weren't able to
-          represent with tags about the shows you like and/or the kind of
-          television watcher you are, and/or the role TV plays in your life:
+          If you'd like, add a tv bio with anything you aren't able to represent
+          with tags -- things about the shows you like and/or the kind of
+          television watcher you are and/or the role TV plays in your life:
         </Text>
         <TextInput
           style={styles.inputText}
-          label="description (optional)"
-          placeholder="Write a description of the show. . ."
+          label="tv bio (optional)"
+          placeholder="Write a tv bio. . ."
           onChangeText={(description) => setDescription(description)}
           mode="outlined"
           outlineColor="#586BA4"
@@ -143,7 +143,7 @@ function PickUserTags(props) {
             style={styles.button}
             onPress={saveDescriptionAndTags}
           >
-            <Text style={styles.buttonText}>Save description and tags</Text>
+            <Text style={styles.buttonText}>Save tv bio and tags</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

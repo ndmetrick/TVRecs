@@ -28,6 +28,7 @@ const AddShow = (props) => {
   const [OMDBKey, setOMDBKey] = useState(null);
   const [TMDBKey, setTMDBKey] = useState(null);
   const [streamingAndPurchase, setStreamingAndPurchase] = useState(false);
+  const [notFound, setNotFound] = useState(false);
   // const [watchShow, setWatchShow] = useState(null)
 
   const isFocused = useIsFocused();
@@ -54,6 +55,7 @@ const AddShow = (props) => {
       setType(null);
       setShowPosterPreview(false);
       setStreamingAndPurchase(false);
+      setNotFound(false);
     };
   }, [props.navigation, isFocused]);
 
@@ -68,14 +70,9 @@ const AddShow = (props) => {
         const getShowOptions = `https://api.themoviedb.org/4/search/tv?api_key=${TMDBKey}&query=${titleString}`;
         const { data } = await axios.get(getShowOptions);
         if (!data.results.length) {
-          return (
-            <View>
-              <Text>
-                I'm so sorry. We can't find that TV show in the database. Check
-                to see if there's a spelling error and try again.
-              </Text>
-            </View>
-          );
+          console.log('i did get here');
+          setNotFound(true);
+          return;
         }
         if (data.results.length > 1) {
           const showList = data.results.map((show, index) => {
@@ -291,6 +288,7 @@ const AddShow = (props) => {
                   outlineColor="#586BA4"
                   activeOutlineColor="#586BA4"
                   value={showInput}
+                  onFocus={() => setNotFound(false)}
                 />
                 <View style={styles.buttonContainer}>
                   <TouchableOpacity
@@ -300,6 +298,14 @@ const AddShow = (props) => {
                     <Text style={styles.buttonText}>Find show</Text>
                   </TouchableOpacity>
                 </View>
+                {!notFound ? null : (
+                  <View>
+                    <Text style={{ ...styles.text, textAlign: 'left' }}>
+                      I'm so sorry. We can't find that TV show in the database.
+                      Check to see if there's a spelling error and try again.
+                    </Text>
+                  </View>
+                )}
               </View>
             )}
           </View>

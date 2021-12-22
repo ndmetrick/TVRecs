@@ -144,7 +144,7 @@ function Settings(props) {
               onPress={() => props.navigation.navigate('User Tags')}
             >
               <Text style={styles.buttonText}>
-                Add/change user tags and description
+                Add/change user tags and tv bio
               </Text>
             </TouchableOpacity>
           </View>

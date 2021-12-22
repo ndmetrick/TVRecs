@@ -31,6 +31,8 @@ function SaveShow(props) {
   useEffect(() => {
     const { showData } = props.route.params;
     if (props.route.params.previous === 'SingleShow') {
+      console.log('fromcurrent:', props.route.params.fromCurrentUserShow);
+      console.log('showData', showData);
       const { fromCurrentUserShow } = props.route.params;
       if (!fromCurrentUserShow) {
         setFromCurrentUserShow(false);
@@ -61,12 +63,10 @@ function SaveShow(props) {
             showData.userShow.id,
             showData.type
           );
-          console.log('show in switch', show);
           setUserShow(show);
           setLoading(false);
         } else {
           const show = await props.addShow(showData, showData.type);
-          console.log('show here', show);
           setUserShow(show);
           setLoading(false);
         }
@@ -106,6 +106,7 @@ function SaveShow(props) {
             userShow.id,
             showInfo.description
           );
+          props.navigation.goBack();
         }
       }
     } catch (err) {

@@ -11,7 +11,7 @@ import {
 import { useIsFocused } from '@react-navigation/native';
 import { logout, changeCountry } from '../../redux/actions';
 
-function Settings(props) {
+function UserTagsAndDescription(props) {
   const { currentUser } = props;
   const isFocused = useIsFocused();
 
@@ -66,29 +66,29 @@ function Settings(props) {
         <View>
           {!isCurrentUser && !user.description ? null : isCurrentUser ? (
             <Text style={styles.text}>
-              <Text style={{ fontWeight: 'bold' }}>Description: </Text>
+              <Text style={{ fontWeight: 'bold' }}>TV Bio: </Text>
               {!props.currentUser.description
-                ? 'Currently you have no description on your profile. Click the button below if you would like to add one.'
+                ? 'Currently you have no tv bio on your profile. Click the button below if you would like to add one.'
                 : props.currentUser.description}
               {'\n'}
             </Text>
           ) : (
             <Text style={styles.text}>
-              <Text style={{ fontWeight: 'bold' }}>Description: </Text>
+              <Text style={{ fontWeight: 'bold' }}>TV Bio: </Text>
               {user.description}
             </Text>
           )}
           {!isCurrentUser && !userTags.length ? null : isCurrentUser &&
             !userTags.length ? (
             <Text style={styles.text}>
-              <Text style={{ fontWeight: 'bold' }}>User tags:</Text> Currently
+              <Text style={{ fontWeight: 'bold' }}>User Tags:</Text> Currently
               you have no user tags. Click the button below if you would like to
               add some.
             </Text>
           ) : (
             <View>
               <Text style={{ ...styles.text, fontWeight: 'bold' }}>
-                User tags:
+                User Tags:
               </Text>
               <View style={[styles.cardContent, styles.tagsContent]}>
                 {displayTags(userTags)}
@@ -164,10 +164,5 @@ const mapStateToProps = (store) => ({
   otherUsers: store.allOtherUsers.usersInfo,
   currentUserTags: store.currentUser.userTags,
 });
-const mapDispatch = (dispatch) => {
-  return {
-    logout: () => dispatch(logout()),
-    changeCountry: (countryCode) => dispatch(changeCountry(countryCode)),
-  };
-};
-export default connect(mapStateToProps, mapDispatch)(Settings);
+
+export default connect(mapStateToProps)(UserTagsAndDescription);

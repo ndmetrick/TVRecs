@@ -219,11 +219,11 @@ function OtherUser(props) {
         />
         {user.description || userTags.length ? (
           <Tab.Screen
-            name="Tags/Description"
+            name="Tags/Bio"
             component={UserTagsAndDescription}
             initialParams={{ user, userTags }}
             options={{
-              tabBarLabel: 'Tags/Description',
+              tabBarLabel: 'Tags/Bio',
             }}
           />
         ) : null}

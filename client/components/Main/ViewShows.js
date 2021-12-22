@@ -14,7 +14,7 @@ import {
 import { useIsFocused } from '@react-navigation/native';
 
 function ViewShows(props) {
-  const [userShows, setUserShows] = useState([]);
+  const [userShows, setUserShows] = useState(null);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -38,6 +38,7 @@ function ViewShows(props) {
           : userToView.id
           ? otherUserShows
           : null;
+
       if (shows) {
         shows.sort(function (x, y) {
           return new Date(y.updatedAt) - new Date(x.updatedAt);
@@ -47,13 +48,13 @@ function ViewShows(props) {
       }
     }
     return () => {
-      setUserShows([]);
+      setUserShows(null);
       setUser(null);
       setLoading(true);
     };
   }, [props.route.params.type, isFocused, props.otherUserShows]);
 
-  if (loading) {
+  if (loading || !userShows) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#5500dc" />
