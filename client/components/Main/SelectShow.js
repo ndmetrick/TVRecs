@@ -23,6 +23,7 @@ const SelectShow = (props) => {
   const [OMDBKey, setOMDBKey] = useState(null);
   const [TMDBKey, setTMDBKey] = useState(null);
   const [notFound, setNotFound] = useState(false);
+
   const isFocused = useIsFocused;
 
   useEffect(() => {
@@ -58,6 +59,7 @@ const SelectShow = (props) => {
       } else {
         const titleString = showInput.split(' ').join('+');
         const getShowOptions = `https://api.themoviedb.org/4/search/tv?api_key=${TMDBKey}&query=${titleString}`;
+
         const { data } = await axios.get(getShowOptions);
         if (!data.results.length) {
           setNotFound(true);
@@ -271,12 +273,26 @@ const SelectShow = (props) => {
                   value={showInput}
                   onFocus={() => setNotFound(false)}
                 />
-                <View style={styles.buttonContainer}>
+                <View
+                  style={
+                    props.previous === 'Search'
+                      ? { flex: 1, alignItems: 'flex-end' }
+                      : styles.buttonContainer
+                  }
+                >
                   <TouchableOpacity
-                    style={styles.button}
+                    style={
+                      props.previous === 'Search'
+                        ? styles.searchPageButton
+                        : styles.button
+                    }
                     onPress={findShowOptions}
                   >
-                    <Text style={styles.buttonText}>Find show</Text>
+                    {props.previous === 'Search' ? (
+                      <Text style={styles.buttonText}>Filter by show</Text>
+                    ) : (
+                      <Text style={styles.buttonText}>Find show</Text>
+                    )}
                   </TouchableOpacity>
                 </View>
                 {!notFound ? null : (
@@ -292,8 +308,21 @@ const SelectShow = (props) => {
           </View>
         ) : (
           <View>
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity style={styles.button} onPress={chooseNewShow}>
+            <View
+              style={
+                props.previous === 'Search'
+                  ? { flex: 1, alignItems: 'flex-end' }
+                  : styles.buttonContainer
+              }
+            >
+              <TouchableOpacity
+                style={
+                  props.previous === 'Search'
+                    ? styles.searchPageButton
+                    : styles.button
+                }
+                onPress={chooseNewShow}
+              >
                 <Text style={styles.buttonText}>
                   Search for a different show
                 </Text>
@@ -391,6 +420,13 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     marginHorizontal: 3,
     marginTop: 5,
+  },
+  searchPageButton: {
+    padding: 5,
+    borderRadius: 15,
+    marginHorizontal: 3,
+    backgroundColor: '#5B85AA',
+    marginRight: 10,
   },
 });
 const mapStateToProps = (store) => ({

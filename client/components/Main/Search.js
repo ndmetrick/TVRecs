@@ -87,6 +87,8 @@ const Search = (props) => {
       setShowName('');
       setFilterShowChosen(false);
       setShowsDropdownValue([]);
+      setTagsChecked('none');
+      setShowsChecked('none');
     };
   }, [isFocused, props.matchingUsers]);
 
@@ -195,24 +197,32 @@ const Search = (props) => {
   return (
     // <TouchableWithoutFeedback onPress={() => closeOpenDropdown()}>
     <View style={styles.container}>
-      <ScrollView nestedScrollEnabled={true}>
+      <ScrollView
+        nestedScrollEnabled={true}
+        keyboardShouldPersistTaps="handled"
+      >
         {advancedSearch ? (
           <View>
             <TouchableOpacity
               // style={styles.button}
               onPress={() => setAdvancedSearch(false)}
             >
-              <Text style={styles.boldText}>
+              <Text style={{ ...styles.boldText, margin: 5 }}>
                 Search for users by filter{' '}
                 <MaterialCommunityIcons name="chevron-double-up" size={18} />
               </Text>
             </TouchableOpacity>
 
-            <View style={{ margin: 10, flex: 1 }}>
+            <View style={{ margin: 10, flex: 1, borderWidth: 1, padding: 10 }}>
               <Text style={styles.filterText}>
                 Click 'Filter users' to perform your search
               </Text>
-              <Text style={styles.resultsText}>User Tags</Text>
+              {!props.currentUser ? (
+                <Text style={styles.filterText}>
+                  Additional filters available when you log in
+                </Text>
+              ) : null}
+              <Text style={styles.tagHeadingText}>User Tag Filters</Text>
               <View style={styles.choiceContainer}>
                 <View style={styles.choices}>
                   <TouchableOpacity onPress={() => setTagsChecked('none')}>
@@ -251,38 +261,37 @@ const Search = (props) => {
                       />
                     )}
 
-                    <Text style={styles.filterText}>filter by chosen tags</Text>
+                    <Text style={styles.filterText}>chosen tags</Text>
                   </TouchableOpacity>
                 </View>
-                <View style={styles.choices}>
-                  <TouchableOpacity
-                    disabled={props.currentUser ? false : true}
-                    onPress={() => setTagsChecked('commonTags')}
-                  >
-                    {tagsChecked === 'commonTags' && props.currentUser ? (
-                      <MaterialIcons
-                        name="radio-button-on"
-                        size={20}
-                        style={{ textAlign: 'center' }}
-                      />
-                    ) : (
-                      <MaterialIcons
-                        name="radio-button-off"
-                        size={20}
-                        style={{ textAlign: 'center' }}
-                        color={props.currentUser ? 'black' : 'gray'}
-                      />
-                    )}
+                {!props.currentUser ? null : (
+                  <View style={styles.choices}>
+                    <TouchableOpacity
+                      onPress={() => setTagsChecked('commonTags')}
+                    >
+                      {tagsChecked === 'commonTags' ? (
+                        <MaterialIcons
+                          name="radio-button-on"
+                          size={20}
+                          style={{ textAlign: 'center' }}
+                        />
+                      ) : (
+                        <MaterialIcons
+                          name="radio-button-off"
+                          size={20}
+                          style={{ textAlign: 'center' }}
+                          color={props.currentUser ? 'black' : 'gray'}
+                        />
+                      )}
 
-                    <Text style={styles.filterText}>
-                      filter by tags in common
-                    </Text>
-                  </TouchableOpacity>
-                </View>
+                      <Text style={styles.filterText}># tags in common</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
               </View>
 
               {tagsChecked === 'chooseTags' ? (
-                <View>
+                <View style={{ marginBottom: 5 }}>
                   {tagsDropdownValue.length ? (
                     <View>
                       <DropDownPicker
@@ -347,7 +356,9 @@ const Search = (props) => {
                 </View>
               ) : null}
 
-              <Text style={styles.resultsText}>Recommended Shows</Text>
+              <Text style={styles.tagHeadingText}>
+                Recommended Show Filters
+              </Text>
               <View style={styles.choiceContainer}>
                 <View style={styles.choices}>
                   <TouchableOpacity onPress={() => setShowsChecked('none')}>
@@ -368,6 +379,54 @@ const Search = (props) => {
                     <Text style={styles.filterText}>No show filter</Text>
                   </TouchableOpacity>
                 </View>
+                {!props.currentUser ? null : (
+                  <View style={styles.choices}>
+                    <TouchableOpacity
+                      onPress={() => setShowsChecked('chooseCommonShows')}
+                    >
+                      {showsChecked === 'chooseCommonShows' ? (
+                        <MaterialIcons
+                          name="radio-button-on"
+                          size={20}
+                          style={{ textAlign: 'center' }}
+                        />
+                      ) : (
+                        <MaterialIcons
+                          name="radio-button-off"
+                          size={20}
+                          style={{ textAlign: 'center' }}
+                          color={props.currentUser ? 'black' : 'gray'}
+                        />
+                      )}
+
+                      <Text style={styles.filterText}>shows in common</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+                {!props.currentUser ? null : (
+                  <View style={styles.choices}>
+                    <TouchableOpacity
+                      onPress={() => setShowsChecked('commonShows')}
+                    >
+                      {showsChecked === 'commonShows' ? (
+                        <MaterialIcons
+                          name="radio-button-on"
+                          size={20}
+                          style={{ textAlign: 'center' }}
+                        />
+                      ) : (
+                        <MaterialIcons
+                          name="radio-button-off"
+                          size={20}
+                          style={{ textAlign: 'center' }}
+                          color={props.currentUser ? 'black' : 'gray'}
+                        />
+                      )}
+
+                      <Text style={styles.filterText}># shows in common</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
                 <View style={styles.choices}>
                   <TouchableOpacity
                     onPress={() => setShowsChecked('chooseShow')}
@@ -386,57 +445,7 @@ const Search = (props) => {
                       />
                     )}
 
-                    <Text style={styles.filterText}>filter by chosen show</Text>
-                  </TouchableOpacity>
-                </View>
-                <View style={styles.choices}>
-                  <TouchableOpacity
-                    disabled={props.currentUser ? false : true}
-                    onPress={() => setShowsChecked('chooseCommonShows')}
-                  >
-                    {showsChecked === 'chooseCommonShows' ? (
-                      <MaterialIcons
-                        name="radio-button-on"
-                        size={20}
-                        style={{ textAlign: 'center' }}
-                      />
-                    ) : (
-                      <MaterialIcons
-                        name="radio-button-off"
-                        size={20}
-                        style={{ textAlign: 'center' }}
-                        color={props.currentUser ? 'black' : 'gray'}
-                      />
-                    )}
-
-                    <Text style={styles.filterText}>
-                      filter by common shows
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-                <View style={styles.choices}>
-                  <TouchableOpacity
-                    disabled={props.currentUser ? false : true}
-                    onPress={() => setShowsChecked('commonShows')}
-                  >
-                    {showsChecked === 'commonShows' ? (
-                      <MaterialIcons
-                        name="radio-button-on"
-                        size={20}
-                        style={{ textAlign: 'center' }}
-                      />
-                    ) : (
-                      <MaterialIcons
-                        name="radio-button-off"
-                        size={20}
-                        style={{ textAlign: 'center' }}
-                        color={props.currentUser ? 'black' : 'gray'}
-                      />
-                    )}
-
-                    <Text style={styles.filterText}>
-                      filter by # shows in common
-                    </Text>
+                    <Text style={styles.filterText}>chosen show</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -446,6 +455,7 @@ const Search = (props) => {
                   <SelectShow
                     handleShow={chooseShowToSearch}
                     showAdded={filterShowChosen}
+                    previous="Search"
                   />
                 </View>
               ) : showsChecked === 'chooseCommonShows' ? (
@@ -518,8 +528,13 @@ const Search = (props) => {
                   <Text style={styles.filterText}>
                     Tag filter:{' '}
                     {tagsChecked === 'chooseTags' && tagsDropdownValue.length
-                      ? `Users who have tagged themselves with: ${tagsDropdownValue
-                          .map((tag) => tag.name)
+                      ? `Users who have tagged themselves with ${tagsDropdownValue
+                          .map((tag, index) =>
+                            index === tagsDropdownValue.length - 1 &&
+                            tagsDropdownValue.length > 2
+                              ? `and ${tag.name}`
+                              : tag.name
+                          )
                           .join(', ')}`
                       : tagsChecked === 'commonTags' && commonTagDropdownValue
                       ? `Users who have at least ${commonTagDropdownValue} user
@@ -648,6 +663,8 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
     margin: 3,
+    flexWrap: 'wrap',
+    width: 100,
   },
   optionContainer: {
     flex: 1,
@@ -695,6 +712,13 @@ const styles = StyleSheet.create({
     textAlign: 'left',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  tagHeadingText: {
+    textAlign: 'left',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 5,
+    marginTop: 5,
   },
   inputText: {
     margin: 10,

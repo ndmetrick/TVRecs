@@ -50,7 +50,11 @@ const AddShow = (props) => {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <SelectShow handleShow={addShow} showAdded={showAdded} />
+        <SelectShow
+          handleShow={addShow}
+          showAdded={showAdded}
+          previous="AddShow"
+        />
         <View>
           {showAdded ? (
             <View>
