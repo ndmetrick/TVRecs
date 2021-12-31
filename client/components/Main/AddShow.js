@@ -14,140 +14,33 @@ import axios from 'axios';
 import StreamingAndPurchase from './StreamingAndPurchase';
 import { getAPIKey } from '../../redux/actions';
 import { useIsFocused } from '@react-navigation/native';
+import SelectShow from './SelectShow';
 
 const AddShow = (props) => {
-  const [showInput, setShowInput] = useState('');
   const [showName, setShowName] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [imdbId, setImdbId] = useState('');
-  const [showOptions, setShowOptions] = useState(null);
-  const [added, setAdded] = useState(false);
   const [type, setType] = useState(null);
-  const [userShowId, setUserShowId] = useState(null);
-  const [showPosterPreview, setShowPosterPreview] = useState(false);
-  const [OMDBKey, setOMDBKey] = useState(null);
-  const [TMDBKey, setTMDBKey] = useState(null);
   const [streamingAndPurchase, setStreamingAndPurchase] = useState(false);
-  const [notFound, setNotFound] = useState(false);
-  // const [watchShow, setWatchShow] = useState(null)
+  const [showAdded, setShowAdded] = useState(false);
 
   const isFocused = useIsFocused();
 
   useEffect(() => {
-    const getAPIKeys = async () => {
-      try {
-        const oKey = await props.getAPIKey('omdb');
-        const tKey = await props.getAPIKey('tmdb');
-        setOMDBKey(oKey);
-        setTMDBKey(tKey);
-      } catch (e) {
-        console.log(e);
-      }
-    };
-    getAPIKeys();
-    // if the user got here by adding an existing show from their own watch or seen list or from someone else's rec list
     return () => {
-      setShowInput('');
       setShowName('');
-      setShowOptions(null);
       setImageUrl('');
-      setAdded('');
-      setType(null);
-      setShowPosterPreview(false);
+      setShowAdded(false);
+      setImdbId('');
       setStreamingAndPurchase(false);
-      setNotFound(false);
     };
-  }, [props.navigation, isFocused]);
+  }, [isFocused]);
 
-  const findShowOptions = async () => {
-    try {
-      if (!showInput.length) {
-        Alert.alert('No show entered', 'Please enter some text to search', {
-          text: 'OK',
-        });
-      } else {
-        const titleString = showInput.split(' ').join('+');
-        const getShowOptions = `https://api.themoviedb.org/4/search/tv?api_key=${TMDBKey}&query=${titleString}`;
-        const { data } = await axios.get(getShowOptions);
-        if (!data.results.length) {
-          console.log('i did get here');
-          setNotFound(true);
-          return;
-        }
-        if (data.results.length > 1) {
-          const showList = data.results.map((show, index) => {
-            return {
-              index: index,
-              year: show.first_air_date,
-              name: show.name,
-              id: show.id,
-              poster: show.poster_path,
-              overview: show.overview,
-            };
-          });
-          setShowOptions(showList);
-        } else {
-          const show = data.results[0];
-          setImdbId(show.id);
-          setShowName(show.name);
-          if (show.poster_path) {
-            setImageUrl(
-              'https://image.tmdb.org/t/p/original' + show.poster_path
-            );
-          } else {
-            const imageShowText = `http://www.omdbapi.com/?t=${titleString}&apikey=${OMDBKey}`;
-            const imageShow = await axios.get(imageShowText);
-            const poster = imageShow.data.Poster;
-            if (!poster) {
-              console.log('I need a plan here');
-            }
-            setImageUrl(poster);
-          }
-          setAdded(true);
-        }
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const viewPoster = () => {
-    setShowPosterPreview(!showPosterPreview);
-  };
-
-  const chooseNewShow = () => {
-    setAdded(false);
-    setShowInput('');
-    setShowName('');
-    setImageUrl('');
-    setImdbId('');
-    setShowOptions('');
-  };
-
-  const getShowData = async (id) => {
-    try {
-      const getShow = `https://api.themoviedb.org/3/tv/${id}?api_key=${TMDBKey}&language=en-US&append_to_response=watch%2Fproviders`;
-      const { data } = await axios.get(getShow);
-      setShowName(data.name);
-      setShowInput(data.name);
-      setShowOptions(null);
-      setImdbId(id);
-      if (data.poster_path) {
-        setImageUrl('https://image.tmdb.org/t/p/original' + data.poster_path);
-      } else {
-        const imageShowText = `http://www.omdbapi.com/?t=${data.name}&apikey=${OMDBKey}`;
-        const imageShow = await axios.get(imageShowText);
-        const poster = imageShow.data.Poster;
-        setImageUrl(poster);
-      }
-      setAdded(true);
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const resetPage = () => {
-    setShowInput('');
+  const addShow = (showName, imageUrl, imdbId, showAdded) => {
+    setShowName(showName);
+    setImageUrl(imageUrl);
+    setImdbId(imdbId);
+    setShowAdded(showAdded);
   };
 
   const image = { uri: imageUrl };
@@ -157,171 +50,9 @@ const AddShow = (props) => {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        {!added ? (
-          <View style={{ flex: 1 }}>
-            <Text style={styles.boldText}>What show do you want to add?</Text>
-
-            {showOptions ? (
-              <View style={{ flex: 1 }}>
-                <View style={styles.buttonContainer}>
-                  <TouchableOpacity
-                    style={styles.button}
-                    onPress={chooseNewShow}
-                  >
-                    <Text style={styles.buttonText}>
-                      Search for a different show
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-                {/* The show posters take up a lot of space, so the default is not to show them, but users can decide to turn them on or back off */}
-                {!showPosterPreview ? (
-                  <View style={styles.buttonContainer}>
-                    <TouchableOpacity
-                      style={styles.addPosterButton}
-                      onPress={() => viewPoster()}
-                    >
-                      <Text style={styles.buttonText}>
-                        Click to see show posters
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                ) : (
-                  <View style={styles.buttonContainer}>
-                    <TouchableOpacity
-                      style={styles.removePosterButton}
-                      onPress={() => viewPoster()}
-                    >
-                      <Text style={styles.buttonText}>
-                        Click to hide posters
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                )}
-                <Text
-                  style={{
-                    fontSize: 18,
-                    fontWeight: 'bold',
-                    marginLeft: 10,
-                    marginRight: 10,
-                  }}
-                >
-                  Is one of these the show you're looking for? (Click inside the
-                  box to choose the show)
-                </Text>
-                <View style={styles.optionContainer}>
-                  {showOptions.map((item, index) => {
-                    return (
-                      <View style={styles.box} key={index}>
-                        <TouchableOpacity onPress={() => getShowData(item.id)}>
-                          <View>
-                            <Text style={styles.optionsText}>
-                              <Text style={{ fontWeight: 'bold' }}>
-                                Show title:
-                              </Text>{' '}
-                              {item.name}
-                            </Text>
-                            {item.year ? (
-                              <Text style={styles.optionsText}>
-                                <Text style={{ fontWeight: 'bold' }}>
-                                  First began airing in:
-                                </Text>{' '}
-                                {item.year.slice(0, 4)}
-                              </Text>
-                            ) : (
-                              <Text style={styles.optionsText}>
-                                <Text style={{ fontWeight: 'bold' }}>
-                                  No air date available
-                                </Text>
-                              </Text>
-                            )}
-                            {item.overview ? (
-                              <Text style={styles.optionsText}>
-                                <Text style={{ fontWeight: 'bold' }}>
-                                  Overview:
-                                </Text>{' '}
-                                {item.overview}
-                              </Text>
-                            ) : (
-                              <Text style={styles.optionsText}>
-                                <Text style={{ fontWeight: 'bold' }}>
-                                  No overview available
-                                </Text>
-                              </Text>
-                            )}
-                          </View>
-                          {/* If the user chose to view poster previews, they'll go here if they were found */}
-                          {showPosterPreview ? (
-                            <View>
-                              {item.poster ? (
-                                <View>
-                                  <Image
-                                    source={{
-                                      uri:
-                                        'https://image.tmdb.org/t/p/original' +
-                                        item.poster,
-                                    }}
-                                    style={styles.image}
-                                  />
-                                </View>
-                              ) : (
-                                <View>
-                                  <Text style={{ fontWeight: 'bold' }}>
-                                    No preview poster available for this show
-                                  </Text>
-                                </View>
-                              )}
-                            </View>
-                          ) : null}
-                        </TouchableOpacity>
-                      </View>
-                    );
-                  })}
-                </View>
-              </View>
-            ) : (
-              <View>
-                <TextInput
-                  style={styles.inputText}
-                  label="Enter show title"
-                  onChangeText={(showInput) => setShowInput(showInput)}
-                  mode="outlined"
-                  outlineColor="#586BA4"
-                  activeOutlineColor="#586BA4"
-                  value={showInput}
-                  onFocus={() => setNotFound(false)}
-                />
-                <View style={styles.buttonContainer}>
-                  <TouchableOpacity
-                    style={styles.button}
-                    onPress={findShowOptions}
-                  >
-                    <Text style={styles.buttonText}>Find show</Text>
-                  </TouchableOpacity>
-                </View>
-                {!notFound ? null : (
-                  <View>
-                    <Text style={{ ...styles.text, textAlign: 'left' }}>
-                      I'm so sorry. We can't find that TV show in the database.
-                      Check to see if there's a spelling error and try again.
-                    </Text>
-                  </View>
-                )}
-              </View>
-            )}
-          </View>
-        ) : (
-          <View>
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity style={styles.button} onPress={chooseNewShow}>
-                <Text style={styles.buttonText}>
-                  Search for a different show
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
+        <SelectShow handleShow={addShow} showAdded={showAdded} />
         <View>
-          {added ? (
+          {showAdded ? (
             <View>
               <Text style={styles.boldText}>{showName}</Text>
               <Image

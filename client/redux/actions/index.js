@@ -2,11 +2,11 @@ import axios from 'axios';
 import types from '../constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const baseUrl = 'https://tvrecs.herokuapp.com';
+// const baseUrl = 'https://tvrecs.herokuapp.com';
 
 // const baseUrl = 'https://10.0.0.98:8080';
 
-// const baseUrl = 'http://10.0.0.171:8080';
+const baseUrl = 'http://10.0.0.171:8080';
 // const baseUrl = 'http://localhost:8080';
 
 const getToken = async () => {
@@ -228,17 +228,13 @@ export function changeCountry(newCountry) {
   };
 }
 
-export function changeUserTagsAndDescription(
-  userTagIds,
-  userShowId,
-  description
-) {
+export function changeUserTagsAndDescription(userTagIds, description) {
   return async (dispatch) => {
     try {
       const headers = await getToken();
       const changedInfo = await axios.put(
         `${baseUrl}/api/users/changeUserTags/`,
-        { userTagIds, userShowId, description },
+        { userTagIds, description },
         headers
       );
       if (changedInfo) {
@@ -289,6 +285,25 @@ export function getAllTags() {
         dispatch({ type: types.GET_ALL_TAGS, tags: tags.data });
       } else {
         console.log('Something went wrong trying to get tags');
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+}
+
+export function getMatchingUsers(filters) {
+  return async (dispatch) => {
+    try {
+      const headers = await getToken();
+      const users = await axios.put(
+        `${baseUrl}/api/users/getMatchingUsers/`,
+        { filters },
+        headers
+      );
+      if (users) {
+        console.log('users in getmatchingusers', users.data);
+        return users.data;
       }
     } catch (e) {
       console.error(e);

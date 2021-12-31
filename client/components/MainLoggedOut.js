@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { View, Text, StyleSheet } from 'react-native';
-import { clearData, getAllOtherUsers } from '../redux/actions';
+import { clearData, getAllOtherUsers, getAllTags } from '../redux/actions';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -16,6 +16,7 @@ function MainLoggedOut(props) {
   useEffect(() => {
     props.clearData();
     props.getAllOtherUsers();
+    props.getAllTags();
   }, []);
 
   return (
@@ -67,6 +68,7 @@ const mapDispatch = (dispatch) => {
   return {
     clearData: () => dispatch(clearData()),
     getAllOtherUsers: () => dispatch(getAllOtherUsers()),
+    getAllTags: () => dispatch(getAllTags()),
   };
 };
 

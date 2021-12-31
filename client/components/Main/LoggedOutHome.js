@@ -13,6 +13,14 @@ import {
 function LoggedOutHome(props) {
   return (
     <ScrollView style={styles.container}>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => props.navigation.navigate('Login')}
+        >
+          <Text style={styles.buttonText}>Log in / Sign up</Text>
+        </TouchableOpacity>
+      </View>
       <Text style={styles.text}>
         This app is a lot more fun if you sign up for an account. If you have an
         account, you can follow other users to receive their recommendations,
@@ -34,14 +42,6 @@ function LoggedOutHome(props) {
         If you've got ideas for tags I'm missing that I should add, or have
         other ideas, feel free to email me at ndmetrick@gmail.com.
       </Text>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => props.navigation.navigate('Login')}
-        >
-          <Text style={styles.buttonText}>Log in / Sign up</Text>
-        </TouchableOpacity>
-      </View>
     </ScrollView>
   );
 }

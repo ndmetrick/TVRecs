@@ -8,6 +8,7 @@ import {
   Text,
   View,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getCurrentUser, getAuthInfo } from '../../redux/actions';
@@ -67,9 +68,17 @@ const Login = (props) => {
       }
     };
     getUser();
-  }, [result]);
+  }, [result, clientId]);
 
   console.log('here in login', clientId);
+
+  if (!clientId) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#5500dc" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.buttonContainer}>

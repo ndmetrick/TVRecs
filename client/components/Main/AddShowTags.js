@@ -12,17 +12,17 @@ import { TextInput } from 'react-native-paper';
 import { changeShowTagsAndDescription } from '../../redux/actions';
 
 function AddShowTags(props) {
-  const [warningTags, setWarningTags] = useState([]);
-  const [tvTags, setTVTags] = useState([]);
+  // const [warningTags, setWarningTags] = useState([]);
+  // const [tvTags, setTVTags] = useState([]);
   const [selectedTags, setSelectedTags] = useState({});
   const [userShow, setUserShow] = useState(null);
   const [loaded, setLoaded] = useState(false);
-  const [allTags, setAllTags] = useState([]);
+  // const [allTags, setAllTags] = useState([]);
   const [description, setDescription] = useState('');
 
   useEffect(() => {
     const { previous } = props.route.params;
-    setAllTags(props.allTags);
+    // setAllTags(props.allTags);
     setUserShow(props.route.params.userShow);
     const tags =
       previous === 'SaveShow' && props.route.params.tags
@@ -38,25 +38,26 @@ function AddShowTags(props) {
         ? props.route.params.description
         : props.route.params.userShow.description;
     setDescription(prevDescription);
-    const tv = [];
-    const warnings = [];
-    for (let i = 0; i < allTags.length; i++) {
-      const tag = allTags[i];
-      if (tag.type === 'tv' || tag.type === 'unassigned') {
-        tv.push(tag);
-      }
-      if (tag.type === 'warning') {
-        warnings.push(tag);
-      }
-    }
+    // const tv = [];
+    // const warnings = [];
+    // for (let i = 0; i < allTags.length; i++) {
+    //   const tag = allTags[i];
+    //   if (tag.type === 'tv' || tag.type === 'unassigned') {
+    //     tv.push(tag);
+    //   }
+    //   if (tag.type === 'warning') {
+    //     warnings.push(tag);
+    //   }
+    // }
+    console.log('in this one', props.warningTags, props.tvTags);
 
-    setWarningTags(warnings);
-    setTVTags(tv);
+    // setWarningTags(warnings);
+    // setTVTags(tv);
     setLoaded(true);
     return () => {
       setUserShow(null);
-      setWarningTags([]);
-      setTVTags([]);
+      // setWarningTags([]);
+      // setTVTags([]);
       setLoaded(false);
       setSelectedTags({});
       setDescription('');
@@ -121,13 +122,13 @@ function AddShowTags(props) {
     return props.navigation.navigate('Profile');
   };
 
-  if (!loaded || !tvTags) {
+  if (!loaded) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#5500dc" />
       </View>
     );
-  } else if (!tvTags.length || !selectedTags) {
+  } else if (!selectedTags) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#5500dc" />
@@ -159,12 +160,12 @@ function AddShowTags(props) {
           Pick some tags that you feel describe the show how you experience it:
         </Text>
         <View style={[styles.cardContent, styles.tagsContent]}>
-          {displayTags(tvTags)}
+          {displayTags(props.tvTags)}
         </View>
 
         <Text style={styles.text}>Pick some warning tags:</Text>
         <View style={[styles.cardContent, styles.tagsContent]}>
-          {displayTags(warningTags)}
+          {displayTags(props.warningTags)}
         </View>
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.button} onPress={chooseTags}>
@@ -279,6 +280,8 @@ const mapStateToProps = (store) => ({
   allTags: store.allOtherUsers.allTags,
   currentUser: store.currentUser.userInfo,
   userShows: store.currentUser.userShows,
+  warningTags: store.allOtherUsers.warningTags,
+  tvTags: store.allOtherUsers.tvTags,
 });
 
 const mapDispatchToProps = (dispatch) => {

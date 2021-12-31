@@ -25,11 +25,6 @@ function UserTagsAndDescription(props) {
       setUser(props.currentUser);
       setUserTags(props.currentUserTags);
     } else {
-      console.log(
-        'hello',
-        props.route.params.user,
-        props.route.params.userTags
-      );
       setIsCurrentUser(false);
       setUser(props.route.params.user);
       setUserTags(props.route.params.userTags);

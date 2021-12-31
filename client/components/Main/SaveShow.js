@@ -98,7 +98,7 @@ function SaveShow(props) {
         }
       } else {
         if (showInfo.keep === false) {
-          props.navigation.goBack();
+          props.navigation.pop(2);
         } else {
           const tagIds = tags.map((tag) => tag.id);
           await changeShowTagsAndDescription(
@@ -106,7 +106,7 @@ function SaveShow(props) {
             userShow.id,
             showInfo.description
           );
-          props.navigation.goBack();
+          props.navigation.pop(2);
         }
       }
     } catch (err) {

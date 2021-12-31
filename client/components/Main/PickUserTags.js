@@ -16,29 +16,18 @@ function PickUserTags(props) {
   const [userTags, setUserTags] = useState([]);
   const [selectedTags, setSelectedTags] = useState(null);
   const [loaded, setLoaded] = useState(false);
-  const [allTags, setAllTags] = useState([]);
   const [description, setDescription] = useState('');
 
   useEffect(() => {
-    setAllTags(props.allTags);
+    setUserTags(props.allUserTags);
     const selected = {};
     props.currentUserTags.forEach((tag) => {
       selected[tag.id] = true;
     });
-    console.log('selected', selected);
     setSelectedTags(selected);
-    const tags = [];
-    console.log('allTags', props.allTags);
-    for (let i = 0; i < props.allTags.length; i++) {
-      const tag = props.allTags[i];
-      if (tag.type === 'profile' || tag.type === 'unassigned') {
-        tags.push(tag);
-      }
-    }
     if (props.currentUser.description) {
       setDescription(props.currentUser.description);
     }
-    setUserTags(tags);
     setLoaded(true);
     return () => {
       setUserTags([]);
@@ -237,7 +226,7 @@ const styles = StyleSheet.create({
 });
 
 const mapStateToProps = (store) => ({
-  allTags: store.allOtherUsers.allTags,
+  allUserTags: store.allOtherUsers.userTags,
   currentUser: store.currentUser.userInfo,
   currentUserTags: store.currentUser.userTags,
 });
