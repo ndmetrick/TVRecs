@@ -117,6 +117,7 @@ function PickUserTags(props) {
           mode="outlined"
           outlineColor="#586BA4"
           activeOutlineColor="#586BA4"
+          multiline={true}
           value={description}
         />
         <Text style={styles.text}>

@@ -1,6 +1,7 @@
 import * as AuthSession from 'expo-auth-session';
 import { connect } from 'react-redux';
 import React, { useState, useEffect } from 'react';
+import * as WebBrowser from 'expo-web-browser';
 import {
   Alert,
   Platform,
@@ -12,6 +13,8 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getCurrentUser, getAuthInfo } from '../../redux/actions';
+
+WebBrowser.maybeCompleteAuthSession();
 
 const useProxy = Platform.select({ web: false, default: true });
 const redirectUri = AuthSession.makeRedirectUri({ useProxy });

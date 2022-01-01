@@ -17,7 +17,7 @@ function AddShowTags(props) {
   const [selectedTags, setSelectedTags] = useState({});
   const [userShow, setUserShow] = useState(null);
   const [loaded, setLoaded] = useState(false);
-  // const [allTags, setAllTags] = useState([]);
+  // const [multilineChecked, setMultilineChecked] = useState(false);
   const [description, setDescription] = useState('');
 
   useEffect(() => {
@@ -61,6 +61,7 @@ function AddShowTags(props) {
       setLoaded(false);
       setSelectedTags({});
       setDescription('');
+      // setMultilineChecked(false);
     };
   }, [userShow, loaded]);
 
@@ -154,6 +155,7 @@ function AddShowTags(props) {
           mode="outlined"
           outlineColor="#586BA4"
           activeOutlineColor="#586BA4"
+          multiline={true}
           value={description}
         />
         <Text style={styles.text}>
