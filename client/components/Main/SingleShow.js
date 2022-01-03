@@ -34,6 +34,7 @@ function SingleShow(props) {
   const isFocused = useIsFocused();
 
   // const [following, setFollowing] = useState(false);
+  // multipleRecInfo counts how many other people you follow recommend a given show that this user recommends
   const [multipleRecInfo, setMultipleRecInfo] = useState({});
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -42,6 +43,7 @@ function SingleShow(props) {
     const { userShow, userInfo } = props.route.params;
 
     if (currentUser === null && userInfo !== null) {
+      console.log('i got in here');
       setUser(userInfo);
       setCountry(userInfo.country);
     } else {
@@ -127,8 +129,6 @@ function SingleShow(props) {
         <ActivityIndicator size="large" color="#5500dc" />
       </View>
     );
-  } else {
-    console.log('i got here and it is', multipleRecInfo);
   }
 
   return (
@@ -148,7 +148,8 @@ function SingleShow(props) {
           </TouchableOpacity>
         )}
       </View>
-      {multipleRecInfo[userShow.show.imdbId].num < 2 ? null : (
+      {!props.currentUser ||
+      multipleRecInfo[userShow.show.imdbId].num < 2 ? null : (
         <View>
           <Text>Also recommended by:</Text>
           <TouchableOpacity onPress={() => setModalVisible(true)}>
@@ -164,15 +165,15 @@ function SingleShow(props) {
                 : 'other person you follow'}
             </Text>
           </TouchableOpacity>
+          <OtherRecerModal
+            modalVisible={modalVisible}
+            setModalVisible={setModalVisible}
+            selectedItem={multipleRecInfo[userShow.show.imdbId].recommenders}
+            navigation={props.navigation}
+            previous="SingleShow"
+          />
         </View>
       )}
-      <OtherRecerModal
-        modalVisible={modalVisible}
-        setModalVisible={setModalVisible}
-        selectedItem={multipleRecInfo[userShow.show.imdbId].recommenders}
-        navigation={props.navigation}
-        previous="SingleShow"
-      />
       <ScrollView showsVerticalScrollIndicator={false}>
         <View>
           <Image
@@ -227,7 +228,7 @@ function SingleShow(props) {
                 ) : null}
               </View>
             ) : null}
-            {!streamingAndPurchase && props.currentUser ? (
+            {!streamingAndPurchase ? (
               <View style={styles.buttonContainer}>
                 <TouchableOpacity
                   style={{ ...styles.button, marginBottom: 15 }}
