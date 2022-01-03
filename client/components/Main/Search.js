@@ -9,6 +9,7 @@ import {
   ScrollView,
   Alert,
   TouchableWithoutFeedback,
+  Switch,
 } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { getAllOtherUsers, getMatchingUsers } from '../../redux/actions';
@@ -44,6 +45,7 @@ const Search = (props) => {
   const [showsDropdownOptions, setShowsDropdownOptions] = useState(null);
   const [showName, setShowName] = useState('');
   const [filterShowChosen, setFilterShowChosen] = useState(false);
+  const [excludeFollowed, setExcludeFollowed] = useState(false);
 
   useEffect(() => {
     setUsers(props.otherUsers);
@@ -89,6 +91,7 @@ const Search = (props) => {
       setShowsDropdownValue([]);
       setTagsChecked('none');
       setShowsChecked('none');
+      setExcludeFollowed(false);
     };
   }, [isFocused, props.matchingUsers]);
 
@@ -176,6 +179,9 @@ const Search = (props) => {
           text: 'OK',
         });
       } else {
+        if (excludeFollowed) {
+          filters['excludeFollowed'] = true;
+        }
         filters['filterCount'] = filterCount;
         const matches = await props.getMatchingUsers(filters);
         if (props.currentUser) {
@@ -520,6 +526,39 @@ const Search = (props) => {
                       placeholder="Select min # of shows in common"
                     />
                   </View>
+                </View>
+              ) : null}
+              {props.currentUser ? (
+                <View>
+                  {!excludeFollowed ? (
+                    <View>
+                      <Text style={styles.tagHeadingText}>
+                        Filter out users you follow
+                      </Text>
+                      <Text style={styles.filterText}>
+                        Users you follow are set to be included in your search.
+                        Toggle to only see unfollowed users.
+                      </Text>
+                    </View>
+                  ) : (
+                    <View style={styles.filterText}>
+                      <Text style={styles.tagHeadingText}>
+                        Add back users you follow
+                      </Text>
+                      <Text>
+                        Users you follow are set to be excluded from your
+                        search. Toggle to include them.
+                      </Text>
+                    </View>
+                  )}
+                  <Switch
+                    style={{ alignItems: 'flex-end' }}
+                    ios_backgroundColor="#3e3e3e"
+                    onValueChange={() =>
+                      setExcludeFollowed((previousState) => !previousState)
+                    }
+                    value={excludeFollowed}
+                  />
                 </View>
               ) : null}
               <View style={styles.filterCriteriaContainer}>

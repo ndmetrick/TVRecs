@@ -109,13 +109,9 @@ const RecShows = (props) => {
         {!noUserShows ? (
           <Text>Toggle to hide shows you've already saved to your profile</Text>
         ) : (
-          <Text>
-            Toggle to see include you've alreeady saved to your profile
-          </Text>
+          <Text>Toggle to see shows you've alreeady saved to your profile</Text>
         )}
         <Switch
-          // trackColor={{ false: '#767577', true: '#81b0ff' }}
-          // thumbColor={isEnabled ? '#f5dd4b' : '#f4f3f4'}
           ios_backgroundColor="#3e3e3e"
           onValueChange={toggleNoUserShows}
           value={noUserShows}
