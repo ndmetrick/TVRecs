@@ -15,7 +15,9 @@ import {
   CHANGE_SHOW_TAGS,
   LOGGING_OUT,
   GET_SEEN,
-} from '../constants';
+  ADD_TO_WATCH_PROVIDERS,
+  GET_MATCHING_RECS,
+} from '../constants'
 
 const initialState = {
   userInfo: null,
@@ -29,7 +31,9 @@ const initialState = {
   seen: [],
   // seenList: [],
   loggingOut: false,
-};
+  watchProviders: {},
+  filterRecs: [],
+}
 
 export default function userReducer(state = initialState, action) {
   switch (action.type) {
@@ -37,30 +41,30 @@ export default function userReducer(state = initialState, action) {
       return {
         ...state,
         userInfo: action.currentUser,
-      };
+      }
     case GET_CURRENT_USER_SHOWS:
       return {
         ...state,
         userShows: action.userShows,
         // showList: action.userShows.map((userShow) => userShow.show.name),
-      };
+      }
     case GET_TO_WATCH:
       return {
         ...state,
         toWatch: action.toWatch,
         // watchList: action.toWatch.map((userShow) => userShow.show.name),
-      };
+      }
     case GET_SEEN:
       return {
         ...state,
         seen: action.seen,
         // watchList: action.toWatch.map((userShow) => userShow.show.name),
-      };
+      }
     case GET_USER_FOLLOWING:
       return {
         ...state,
         following: action.following,
-      };
+      }
     case ADD_SHOW:
       return action.showType === 'rec'
         ? {
@@ -78,7 +82,7 @@ export default function userReducer(state = initialState, action) {
             ...state,
             seen: [...state.seen, action.userShow],
             // seenList: [...state.seenList, action.userShow.show.name],
-          };
+          }
     case DELETE_SHOW:
       return action.userShow.type === 'rec'
         ? {
@@ -108,7 +112,7 @@ export default function userReducer(state = initialState, action) {
             // seenList: state.seenList.filter(
             //   (showName) => showName !== action.userShow.show.name
             // ),
-          };
+          }
     case SWITCH_SHOW:
       return action.userShow.type === 'rec'
         ? {
@@ -126,18 +130,18 @@ export default function userReducer(state = initialState, action) {
             toWatch: state.toWatch.filter(
               (userShow) => userShow.show.id !== action.userShow.show.id
             ),
-          };
+          }
     case GET_USER_TAGS:
       return {
         ...state,
         userTags: action.tags,
-      };
+      }
     case CHANGE_USER_TAGS:
       return {
         ...state,
         userTags: action.tags,
         userInfo: { ...state.userInfo, description: action.description },
-      };
+      }
     case CHANGE_SHOW_TAGS:
       return action.userShow.type === 'rec'
         ? {
@@ -165,12 +169,12 @@ export default function userReducer(state = initialState, action) {
               ...state.seen.filter((seen) => seen.id !== action.userShow.id),
               action.userShow,
             ],
-          };
+          }
     case FOLLOW:
       return {
         ...state,
         following: [...state.following, action.following],
-      };
+      }
     case UNFOLLOW:
       return {
         ...state,
@@ -180,17 +184,32 @@ export default function userReducer(state = initialState, action) {
         recShows: state.recShows.filter(
           (userShow) => userShow.user.id !== action.unfollowed.id
         ),
-      };
+      }
     case GET_FOLLOWING_RECS:
       return {
         ...state,
         recShows: action.recs,
-      };
+      }
+    case GET_MATCHING_RECS:
+      return {
+        ...state,
+        filterRecs: action.recs,
+      }
     case LOGGING_OUT:
-      return { ...initialState, loggingOut: true };
+      return { ...initialState, loggingOut: true }
     case CLEAR_DATA:
-      return initialState;
+      return initialState
+    case ADD_TO_WATCH_PROVIDERS:
+      // eslint-disable-next-line no-case-declarations
+      const showId = action.watchInfo.imdbId
+      return {
+        ...state,
+        watchProviders: {
+          ...state.watchProviders,
+          [imdbId]: action.watchInfo.info,
+        },
+      }
     default:
-      return state;
+      return state
   }
 }

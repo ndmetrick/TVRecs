@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { connect } from 'react-redux';
+import React, { useState, useEffect } from 'react'
+import { connect } from 'react-redux'
 import {
   View,
   Text,
@@ -8,62 +8,61 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
-} from 'react-native';
-import { TextInput } from 'react-native-paper';
-import axios from 'axios';
-import StreamingAndPurchase from './StreamingAndPurchase';
-import { getAPIKey } from '../../redux/actions';
-import { useIsFocused } from '@react-navigation/native';
+} from 'react-native'
+import { TextInput } from 'react-native-paper'
+import axios from 'axios'
+import { getAPIKey } from '../../redux/actions'
+import { useIsFocused } from '@react-navigation/native'
 
 const SelectShow = (props) => {
-  const [showInput, setShowInput] = useState('');
-  const [showOptions, setShowOptions] = useState(null);
-  const [added, setAdded] = useState(false);
-  const [showPosterPreview, setShowPosterPreview] = useState(false);
-  const [OMDBKey, setOMDBKey] = useState(null);
-  const [TMDBKey, setTMDBKey] = useState(null);
-  const [notFound, setNotFound] = useState(false);
+  const [showInput, setShowInput] = useState('')
+  const [showOptions, setShowOptions] = useState(null)
+  const [added, setAdded] = useState(false)
+  const [showPosterPreview, setShowPosterPreview] = useState(false)
+  const [OMDBKey, setOMDBKey] = useState(null)
+  const [TMDBKey, setTMDBKey] = useState(null)
+  const [notFound, setNotFound] = useState(false)
 
-  const isFocused = useIsFocused;
+  const isFocused = useIsFocused
 
   useEffect(() => {
     const getAPIKeys = async () => {
       try {
-        const oKey = await props.getAPIKey('omdb');
-        const tKey = await props.getAPIKey('tmdb');
-        setOMDBKey(oKey);
-        setTMDBKey(tKey);
+        const oKey = await props.getAPIKey('omdb')
+        const tKey = await props.getAPIKey('tmdb')
+        setOMDBKey(oKey)
+        setTMDBKey(tKey)
       } catch (e) {
-        console.log(e);
+        console.log(e)
       }
-    };
+    }
     if (!TMDBKey) {
-      getAPIKeys();
+      getAPIKeys()
     }
 
     if (props.showAdded === false) {
-      setShowInput('');
-      setShowOptions(null);
-      setAdded(false);
-      setShowPosterPreview(false);
-      setNotFound(false);
+      setShowInput('')
+      setShowOptions(null)
+      setAdded(false)
+      setShowPosterPreview(false)
+      setNotFound(false)
     }
-  }, [props.showAdded]);
+  }, [props.showAdded])
 
   const findShowOptions = async () => {
     try {
       if (!showInput.length) {
         Alert.alert('No show entered', 'Please enter some text to search', {
           text: 'OK',
-        });
+        })
       } else {
-        const titleString = showInput.split(' ').join('+');
-        const getShowOptions = `https://api.themoviedb.org/4/search/tv?api_key=${TMDBKey}&query=${titleString}`;
+        const titleString = showInput.split(' ').join('+')
+        const getShowOptions = `https://api.themoviedb.org/4/search/tv?api_key=${TMDBKey}&query=${titleString}`
 
-        const { data } = await axios.get(getShowOptions);
+        const { data } = await axios.get(getShowOptions)
         if (!data.results.length) {
-          setNotFound(true);
-          return;
+          setNotFound(true)
+          return
         }
         if (data.results.length > 1) {
           const showList = data.results.map((show, index) => {
@@ -74,65 +73,65 @@ const SelectShow = (props) => {
               id: show.id,
               poster: show.poster_path,
               overview: show.overview,
-            };
-          });
-          setShowOptions(showList);
+            }
+          })
+          setShowOptions(showList)
         } else {
-          const show = data.results[0];
+          const show = data.results[0]
           if (show.poster_path) {
             const image =
-              'https://image.tmdb.org/t/p/original' + show.poster_path;
-            props.handleShow(show.name, image, show.id, true);
-            setAdded(true);
+              'https://image.tmdb.org/t/p/original' + show.poster_path
+            props.handleShow(show.name, image, show.id, true)
+            setAdded(true)
           } else {
-            const imageShowText = `http://www.omdbapi.com/?t=${titleString}&apikey=${OMDBKey}`;
-            const imageShow = await axios.get(imageShowText);
-            const poster = imageShow.data.Poster;
+            const imageShowText = `http://www.omdbapi.com/?t=${titleString}&apikey=${OMDBKey}`
+            const imageShow = await axios.get(imageShowText)
+            const poster = imageShow.data.Poster
             if (!poster) {
-              console.log('I need a plan here');
+              console.log('I need a plan here')
             }
-            props.handleShow(show.name, poster, show.id, true);
-            setAdded(true);
+            props.handleShow(show.name, poster, show.id, true)
+            setAdded(true)
           }
         }
       }
     } catch (e) {
-      console.error(e);
+      console.error(e)
     }
-  };
+  }
 
   const viewPoster = () => {
-    setShowPosterPreview(!showPosterPreview);
-  };
+    setShowPosterPreview(!showPosterPreview)
+  }
 
   const chooseNewShow = () => {
-    setAdded(false);
-    setShowInput('');
-    setShowOptions('');
-    props.handleShow('', '', '', false);
-  };
+    setAdded(false)
+    setShowInput('')
+    setShowOptions('')
+    props.handleShow('', '', '', false)
+  }
 
   const getShowData = async (id) => {
     try {
-      const getShow = `https://api.themoviedb.org/3/tv/${id}?api_key=${TMDBKey}&language=en-US&append_to_response=watch%2Fproviders`;
-      const { data } = await axios.get(getShow);
-      setShowInput(data.name);
-      setShowOptions(null);
+      const getShow = `https://api.themoviedb.org/3/tv/${id}?api_key=${TMDBKey}&language=en-US&append_to_response=watch%2Fproviders`
+      const { data } = await axios.get(getShow)
+      setShowInput(data.name)
+      setShowOptions(null)
       if (data.poster_path) {
-        const image = 'https://image.tmdb.org/t/p/original' + data.poster_path;
-        props.handleShow(data.name, image, id, true);
-        setAdded(true);
+        const image = 'https://image.tmdb.org/t/p/original' + data.poster_path
+        props.handleShow(data.name, image, id, true)
+        setAdded(true)
       } else {
-        const imageShowText = `http://www.omdbapi.com/?t=${data.name}&apikey=${OMDBKey}`;
-        const imageShow = await axios.get(imageShowText);
-        const poster = imageShow.data.Poster;
-        props.handleShow(data.name, poster, id, true);
-        setAdded(true);
+        const imageShowText = `http://www.omdbapi.com/?t=${data.name}&apikey=${OMDBKey}`
+        const imageShow = await axios.get(imageShowText)
+        const poster = imageShow.data.Poster
+        props.handleShow(data.name, poster, id, true)
+        setAdded(true)
       }
     } catch (e) {
-      console.error(e);
+      console.error(e)
     }
-  };
+  }
 
   return (
     <View style={styles.container}>
@@ -257,7 +256,7 @@ const SelectShow = (props) => {
                           ) : null}
                         </TouchableOpacity>
                       </View>
-                    );
+                    )
                   })}
                 </View>
               </View>
@@ -333,8 +332,8 @@ const SelectShow = (props) => {
         <View></View>
       </ScrollView>
     </View>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -428,18 +427,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#5B85AA',
     marginRight: 10,
   },
-});
+})
 const mapStateToProps = (store) => ({
   currentUser: store.currentUser.userInfo,
   userShows: store.currentUser.userShows,
   seenShows: store.currentUser.seen,
   watchShows: store.currentUser.toWatch,
-});
+})
 
 const mapDispatchToProps = (dispatch) => {
   return {
     getAPIKey: (API) => dispatch(getAPIKey(API)),
-  };
-};
+  }
+}
 
-export default connect(mapStateToProps, mapDispatchToProps)(SelectShow);
+export default connect(mapStateToProps, mapDispatchToProps)(SelectShow)

@@ -8,9 +8,11 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
+    "privacy": "public",
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.ndmetrick.TelevisionIsMyFriend"
     }
   }
 }

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { connect } from 'react-redux';
+import React, { useState, useEffect } from 'react'
+import { connect } from 'react-redux'
 import {
   View,
   Text,
@@ -9,126 +9,128 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
-} from 'react-native';
+} from 'react-native'
 import {
   addShow,
   deleteShow,
   switchShow,
   getAPIKey,
-} from '../../redux/actions';
-import StreamingAndPurchase from './StreamingAndPurchase';
-import OtherRecerModal from './OtherRecerModal';
+  getOtherUser,
+  getSingleUserShow,
+} from '../../redux/actions'
+import StreamingAndPurchase from './StreamingAndPurchase'
+import OtherRecerModal from './OtherRecerModal'
 
-import { useIsFocused } from '@react-navigation/native';
+import { useIsFocused } from '@react-navigation/native'
 
 function SingleShow(props) {
-  const [userShow, setUserShow] = useState({});
-  const [user, setUser] = useState(null);
-  const [type, setType] = useState(null);
-  const [warningTags, setWarningTags] = useState([]);
-  const [tvTags, setTVTags] = useState([]);
-  const [isCurrentUser, setIsCurrentUser] = useState(false);
-  const [country, setCountry] = useState(null);
-  const [streamingAndPurchase, setStreamingAndPurchase] = useState(false);
+  const [userShow, setUserShow] = useState({})
+  const [user, setUser] = useState(null)
+  const [type, setType] = useState(null)
+  const [warningTags, setWarningTags] = useState([])
+  const [tvTags, setTVTags] = useState([])
+  const [isCurrentUser, setIsCurrentUser] = useState(false)
+  const [country, setCountry] = useState(null)
+  const [streamingAndPurchase, setStreamingAndPurchase] = useState(false)
 
-  const isFocused = useIsFocused();
+  const isFocused = useIsFocused()
 
   // const [following, setFollowing] = useState(false);
   // multipleRecInfo counts how many other people you follow recommend a given show that this user recommends
-  const [multipleRecInfo, setMultipleRecInfo] = useState({});
-  const [modalVisible, setModalVisible] = useState(false);
+  const [multipleRecInfo, setMultipleRecInfo] = useState({})
+  const [modalVisible, setModalVisible] = useState(false)
 
   useEffect(() => {
-    const { currentUser } = props;
-    const { userShow, userInfo } = props.route.params;
+    const { currentUser } = props
+    const { singleShow, userInfo } = props.route.params
 
     if (currentUser === null && userInfo !== null) {
-      console.log('i got in here');
-      setUser(userInfo);
-      setCountry(userInfo.country);
+      console.log('i got in here')
+      setUser(userInfo)
+      // setCountry(userInfo.country)
     } else {
       if (userInfo !== null) {
-        const imdbId = userShow.show.imdbId;
-        let recCounts = {};
-        recCounts[imdbId] = {
+        console.log('userInfo', userInfo)
+        if (userInfo.id === currentUser.id) {
+          setUser(currentUser)
+          setIsCurrentUser(true)
+          setCountry(userInfo.country)
+        } else {
+          setUser(userInfo)
+          setCountry(currentUser.country)
+        }
+        const showId = singleShow.show.id
+        let recCounts = {}
+        recCounts[showId] = {
           num: 1,
-          recommenders: [{ name: userInfo.username, recShow: userShow }],
-        };
+          recommenders: [{ name: userInfo.username, recShow: singleShow }],
+        }
 
         props.recShows.forEach((recShow) => {
           if (
-            recShow.show.imdbId == imdbId &&
-            recShow.user.username !== userInfo.username
+            recShow.showId == showId &&
+            recShow.username !== userInfo.username
           ) {
-            recCounts[imdbId].num++;
-            recCounts[imdbId].recommenders.push({
-              name: recShow.user.username,
+            recCounts[showId].num++
+            recCounts[showId].recommenders.push({
+              name: recShow.username,
               recShow,
-            });
+            })
           }
-        });
-        setMultipleRecInfo(recCounts);
-      }
-      if (userInfo.id === currentUser.id) {
-        setUser(currentUser);
-        setIsCurrentUser(true);
-        setCountry(userInfo.country);
-      } else {
-        setUser(userInfo);
-        setCountry(userInfo.country);
+        })
+        setMultipleRecInfo(recCounts)
       }
     }
-    const warnings = userShow.tags.filter((tag) => {
-      return tag.type === 'warning';
-    });
-    const tv = userShow.tags.filter((tag) => {
-      return tag.type === 'tv' || tag.type === 'unassigned';
-    });
-    setTVTags(tv);
-    setWarningTags(warnings);
-    setUserShow(userShow);
-    setType(userShow.type);
+    const warnings = singleShow.tags.filter((tag) => {
+      return tag.type === 'warning'
+    })
+    const tv = singleShow.tags.filter((tag) => {
+      return tag.type === 'tv' || tag.type === 'unassigned'
+    })
+    setTVTags(tv)
+    setWarningTags(warnings)
+    setUserShow(singleShow)
+    setType(singleShow.type)
     return () => {
-      setStreamingAndPurchase(false);
-      setUserShow({});
-      setUser(null);
-      setType(null);
-      setWarningTags([]);
-      setTVTags([]);
-      setIsCurrentUser(false);
-      setCountry(null);
-      setMultipleRecInfo({});
-      setModalVisible(false);
-    };
-  }, [props.route.params.userInfo, type, isFocused]);
+      setStreamingAndPurchase(false)
+      setUserShow({})
+      setUser(null)
+      setType(null)
+      setWarningTags([])
+      setTVTags([])
+      setIsCurrentUser(false)
+      setCountry(null)
+      setMultipleRecInfo({})
+      setModalVisible(false)
+    }
+  }, [props.route.params.userInfo, type, isFocused])
 
   const deleteShow = async () => {
     try {
-      await props.deleteShow(userShow.show.id);
-      return props.navigation.goBack();
+      await props.deleteShow(userShow.show.id)
+      return props.navigation.goBack()
     } catch (err) {
-      console.error(err);
+      console.error(err)
     }
-  };
+  }
 
   const displayTags = (tags) => {
     return tags.map((tag, key) => {
-      const tagStyle =
-        tag.type === 'warning' ? styles.warningTag : styles.tvTag;
+      const tagStyle = tag.type === 'warning' ? styles.warningTag : styles.tvTag
       return (
         <View key={key} style={tagStyle}>
           <Text style={styles.tagText}>{tag.name}</Text>
         </View>
-      );
-    });
-  };
+      )
+    })
+  }
 
   if (user === null || multipleRecInfo.length === 0) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#5500dc" />
       </View>
-    );
+    )
   }
 
   return (
@@ -149,18 +151,17 @@ function SingleShow(props) {
         )}
       </View>
       {!props.currentUser ||
-      multipleRecInfo[userShow.show.imdbId].num < 2 ? null : (
+      multipleRecInfo[userShow.show.id].num < 2 ? null : (
         <View>
           <Text>Also recommended by:</Text>
           <TouchableOpacity onPress={() => setModalVisible(true)}>
             <Text style={{ color: 'blue' }}>
-              {`${multipleRecInfo[userShow.show.imdbId].num - 1}`}{' '}
-              {multipleRecInfo[userShow.show.imdbId].num > 2 && isCurrentUser
+              {`${multipleRecInfo[userShow.show.id].num - 1}`}{' '}
+              {multipleRecInfo[userShow.show.id].num > 2 && isCurrentUser
                 ? 'people you follow'
-                : multipleRecInfo[userShow.show.imdbId].num > 2 &&
-                  !isCurrentUser
+                : multipleRecInfo[userShow.show.id].num > 2 && !isCurrentUser
                 ? 'other people you follow'
-                : multipleRecInfo[userShow.show.imdbId].num < 3 && isCurrentUser
+                : multipleRecInfo[userShow.show.id].num < 3 && isCurrentUser
                 ? 'person you follow'
                 : 'other person you follow'}
             </Text>
@@ -168,9 +169,10 @@ function SingleShow(props) {
           <OtherRecerModal
             modalVisible={modalVisible}
             setModalVisible={setModalVisible}
-            selectedItem={multipleRecInfo[userShow.show.imdbId].recommenders}
+            selectedItem={multipleRecInfo[userShow.show.id].recommenders}
             navigation={props.navigation}
             previous="SingleShow"
+            getSingleUserShow={props.getSingleUserShow}
           />
         </View>
       )}
@@ -252,7 +254,7 @@ function SingleShow(props) {
                   </TouchableOpacity>
                 </View>
                 <StreamingAndPurchase
-                  showId={userShow.show.imdbId}
+                  showId={userShow.show.id}
                   currentUser={props.currentUser}
                 />
               </View>
@@ -400,13 +402,13 @@ function SingleShow(props) {
                 {props.currentUser === null ||
                 props.currentUserShows.find(
                   (currentUserShow) =>
-                    currentUserShow.show.imdbId === userShow.show.imdbId
+                    currentUserShow.show.id === userShow.show.id
                 ) ||
                 props.watchShows.find(
-                  (watchShow) => watchShow.show.imdbId === userShow.show.imdbId
+                  (watchShow) => watchShow.show.id === userShow.show.id
                 ) ||
                 props.seenShows.find(
-                  (seenShow) => seenShow.show.imdbId === userShow.show.imdbId
+                  (seenShow) => seenShow.show.id === userShow.show.id
                 ) ? null : (
                   <View>
                     <View style={styles.buttonContainer}>
@@ -577,7 +579,7 @@ function SingleShow(props) {
         </View>
       </ScrollView>
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -652,7 +654,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#586BA4',
     marginTop: 5,
   },
-});
+})
 const mapState = (store) => ({
   currentUser: store.currentUser.userInfo,
   currentUserShows: store.currentUser.userShows,
@@ -660,7 +662,7 @@ const mapState = (store) => ({
   seenShows: store.currentUser.seen,
   following: store.currentUser.following,
   recShows: store.currentUser.recShows,
-});
+})
 
 const mapDispatch = (dispatch) => {
   return {
@@ -668,7 +670,10 @@ const mapDispatch = (dispatch) => {
     deleteShow: (showId) => dispatch(deleteShow(showId)),
     switchShow: (userShowId, newType) =>
       dispatch(switchShow(userShowId, newType)),
-  };
-};
+    getOtherUser: (userId) => dispatch(getOtherUser(userId)),
+    getSingleUserShow: (uid, showId) =>
+      dispatch(getSingleUserShow(uid, showId)),
+  }
+}
 
-export default connect(mapState, mapDispatch)(SingleShow);
+export default connect(mapState, mapDispatch)(SingleShow)

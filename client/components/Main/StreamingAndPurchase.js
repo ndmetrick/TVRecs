@@ -1,83 +1,100 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'
 import {
   View,
   StyleSheet,
   ActivityIndicator,
   Text,
   TouchableOpacity,
-} from 'react-native';
-import axios from 'axios';
-import { connect } from 'react-redux';
-import { getAPIKey } from '../../redux/actions';
-import PickCountry from './PickCountry';
+} from 'react-native'
+import axios from 'axios'
+import { connect } from 'react-redux'
+import { getAPIKey, addToWatchProviders } from '../../redux/actions'
+import PickCountry from './PickCountry'
 
 function StreamingAndPurchase(props) {
-  const [country, setCountry] = useState('US');
-  const [streaming, setStreaming] = useState(null);
-  const [purchase, setPurchase] = useState(null);
-  const [changeCountry, setChangeCountry] = useState(false);
+  const [country, setCountry] = useState('US')
+  const [streaming, setStreaming] = useState(null)
+  const [purchase, setPurchase] = useState(null)
+  const [changeCountry, setChangeCountry] = useState(false)
 
   useEffect(() => {
     if (props.currentUser) {
-      setCountry(props.currentUser.country);
+      setCountry(props.currentUser.country)
     }
     const getWatchProviders = async (showId) => {
       try {
-        const tmdbKey = await props.getAPIKey('tmdb');
-        const APIString = `https://api.themoviedb.org/3/tv/${showId}/watch/providers?api_key=${tmdbKey}`;
-        const watchProviders = await axios.get(APIString);
+        const tmdbKey = await props.getAPIKey('tmdb')
+        const APIString = `https://api.themoviedb.org/3/tv/${showId}/watch/providers?api_key=${tmdbKey}`
+        const watchProviders = await axios.get(APIString)
         if (watchProviders) {
-          const providers = watchProviders.data.results[country || 'US'];
-          const streamingInfo = getStreaming(providers);
-          const purchaseInfo = getPurchase(providers);
-          setStreaming(streamingInfo);
-          setPurchase(purchaseInfo);
+          const providers = watchProviders.data.results[country || 'US']
+          const streamingInfo = getStreaming(providers)
+          const purchaseInfo = getPurchase(providers)
+          setStreaming(streamingInfo)
+          setPurchase(purchaseInfo)
+          const info = {
+            streaming: streamingInfo,
+            purchase: purchaseInfo,
+            date: new Date(),
+          }
+          addToWatchProviders({ imdbId: props.showId, info })
         }
       } catch (err) {
-        console.log(err);
+        console.log(err)
       }
-    };
-    getWatchProviders(props.showId);
-  }, [props.currentUser, country]);
+    }
+    // if the watch provider info is already on state and it was updated less than a week ago:
+    if (
+      props.watchProviders[props.showId] &&
+      (new Date() - props.watchProviders[props.showId].date) /
+        (1000 * 60 * 60 * 24) <
+        7
+    ) {
+      setStreaming(props.watchProviders[props.showId].streaming)
+      setPurchase(props.watchProviders[props.showId].purchase)
+    } else {
+      getWatchProviders[props.showId]
+    }
+  }, [props.currentUser, country])
 
   const getStreaming = (watchProviders) => {
-    const stream = watchProviders ? watchProviders.flatrate : null;
-    let streamingInfo = '';
+    const stream = watchProviders ? watchProviders.flatrate : null
+    let streamingInfo = ''
     if (stream) {
       const streamingOptions =
-        stream && stream.map((option) => option.provider_name).join(', ');
+        stream && stream.map((option) => option.provider_name).join(', ')
       if (streamingOptions) {
-        streamingInfo = streamingOptions;
+        streamingInfo = streamingOptions
       }
     }
-    return streamingInfo;
-  };
+    return streamingInfo
+  }
 
   const getPurchase = (watchProviders) => {
-    const buy = watchProviders ? watchProviders.buy : null;
-    let purchaseInfo = '';
+    const buy = watchProviders ? watchProviders.buy : null
+    let purchaseInfo = ''
     if (buy) {
       const purchaseOptions =
-        buy && buy.map((option) => option.provider_name).join(', ');
+        buy && buy.map((option) => option.provider_name).join(', ')
       if (purchaseOptions) {
-        purchaseInfo = purchaseOptions;
+        purchaseInfo = purchaseOptions
       }
     }
-    return purchaseInfo;
-  };
+    return purchaseInfo
+  }
 
   if (purchase === null || streaming === null) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#5500dc" />
       </View>
-    );
+    )
   }
 
   const getCountry = (country) => {
-    setCountry(country.cca2);
-    setChangeCountry(false);
-  };
+    setCountry(country.cca2)
+    setChangeCountry(false)
+  }
 
   return (
     <View style={styles.container}>
@@ -136,7 +153,7 @@ function StreamingAndPurchase(props) {
         </Text>
       )}
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -167,12 +184,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#586BA4',
     marginTop: 5,
   },
-});
+})
+
+const mapState = (store) => ({
+  watchProviders: store.currentUser.watchProviders,
+})
 
 const mapDispatch = (dispatch) => {
   return {
     getAPIKey: (api) => dispatch(getAPIKey(api)),
-  };
-};
+    addToWatchProviders: (watchInfo) =>
+      dispatch(addToWatchProviders(watchInfo)),
+  }
+}
 
-export default connect(null, mapDispatch)(StreamingAndPurchase);
+export default connect(mapState, mapDispatch)(StreamingAndPurchase)

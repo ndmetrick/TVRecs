@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { connect } from 'react-redux';
+import React, { useState, useEffect } from 'react'
+import { connect } from 'react-redux'
 import {
   View,
   Text,
@@ -8,42 +8,42 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
-} from 'react-native';
-import { TextInput } from 'react-native-paper';
-import axios from 'axios';
-import StreamingAndPurchase from './StreamingAndPurchase';
-import { getAPIKey } from '../../redux/actions';
-import { useIsFocused } from '@react-navigation/native';
-import SelectShow from './SelectShow';
+} from 'react-native'
+import { TextInput } from 'react-native-paper'
+import axios from 'axios'
+import StreamingAndPurchase from './StreamingAndPurchase'
+import { getAPIKey } from '../../redux/actions'
+import { useIsFocused } from '@react-navigation/native'
+import SelectShow from './SelectShow'
 
 const AddShow = (props) => {
-  const [showName, setShowName] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
-  const [imdbId, setImdbId] = useState('');
-  const [type, setType] = useState(null);
-  const [streamingAndPurchase, setStreamingAndPurchase] = useState(false);
-  const [showAdded, setShowAdded] = useState(false);
+  const [showName, setShowName] = useState('')
+  const [imageUrl, setImageUrl] = useState('')
+  const [imdbId, setImdbId] = useState('')
+  const [type, setType] = useState(null)
+  const [streamingAndPurchase, setStreamingAndPurchase] = useState(false)
+  const [showAdded, setShowAdded] = useState(false)
 
-  const isFocused = useIsFocused();
+  const isFocused = useIsFocused()
 
   useEffect(() => {
     return () => {
-      setShowName('');
-      setImageUrl('');
-      setShowAdded(false);
-      setImdbId('');
-      setStreamingAndPurchase(false);
-    };
-  }, [isFocused]);
+      setShowName('')
+      setImageUrl('')
+      setShowAdded(false)
+      setImdbId('')
+      setStreamingAndPurchase(false)
+    }
+  }, [isFocused])
 
   const addShow = (showName, imageUrl, imdbId, showAdded) => {
-    setShowName(showName);
-    setImageUrl(imageUrl);
-    setImdbId(imdbId);
-    setShowAdded(showAdded);
-  };
+    setShowName(showName)
+    setImageUrl(imageUrl)
+    setImdbId(imdbId)
+    setShowAdded(showAdded)
+  }
 
-  const image = { uri: imageUrl };
+  const image = { uri: imageUrl }
   return (
     <View style={styles.container}>
       <ScrollView
@@ -167,7 +167,7 @@ const AddShow = (props) => {
                   </View>
                 )}
                 {props.watchShows.find((watchShow) => {
-                  return imdbId == watchShow.show.imdbId;
+                  return imdbId == watchShow.show.imdbId
                 }) ? (
                   <View>
                     <Text style={styles.text}>
@@ -210,8 +210,8 @@ const AddShow = (props) => {
         </View>
       </ScrollView>
     </View>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -299,18 +299,18 @@ const styles = StyleSheet.create({
     marginHorizontal: 3,
     marginTop: 5,
   },
-});
+})
 const mapStateToProps = (store) => ({
   currentUser: store.currentUser.userInfo,
   userShows: store.currentUser.userShows,
   seenShows: store.currentUser.seen,
   watchShows: store.currentUser.toWatch,
-});
+})
 
 const mapDispatchToProps = (dispatch) => {
   return {
     getAPIKey: (API) => dispatch(getAPIKey(API)),
-  };
-};
+  }
+}
 
-export default connect(mapStateToProps, mapDispatchToProps)(AddShow);
+export default connect(mapStateToProps, mapDispatchToProps)(AddShow)

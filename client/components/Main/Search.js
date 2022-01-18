@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { connect } from 'react-redux';
+import React, { useState, useEffect } from 'react'
+import { connect } from 'react-redux'
 import {
   View,
   Text,
@@ -10,90 +10,84 @@ import {
   Alert,
   TouchableWithoutFeedback,
   Switch,
-} from 'react-native';
-import { TextInput } from 'react-native-paper';
-import { getAllOtherUsers, getMatchingUsers } from '../../redux/actions';
-import { useIsFocused } from '@react-navigation/native';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import DropDownPicker from 'react-native-dropdown-picker';
-import SelectShow from './SelectShow';
+} from 'react-native'
+import { TextInput } from 'react-native-paper'
+import { getAllOtherUsers, getMatchingUsers } from '../../redux/actions'
+import { useIsFocused } from '@react-navigation/native'
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
+import DropDownPicker from 'react-native-dropdown-picker'
+import SelectShow from './SelectShow'
 
 const Search = (props) => {
-  const isFocused = useIsFocused();
-  const [users, setUsers] = useState([]);
-  const [matchingUsers, setMatchingUsers] = useState(null);
-  const [searchByTags, setSearchByTags] = useState(false);
-  const [allUserTags, setAllUserTags] = useState(null);
-  const [advancedSearch, setAdvancedSearch] = useState(false);
-  const [tagsChecked, setTagsChecked] = useState('none');
-  const [showsChecked, setShowsChecked] = useState('none');
-  const [commonTagDropdownOpen, setCommonTagDropdownOpen] = useState(false);
-  const [commonTagDropdownValue, setCommonTagDropdownValue] = useState(null);
-  const [commonTagDropdownOptions, setCommonTagDropdownOptions] =
-    useState(null);
-  const [commonShowDropdownOpen, setCommonShowDropdownOpen] = useState(false);
-  const [commonShowDropdownValue, setCommonShowDropdownValue] = useState(null);
+  const isFocused = useIsFocused()
+  const [users, setUsers] = useState([])
+  const [matchingUsers, setMatchingUsers] = useState(null)
+  const [advancedSearch, setAdvancedSearch] = useState(false)
+  const [tagsChecked, setTagsChecked] = useState('none')
+  const [showsChecked, setShowsChecked] = useState('none')
+  const [commonTagDropdownOpen, setCommonTagDropdownOpen] = useState(false)
+  const [commonTagDropdownValue, setCommonTagDropdownValue] = useState(null)
+  const [commonTagDropdownOptions, setCommonTagDropdownOptions] = useState(null)
+  const [commonShowDropdownOpen, setCommonShowDropdownOpen] = useState(false)
+  const [commonShowDropdownValue, setCommonShowDropdownValue] = useState(null)
   const [commonShowDropdownOptions, setCommonShowDropdownOptions] =
-    useState(null);
-  const [chosenShow, setChosenShow] = useState(null);
-  const [tagsDropdownOpen, setTagsDropdownOpen] = useState(false);
-  const [tagsDropdownValue, setTagsDropdownValue] = useState([]);
-  const [tagsDropdownOptions, setTagsDropdownOptions] = useState(null);
-  const [showsDropdownOpen, setShowsDropdownOpen] = useState(false);
-  const [showsDropdownValue, setShowsDropdownValue] = useState([]);
-  const [showsDropdownOptions, setShowsDropdownOptions] = useState(null);
-  const [showName, setShowName] = useState('');
-  const [filterShowChosen, setFilterShowChosen] = useState(false);
-  const [excludeFollowed, setExcludeFollowed] = useState(false);
+    useState(null)
+  const [chosenShow, setChosenShow] = useState(null)
+  const [tagsDropdownOpen, setTagsDropdownOpen] = useState(false)
+  const [tagsDropdownValue, setTagsDropdownValue] = useState([])
+  const [tagsDropdownOptions, setTagsDropdownOptions] = useState(null)
+  const [showsDropdownOpen, setShowsDropdownOpen] = useState(false)
+  const [showsDropdownValue, setShowsDropdownValue] = useState([])
+  const [showsDropdownOptions, setShowsDropdownOptions] = useState(null)
+  const [showName, setShowName] = useState('')
+  const [filterShowChosen, setFilterShowChosen] = useState(false)
+  const [excludeFollowed, setExcludeFollowed] = useState(false)
 
   useEffect(() => {
-    setUsers(props.otherUsers);
-
-    setAllUserTags(props.allUserTags);
-    const tags = [];
+    setUsers(props.otherUsers)
+    const tags = []
     props.allUserTags.forEach((tag) => {
-      tags.push({ label: tag.name, value: tag });
-    });
+      tags.push({ label: tag.name, value: tag })
+    })
 
-    setTagsDropdownOptions(tags);
+    setTagsDropdownOptions(tags)
     if (props.currentUser) {
-      const numCommonUserTags = [];
-      const tagsLength = props.userTags.length;
+      const numCommonUserTags = []
+      const tagsLength = props.userTags.length
       for (let i = 0; i <= tagsLength; i++) {
-        numCommonUserTags.push({ label: i, value: i });
+        numCommonUserTags.push({ label: i, value: i })
       }
-      setCommonTagDropdownOptions(numCommonUserTags);
-      const numCommonUserShows = [];
-      const showsLength = props.userShows.length;
+      setCommonTagDropdownOptions(numCommonUserTags)
+      const numCommonUserShows = []
+      const showsLength = props.userShows.length
       for (let i = 0; i <= showsLength; i++) {
-        numCommonUserShows.push({ label: i, value: i });
+        numCommonUserShows.push({ label: i, value: i })
       }
-      setCommonShowDropdownOptions(numCommonUserShows);
-      const shows = [];
+      setCommonShowDropdownOptions(numCommonUserShows)
+      const shows = []
       props.userShows.forEach((userShow) => {
-        shows.push({ label: userShow.show.name, value: userShow.show });
-      });
-      setShowsDropdownOptions(shows);
+        shows.push({ label: userShow.show.name, value: userShow.show })
+      })
+      setShowsDropdownOptions(shows)
     }
 
     return () => {
-      setUsers(null);
-      setMatchingUsers(null);
-      setSearchByTags(false);
-      setAdvancedSearch(false);
-      setCommonTagDropdownValue(null);
-      setCommonShowDropdownValue(null);
-      setChosenShow(null);
-      setTagsDropdownValue([]);
-      setShowName('');
-      setFilterShowChosen(false);
-      setShowsDropdownValue([]);
-      setTagsChecked('none');
-      setShowsChecked('none');
-      setExcludeFollowed(false);
-    };
-  }, [isFocused, props.matchingUsers]);
+      setUsers(null)
+      setMatchingUsers(null)
+      setAdvancedSearch(false)
+      setCommonTagDropdownValue(null)
+      setCommonShowDropdownValue(null)
+      setChosenShow(null)
+      setTagsDropdownValue([])
+      setShowName('')
+      setFilterShowChosen(false)
+      setShowsDropdownValue([])
+      setTagsChecked('none')
+      setShowsChecked('none')
+      setExcludeFollowed(false)
+    }
+  }, [isFocused, props.matchingUsers])
 
   const displayChosenTags = (tags) => {
     return tags.map((tag, key) => {
@@ -101,104 +95,103 @@ const Search = (props) => {
         <View key={key} style={styles.selectedTag}>
           <Text style={styles.tagText}>{tag.name}</Text>
         </View>
-      );
-    });
-  };
+      )
+    })
+  }
 
   const chooseShowToSearch = (showName, imageUrl, imdbId, filterShowChosen) => {
-    setShowName(showName);
-    setChosenShow(imdbId);
-    setFilterShowChosen(filterShowChosen);
-  };
+    setShowName(showName)
+    setChosenShow(imdbId)
+    setFilterShowChosen(filterShowChosen)
+  }
 
   const reset = () => {
-    setSearchByTags(false);
-    setAdvancedSearch(false);
-    setCommonTagDropdownValue(null);
-    setCommonShowDropdownValue(null);
-    setChosenShow(null);
-    setTagsDropdownValue([]);
-    setShowName('');
-    setFilterShowChosen(false);
-    setShowsDropdownValue([]);
-  };
+    setAdvancedSearch(false)
+    setCommonTagDropdownValue(null)
+    setCommonShowDropdownValue(null)
+    setChosenShow(null)
+    setTagsDropdownValue([])
+    setShowName('')
+    setFilterShowChosen(false)
+    setShowsDropdownValue([])
+  }
 
   const getMatchingUsers = async (searchInput) => {
-    console.log('got here', users);
+    console.log('got here', users)
     const matches = users.filter((user) => {
-      return user.username.includes(searchInput.toLowerCase());
-    });
-    console.log('matches here', matches);
-    setMatchingUsers(matches);
-  };
+      return user.username.includes(searchInput.toLowerCase())
+    })
+    console.log('matches here', matches)
+    setMatchingUsers(matches)
+  }
 
   const filter = async () => {
     try {
-      const filters = {};
-      let filterCount = 0;
+      const filters = {}
+      let filterCount = 0
       if (tagsChecked === 'chooseTags') {
-        const chosenTags = [];
+        const chosenTags = []
         for (const tag of tagsDropdownValue) {
-          chosenTags.push(tag.id);
+          chosenTags.push(tag.id)
         }
         if (chosenTags.length) {
-          filterCount += 1;
-          filters['chooseTags'] = chosenTags;
+          filterCount += 1
+          filters['chooseTags'] = chosenTags
         }
       }
       if (tagsChecked === 'commonTags') {
         if (commonTagDropdownValue) {
-          filters['commonTags'] = commonTagDropdownValue;
-          filterCount += 1;
+          filters['commonTags'] = commonTagDropdownValue
+          filterCount += 1
         }
       }
       if (showsChecked === 'chooseShow') {
         if (chosenShow) {
-          filters['chooseShow'] = chosenShow;
-          filterCount += 1;
+          filters['chooseShow'] = chosenShow
+          filterCount += 1
         }
       }
       if (showsChecked === 'commonShows') {
         if (commonShowDropdownValue) {
-          filters['commonShows'] = commonShowDropdownValue;
-          filterCount += 1;
+          filters['commonShows'] = commonShowDropdownValue
+          filterCount += 1
         }
       }
       if (showsChecked === 'chooseCommonShows') {
-        const chosenShows = [];
+        const chosenShows = []
         for (const show of showsDropdownValue) {
-          chosenShows.push(show.id);
+          chosenShows.push(show.id)
         }
         if (chosenShows.length) {
-          filters['chooseCommonShows'] = chosenShows;
-          filterCount += 1;
+          filters['chooseCommonShows'] = chosenShows
+          filterCount += 1
         }
       }
       if (filterCount === 0) {
         Alert.alert('No filters to search by', 'Please add a filter', {
           text: 'OK',
-        });
+        })
       } else {
         if (excludeFollowed) {
-          filters['excludeFollowed'] = true;
+          filters['excludeFollowed'] = true
         }
-        filters['filterCount'] = filterCount;
-        const matches = await props.getMatchingUsers(filters);
+        filters['filterCount'] = filterCount
+        const matches = await props.getMatchingUsers(filters)
         if (props.currentUser) {
           const matchesMinusUser = matches.filter(
             (match) => match.id !== props.currentUser.id
-          );
+          )
 
-          setMatchingUsers(matchesMinusUser);
+          setMatchingUsers(matchesMinusUser)
         } else {
-          setMatchingUsers(matches);
+          setMatchingUsers(matches)
         }
-        setAdvancedSearch(false);
+        setAdvancedSearch(false)
       }
     } catch (err) {
-      console.log(err);
+      console.log(err)
     }
-  };
+  }
 
   return (
     // <TouchableWithoutFeedback onPress={() => closeOpenDropdown()}>
@@ -676,15 +669,15 @@ const Search = (props) => {
                     </View>
                   </TouchableOpacity>
                 </View>
-              );
+              )
             })}
           </View>
         )}
       </ScrollView>
     </View>
     // </TouchableWithoutFeedback>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -845,7 +838,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F46036',
     marginTop: 5,
   },
-});
+})
 
 const mapStateToProps = (store) => ({
   currentUser: store.currentUser.userInfo,
@@ -853,13 +846,13 @@ const mapStateToProps = (store) => ({
   allUserTags: store.allOtherUsers.userTags,
   userTags: store.currentUser.userTags,
   userShows: store.currentUser.userShows,
-});
+})
 
 const mapDispatch = (dispatch) => {
   return {
     getAllOtherUsers: () => dispatch(getAllOtherUsers()),
     getMatchingUsers: (filters) => dispatch(getMatchingUsers(filters)),
-  };
-};
+  }
+}
 
-export default connect(mapStateToProps, mapDispatch)(Search);
+export default connect(mapStateToProps, mapDispatch)(Search)

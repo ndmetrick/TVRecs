@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'
 import {
   StyleSheet,
   View,
@@ -8,18 +8,34 @@ import {
   Alert,
   TouchableOpacity,
   ScrollView,
-} from 'react-native';
+} from 'react-native'
 
 export default function CustomModal(props) {
-  const { modalVisible, selectedItem, setModalVisible, previous } = props;
+  const {
+    modalVisible,
+    selectedItem,
+    setModalVisible,
+    previous,
+    getSingleUserShow,
+  } = props
 
-  const otherRecerClicked = (item) => {
-    setModalVisible(!modalVisible);
-    props.navigation.navigate('Show', {
-      userInfo: item.recShow.user,
-      userShow: item.recShow,
-    });
-  };
+  const otherRecerClicked = async (recShow) => {
+    try {
+      // const userId = previous === 'RecShows' ? recShow.userId : recShow.user.id
+      // const showId = previous === 'RecShows' ? recShow.showId : recShow.show.Id
+      const userInfo = { id: recShow.userId, username: recShow.username }
+      setModalVisible(!modalVisible)
+      const userShow = await getSingleUserShow(recShow.userId, recShow.showId)
+      if (userShow) {
+        return props.navigation.navigate('Show', {
+          userInfo,
+          singleShow: userShow,
+        })
+      }
+    } catch (err) {
+      console.log(err)
+    }
+  }
 
   return (
     <Modal
@@ -27,7 +43,7 @@ export default function CustomModal(props) {
       transparent={true}
       visible={modalVisible}
       onRequestClose={() => {
-        Alert.alert('Modal has been closed.');
+        Alert.alert('Modal has been closed.')
       }}
     >
       <ScrollView>
@@ -42,12 +58,12 @@ export default function CustomModal(props) {
                     return (
                       <View key={index}>
                         <TouchableOpacity
-                          onPress={() => otherRecerClicked(item)}
+                          onPress={() => otherRecerClicked(item.recShow)}
                         >
                           <Text style={styles.text}>{item.name}</Text>
                         </TouchableOpacity>
                       </View>
-                    );
+                    )
                   }
                 })
               : null}
@@ -61,7 +77,7 @@ export default function CustomModal(props) {
         </View>
       </ScrollView>
     </Modal>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -95,4 +111,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 20,
   },
-});
+})

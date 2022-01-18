@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'
 import {
   View,
   TextInput,
@@ -9,52 +9,52 @@ import {
   StyleSheet,
   Alert,
   ActivityIndicator,
-} from 'react-native';
-import { connect } from 'react-redux';
+} from 'react-native'
+import { connect } from 'react-redux'
 import {
   addShow,
   switchShow,
   changeShowTagsAndDescription,
-} from '../../redux/actions';
+} from '../../redux/actions'
 
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native'
 
 function SaveShow(props) {
-  const [userShow, setUserShow] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [previous, setPrevious] = useState(null);
-  const [fromCurrentUserShow, setFromCurrentUserShow] = useState(false);
-  const [showInfo, setShowInfo] = useState(null);
-  const [tags, setTags] = useState(null);
-  const [description, setDescription] = useState(null);
+  const [userShow, setUserShow] = useState({})
+  const [loading, setLoading] = useState(true)
+  const [previous, setPrevious] = useState(null)
+  const [fromCurrentUserShow, setFromCurrentUserShow] = useState(false)
+  const [showInfo, setShowInfo] = useState(null)
+  const [tags, setTags] = useState(null)
+  const [description, setDescription] = useState(null)
 
   useEffect(() => {
-    const { showData } = props.route.params;
+    const { showData } = props.route.params
     if (props.route.params.previous === 'SingleShow') {
-      console.log('fromcurrent:', props.route.params.fromCurrentUserShow);
-      console.log('showData', showData);
-      const { fromCurrentUserShow } = props.route.params;
+      console.log('fromcurrent:', props.route.params.fromCurrentUserShow)
+      console.log('showData', showData)
+      const { fromCurrentUserShow } = props.route.params
       if (!fromCurrentUserShow) {
-        setFromCurrentUserShow(false);
-        setPrevious('SingleShow');
-        setShowInfo(showData);
+        setFromCurrentUserShow(false)
+        setPrevious('SingleShow')
+        setShowInfo(showData)
         if (showData.keep === true) {
-          setDescription(showData.description);
-          setTags(showData.tags);
+          setDescription(showData.description)
+          setTags(showData.tags)
         }
       } else if (fromCurrentUserShow) {
-        setFromCurrentUserShow(true);
-        setPrevious('SingleShow');
-        setShowInfo(showData);
+        setFromCurrentUserShow(true)
+        setPrevious('SingleShow')
+        setShowInfo(showData)
         if (showData.keep === false) {
-          setDescription('');
-          setTags([]);
+          setDescription('')
+          setTags([])
         }
       }
     } else if (props.route.params.previous === 'AddShow') {
-      setFromCurrentUserShow(true);
-      setPrevious('AddShow');
-      setShowInfo(showData);
+      setFromCurrentUserShow(true)
+      setPrevious('AddShow')
+      setShowInfo(showData)
     }
     const saveShowData = async () => {
       try {
@@ -62,57 +62,57 @@ function SaveShow(props) {
           const show = await props.switchShow(
             showData.userShow.id,
             showData.type
-          );
-          setUserShow(show);
-          setLoading(false);
+          )
+          setUserShow(show)
+          setLoading(false)
         } else {
-          const show = await props.addShow(showData, showData.type);
-          setUserShow(show);
-          setLoading(false);
+          const show = await props.addShow(showData, showData.type)
+          setUserShow(show)
+          setLoading(false)
         }
       } catch (err) {
-        console.log(err);
+        console.log(err)
       }
-    };
-    saveShowData();
+    }
+    saveShowData()
     return () => {
-      setUserShow({});
-      setLoading(true);
-      setShowInfo(null);
-      setFromCurrentUserShow(false);
-      setPrevious(null);
-      setDescription(null);
-      setTags(null);
-    };
-  }, [props.route.params]);
+      setUserShow({})
+      setLoading(true)
+      setShowInfo(null)
+      setFromCurrentUserShow(false)
+      setPrevious(null)
+      setDescription(null)
+      setTags(null)
+    }
+  }, [props.route.params])
 
   const skipTags = async () => {
     try {
       if (previous === 'AddShow') {
-        props.navigation.navigate('Profile');
+        props.navigation.navigate('Profile')
       } else if (fromCurrentUserShow) {
         if (showInfo.keep === true) {
-          props.navigation.navigate('Profile');
+          props.navigation.navigate('Profile')
         } else {
-          await changeShowTagsAndDescription(tags, userShow.id, description);
+          await changeShowTagsAndDescription(tags, userShow.id, description)
         }
       } else {
         if (showInfo.keep === false) {
-          props.navigation.pop(2);
+          props.navigation.pop(2)
         } else {
-          const tagIds = tags.map((tag) => tag.id);
+          const tagIds = tags.map((tag) => tag.id)
           await changeShowTagsAndDescription(
             tagIds,
             userShow.id,
             showInfo.description
-          );
-          props.navigation.pop(2);
+          )
+          props.navigation.pop(2)
         }
       }
     } catch (err) {
-      console.log(err);
+      console.log(err)
     }
-  };
+  }
 
   const displayUserShowInfo = () => {
     return (
@@ -126,18 +126,18 @@ function SaveShow(props) {
           : 'Rec'}{' '}
         list{' '}
       </Text>
-    );
-  };
+    )
+  }
 
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#5500dc" />
       </View>
-    );
+    )
   }
 
-  const image = { uri: userShow.show.imageUrl };
+  const image = { uri: userShow.show.imageUrl }
   return (
     <View>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -171,7 +171,7 @@ function SaveShow(props) {
         </View>
       </ScrollView>
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -208,15 +208,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#586BA4',
     marginTop: 5,
   },
-});
+})
 
 const mapStateToProps = (state) => ({
-  recShows: state.currentUser.recShows,
   watchShows: state.currentUser.toWatch,
   seenShows: state.currentUser.seen,
   currentUser: state.currentUser.userInfo,
   currentUserShows: state.currentUser.userShows,
-});
+})
 
 const mapDispatch = (dispatch) => {
   return {
@@ -225,6 +224,6 @@ const mapDispatch = (dispatch) => {
       dispatch(switchShow(userShowId, newType)),
     changeShowTagsAndDescription: (tagIds, userShowId, description) =>
       dispatch(changeShowTagsAndDescription(tagIds, userShowId, description)),
-  };
-};
-export default connect(mapStateToProps, mapDispatch)(SaveShow);
+  }
+}
+export default connect(mapStateToProps, mapDispatch)(SaveShow)
