@@ -247,30 +247,30 @@ const RecShows = (props) => {
       <View>
         <Text>
           {filter['chooseTags']
-            ? `Only display shows tagged as ${filter['chooseTags']
+            ? `Only display shows tagged as "${filter['chooseTags']
                 .map((tag, index) =>
                   index === filter['chooseTags'] - 1 && filter['chooseTags'] > 2
-                    ? `and ${tag.name}`
+                    ? `"and ${tag.name}"`
                     : tag.name
                 )
-                .join(', ')}`
+                .join(', ')}"`
             : filter['chooseAnyTags']
-            ? `Only display shows tagged as ${filter['chooseAnyTags']
+            ? `Only display shows tagged as "${filter['chooseAnyTags']
                 .map((tag, index) =>
                   index === filter['chooseAnyTags'] - 1 &&
                   filter['chooseAnyTags'] > 2
-                    ? `or ${tag.name}`
+                    ? `"or ${tag.name}"`
                     : tag.name
                 )
-                .join(', ')}`
+                .join(', ')}"`
             : filter['nonZeroTags']
             ? `Only display shows with at least 1 tag`
             : filter['tagsOrDescription']
             ? `Only display shows with at least 1 tag or a description`
             : filter['descriptionValue']
-            ? `Only display shows with ${filter['descriptionValue'].join(
-                ' or '
-              )} in their description`
+            ? `Only display shows with "${filter['descriptionValue']
+                .join('" or "')
+                .toLowerCase()}" in their description`
             : filter['nonZeroDescription']
             ? `Only display shows with a description`
             : null}

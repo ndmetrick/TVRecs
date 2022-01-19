@@ -408,9 +408,9 @@ const RecsFilter = (props) => {
               <View>
                 <View>
                   <Text style={styles.filterText}>
-                    Enter the word you want to see present in the show
-                    description (if you choose multiple words, the search will
-                    return shows containing any one of those words)
+                    Enter the word (not case-sensitive) you want to see present
+                    in the show description (if you choose multiple words, the
+                    search will return shows containing any one of those words).
                   </Text>
                   <TextInput
                     style={styles.inputText}
@@ -445,7 +445,8 @@ const RecsFilter = (props) => {
             descriptionValue.length ? (
               <View style={{ marginLeft: 15 }}>
                 <Text style={styles.filterText}>
-                  Filer description words added: {descriptionValue.join(', ')}
+                  Filer description words added: "
+                  {descriptionValue.join('", "').toLowerCase()}"
                 </Text>
               </View>
             ) : null}
@@ -710,28 +711,28 @@ const RecsFilter = (props) => {
                   Tags / description filter:{' '}
                   {tagsDescriptionChecked === 'chooseTags' &&
                   tagsDropdownValue.length
-                    ? `Shows tagged with ${tagsDropdownValue
+                    ? `Shows tagged as "${tagsDropdownValue
                         .map((tag, index) =>
                           index === tagsDropdownValue.length - 1 &&
                           tagsDropdownValue.length > 2 &&
                           !filterAnyTags
-                            ? `and ${tag.name}`
+                            ? `"and ${tag.name}"`
                             : index === tagsDropdownValue.length - 1 &&
                               tagsDropdownValue.length > 2 &&
                               filterAnyTags
-                            ? `or ${tag.name}`
+                            ? `"or ${tag.name}"`
                             : tag.name
                         )
-                        .join(', ')}`
+                        .join(', ')}"`
                     : tagsDescriptionChecked === 'nonZeroTags'
                     ? `Shows with at least 1 tag`
                     : tagsDescriptionChecked === 'tagsOrDescription'
                     ? `Shows with at least 1 tag or a description`
                     : tagsDescriptionChecked === 'descriptionWord' &&
                       descriptionValue.length
-                    ? `Shows with ${descriptionValue.join(
-                        ' or '
-                      )} in their description`
+                    ? `Shows with "${descriptionValue
+                        .join('" or "')
+                        .toLowerCase()}" in their description`
                     : tagsDescriptionChecked === 'nonZeroDescription'
                     ? `Shows with a description`
                     : 'None yet'}
