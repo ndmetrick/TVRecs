@@ -239,6 +239,7 @@ const RecShows = (props) => {
 
   const displayFilters = () => {
     console.log('i got here at least')
+    console.log('filter', filter)
     return (
       <View>
         <Text>
@@ -263,8 +264,8 @@ const RecShows = (props) => {
             ? `Only display shows with at least 1 tag`
             : filter['tagsOrDescription']
             ? `Only display shows with at least 1 tag or a description`
-            : filter['descriptionWord']
-            ? `Only display shows with ${filter['nonZeroDescription'].join(
+            : filter['descriptionValue']
+            ? `Only display shows with ${filter['descriptionValue'].join(
                 ' or '
               )} in their description`
             : filter['nonZeroDescription']

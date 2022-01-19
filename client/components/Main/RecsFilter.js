@@ -83,9 +83,9 @@ const RecsFilter = (props) => {
         setTagsDescriptionChecked('nonZeroTags')
       }
 
-      if (props.filter['descriptionWord']) {
+      if (props.filter['descriptionValue']) {
         setTagsDescriptionChecked('descriptionWord')
-        setDescriptionValue(props.filter['descriptionWord'])
+        setDescriptionValue(props.filter['descriptionValue'])
       }
       if (props.filter['nonZeroDescription']) {
         setTagsDescriptionChecked('nonZeroDescription')
@@ -191,7 +191,7 @@ const RecsFilter = (props) => {
       }
       if (tagsDescriptionChecked === 'descriptionWord') {
         if (descriptionValue.length) {
-          filters['descriptionContent'] = descriptionValue
+          filters['descriptionValue'] = descriptionValue
           filterCount += 1
         }
       }
@@ -227,7 +227,9 @@ const RecsFilter = (props) => {
       } else {
         const matches = await props.getMatchingRecs(filters)
         if (matches) {
-          filters['chooseTags'] = tagsDropdownValue
+          if (tagsDescriptionChecked === 'chooseTags') {
+            filters['chooseTags'] = tagsDropdownValue
+          }
           props.setMatchingRecs(matches)
           props.setFilter(filters)
           props.setAdvancedSearch(false)
@@ -378,7 +380,7 @@ const RecsFilter = (props) => {
                 </TouchableOpacity>
               </View>
 
-              {/* <View style={styles.choices}>
+              <View style={styles.choices}>
                 <TouchableOpacity
                   onPress={() => setTagsDescriptionChecked('descriptionWord')}
                 >
@@ -399,7 +401,7 @@ const RecsFilter = (props) => {
                     only shows containing a particular word
                   </Text>
                 </TouchableOpacity>
-              </View> */}
+              </View>
             </View>
 
             {tagsDescriptionChecked === 'descriptionWord' ? (
@@ -422,7 +424,13 @@ const RecsFilter = (props) => {
                     value={descriptionInput}
                     // onFocus={() => setNotFound(false)}
                   />
-                  <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                  <View
+                    style={{
+                      flex: 1,
+                      alignItems: 'flex-end',
+                      marginBottom: 5,
+                    }}
+                  >
                     <TouchableOpacity
                       style={styles.filterButton}
                       onPress={addWordToDescriptionFilter}
@@ -431,6 +439,14 @@ const RecsFilter = (props) => {
                     </TouchableOpacity>
                   </View>
                 </View>
+              </View>
+            ) : null}
+            {tagsDescriptionChecked === 'descriptionWord' &&
+            descriptionValue.length ? (
+              <View style={{ marginLeft: 15 }}>
+                <Text style={styles.filterText}>
+                  Filer description words added: {descriptionValue.join(', ')}
+                </Text>
               </View>
             ) : null}
 
