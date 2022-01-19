@@ -71,7 +71,7 @@ const AddShow = (props) => {
                     onPress={() => setStreamingAndPurchase(true)}
                   >
                     <Text style={styles.buttonText}>
-                      Show streaming and purchase options
+                      Show overview and options for streaming and purchase
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -83,7 +83,7 @@ const AddShow = (props) => {
                       onPress={() => setStreamingAndPurchase(false)}
                     >
                       <Text style={styles.buttonText}>
-                        Hide streaming and purchase options
+                        Hide overview and options for streaming and purchase
                       </Text>
                     </TouchableOpacity>
                   </View>

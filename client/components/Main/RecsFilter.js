@@ -139,11 +139,6 @@ const RecsFilter = (props) => {
     }
   }, [isFocused])
 
-  console.log(
-    'i am out of useEffect in filters and this is tagsDescriptionChecked',
-    tagsDescriptionChecked
-  )
-
   const displayChosen = (chosenValues) => {
     return chosenValues.map((chosenValue, key) => {
       return (
@@ -358,7 +353,7 @@ const RecsFilter = (props) => {
                   </Text>
                 </TouchableOpacity>
               </View>
-              <View style={styles.choices}>
+              <View style={{ ...styles.choices, marginBottom: 5 }}>
                 <TouchableOpacity
                   onPress={() =>
                     setTagsDescriptionChecked('nonZeroDescription')
@@ -383,7 +378,7 @@ const RecsFilter = (props) => {
                 </TouchableOpacity>
               </View>
 
-              <View style={styles.choices}>
+              {/* <View style={styles.choices}>
                 <TouchableOpacity
                   onPress={() => setTagsDescriptionChecked('descriptionWord')}
                 >
@@ -404,7 +399,7 @@ const RecsFilter = (props) => {
                     only shows containing a particular word
                   </Text>
                 </TouchableOpacity>
-              </View>
+              </View> */}
             </View>
 
             {tagsDescriptionChecked === 'descriptionWord' ? (
@@ -519,57 +514,59 @@ const RecsFilter = (props) => {
 
             {/* add choice for all or any */}
 
-            <Text style={styles.tagHeadingText}>
-              Filter by where you can stream the show
-            </Text>
-            <View style={styles.choiceContainer}>
-              <View style={styles.choices}>
-                <TouchableOpacity onPress={() => setStreamersChecked('none')}>
-                  {streamersChecked === 'none' ? (
-                    <MaterialIcons
-                      name="radio-button-on"
-                      size={20}
-                      style={{ textAlign: 'center' }}
-                    />
-                  ) : (
-                    <MaterialIcons
-                      name="radio-button-off"
-                      size={20}
-                      style={{ textAlign: 'center' }}
-                    />
-                  )}
+            <View style={{ backgroundColor: 'grey' }}>
+              <Text style={styles.tagHeadingText}>
+                Filter by where you can stream the show
+              </Text>
+              <View style={styles.choiceContainer}>
+                <View style={styles.choices}>
+                  <TouchableOpacity onPress={() => setStreamersChecked('none')}>
+                    {streamersChecked === 'none' ? (
+                      <MaterialIcons
+                        name="radio-button-on"
+                        size={20}
+                        style={{ textAlign: 'center' }}
+                      />
+                    ) : (
+                      <MaterialIcons
+                        name="radio-button-off"
+                        size={20}
+                        style={{ textAlign: 'center' }}
+                      />
+                    )}
 
-                  <Text style={styles.filterText}>no streaming filter</Text>
-                </TouchableOpacity>
-              </View>
+                    <Text style={styles.filterText}>no streaming filter</Text>
+                  </TouchableOpacity>
+                </View>
 
-              <View style={styles.choices}>
-                <TouchableOpacity
-                  onPress={() => setStreamersChecked('chooseStreamers')}
-                >
-                  {streamersChecked === 'chooseStreamers' ? (
-                    <MaterialIcons
-                      name="radio-button-on"
-                      size={20}
-                      style={{ textAlign: 'center' }}
-                    />
-                  ) : (
-                    <MaterialIcons
-                      name="radio-button-off"
-                      size={20}
-                      style={{ textAlign: 'center' }}
-                    />
-                  )}
+                <View style={styles.choices}>
+                  <TouchableOpacity
+                    onPress={() => setStreamersChecked('chooseStreamers')}
+                  >
+                    {streamersChecked === 'chooseStreamers' ? (
+                      <MaterialIcons
+                        name="radio-button-on"
+                        size={20}
+                        style={{ textAlign: 'center' }}
+                      />
+                    ) : (
+                      <MaterialIcons
+                        name="radio-button-off"
+                        size={20}
+                        style={{ textAlign: 'center' }}
+                      />
+                    )}
 
-                  <Text style={styles.filterText}>
-                    only shows available on:
-                  </Text>
-                </TouchableOpacity>
+                    <Text style={styles.filterText}>
+                      only shows available on:
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
 
             {streamersChecked === 'chooseStreamers' ? (
-              <View>
+              <View style={{ backgroundColor: 'gray' }}>
                 {streamersDropdownValue.length ? (
                   <View>
                     <DropDownPicker
@@ -727,7 +724,7 @@ const RecsFilter = (props) => {
 
               <View style={styles.filterCriteriaRow}>
                 <Text style={styles.filterText}>
-                  Streamer filter:{' '}
+                  Streamer filter (doesn't work yet):{' '}
                   {streamersChecked === 'chooseStreamers' &&
                   streamersDropdownValue.length
                     ? `Shows available on ${streamersDropdownValue

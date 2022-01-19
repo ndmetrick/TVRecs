@@ -206,7 +206,7 @@ export default function userReducer(state = initialState, action) {
         ...state,
         watchProviders: {
           ...state.watchProviders,
-          [imdbId]: action.watchInfo.info,
+          [showId]: action.watchInfo.info,
         },
       }
     default:

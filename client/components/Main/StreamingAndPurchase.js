@@ -16,6 +16,7 @@ function StreamingAndPurchase(props) {
   const [streaming, setStreaming] = useState(null)
   const [purchase, setPurchase] = useState(null)
   const [changeCountry, setChangeCountry] = useState(false)
+  const [overview, setOverview] = useState(null)
 
   useEffect(() => {
     if (props.currentUser) {
@@ -24,20 +25,23 @@ function StreamingAndPurchase(props) {
     const getWatchProviders = async (showId) => {
       try {
         const tmdbKey = await props.getAPIKey('tmdb')
-        const APIString = `https://api.themoviedb.org/3/tv/${showId}/watch/providers?api_key=${tmdbKey}`
-        const watchProviders = await axios.get(APIString)
-        if (watchProviders) {
-          const providers = watchProviders.data.results[country || 'US']
-          const streamingInfo = getStreaming(providers)
-          const purchaseInfo = getPurchase(providers)
+        const APIString = `https://api.themoviedb.org/3/tv/${showId}?api_key=${tmdbKey}&append_to_response=watch/providers`
+        const showInfo = await axios.get(APIString)
+        if (showInfo) {
+          const watchProviders =
+            showInfo.data['watch/providers'].results[country || 'US']
+          const streamingInfo = getStreaming(watchProviders)
+          const purchaseInfo = getPurchase(watchProviders)
+          setOverview(showInfo.data.overview)
           setStreaming(streamingInfo)
           setPurchase(purchaseInfo)
           const info = {
+            overview: showInfo.data.overview,
             streaming: streamingInfo,
             purchase: purchaseInfo,
             date: new Date(),
           }
-          addToWatchProviders({ imdbId: props.showId, info })
+          props.addToWatchProviders({ imdbId: props.showId, info })
         }
       } catch (err) {
         console.log(err)
@@ -52,10 +56,13 @@ function StreamingAndPurchase(props) {
     ) {
       setStreaming(props.watchProviders[props.showId].streaming)
       setPurchase(props.watchProviders[props.showId].purchase)
+      setOverview(props.watchProviders[props.showId].overview)
     } else {
-      getWatchProviders[props.showId]
+      getWatchProviders(props.showId)
     }
   }, [props.currentUser, country])
+
+  console.log('here it is', props.watchProviders)
 
   const getStreaming = (watchProviders) => {
     const stream = watchProviders ? watchProviders.flatrate : null
@@ -150,6 +157,17 @@ function StreamingAndPurchase(props) {
             {country} purchase options:{' '}
           </Text>
           Currently none that we're aware of
+        </Text>
+      )}
+      {overview ? (
+        <Text style={styles.text}>
+          <Text style={{ fontWeight: 'bold' }}>Official overview: </Text>
+          {overview}
+        </Text>
+      ) : (
+        <Text style={styles.text}>
+          <Text style={{ fontWeight: 'bold' }}>Official overview: </Text>
+          None available
         </Text>
       )}
     </View>

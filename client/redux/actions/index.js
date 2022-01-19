@@ -79,6 +79,7 @@ export function getCurrentUser() {
 export function addToWatchProviders(watchInfo) {
   return async (dispatch) => {
     try {
+      console.log('watchInfo', watchInfo)
       dispatch({
         type: types.ADD_TO_WATCH_PROVIDERS,
         watchInfo,

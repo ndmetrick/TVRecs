@@ -237,7 +237,7 @@ function SingleShow(props) {
                   onPress={() => setStreamingAndPurchase(true)}
                 >
                   <Text style={styles.buttonText}>
-                    Show streaming and purchase options
+                    Show overview and options for streaming and purchase
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -249,12 +249,12 @@ function SingleShow(props) {
                     onPress={() => setStreamingAndPurchase(false)}
                   >
                     <Text style={styles.buttonText}>
-                      Hide streaming and purchase options
+                      Hide overview and options for streaming and purchase
                     </Text>
                   </TouchableOpacity>
                 </View>
                 <StreamingAndPurchase
-                  showId={userShow.show.id}
+                  showId={userShow.show.imdbId}
                   currentUser={props.currentUser}
                 />
               </View>
