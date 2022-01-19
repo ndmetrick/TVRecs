@@ -106,7 +106,10 @@ const RecShows = (props) => {
       }
       setRecShows(visibleShows)
       setMultipleRecInfo(recCounts)
-      if (props.currentUser && props.following.length === 0) {
+      if (
+        (props.currentUser && props.following.length === 0) ||
+        (props.currentUser && props.filterRecs.length === 0)
+      ) {
         console.log('i got into this one down here')
         setLoading(false)
       }
