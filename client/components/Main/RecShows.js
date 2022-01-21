@@ -62,7 +62,7 @@ const RecShows = (props) => {
             props.filterRecs
           )
           let shows = filter ? props.filterRecs : props.allRecShows
-          let height = filter ? 180 : 75
+          let height = filter ? 150 : 55
           setHeaderHeight(height)
           // shows.sort(function (x, y) {
           //   return new Date(y.updatedAt) - new Date(x.updatedAt)
@@ -169,6 +169,7 @@ const RecShows = (props) => {
         contentContainerStyle={{ paddingTop: headerHeight }}
         numColumns={1}
         horizontal={false}
+        bounces={false}
         data={recShows}
         renderItem={({ item }) => (
           <View style={styles.containerImage}>
@@ -303,7 +304,9 @@ const RecShows = (props) => {
     )
   }
 
-  const translateY = scrollY.current.interpolate({
+  const diffClamp = Animated.diffClamp(scrollY.current, 0, headerHeight)
+
+  const translateY = diffClamp.interpolate({
     inputRange: [0, headerHeight],
     outputRange: [0, -headerHeight],
     extrapolate: 'clamp',
@@ -336,9 +339,13 @@ const RecShows = (props) => {
             {!advancedSearch ? (
               <View style={styles.headerHeight}>
                 {!noUserShows ? (
-                  <Text>Toggle to hide shows saved to your profile</Text>
+                  <Text style={{ color: 'white' }}>
+                    Toggle to hide shows saved to your profile
+                  </Text>
                 ) : (
-                  <Text>Toggle to see shows saved to your profile</Text>
+                  <Text style={{ color: 'white' }}>
+                    Toggle to see shows saved to your profile
+                  </Text>
                 )}
                 <View
                   style={{ flexDirection: 'row', flexWrap: 'wrap', flex: 1 }}
@@ -365,6 +372,7 @@ const RecShows = (props) => {
                         marginTop: 5,
                         fontSize: 16,
                         fontWeight: '400',
+                        color: 'white',
                       }}
                     >
                       My filters{' '}
@@ -377,17 +385,23 @@ const RecShows = (props) => {
                 </View>
                 {filter ? (
                   <View>
-                    <Text style={{ fontWeight: 'bold' }}>
+                    <Text style={{ fontWeight: 'bold', color: 'white' }}>
                       The following {noUserShows ? 'additional ' : null}filters
                       have been applied to this search:
                     </Text>
                     <View style={styles.filterDisplay}>{displayFilters()}</View>
                     <View style={{ alignItems: 'flex-end' }}>
                       <TouchableOpacity
-                        style={styles.button}
+                        style={{
+                          ...styles.button,
+                          backgroundColor: '#008DD5',
+                          marginBottom: 5,
+                        }}
                         onPress={() => setFilter(null)}
                       >
-                        <Text style={styles.buttonText}>Cancel filters</Text>
+                        <Text style={{ ...styles.buttonText, color: 'white' }}>
+                          Cancel filters
+                        </Text>
                       </TouchableOpacity>
                     </View>
                   </View>
@@ -487,7 +501,6 @@ const styles = StyleSheet.create({
   filterDisplay: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginBottom: 2,
     marginTop: 2,
   },
   header: {
@@ -496,6 +509,7 @@ const styles = StyleSheet.create({
     right: 0,
     width: '100%',
     zIndex: 1,
+    backgroundColor: '#340068',
   },
 })
 const mapStateToProps = (store) => ({
