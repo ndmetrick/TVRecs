@@ -17,8 +17,6 @@ import {
   changeShowTagsAndDescription,
 } from '../../redux/actions'
 
-import { NavigationContainer } from '@react-navigation/native'
-
 function SaveShow(props) {
   const [userShow, setUserShow] = useState({})
   const [loading, setLoading] = useState(true)
@@ -32,7 +30,6 @@ function SaveShow(props) {
     const { showData } = props.route.params
     if (props.route.params.previous === 'SingleShow') {
       console.log('fromcurrent:', props.route.params.fromCurrentUserShow)
-      console.log('showData', showData)
       const { fromCurrentUserShow } = props.route.params
       if (!fromCurrentUserShow) {
         setFromCurrentUserShow(false)
@@ -98,7 +95,7 @@ function SaveShow(props) {
         }
       } else {
         if (showInfo.keep === false) {
-          props.navigation.pop(2)
+          props.navigation.pop()
         } else {
           const tagIds = tags.map((tag) => tag.id)
           await changeShowTagsAndDescription(
@@ -106,7 +103,7 @@ function SaveShow(props) {
             userShow.id,
             showInfo.description
           )
-          props.navigation.pop(2)
+          props.navigation.pop()
         }
       }
     } catch (err) {

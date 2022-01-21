@@ -631,7 +631,6 @@ const styles = StyleSheet.create({
   },
   recButton: {
     borderRadius: 25,
-    backgroundColor: '#4056F4',
     backgroundColor: '#340068',
   },
   usernameText: {

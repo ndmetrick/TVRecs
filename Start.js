@@ -55,7 +55,13 @@ const Start = (props) => {
       {user ? (
         // <GestureHandlerRootView>
         <NavigationContainer>
-          <Stack.Navigator initialRouteName="Main">
+          <Stack.Navigator
+            initialRouteName="Main"
+            screenOptions={() => ({
+              headerBackTitle: 'Back',
+              headerTintColor: '#340068',
+            })}
+          >
             <Stack.Screen
               name="Main"
               component={Main}
@@ -194,7 +200,13 @@ const Start = (props) => {
       ) : (
         // </GestureHandlerRootView>
         <NavigationContainer>
-          <Stack.Navigator initialRouteName="MainLoggedOut">
+          <Stack.Navigator
+            initialRouteName="MainLoggedOut"
+            screenOptions={() => ({
+              headerBackTitle: 'Back',
+              headerTintColor: '#340068',
+            })}
+          >
             <Stack.Screen
               name="MainLoggedOut"
               component={MainLoggedOut}

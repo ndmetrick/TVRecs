@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 40,
     marginHorizontal: 3,
-    backgroundColor: '#36C9C6',
+    backgroundColor: '#008DD5',
     marginTop: 5,
   },
   tagText: {
