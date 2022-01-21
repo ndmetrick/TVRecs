@@ -30,14 +30,14 @@ function StreamingAndPurchase(props) {
         if (showInfo) {
           const watchProviders =
             showInfo.data['watch/providers'].results[country || 'US']
-          const streamingInfo = getStreaming(watchProviders)
+          const streamingContainer = getStreaming(watchProviders)
           const purchaseInfo = getPurchase(watchProviders)
           setOverview(showInfo.data.overview)
-          setStreaming(streamingInfo)
+          setStreaming(streamingContainer.string)
           setPurchase(purchaseInfo)
           const info = {
             overview: showInfo.data.overview,
-            streaming: streamingInfo,
+            streaming: streamingContainer,
             purchase: purchaseInfo,
             date: new Date(),
           }
@@ -54,7 +54,7 @@ function StreamingAndPurchase(props) {
         (1000 * 60 * 60 * 24) <
         7
     ) {
-      setStreaming(props.watchProviders[props.showId].streaming)
+      setStreaming(props.watchProviders[props.showId].streaming.string)
       setPurchase(props.watchProviders[props.showId].purchase)
       setOverview(props.watchProviders[props.showId].overview)
     } else {
@@ -64,17 +64,25 @@ function StreamingAndPurchase(props) {
 
   console.log('here it is', props.watchProviders)
 
+  console.log('watch providers in streaming and purchase', props.watchProviders)
+
   const getStreaming = (watchProviders) => {
     const stream = watchProviders ? watchProviders.flatrate : null
-    let streamingInfo = ''
+    let streamingContainer
+    let streaming
     if (stream) {
-      const streamingOptions =
-        stream && stream.map((option) => option.provider_name).join(', ')
-      if (streamingOptions) {
-        streamingInfo = streamingOptions
+      const streamingInfo =
+        stream && stream.map((option) => option.provider_name)
+      if (streamingInfo) {
+        const string = streamingInfo.join(', ')
+        const options = {}
+        streamingInfo.forEach((streamer) => {
+          options[streamer] = true
+        })
+        streamingContainer = { string, options }
       }
     }
-    return streamingInfo
+    return streamingContainer
   }
 
   const getPurchase = (watchProviders) => {
@@ -199,7 +207,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 40,
     marginHorizontal: 3,
-    backgroundColor: '#586BA4',
+    backgroundColor: '#340068',
     marginTop: 5,
   },
 })

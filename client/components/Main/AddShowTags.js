@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useReducer } from 'react';
-import { connect } from 'react-redux';
+import React, { useEffect, useState, useReducer } from 'react'
+import { connect } from 'react-redux'
 import {
   View,
   StyleSheet,
@@ -7,37 +7,37 @@ import {
   Text,
   TouchableOpacity,
   ActivityIndicator,
-} from 'react-native';
-import { TextInput } from 'react-native-paper';
-import { changeShowTagsAndDescription } from '../../redux/actions';
+} from 'react-native'
+import { TextInput } from 'react-native-paper'
+import { changeShowTagsAndDescription } from '../../redux/actions'
 
 function AddShowTags(props) {
   // const [warningTags, setWarningTags] = useState([]);
   // const [tvTags, setTVTags] = useState([]);
-  const [selectedTags, setSelectedTags] = useState({});
-  const [userShow, setUserShow] = useState(null);
-  const [loaded, setLoaded] = useState(false);
+  const [selectedTags, setSelectedTags] = useState({})
+  const [userShow, setUserShow] = useState(null)
+  const [loaded, setLoaded] = useState(false)
   // const [multilineChecked, setMultilineChecked] = useState(false);
-  const [description, setDescription] = useState('');
+  const [description, setDescription] = useState('')
 
   useEffect(() => {
-    const { previous } = props.route.params;
+    const { previous } = props.route.params
     // setAllTags(props.allTags);
-    setUserShow(props.route.params.userShow);
+    setUserShow(props.route.params.userShow)
     const tags =
       previous === 'SaveShow' && props.route.params.tags
         ? props.route.params.tags
-        : props.route.params.userShow.tags;
-    const selected = {};
+        : props.route.params.userShow.tags
+    const selected = {}
     tags.forEach((tag) => {
-      selected[tag.id] = true;
-    });
-    setSelectedTags(selected);
+      selected[tag.id] = true
+    })
+    setSelectedTags(selected)
     const prevDescription =
       previous === 'SaveShow' && props.route.params.description
         ? props.route.params.description
-        : props.route.params.userShow.description;
-    setDescription(prevDescription);
+        : props.route.params.userShow.description
+    setDescription(prevDescription)
     // const tv = [];
     // const warnings = [];
     // for (let i = 0; i < allTags.length; i++) {
@@ -49,21 +49,21 @@ function AddShowTags(props) {
     //     warnings.push(tag);
     //   }
     // }
-    console.log('in this one', props.warningTags, props.tvTags);
+    console.log('in this one', props.warningTags, props.tvTags)
 
     // setWarningTags(warnings);
     // setTVTags(tv);
-    setLoaded(true);
+    setLoaded(true)
     return () => {
-      setUserShow(null);
+      setUserShow(null)
       // setWarningTags([]);
       // setTVTags([]);
-      setLoaded(false);
-      setSelectedTags({});
-      setDescription('');
+      setLoaded(false)
+      setSelectedTags({})
+      setDescription('')
       // setMultilineChecked(false);
-    };
-  }, [userShow, loaded]);
+    }
+  }, [userShow, loaded])
 
   // const unselectAll = () => {
   //   if (TagGroup.getSelectedIndex() !== -1) {
@@ -75,13 +75,13 @@ function AddShowTags(props) {
 
   const selectTag = (tag) => {
     if (selectedTags[tag.id] === true) {
-      const swap = { ...selectedTags, [tag.id]: false };
-      setSelectedTags(swap);
+      const swap = { ...selectedTags, [tag.id]: false }
+      setSelectedTags(swap)
     } else {
-      const swap = { ...selectedTags, [tag.id]: true };
-      setSelectedTags(swap);
+      const swap = { ...selectedTags, [tag.id]: true }
+      setSelectedTags(swap)
     }
-  };
+  }
 
   const displayTags = (tags) => {
     return tags.map((tag, key) => {
@@ -94,7 +94,7 @@ function AddShowTags(props) {
           ? styles.highlightTvTag
           : selectedTags[tag.id] !== true && tag.type === 'warning'
           ? styles.warningTag
-          : styles.highlightWarningTag;
+          : styles.highlightWarningTag
 
       return (
         <TouchableOpacity
@@ -104,37 +104,37 @@ function AddShowTags(props) {
         >
           <Text style={styles.tagText}>{tag.name}</Text>
         </TouchableOpacity>
-      );
-    });
-  };
+      )
+    })
+  }
 
   const chooseTags = async () => {
-    const chosenTags = [];
+    const chosenTags = []
     for (const tagId in selectedTags) {
       if (selectedTags[tagId] === true) {
-        chosenTags.push(tagId);
+        chosenTags.push(tagId)
       }
     }
     await props.changeShowTagsAndDescription(
       chosenTags,
       userShow.id,
       description
-    );
-    return props.navigation.navigate('Profile');
-  };
+    )
+    return props.navigation.navigate('Profile')
+  }
 
   if (!loaded) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#5500dc" />
       </View>
-    );
+    )
   } else if (!selectedTags) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#5500dc" />
       </View>
-    );
+    )
   }
 
   return (
@@ -153,8 +153,8 @@ function AddShowTags(props) {
           placeholder="Write a description of the show. . ."
           onChangeText={(description) => setDescription(description)}
           mode="outlined"
-          outlineColor="#586BA4"
-          activeOutlineColor="#586BA4"
+          outlineColor="#340068"
+          activeOutlineColor="#340068"
           multiline={true}
           value={description}
         />
@@ -176,7 +176,7 @@ function AddShowTags(props) {
         </View>
       </ScrollView>
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 40,
     marginHorizontal: 3,
-    backgroundColor: '#586BA4',
+    backgroundColor: '#340068',
     marginTop: 5,
     marginBottom: 20,
   },
@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#E24E1B',
     marginTop: 5,
   },
-});
+})
 
 const mapStateToProps = (store) => ({
   allTags: store.allOtherUsers.allTags,
@@ -284,12 +284,12 @@ const mapStateToProps = (store) => ({
   userShows: store.currentUser.userShows,
   warningTags: store.allOtherUsers.warningTags,
   tvTags: store.allOtherUsers.tvTags,
-});
+})
 
 const mapDispatchToProps = (dispatch) => {
   return {
     changeShowTagsAndDescription: (tagIds, userShowId, description) =>
       dispatch(changeShowTagsAndDescription(tagIds, userShowId, description)),
-  };
-};
-export default connect(mapStateToProps, mapDispatchToProps)(AddShowTags);
+  }
+}
+export default connect(mapStateToProps, mapDispatchToProps)(AddShowTags)

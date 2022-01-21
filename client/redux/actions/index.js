@@ -2,11 +2,11 @@ import axios from 'axios'
 import types from '../constants'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
-const baseUrl = 'https://tvrecs.herokuapp.com'
+// const baseUrl = 'https://tvrecs.herokuapp.com'
 
 // const baseUrl = 'https://10.0.0.98:8080';
 
-// const baseUrl = 'http://10.0.0.171:8080'
+const baseUrl = 'http://10.0.0.171:8080'
 // const baseUrl = 'http://localhost:8080';
 
 const getToken = async () => {
@@ -346,22 +346,31 @@ export function getMatchingRecs(filters) {
   return async (dispatch) => {
     try {
       const headers = await getToken()
-      const recs = await axios.put(
+      const response = await axios.put(
         `${baseUrl}/api/users/getMatchingRecs/`,
         { filters },
         headers
       )
-      if (recs) {
-        // if (filters['chooseStreamers']) {
-        //   const finalRecs
-        //   recs.filter((rec) => {
-
-        //   })
-        // }
-
-        dispatch({ type: types.GET_MATCHING_RECS, recs: recs.data })
-        console.log('recs in getmatchingusers', recs.data)
-        return recs.data
+      if (response) {
+        if (filters['chooseStreamers']) {
+          console.log('i got into this', response.data)
+          const { recs, newWatchProviders } = response.data
+          dispatch({
+            type: types.GET_MATCHING_RECS_AND_WATCH,
+            recs,
+            newWatchProviders,
+          })
+          console.log(
+            'recs and watch in getmatchingusers',
+            recs,
+            newWatchProviders
+          )
+          return response.data
+        } else {
+          dispatch({ type: types.GET_MATCHING_RECS, recs: response.data })
+          console.log('recs in getmatchingusers', response.data)
+          return response.data
+        }
       }
     } catch (e) {
       console.error(e)

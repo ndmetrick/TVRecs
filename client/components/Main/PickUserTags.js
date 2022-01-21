@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useReducer } from 'react';
-import { connect } from 'react-redux';
+import React, { useEffect, useState, useReducer } from 'react'
+import { connect } from 'react-redux'
 import {
   View,
   StyleSheet,
@@ -8,34 +8,34 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
-} from 'react-native';
-import { TextInput } from 'react-native-paper';
-import { changeUserTagsAndDescription } from '../../redux/actions';
+} from 'react-native'
+import { TextInput } from 'react-native-paper'
+import { changeUserTagsAndDescription } from '../../redux/actions'
 
 function PickUserTags(props) {
-  const [userTags, setUserTags] = useState([]);
-  const [selectedTags, setSelectedTags] = useState(null);
-  const [loaded, setLoaded] = useState(false);
-  const [description, setDescription] = useState('');
+  const [userTags, setUserTags] = useState([])
+  const [selectedTags, setSelectedTags] = useState(null)
+  const [loaded, setLoaded] = useState(false)
+  const [description, setDescription] = useState('')
 
   useEffect(() => {
-    setUserTags(props.allUserTags);
-    const selected = {};
+    setUserTags(props.allUserTags)
+    const selected = {}
     props.currentUserTags.forEach((tag) => {
-      selected[tag.id] = true;
-    });
-    setSelectedTags(selected);
+      selected[tag.id] = true
+    })
+    setSelectedTags(selected)
     if (props.currentUser.description) {
-      setDescription(props.currentUser.description);
+      setDescription(props.currentUser.description)
     }
-    setLoaded(true);
+    setLoaded(true)
     return () => {
-      setUserTags([]);
-      setLoaded(false);
-      setSelectedTags(null);
-      setDescription('');
-    };
-  }, [loaded]);
+      setUserTags([])
+      setLoaded(false)
+      setSelectedTags(null)
+      setDescription('')
+    }
+  }, [loaded])
 
   // const unselectAll = () => {
   //   if (TagGroup.getSelectedIndex() !== -1) {
@@ -47,20 +47,20 @@ function PickUserTags(props) {
 
   const selectTag = (tag) => {
     if (selectedTags[tag.id] === true) {
-      const swap = { ...selectedTags, [tag.id]: false };
-      setSelectedTags(swap);
+      const swap = { ...selectedTags, [tag.id]: false }
+      setSelectedTags(swap)
     } else {
-      const swap = { ...selectedTags, [tag.id]: true };
-      setSelectedTags(swap);
+      const swap = { ...selectedTags, [tag.id]: true }
+      setSelectedTags(swap)
     }
-  };
+  }
 
   const displayTags = (tags) => {
     return tags.map((tag, key) => {
       const tagStyle =
         selectedTags[tag.id] !== true
           ? styles.unselectedTag
-          : styles.selectedTag;
+          : styles.selectedTag
 
       return (
         <TouchableOpacity
@@ -70,35 +70,35 @@ function PickUserTags(props) {
         >
           <Text style={styles.tagText}>{tag.name}</Text>
         </TouchableOpacity>
-      );
-    });
-  };
+      )
+    })
+  }
 
   const saveDescriptionAndTags = async () => {
-    const chosenTags = [];
+    const chosenTags = []
     for (const tagId in selectedTags) {
       if (selectedTags[tagId] === true) {
-        chosenTags.push(tagId);
+        chosenTags.push(tagId)
       }
     }
-    await props.changeUserTagsAndDescription(chosenTags, description);
-    return props.navigation.navigate('Settings');
-  };
+    await props.changeUserTagsAndDescription(chosenTags, description)
+    return props.navigation.navigate('Settings')
+  }
 
   if (!loaded || !userTags) {
-    console.log('this one is where i am');
+    console.log('this one is where i am')
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#5500dc" />
       </View>
-    );
+    )
   } else if (!userTags.length || !selectedTags) {
-    console.log('i got this far');
+    console.log('i got this far')
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#5500dc" />
       </View>
-    );
+    )
   }
 
   return (
@@ -115,8 +115,8 @@ function PickUserTags(props) {
           placeholder="Write a tv bio. . ."
           onChangeText={(description) => setDescription(description)}
           mode="outlined"
-          outlineColor="#586BA4"
-          activeOutlineColor="#586BA4"
+          outlineColor="#340068"
+          activeOutlineColor="#340068"
           multiline={true}
           value={description}
         />
@@ -138,7 +138,7 @@ function PickUserTags(props) {
         </View>
       </ScrollView>
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 40,
     marginHorizontal: 3,
-    backgroundColor: '#586BA4',
+    backgroundColor: '#340068',
     marginTop: 5,
     marginBottom: 20,
   },
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 40,
     marginHorizontal: 3,
-    backgroundColor: '#36C9C6',
+    backgroundColor: '#008DD5',
     marginTop: 5,
   },
   unselectedTag: {
@@ -224,18 +224,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#9BC1BC',
     marginTop: 5,
   },
-});
+})
 
 const mapStateToProps = (store) => ({
   allUserTags: store.allOtherUsers.userTags,
   currentUser: store.currentUser.userInfo,
   currentUserTags: store.currentUser.userTags,
-});
+})
 
 const mapDispatchToProps = (dispatch) => {
   return {
     changeUserTagsAndDescription: (tagIds, description) =>
       dispatch(changeUserTagsAndDescription(tagIds, description)),
-  };
-};
-export default connect(mapStateToProps, mapDispatchToProps)(PickUserTags);
+  }
+}
+export default connect(mapStateToProps, mapDispatchToProps)(PickUserTags)

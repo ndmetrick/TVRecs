@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { connect } from 'react-redux';
+import React, { useState, useEffect } from 'react'
+import { connect } from 'react-redux'
 import {
   View,
   Text,
@@ -8,7 +8,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
-} from 'react-native';
+} from 'react-native'
 import {
   getUserShows,
   getOtherUser,
@@ -17,102 +17,102 @@ import {
   getUsersFollowingRecs,
   getUserFollowing,
   getUserTags,
-} from '../../redux/actions';
-import { createStackNavigator } from '@react-navigation/stack';
-import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import UserTagsAndDescription from './UserTagsAndDescription';
-import ViewShows from './ViewShows';
+} from '../../redux/actions'
+import { createStackNavigator } from '@react-navigation/stack'
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs'
+import UserTagsAndDescription from './UserTagsAndDescription'
+import ViewShows from './ViewShows'
 
-const Tab = createMaterialTopTabNavigator();
-const Stack = createStackNavigator();
+const Tab = createMaterialTopTabNavigator()
+const Stack = createStackNavigator()
 
 // import { useIsFocused } from '@react-navigation/native';
 
 function OtherUser(props) {
-  const [userShows, setUserShows] = useState([]);
-  const [user, setUser] = useState(null);
-  const [following, setFollowing] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [userFollowing, setUserFollowing] = useState({});
-  const [userTags, setUserTags] = useState(null);
+  const [userShows, setUserShows] = useState([])
+  const [user, setUser] = useState(null)
+  const [following, setFollowing] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [loggedIn, setLoggedIn] = useState(false)
+  const [userFollowing, setUserFollowing] = useState({})
+  const [userTags, setUserTags] = useState(null)
 
   // const isFocused = useIsFocused();
 
   useEffect(() => {
-    console.log('i got in here to this other user');
-    const { currentUser, currentUserShows } = props;
+    console.log('i got in here to this other user')
+    const { currentUser, currentUserShows } = props
     if (currentUser) {
-      setLoggedIn(true);
-      console.log('i got here to this thing in otherUser');
+      setLoggedIn(true)
+      console.log('i got here to this thing in otherUser')
     }
-    const { uid } = props.route.params ?? {};
+    const { uid } = props.route.params ?? {}
 
     const getUser = async () => {
       try {
         if (uid) {
-          const otherUser = await props.getOtherUser(uid);
-          const otherUserShows = await props.getUserShows(uid);
-          const otherUserFollowing = await props.getUserFollowing(uid);
-          const otherUserTags = await props.getUserTags(uid);
-          setUser(otherUser);
-          setUserShows(otherUserShows);
-          setUserFollowing(otherUserFollowing);
-          setUserTags(otherUserTags);
+          const otherUser = await props.getOtherUser(uid)
+          const otherUserShows = await props.getUserShows(uid)
+          const otherUserFollowing = await props.getUserFollowing(uid)
+          const otherUserTags = await props.getUserTags(uid)
+          setUser(otherUser)
+          setUserShows(otherUserShows)
+          setUserFollowing(otherUserFollowing)
+          setUserTags(otherUserTags)
           if (
             props.following.filter((followed) => followed.id === uid).length
           ) {
             // if (props.following.includes(uid)) {
-            setFollowing(true);
-            setLoading(false);
+            setFollowing(true)
+            setLoading(false)
           } else {
-            console.log('i know im not following');
-            setFollowing(false);
-            setLoading(false);
+            console.log('i know im not following')
+            setFollowing(false)
+            setLoading(false)
           }
         }
       } catch (err) {
-        console.error(err);
+        console.error(err)
       }
-    };
-    getUser();
+    }
+    getUser()
     return () => {
-      console.log('is this something?');
-      setUserShows([]);
-      setUser(null);
-      setFollowing(false);
-      setUserFollowing({});
-      setUserTags(null);
-    };
-  }, [props.route.params.uid, props.following]);
+      console.log('is this something?')
+      setUserShows([])
+      setUser(null)
+      setFollowing(false)
+      setUserFollowing({})
+      setUserTags(null)
+    }
+  }, [props.route.params.uid, props.following])
 
   const follow = async () => {
     try {
-      await props.follow(user.id);
-      await props.getUsersFollowingRecs();
-      setFollowing(true);
+      await props.follow(user.id)
+      await props.getUsersFollowingRecs()
+      setFollowing(true)
     } catch (err) {
-      console.log(err);
+      console.log(err)
     }
-  };
+  }
   const unfollow = async () => {
     try {
-      await props.unfollow(user.id);
-      setFollowing(false);
+      await props.unfollow(user.id)
+      setFollowing(false)
     } catch (err) {
-      console.log(err);
+      console.log(err)
     }
-  };
+  }
 
   if (loading === null || userTags === null || user === null) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#5500dc" />
       </View>
-    );
+    )
   }
 
-  const { uid } = props.route.params ? props.route.params : {};
+  const { uid } = props.route.params ? props.route.params : {}
 
   return (
     <View style={styles.container}>
@@ -205,7 +205,7 @@ function OtherUser(props) {
             borderBottomWidth: 2,
           },
           tabBarStyle: {
-            backgroundColor: '#586BA4',
+            backgroundColor: '#340068',
           },
         }}
       >
@@ -214,7 +214,7 @@ function OtherUser(props) {
           component={ViewShows}
           initialParams={{ userToView: user, type: 'recs', userShows }}
           options={{
-            tabBarLabel: 'Recs',
+            tabBarLabel: `Recs (${props.otherUserShows.length})`,
           }}
         />
         {user.description || userTags.length ? (
@@ -229,7 +229,7 @@ function OtherUser(props) {
         ) : null}
       </Tab.Navigator>
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -265,10 +265,10 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 40,
     marginHorizontal: 3,
-    backgroundColor: '#586BA4',
+    backgroundColor: '#340068',
     marginTop: 5,
   },
-});
+})
 const mapStateToProps = (store) => ({
   currentUser: store.currentUser.userInfo,
   otherUser: store.otherUser.userInfo,
@@ -276,7 +276,7 @@ const mapStateToProps = (store) => ({
   otherUserShows: store.otherUser.userShows,
   following: store.currentUser.following,
   otherUsers: store.allOtherUsers.usersInfo,
-});
+})
 const mapDispatch = (dispatch) => {
   return {
     getOtherUser: (uid) => dispatch(getOtherUser(uid)),
@@ -286,6 +286,6 @@ const mapDispatch = (dispatch) => {
     getUserFollowing: (uid) => dispatch(getUserFollowing(uid)),
     getUsersFollowingRecs: () => dispatch(getUsersFollowingRecs()),
     getUserTags: (uid) => dispatch(getUserTags(uid)),
-  };
-};
-export default connect(mapStateToProps, mapDispatch)(OtherUser);
+  }
+}
+export default connect(mapStateToProps, mapDispatch)(OtherUser)

@@ -267,8 +267,8 @@ const SelectShow = (props) => {
                   label="Enter show title"
                   onChangeText={(showInput) => setShowInput(showInput)}
                   mode="outlined"
-                  outlineColor="#586BA4"
-                  activeOutlineColor="#586BA4"
+                  outlineColor="#340068"
+                  activeOutlineColor="#340068"
                   value={showInput}
                   onFocus={() => setNotFound(false)}
                 />
@@ -384,7 +384,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 40,
     marginHorizontal: 3,
-    backgroundColor: '#586BA4',
+    backgroundColor: '#340068',
     marginTop: 5,
   },
   addPosterButton: {
@@ -424,7 +424,7 @@ const styles = StyleSheet.create({
     padding: 5,
     borderRadius: 15,
     marginHorizontal: 3,
-    backgroundColor: '#5B85AA',
+    backgroundColor: '#340068',
     marginRight: 10,
   },
 })

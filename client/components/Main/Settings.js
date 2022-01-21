@@ -1,67 +1,67 @@
-import React, { useState, useEffect } from 'react';
-import { connect } from 'react-redux';
+import React, { useState, useEffect } from 'react'
+import { connect } from 'react-redux'
 import {
   View,
   Text,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
-} from 'react-native';
-import { useIsFocused } from '@react-navigation/native';
-import PickCountry from './PickCountry';
-import { logout, changeCountry } from '../../redux/actions';
-import { createStackNavigator } from '@react-navigation/stack';
-import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import * as AuthSession from 'expo-auth-session';
-import UserTagsAndDescription from './UserTagsAndDescription';
-import FAQ from './FAQ';
+} from 'react-native'
+import { useIsFocused } from '@react-navigation/native'
+import PickCountry from './PickCountry'
+import { logout, changeCountry } from '../../redux/actions'
+import { createStackNavigator } from '@react-navigation/stack'
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs'
+import * as AuthSession from 'expo-auth-session'
+import UserTagsAndDescription from './UserTagsAndDescription'
+import FAQ from './FAQ'
 
-import ViewShows from './ViewShows';
+import ViewShows from './ViewShows'
 
 function Settings(props) {
-  const [countryCode, setCountryCode] = useState(null);
-  const [country, setCountry] = useState(null);
-  const [changeCountry, setChangeCountry] = useState(false);
-  const [saveCountry, setSaveCountry] = useState(false);
-  const { currentUser, currentUserShows } = props;
-  const isFocused = useIsFocused();
+  const [countryCode, setCountryCode] = useState(null)
+  const [country, setCountry] = useState(null)
+  const [changeCountry, setChangeCountry] = useState(false)
+  const [saveCountry, setSaveCountry] = useState(false)
+  const { currentUser, currentUserShows } = props
+  const isFocused = useIsFocused()
 
   useEffect(() => {
     if (props.currentUser) {
-      setCountryCode(props.currentUser.country);
+      setCountryCode(props.currentUser.country)
     }
     return () => {
-      setCountry(null);
-      setChangeCountry(false);
-      setSaveCountry(false);
-    };
-  }, [props.currentUser, isFocused]);
+      setCountry(null)
+      setChangeCountry(false)
+      setSaveCountry(false)
+    }
+  }, [props.currentUser, isFocused])
 
   if (props.currentUser === null) {
-    return <View />;
+    return <View />
   }
 
   const logout = async () => {
     try {
-      await AuthSession.dismiss();
-      await props.logout();
-      return props.navigation.navigate('AddShow');
+      await AuthSession.dismiss()
+      await props.logout()
+      return props.navigation.navigate('AddShow')
     } catch (e) {
-      console.log(e);
+      console.log(e)
     }
-  };
+  }
 
   const getCountry = (country) => {
-    setCountry(country.name);
-    setCountryCode(country.cca2);
-    setChangeCountry(false);
-    setSaveCountry(true);
-  };
+    setCountry(country.name)
+    setCountryCode(country.cca2)
+    setChangeCountry(false)
+    setSaveCountry(true)
+  }
 
   const saveNewCountry = async () => {
-    await props.changeCountry(countryCode);
-    setSaveCountry(false);
-  };
+    await props.changeCountry(countryCode)
+    setSaveCountry(false)
+  }
 
   const displayTags = (tags) => {
     return tags.map((tag, key) => {
@@ -69,17 +69,20 @@ function Settings(props) {
         <View key={key} style={styles.userTags}>
           <Text style={styles.tagText}>{tag.name}</Text>
         </View>
-      );
-    });
-  };
+      )
+    })
+  }
 
   return (
     <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <Text style={styles.text}>
-          settings coming soon (how to filter your recs, what country you're
-          watching in (currently everything is set to US), user tags, etc).
-        </Text>
+        <Text style={styles.text}>more settings coming soon...</Text>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.button} onPress={logout}>
+            <Text style={styles.buttonText}>Logout</Text>
+          </TouchableOpacity>
+        </View>
+
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={styles.button}
@@ -151,7 +154,7 @@ function Settings(props) {
         </View>
       </ScrollView>
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -185,7 +188,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 40,
     marginHorizontal: 3,
-    backgroundColor: '#586BA4',
+    backgroundColor: '#340068',
     marginTop: 5,
   },
   cardContent: {
@@ -201,14 +204,14 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 40,
     marginHorizontal: 3,
-    backgroundColor: '#36C9C6',
+    backgroundColor: '#008DD5',
     marginTop: 5,
   },
   tagText: {
     fontSize: 13.5,
     fontWeight: '500',
   },
-});
+})
 
 const mapStateToProps = (store) => ({
   currentUser: store.currentUser.userInfo,
@@ -218,11 +221,11 @@ const mapStateToProps = (store) => ({
   following: store.currentUser.following,
   otherUsers: store.allOtherUsers.usersInfo,
   userTags: store.currentUser.userTags,
-});
+})
 const mapDispatch = (dispatch) => {
   return {
     logout: () => dispatch(logout()),
     changeCountry: (countryCode) => dispatch(changeCountry(countryCode)),
-  };
-};
-export default connect(mapStateToProps, mapDispatch)(Settings);
+  }
+}
+export default connect(mapStateToProps, mapDispatch)(Settings)

@@ -137,25 +137,45 @@ function SingleShow(props) {
     <View style={styles.container}>
       <View style={styles.containerInfo}>
         {isCurrentUser ? (
-          <Text style={styles.text}>{user.username}</Text>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', margin: 10 }}>
+            <View style={styles.usernameButton}>
+              <Text
+                onPress={() => props.navigation.navigate('Profile')}
+                style={styles.usernameText}
+              >
+                Your{' '}
+              </Text>
+            </View>
+            <View style={styles.recButton}>
+              <Text style={styles.recText}>recommendation:</Text>
+            </View>
+          </View>
         ) : (
-          <TouchableOpacity
-            onPress={() =>
-              props.navigation.navigate("TV rec'er", {
-                uid: user.id,
-              })
-            }
-          >
-            <Text style={styles.text}>{user.username}</Text>
-          </TouchableOpacity>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', margin: 10 }}>
+            <View style={styles.usernameButton}>
+              <Text
+                onPress={() =>
+                  props.navigation.navigate("TV rec'er", {
+                    uid: user.id,
+                  })
+                }
+                style={styles.usernameText}
+              >
+                {user.username}
+              </Text>
+            </View>
+            <View style={styles.recButton}>
+              <Text style={styles.recText}>'s recommendation:</Text>
+            </View>
+          </View>
         )}
       </View>
       {!props.currentUser ||
       multipleRecInfo[userShow.show.id].num < 2 ? null : (
-        <View>
-          <Text>Also recommended by:</Text>
+        <View style={{ marginLeft: 10, marginBottom: 10 }}>
+          <Text style={{ fontSize: 16 }}>Also recommended by:</Text>
           <TouchableOpacity onPress={() => setModalVisible(true)}>
-            <Text style={{ color: 'blue' }}>
+            <Text style={{ color: 'blue', fontSize: 16 }}>
               {`${multipleRecInfo[userShow.show.id].num - 1}`}{' '}
               {multipleRecInfo[userShow.show.id].num > 2 && isCurrentUser
                 ? 'people you follow'
@@ -586,17 +606,49 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     marginBottom: 30,
+    backgroundColor: '#EBECF0',
   },
   // extra: {
   //   marginBottom: 25,
   //   marginLeft: 15,
   // },
   containerInfo: {
-    margin: 5,
+    marginBottom: 5,
     padding: 5,
-    borderStyle: 'solid',
-    borderColor: 'blue',
-    borderWidth: 2,
+    backgroundColor: '#340068',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headingText: {
+    fontWeight: '500',
+    fontSize: 20,
+    margin: 10,
+  },
+  usernameButton: {
+    borderRadius: 25,
+    elevation: 3,
+    backgroundColor: '#4056F4',
+  },
+  recButton: {
+    borderRadius: 25,
+    backgroundColor: '#4056F4',
+    backgroundColor: '#340068',
+  },
+  usernameText: {
+    fontWeight: '500',
+    fontSize: 20,
+    letterSpacing: 0.25,
+    margin: 4,
+    color: 'white',
+  },
+  recText: {
+    fontWeight: '500',
+    fontSize: 20,
+    letterSpacing: 0.25,
+    marginBottom: 4,
+    marginTop: 4,
+    marginRight: 4,
+    color: 'white',
   },
   showsList: {
     flex: 1,
@@ -622,14 +674,14 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 40,
     marginHorizontal: 3,
-    backgroundColor: '#21A179',
+    backgroundColor: '#36C9C6',
     marginTop: 5,
   },
   warningTag: {
     padding: 10,
     borderRadius: 40,
     marginHorizontal: 3,
-    backgroundColor: '#E24E1B',
+    backgroundColor: '#ED6A5A',
     marginTop: 5,
   },
   tagText: {
@@ -651,8 +703,10 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 40,
     marginHorizontal: 3,
-    backgroundColor: '#586BA4',
+    backgroundColor: '#340068',
     marginTop: 5,
+    marginLeft: 5,
+    marginRight: 5,
   },
 })
 const mapState = (store) => ({

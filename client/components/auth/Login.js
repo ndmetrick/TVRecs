@@ -1,7 +1,7 @@
-import * as AuthSession from 'expo-auth-session';
-import { connect } from 'react-redux';
-import React, { useState, useEffect } from 'react';
-import * as WebBrowser from 'expo-web-browser';
+import * as AuthSession from 'expo-auth-session'
+import { connect } from 'react-redux'
+import React, { useState, useEffect } from 'react'
+import * as WebBrowser from 'expo-web-browser'
 import {
   Alert,
   Platform,
@@ -10,18 +10,18 @@ import {
   View,
   TouchableOpacity,
   ActivityIndicator,
-} from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getCurrentUser, getAuthInfo } from '../../redux/actions';
+} from 'react-native'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { getCurrentUser, getAuthInfo } from '../../redux/actions'
 
-WebBrowser.maybeCompleteAuthSession();
+WebBrowser.maybeCompleteAuthSession()
 
-const useProxy = Platform.select({ web: false, default: true });
-const redirectUri = AuthSession.makeRedirectUri({ useProxy });
+const useProxy = Platform.select({ web: false, default: true })
+const redirectUri = AuthSession.makeRedirectUri({ useProxy })
 
 const Login = (props) => {
-  const [clientId, setClientId] = useState(null);
-  const authorizationEndpoint = 'https://dev--5p-bz53.us.auth0.com/authorize';
+  const [clientId, setClientId] = useState(null)
+  const authorizationEndpoint = 'https://dev--5p-bz53.us.auth0.com/authorize'
 
   const [request, result, promptAsync] = AuthSession.useAuthRequest(
     {
@@ -35,52 +35,52 @@ const Login = (props) => {
       },
     },
     { authorizationEndpoint }
-  );
+  )
 
   useEffect(() => {
     const getAuth = async () => {
       try {
-        const authInfo = await props.getAuthInfo();
-        setClientId(authInfo[0]);
+        const authInfo = await props.getAuthInfo()
+        setClientId(authInfo[0])
       } catch (e) {
-        console.log(e);
+        console.log(e)
       }
-    };
-    getAuth();
+    }
+    getAuth()
     const getUser = async () => {
       try {
         if (result) {
           if (result.error) {
-            console.log(result.error);
+            console.log(result.error)
             Alert.alert(
               'Authentication error',
               result.params.error_description || 'something went wrong'
-            );
-            return;
+            )
+            return
           }
           if (result.type === 'success') {
             //ADD TRY/CATCH and async
             // Retrieve the JWT token and decode it
-            const jwtToken = result.params.id_token;
-            await AsyncStorage.setItem('token', jwtToken);
-            await props.login();
+            const jwtToken = result.params.id_token
+            await AsyncStorage.setItem('token', jwtToken)
+            await props.login()
           }
         }
       } catch (err) {
-        console.error(err);
+        console.error(err)
       }
-    };
-    getUser();
-  }, [result, clientId]);
+    }
+    getUser()
+  }, [result, clientId])
 
-  console.log('here in login', clientId);
+  console.log('here in login', clientId)
 
   if (!clientId) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#5500dc" />
       </View>
-    );
+    )
   }
 
   return (
@@ -93,8 +93,8 @@ const Login = (props) => {
         <Text style={styles.buttonText}>Log in with Auth0</Text>
       </TouchableOpacity>
     </View>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   buttonText: {
@@ -113,17 +113,17 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 40,
     marginHorizontal: 3,
-    backgroundColor: '#586BA4',
+    backgroundColor: '#340068',
     marginTop: 5,
     marginBottom: 10,
   },
-});
+})
 
 const mapDispatchToProps = (dispatch) => {
   return {
     login: () => dispatch(getCurrentUser()),
     getAuthInfo: () => dispatch(getAuthInfo()),
-  };
-};
+  }
+}
 
-export default connect(null, mapDispatchToProps)(Login);
+export default connect(null, mapDispatchToProps)(Login)

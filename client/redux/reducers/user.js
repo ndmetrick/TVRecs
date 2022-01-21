@@ -17,6 +17,7 @@ import {
   GET_SEEN,
   ADD_TO_WATCH_PROVIDERS,
   GET_MATCHING_RECS,
+  GET_MATCHING_RECS_AND_WATCH,
 } from '../constants'
 
 const initialState = {
@@ -194,6 +195,12 @@ export default function userReducer(state = initialState, action) {
       return {
         ...state,
         filterRecs: action.recs,
+      }
+    case GET_MATCHING_RECS_AND_WATCH:
+      return {
+        ...state,
+        filterRecs: action.recs,
+        watchProviders: action.newWatchProviders,
       }
     case LOGGING_OUT:
       return { ...initialState, loggingOut: true }

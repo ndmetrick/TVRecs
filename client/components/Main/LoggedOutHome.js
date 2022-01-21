@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { connect } from 'react-redux';
+import React, { useState, useEffect } from 'react'
+import { connect } from 'react-redux'
 import {
   View,
   Text,
@@ -8,7 +8,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-} from 'react-native';
+} from 'react-native'
 
 function LoggedOutHome(props) {
   return (
@@ -43,7 +43,7 @@ function LoggedOutHome(props) {
         other ideas, feel free to email me at ndmetrick@gmail.com.
       </Text>
     </ScrollView>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -77,10 +77,10 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 40,
     marginHorizontal: 3,
-    backgroundColor: '#586BA4',
+    backgroundColor: '#340068',
     marginTop: 5,
     marginBottom: 10,
   },
-});
+})
 
-export default LoggedOutHome;
+export default LoggedOutHome

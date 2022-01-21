@@ -9,14 +9,18 @@ import {
   Switch,
   Dimensions,
   ActivityIndicator,
+  Animated,
+  ScrollView,
 } from 'react-native'
 
 import {
   RecyclerListView,
   DataProvider,
   LayoutProvider,
+  BaseScrollView,
 } from 'recyclerlistview'
 
+import { useFirstRender } from './helpers.js'
 import RecsFilter from './RecsFilter'
 
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
@@ -45,14 +49,23 @@ const RecShows = (props) => {
   const [matchingRecs, setMatchingRecs] = useState(null)
   const [advancedSearch, setAdvancedSearch] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [headerHeight, setHeaderHeight] = useState(80)
+
   const isFocused = useIsFocused()
+  const firstRender = useFirstRender()
 
   useEffect(() => {
     // const getRecShows = async () => {
     //   try {
     if (props.allRecShows || props.filterRecs) {
+      console.log(
+        'i am up here above first time and filterREcs is',
+        props.filterRecs
+      )
       setLoading(true)
       let shows = filter ? props.filterRecs : props.allRecShows
+      let height = filter ? 80 : 250
+      setHeaderHeight(height)
       // shows.sort(function (x, y) {
       //   return new Date(y.updatedAt) - new Date(x.updatedAt)
       // })
@@ -106,11 +119,14 @@ const RecShows = (props) => {
       }
       setRecShows(visibleShows)
       setMultipleRecInfo(recCounts)
+      if (firstRender) {
+        console.log('i am in the first render')
+      }
       if (
-        (props.currentUser && props.following.length === 0) ||
-        (props.currentUser && props.filterRecs.length === 0)
+        !firstRender &&
+        (!props.following.length || !props.filterRecs.length)
       ) {
-        console.log('i got into this one down here')
+        console.log('i am not in the first render but there is no following')
         setLoading(false)
       }
 
@@ -125,7 +141,10 @@ const RecShows = (props) => {
     noUserShows,
     filter,
     props.filterRecs,
+    firstRender,
   ])
+
+  console.log('advanced search', advancedSearch, props.filterRecs)
 
   console.log('loading', loading)
   const _dataProvider = useMemo(() => {
@@ -241,28 +260,57 @@ const RecShows = (props) => {
   }
 
   const displayFilters = () => {
-    console.log('i got here at least')
-    console.log('filter', filter)
-    return (
-      <View>
-        <Text>
-          {filter['chooseTags']
-            ? `Only display shows tagged as "${filter['chooseTags']
+    const filterWords = []
+    const tagFilter =
+      filter['chooseTags'] || filter['chooseAnyTags']
+        ? 'chosen tags'
+        : filter['nonZeroTags']
+        ? 'has tags'
+        : filter['nonZeroDescription']
+        ? 'has description'
+        : filter['tagsOrDescription']
+        ? 'tags or description'
+        : filter[descriptionValue]
+        ? 'word in description'
+        : null
+    if (tagFilter) {
+      filterWords.push(tagFilter)
+    }
+    if (filter['chooseStreamers']) {
+      filterWords.push('chosen streamers')
+    }
+    if (filter['minRecs']) {
+      filterWords.push('number of recs')
+    }
+
+    return filterWords.map((filter, key) => {
+      return (
+        <View key={key} style={styles.filterWord}>
+          <Text style={styles.filterText}>{filter}</Text>
+        </View>
+      )
+    })
+    // (
+    // <View>
+    //   <Text>
+    {
+      /* {filter['chooseTags']
+            ? `Only display shows tagged as ${filter['chooseTags']
                 .map((tag, index) =>
                   index === filter['chooseTags'] - 1 && filter['chooseTags'] > 2
-                    ? `"and ${tag.name}"`
-                    : tag.name
+                    ? `and "${tag.name}"`
+                    : `"${tag.name}"`
                 )
-                .join(', ')}"`
+                .join(', ')}`
             : filter['chooseAnyTags']
-            ? `Only display shows tagged as "${filter['chooseAnyTags']
+            ? `Only display shows tagged as ${filter['chooseAnyTags']
                 .map((tag, index) =>
                   index === filter['chooseAnyTags'] - 1 &&
-                  filter['chooseAnyTags'] > 2
-                    ? `"or ${tag.name}"`
-                    : tag.name
+                  filter['chooseAnyTags'] > 1
+                    ? `or "${tag.name}"`
+                    : `"${tag.name}"`
                 )
-                .join(', ')}"`
+                .join(', ')}`
             : filter['nonZeroTags']
             ? `Only display shows with at least 1 tag`
             : filter['tagsOrDescription']
@@ -277,23 +325,18 @@ const RecShows = (props) => {
         </Text>
         <Text>
           {filter['chooseStreamers']
-            ? `Only display shows available on ${filter['chooseStreamers']
+            ? `Only display shows available on ${filter[
+                'chooseStreamers'
+              ].streamers
                 .map((streamer, index) =>
                   index === filter['chooseStreamers'].length - 1 &&
                   filter['chooseStreamers'].length > 2
-                    ? `, or ${streamer.name}`
+                    ? `or ${streamer.name}`
                     : streamer.name
                 )
                 .join(', ')}`
-            : null}
-        </Text>
-        <Text>
-          {filter['chooseMinRecs']
-            ? `Only shows recommended by at least ${filter['chooseMinRecs']} users you follow`
-            : null}
-        </Text>
-      </View>
-    )
+            : null} */
+    }
   }
 
   if (loading) {
@@ -316,49 +359,90 @@ const RecShows = (props) => {
     )
   }
 
+  // const scrollY = new Animated.Value(0)
+  // const diffClamp = Animated.diffClamp(scrollY, 0, headerHeight)
+  // const translateY = diffClamp.interpolate({
+  //   inputRange: [0, headerHeight],
+  //   outputRange: [0, -headerHeight],
+  // })
+
   return (
     <View style={styles.container}>
-      <View style={styles.toggleContainer}>
-        {!noUserShows ? (
-          <Text>Toggle to hide shows you've already saved to your profile</Text>
-        ) : (
-          <Text>Toggle to see shows you've alreeady saved to your profile</Text>
-        )}
-        <Switch
-          style={{ marginBottom: 5, marginTop: 5 }}
-          ios_backgroundColor="#3e3e3e"
-          onValueChange={toggleNoUserShows}
-          value={noUserShows}
-        />
-        {!advancedSearch && filter ? (
-          <View>
-            <Text style={{ fontWeight: 'bold' }}>
-              The following {noUserShows ? 'additional ' : null}filters have
-              been applied to this search:
-            </Text>
-            <View>{displayFilters()}</View>
-            <View style={{ alignItems: 'flex-end' }}>
+      {/* <Animated.View
+        style={{
+          transform: [{ translateY: translateY }],
+          elevation: 4,
+          zIndex: 100,
+        }}
+      > */}
+      <View
+      // style={
+      //   filter
+      //     ? { ...styles.header, height: 250 }
+      //     : { ...styles.header, height: 80 }
+      // }
+      >
+        {!advancedSearch ? (
+          <View style={styles.toggleContainer}>
+            {!noUserShows ? (
+              <Text>Toggle to hide shows saved to your profile</Text>
+            ) : (
+              <Text>Toggle to see shows saved to your profile</Text>
+            )}
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', flex: 1 }}>
+              <View style={{ alignItems: 'flex-start', flex: 1 }}>
+                <Switch
+                  style={{
+                    marginBottom: 5,
+                    marginTop: 5,
+                  }}
+                  ios_backgroundColor="#3e3e3e"
+                  onValueChange={toggleNoUserShows}
+                  value={noUserShows}
+                />
+              </View>
               <TouchableOpacity
-                style={styles.button}
-                onPress={() => setFilter(null)}
+                // style={styles.button}
+                onPress={() => setAdvancedSearch(true)}
+                style={{ alignItems: 'flex-end', flex: 1 }}
               >
-                <Text style={styles.buttonText}>Cancel filters</Text>
+                <Text
+                  style={{
+                    marginBottom: 5,
+                    marginTop: 5,
+                    fontSize: 16,
+                    fontWeight: '400',
+                  }}
+                >
+                  My filters{' '}
+                  <MaterialCommunityIcons
+                    name="chevron-double-down"
+                    size={18}
+                  />
+                </Text>
               </TouchableOpacity>
             </View>
+            {filter ? (
+              <View>
+                <Text style={{ fontWeight: 'bold' }}>
+                  The following {noUserShows ? 'additional ' : null}filters have
+                  been applied to this search:
+                </Text>
+                <View style={styles.filterDisplay}>{displayFilters()}</View>
+                <View style={{ alignItems: 'flex-end' }}>
+                  <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => setFilter(null)}
+                  >
+                    <Text style={styles.buttonText}>Cancel filters</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ) : null}
           </View>
         ) : null}
-        {!advancedSearch || (filter && !recShows.length) ? (
-          <TouchableOpacity
-            // style={styles.button}
-            onPress={() => setAdvancedSearch(true)}
-          >
-            <Text style={{ ...styles.boldText, margin: 5 }}>
-              Filter recommendations you see{' '}
-              <MaterialCommunityIcons name="chevron-double-down" size={18} />
-            </Text>
-          </TouchableOpacity>
-        ) : null}
       </View>
+      {/* </Animated.View> */}
       {!advancedSearch && !recShows.length ? (
         <View>
           <Text style={styles.text}>
@@ -373,6 +457,13 @@ const RecShows = (props) => {
             layoutProvider={_layoutProvider}
             dataProvider={newDataProvider}
             rowRenderer={_rowRenderer}
+            // onScroll={(e) => {
+            //   scrollY.setValue(e.nativeEvent.contentOffset.y)
+            // // }}
+            // externalScrollView={ExternalScrollView}
+            // animatedEvent={(e) => {
+            //   scrollY.setValue(e.nativeEvent.contentOffset.y)
+            // }}
           />
           <OtherRecerModal
             modalVisible={modalVisible}
@@ -383,7 +474,8 @@ const RecShows = (props) => {
             getSingleUserShow={props.getSingleUserShow}
           />
         </View>
-      ) : (
+      ) : null}
+      {!advancedSearch ? null : (
         <RecsFilter
           setAdvancedSearch={setAdvancedSearch}
           setMatchingRecs={setMatchingRecs}
@@ -404,6 +496,18 @@ class CellContainer extends React.Component {
     return <View {...this.props}>{this.props.children}</View>
   }
 }
+
+// class ExternalScrollView extends BaseScrollView {
+//   render() {
+//     return (
+//       <ScrollView
+//         onScroll={Animated.event([this.props.animatedEvent], {
+//           useNativeDriver: true,
+//         })}
+//       />
+//     )
+//   }
+// }
 
 const styles = StyleSheet.create({
   container: {
@@ -435,7 +539,7 @@ const styles = StyleSheet.create({
     padding: 5,
     borderRadius: 15,
     marginHorizontal: 3,
-    backgroundColor: '#586BA4',
+    backgroundColor: '#340068',
     marginTop: 5,
   },
   toggleContainer: {
@@ -447,6 +551,27 @@ const styles = StyleSheet.create({
     margin: 5,
     fontWeight: '500',
     color: 'white',
+  },
+  filterWord: {
+    padding: 3,
+    borderRadius: 25,
+    marginHorizontal: 3,
+    backgroundColor: '#36C9C6',
+    marginTop: 3,
+  },
+  filterText: { fontSize: 13.5, fontWeight: '400', textAlign: 'center' },
+  filterDisplay: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 2,
+    marginTop: 2,
+  },
+  header: {
+    flexDirection: 'row',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
   },
 })
 const mapStateToProps = (store) => ({

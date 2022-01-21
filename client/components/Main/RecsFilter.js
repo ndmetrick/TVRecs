@@ -158,7 +158,7 @@ const RecsFilter = (props) => {
     setTagsDropdownValue([])
     setDescriptionValue([])
     setFilterAnyTags(false)
-    setFilter(null)
+    props.setFilter(null)
   }
 
   const addWordToDescriptionFilter = () => {
@@ -169,6 +169,7 @@ const RecsFilter = (props) => {
 
   const filter = async () => {
     try {
+      console.log('i got into filter')
       const filters = {}
       let filterCount = 0
       if (tagsDescriptionChecked === 'chooseTags') {
@@ -207,7 +208,10 @@ const RecsFilter = (props) => {
 
       if (streamersChecked === 'chooseStreamers') {
         if (streamersDropdownValue.length) {
-          filters['chooseStreamers'] = streamersDropdownValue
+          filters['chooseStreamers'] = {
+            streamers: streamersDropdownValue,
+            watchProviders: props.watchProviders,
+          }
           filterCount += 1
         }
       }
@@ -225,11 +229,13 @@ const RecsFilter = (props) => {
           text: 'OK',
         })
       } else {
+        console.log(filters, 'filters at this point')
         const matches = await props.getMatchingRecs(filters)
         if (matches) {
           if (tagsDescriptionChecked === 'chooseTags') {
             filters['chooseTags'] = tagsDropdownValue
           }
+          console.log('i got to the matches and this is', matches)
           props.setMatchingRecs(matches)
           props.setFilter(filters)
           props.setAdvancedSearch(false)
@@ -254,158 +260,97 @@ const RecsFilter = (props) => {
             onPress={() => props.setAdvancedSearch(false)}
           >
             <Text style={{ ...styles.boldText, margin: 5 }}>
-              Filter recommendations you see{' '}
+              My filters{' '}
               <MaterialCommunityIcons name="chevron-double-up" size={18} />
             </Text>
           </TouchableOpacity>
 
-          <View style={{ margin: 10, flex: 1, borderWidth: 1, padding: 10 }}>
+          <View style={{ flex: 1 }}>
             <Text style={styles.filterText}>
               Click 'Filter recommendations' to perform your search
             </Text>
-            <Text style={styles.tagHeadingText}>
-              Filter by tags and/or description
-            </Text>
+            <Text style={styles.tagHeadingText}>Tags / Description</Text>
             <View style={styles.choiceContainer}>
-              <View style={styles.choices}>
-                <TouchableOpacity
-                  onPress={() => setTagsDescriptionChecked('none')}
-                >
-                  {tagsDescriptionChecked === 'none' ? (
-                    <MaterialIcons
-                      name="radio-button-on"
-                      size={20}
-                      style={{ textAlign: 'center' }}
-                    />
-                  ) : (
-                    <MaterialIcons
-                      name="radio-button-off"
-                      size={20}
-                      style={{ textAlign: 'center' }}
-                    />
-                  )}
+              <TouchableOpacity
+                style={
+                  tagsDescriptionChecked === 'none'
+                    ? { ...styles.choices, backgroundColor: '#36C9C6' }
+                    : { ...styles.choices, backgroundColor: '#9BC1BC' }
+                }
+                onPress={() => setTagsDescriptionChecked('none')}
+              >
+                <Text style={styles.filterOptionsText}>no filter</Text>
+              </TouchableOpacity>
 
-                  <Text style={styles.filterText}>
-                    No tag/description filter
-                  </Text>
-                </TouchableOpacity>
-              </View>
-              <View style={styles.choices}>
-                <TouchableOpacity
-                  onPress={() => setTagsDescriptionChecked('tagsOrDescription')}
-                >
-                  {tagsDescriptionChecked === 'tagsOrDescription' ? (
-                    <MaterialIcons
-                      name="radio-button-on"
-                      size={20}
-                      style={{ textAlign: 'center' }}
-                    />
-                  ) : (
-                    <MaterialIcons
-                      name="radio-button-off"
-                      size={20}
-                      style={{ textAlign: 'center' }}
-                    />
-                  )}
-                  <Text style={styles.filterText}>
-                    only shows with description OR tags
-                  </Text>
-                </TouchableOpacity>
-              </View>
-              <View style={styles.choices}>
-                <TouchableOpacity
-                  onPress={() => setTagsDescriptionChecked('nonZeroTags')}
-                >
-                  {tagsDescriptionChecked === 'nonZeroTags' ? (
-                    <MaterialIcons
-                      name="radio-button-on"
-                      size={20}
-                      style={{ textAlign: 'center' }}
-                    />
-                  ) : (
-                    <MaterialIcons
-                      name="radio-button-off"
-                      size={20}
-                      style={{ textAlign: 'center' }}
-                    />
-                  )}
-                  <Text style={styles.filterText}>only tagged shows</Text>
-                </TouchableOpacity>
-              </View>
-              <View style={styles.choices}>
-                <TouchableOpacity
-                  onPress={() => setTagsDescriptionChecked('chooseTags')}
-                >
-                  {tagsDescriptionChecked === 'chooseTags' ? (
-                    <MaterialIcons
-                      name="radio-button-on"
-                      size={20}
-                      style={{ textAlign: 'center' }}
-                    />
-                  ) : (
-                    <MaterialIcons
-                      name="radio-button-off"
-                      size={20}
-                      style={{ textAlign: 'center' }}
-                    />
-                  )}
+              <TouchableOpacity
+                style={
+                  tagsDescriptionChecked === 'tagsOrDescription'
+                    ? { ...styles.choices, backgroundColor: '#36C9C6' }
+                    : { ...styles.choices, backgroundColor: '#9BC1BC' }
+                }
+                onPress={() => setTagsDescriptionChecked('tagsOrDescription')}
+              >
+                <Text style={styles.filterOptionsText}>
+                  only shows with description or tags
+                </Text>
+              </TouchableOpacity>
 
-                  <Text style={styles.filterText}>
-                    only shows with these tags
-                  </Text>
-                </TouchableOpacity>
-              </View>
-              <View style={{ ...styles.choices, marginBottom: 5 }}>
-                <TouchableOpacity
-                  onPress={() =>
-                    setTagsDescriptionChecked('nonZeroDescription')
-                  }
-                >
-                  {tagsDescriptionChecked === 'nonZeroDescription' ? (
-                    <MaterialIcons
-                      name="radio-button-on"
-                      size={20}
-                      style={{ textAlign: 'center' }}
-                    />
-                  ) : (
-                    <MaterialIcons
-                      name="radio-button-off"
-                      size={20}
-                      style={{ textAlign: 'center' }}
-                    />
-                  )}
-                  <Text style={styles.filterText}>
-                    only shows with a description
-                  </Text>
-                </TouchableOpacity>
-              </View>
+              <TouchableOpacity
+                style={
+                  tagsDescriptionChecked === 'nonZeroTags'
+                    ? { ...styles.choices, backgroundColor: '#36C9C6' }
+                    : { ...styles.choices, backgroundColor: '#9BC1BC' }
+                }
+                onPress={() => setTagsDescriptionChecked('nonZeroTags')}
+              >
+                <Text style={styles.filterOptionsText}>
+                  only shows with tags
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.choiceContainer}>
+              <TouchableOpacity
+                style={
+                  tagsDescriptionChecked === 'chooseTags'
+                    ? { ...styles.choices, backgroundColor: '#36C9C6' }
+                    : { ...styles.choices, backgroundColor: '#9BC1BC' }
+                }
+                onPress={() => setTagsDescriptionChecked('chooseTags')}
+              >
+                <Text style={styles.filterOptionsText}>
+                  only shows with these tags
+                </Text>
+              </TouchableOpacity>
 
-              <View style={styles.choices}>
-                <TouchableOpacity
-                  onPress={() => setTagsDescriptionChecked('descriptionWord')}
-                >
-                  {tagsDescriptionChecked === 'descriptionWord' ? (
-                    <MaterialIcons
-                      name="radio-button-on"
-                      size={20}
-                      style={{ textAlign: 'center' }}
-                    />
-                  ) : (
-                    <MaterialIcons
-                      name="radio-button-off"
-                      size={20}
-                      style={{ textAlign: 'center' }}
-                    />
-                  )}
-                  <Text style={styles.filterText}>
-                    only shows containing a particular word
-                  </Text>
-                </TouchableOpacity>
-              </View>
+              <TouchableOpacity
+                style={
+                  tagsDescriptionChecked === 'nonZeroDescription'
+                    ? { ...styles.choices, backgroundColor: '#36C9C6' }
+                    : { ...styles.choices, backgroundColor: '#9BC1BC' }
+                }
+                onPress={() => setTagsDescriptionChecked('nonZeroDescription')}
+              >
+                <Text style={styles.filterOptionsText}>
+                  only shows with a description
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={
+                  tagsDescriptionChecked === 'descriptionWord'
+                    ? { ...styles.choices, backgroundColor: '#36C9C6' }
+                    : { ...styles.choices, backgroundColor: '#9BC1BC' }
+                }
+                onPress={() => setTagsDescriptionChecked('descriptionWord')}
+              >
+                <Text style={styles.filterOptionsText}>
+                  only shows with this description
+                </Text>
+              </TouchableOpacity>
             </View>
 
             {tagsDescriptionChecked === 'descriptionWord' ? (
-              <View>
+              <View style={{ marginTop: 5 }}>
                 <View>
                   <Text style={styles.filterText}>
                     Enter the word (not case-sensitive) you want to see present
@@ -419,8 +364,8 @@ const RecsFilter = (props) => {
                       setDescriptionInput(descriptionInput)
                     }
                     mode="outlined"
-                    outlineColor="#586BA4"
-                    activeOutlineColor="#586BA4"
+                    outlineColor="#340068"
+                    activeOutlineColor="#340068"
                     value={descriptionInput}
                     // onFocus={() => setNotFound(false)}
                   />
@@ -452,7 +397,7 @@ const RecsFilter = (props) => {
             ) : null}
 
             {tagsDescriptionChecked === 'chooseTags' ? (
-              <View style={{ marginBottom: 5 }}>
+              <View style={{ marginBottom: 5, marginTop: 7 }}>
                 {tagsDropdownValue.length ? (
                   <View>
                     <DropDownPicker
@@ -531,59 +476,54 @@ const RecsFilter = (props) => {
 
             {/* add choice for all or any */}
 
-            <View style={{ backgroundColor: 'grey' }}>
-              <Text style={styles.tagHeadingText}>
-                Filter by where you can stream the show
-              </Text>
+            <View style={{ marginTop: 5 }}>
+              <Text style={styles.tagHeadingText}>Streamers</Text>
+
               <View style={styles.choiceContainer}>
-                <View style={styles.choices}>
-                  <TouchableOpacity onPress={() => setStreamersChecked('none')}>
-                    {streamersChecked === 'none' ? (
-                      <MaterialIcons
-                        name="radio-button-on"
-                        size={20}
-                        style={{ textAlign: 'center' }}
-                      />
-                    ) : (
-                      <MaterialIcons
-                        name="radio-button-off"
-                        size={20}
-                        style={{ textAlign: 'center' }}
-                      />
-                    )}
+                <TouchableOpacity
+                  style={
+                    streamersChecked === 'none'
+                      ? {
+                          ...styles.choices,
+                          backgroundColor: '#36C9C6',
+                          flex: 1 / 2,
+                        }
+                      : {
+                          ...styles.choices,
+                          backgroundColor: '#9BC1BC',
+                          flex: 1 / 2,
+                        }
+                  }
+                  onPress={() => setStreamersChecked('none')}
+                >
+                  <Text style={styles.filterOptionsText}>no filter</Text>
+                </TouchableOpacity>
 
-                    <Text style={styles.filterText}>no streaming filter</Text>
-                  </TouchableOpacity>
-                </View>
-
-                <View style={styles.choices}>
-                  <TouchableOpacity
-                    onPress={() => setStreamersChecked('chooseStreamers')}
-                  >
-                    {streamersChecked === 'chooseStreamers' ? (
-                      <MaterialIcons
-                        name="radio-button-on"
-                        size={20}
-                        style={{ textAlign: 'center' }}
-                      />
-                    ) : (
-                      <MaterialIcons
-                        name="radio-button-off"
-                        size={20}
-                        style={{ textAlign: 'center' }}
-                      />
-                    )}
-
-                    <Text style={styles.filterText}>
-                      only shows available on:
-                    </Text>
-                  </TouchableOpacity>
-                </View>
+                <TouchableOpacity
+                  style={
+                    streamersChecked === 'chooseStreamers'
+                      ? {
+                          ...styles.choices,
+                          backgroundColor: '#36C9C6',
+                          flex: 1 / 2,
+                        }
+                      : {
+                          ...styles.choices,
+                          backgroundColor: '#9BC1BC',
+                          flex: 1 / 2,
+                        }
+                  }
+                  onPress={() => setStreamersChecked('chooseStreamers')}
+                >
+                  <Text style={styles.filterText}>
+                    only shows available on the following streamers:
+                  </Text>
+                </TouchableOpacity>
               </View>
             </View>
 
             {streamersChecked === 'chooseStreamers' ? (
-              <View style={{ backgroundColor: 'gray' }}>
+              <View>
                 {streamersDropdownValue.length ? (
                   <View>
                     <DropDownPicker
@@ -629,53 +569,48 @@ const RecsFilter = (props) => {
             {props.following.length > 1 ? (
               <View>
                 <Text style={styles.tagHeadingText}>
-                  Filter by how many people I follow recomended the show
+                  People I follow who recommend this show
                 </Text>
                 <View style={styles.choiceContainer}>
-                  <View style={styles.choices}>
-                    <TouchableOpacity onPress={() => setMinRecs('none')}>
-                      {minRecs === 'none' ? (
-                        <MaterialIcons
-                          name="radio-button-on"
-                          size={20}
-                          style={{ textAlign: 'center' }}
-                        />
-                      ) : (
-                        <MaterialIcons
-                          name="radio-button-off"
-                          size={20}
-                          style={{ textAlign: 'center' }}
-                        />
-                      )}
+                  <TouchableOpacity
+                    style={
+                      minRecs === 'none'
+                        ? {
+                            ...styles.choices,
+                            backgroundColor: '#36C9C6',
+                            flex: 1 / 2,
+                          }
+                        : {
+                            ...styles.choices,
+                            backgroundColor: '#9BC1BC',
+                            flex: 1 / 2,
+                          }
+                    }
+                    onPress={() => setMinRecs('none')}
+                  >
+                    <Text style={styles.filterOptionsText}>no filter</Text>
+                  </TouchableOpacity>
 
-                      <Text style={styles.filterText}>
-                        no minimum rec filter
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-
-                  <View style={styles.choices}>
-                    <TouchableOpacity
-                      onPress={() => setMinRecs('chooseMinRecs')}
-                    >
-                      {minRecs === 'chooseMinRecs' ? (
-                        <MaterialIcons
-                          name="radio-button-on"
-                          size={20}
-                          style={{ textAlign: 'center' }}
-                        />
-                      ) : (
-                        <MaterialIcons
-                          name="radio-button-off"
-                          size={20}
-                          style={{ textAlign: 'center' }}
-                        />
-                      )}
-                      <Text style={styles.filterText}>
-                        only shows rec'd by at least
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
+                  <TouchableOpacity
+                    style={
+                      minRecs === 'chooseMinRecs'
+                        ? {
+                            ...styles.choices,
+                            backgroundColor: '#36C9C6',
+                            flex: 1 / 2,
+                          }
+                        : {
+                            ...styles.choices,
+                            backgroundColor: '#9BC1BC',
+                            flex: 1 / 2,
+                          }
+                    }
+                    onPress={() => setMinRecs('chooseMinRecs')}
+                  >
+                    <Text style={styles.filterOptionsText}>
+                      only shows rec'd by at least this many
+                    </Text>
+                  </TouchableOpacity>
                 </View>
               </View>
             ) : null}
@@ -704,86 +639,93 @@ const RecsFilter = (props) => {
               </View>
             ) : null}
 
-            <View style={styles.filterCriteriaContainer}>
-              <Text style={styles.text}>Filter criteria:</Text>
-              <View style={styles.filterCriteriaRow}>
-                <Text style={styles.filterText}>
-                  Tags / description filter:{' '}
-                  {tagsDescriptionChecked === 'chooseTags' &&
-                  tagsDropdownValue.length
-                    ? `Shows tagged as "${tagsDropdownValue
-                        .map((tag, index) =>
-                          index === tagsDropdownValue.length - 1 &&
-                          tagsDropdownValue.length > 2 &&
-                          !filterAnyTags
-                            ? `"and ${tag.name}"`
-                            : index === tagsDropdownValue.length - 1 &&
-                              tagsDropdownValue.length > 2 &&
-                              filterAnyTags
-                            ? `"or ${tag.name}"`
-                            : tag.name
-                        )
-                        .join(', ')}"`
-                    : tagsDescriptionChecked === 'nonZeroTags'
-                    ? `Shows with at least 1 tag`
-                    : tagsDescriptionChecked === 'tagsOrDescription'
-                    ? `Shows with at least 1 tag or a description`
-                    : tagsDescriptionChecked === 'descriptionWord' &&
-                      descriptionValue.length
-                    ? `Shows with "${descriptionValue
-                        .join('" or "')
-                        .toLowerCase()}" in their description`
-                    : tagsDescriptionChecked === 'nonZeroDescription'
-                    ? `Shows with a description`
-                    : 'None yet'}
-                </Text>
-              </View>
+            {tagsDescriptionChecked === 'none' &&
+            streamersChecked === 'none' &&
+            minRecs === 'none' ? null : (
+              <View style={styles.filterCriteriaContainer}>
+                <Text style={styles.boldText}>Filter criteria</Text>
+                {tagsDescriptionChecked === 'None' ? null : (
+                  <Text style={{ ...styles.filterText, marginBottom: 0 }}>
+                    {tagsDescriptionChecked === 'chooseTags' &&
+                    tagsDropdownValue.length
+                      ? `Only display shows tagged as ${tagsDropdownValue
+                          .map((tag, index) =>
+                            index === tagsDropdownValue.length - 1 &&
+                            tagsDropdownValue.length > 2 &&
+                            !filterAnyTags
+                              ? `and "${tag.name}"`
+                              : index === tagsDropdownValue.length - 1 &&
+                                tagsDropdownValue.length > 2 &&
+                                filterAnyTags
+                              ? `or "${tag.name}"`
+                              : `"${tag.name}"`
+                          )
+                          .join(', ')}`
+                      : tagsDescriptionChecked === 'nonZeroTags'
+                      ? `Only display shows with at least 1 tag`
+                      : tagsDescriptionChecked === 'tagsOrDescription'
+                      ? `Only display shows with at least 1 tag or a description`
+                      : tagsDescriptionChecked === 'descriptionWord' &&
+                        descriptionValue.length
+                      ? `Only display shows with "${descriptionValue
+                          .join('" or "')
+                          .toLowerCase()}" in their description`
+                      : tagsDescriptionChecked === 'nonZeroDescription'
+                      ? `Only display shows with a description`
+                      : null}
+                  </Text>
+                )}
 
-              <View style={styles.filterCriteriaRow}>
-                <Text style={styles.filterText}>
-                  Streamer filter (doesn't work yet):{' '}
-                  {streamersChecked === 'chooseStreamers' &&
-                  streamersDropdownValue.length
-                    ? `Shows available on ${streamersDropdownValue
-                        .map((streamer, index) =>
-                          index === streamersDropdownValue.length - 1 &&
-                          tagsDropdownValue.length > 2
-                            ? `, or ${streamer.name}`
-                            : streamer.name
-                        )
-                        .join(', ')}`
-                    : 'None yet'}
-                </Text>
-              </View>
+                {streamersChecked === 'chooseStreamers' &&
+                streamersDropdownValue.length ? (
+                  <Text style={{ ...styles.filterText, marginBottom: 0 }}>
+                    Only display shows available on{' '}
+                    {streamersDropdownValue
+                      .map((streamer, index) =>
+                        index === streamersDropdownValue.length - 1 &&
+                        tagsDropdownValue.length > 2
+                          ? ` or ${streamer.name}`
+                          : streamer.name
+                      )
+                      .join(', ')}
+                  </Text>
+                ) : null}
 
-              <View style={styles.filterCriteriaRow}>
-                <Text style={styles.filterText}>
-                  Recommenders filter:{' '}
-                  {minRecs === 'chooseMinRecs' && minRecsDropdownValue > 1
-                    ? `Shows recommended by at least ${minRecsDropdownValue} users I follow`
-                    : props.following < 2
-                    ? 'This filter will become available when you follow more users'
-                    : 'None yet'}
-                </Text>
+                {minRecs === 'chooseMinRecs' && minRecsDropdownValue > 1 ? (
+                  <Text style={{ ...styles.filterText, marginBottom: 0 }}>
+                    Only display shows recommended by at least{' '}
+                    {minRecsDropdownValue} users I follow
+                  </Text>
+                ) : null}
               </View>
-            </View>
-            <View style={{ flex: 1, flexDirection: 'row' }}>
-              <View style={{ flex: 1, alignItems: 'flex-start' }}>
-                <TouchableOpacity
-                  style={styles.cancelButton}
-                  onPress={() => reset()}
-                >
-                  <Text style={styles.buttonText}>Clear</Text>
-                </TouchableOpacity>
-              </View>
-              <View style={{ flex: 1, alignItems: 'flex-end' }}>
-                <TouchableOpacity
-                  style={styles.searchButton}
-                  onPress={() => filter()}
-                >
-                  <Text style={styles.buttonText}>Filter Recommendations</Text>
-                </TouchableOpacity>
-              </View>
+            )}
+            <View
+              style={{
+                flex: 1,
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+                justifyContent: 'space-between',
+              }}
+            >
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => reset()}
+              >
+                <Text style={styles.buttonText}>Clear filters</Text>
+              </TouchableOpacity>
+              {/* <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => props.setAdvancedSearch(false)}
+              >
+                <Text style={styles.buttonText}>Close filter</Text>
+              </TouchableOpacity> */}
+
+              <TouchableOpacity
+                style={styles.searchButton}
+                onPress={() => filter()}
+              >
+                <Text style={styles.buttonText}>Filter Recommendations</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </View>
@@ -799,25 +741,31 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 2,
     marginBottom: 40,
+    backgroundColor: '#D3D3D3',
   },
   choiceContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-evenly',
     flexWrap: 'wrap',
+    flex: 1,
   },
   choices: {
     flexDirection: 'column',
     alignItems: 'center',
-    margin: 3,
     flexWrap: 'wrap',
-    width: 100,
+    flex: 1 / 3,
+    margin: 2,
+    paddingVertical: 10,
+    paddingHorizontal: 3,
+    alignContent: 'center',
   },
-  optionContainer: {
-    flex: 1,
-    justifyContent: 'space-between',
-    marginRight: 10,
-    marginLeft: 10,
-  },
+
+  // optionContainer: {
+  //   flex: 1,
+  //   justifyContent: 'space-between',
+  //   marginRight: 10,
+  //   marginLeft: 10,
+  // },
   buttonText: {
     textAlign: 'center',
     fontSize: 16,
@@ -826,7 +774,6 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   text: {
-    margin: 5,
     textAlign: 'center',
     fontSize: 20,
   },
@@ -835,20 +782,23 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 7,
   },
+  filterOptionsText: {
+    textAlign: 'center',
+    fontSize: 16,
+    flex: 1,
+  },
   filterCriteriaContainer: {
     flex: 1,
-    borderWidth: 1,
     padding: 3,
-    backgroundColor: '#FAFAC6',
+    backgroundColor: '#F4F1BB',
     marginTop: 7,
   },
-  filterCriteriaRow: {
-    flex: 1,
-    borderTopWidth: 1,
-    paddingTop: 3,
-  },
+  // filterCriteriaRow: {
+  //   flex: 1,
+  //   paddingTop: 3,
+  // },
   boldText: {
-    margin: 5,
+    margin: 3,
     textAlign: 'center',
     fontSize: 20,
     fontWeight: 'bold',
@@ -934,7 +884,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 40,
     marginHorizontal: 3,
-    backgroundColor: '#586BA4',
+    backgroundColor: '#340068',
     marginTop: 5,
     marginBottom: 10,
   },
@@ -942,7 +892,7 @@ const styles = StyleSheet.create({
     padding: 5,
     borderRadius: 15,
     marginHorizontal: 3,
-    backgroundColor: 'orange',
+    backgroundColor: '#340068',
     marginTop: 5,
   },
   cancelButton: {
@@ -965,6 +915,7 @@ const mapStateToProps = (store) => ({
   currentUser: store.currentUser.userInfo,
   following: store.currentUser.following,
   tvTags: store.allOtherUsers.tvTags,
+  watchProviders: store.currentUser.watchProviders,
 })
 
 const mapDispatch = (dispatch) => {
