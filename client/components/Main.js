@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
-import { connect } from 'react-redux';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useEffect } from 'react'
+import { connect } from 'react-redux'
+import { View, Text, StyleSheet } from 'react-native'
 import {
   getCurrentUser,
   clearData,
@@ -12,34 +12,34 @@ import {
   getUserShowsToWatch,
   getAllTags,
   getUserShowsSeen,
-} from '../redux/actions';
-import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+} from '../redux/actions'
+import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs'
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 
-import RecShows from './Main/RecShows';
-import Search from './Main/Search';
-import Profile from './Main/Profile';
-import AddShow from './Main/AddShow';
-import Settings from './Main/Settings';
+import RecShows from './Main/RecShows'
+import Search from './Main/Search'
+import Profile from './Main/Profile'
+import AddShow from './Main/AddShow'
+import Settings from './Main/Settings'
 
-const Tab = createMaterialBottomTabNavigator();
+const Tab = createMaterialBottomTabNavigator()
 
 function Main(props) {
   useEffect(() => {
-    props.clearData();
-    props.getCurrentUser();
-    props.getUserFollowing();
-    props.getUserShows();
-    props.getUsersFollowingRecs();
-    props.getAllOtherUsers();
-    props.getUserShowsToWatch();
-    props.getUserShowsSeen();
-    props.getUserTags();
-    props.getAllTags();
-  }, []);
+    props.clearData()
+    props.getCurrentUser()
+    props.getUserFollowing()
+    props.getUserShows()
+    props.getUsersFollowingRecs()
+    props.getAllOtherUsers()
+    props.getUserShowsToWatch()
+    props.getUserShowsSeen()
+    props.getUserTags()
+    props.getAllTags()
+  }, [])
 
-  const { user } = props;
+  const { user } = props
 
   return (
     <Tab.Navigator initialRouteName="Feed" labeled={false}>
@@ -87,8 +87,8 @@ function Main(props) {
         component={Profile}
         listeners={({ navigation }) => ({
           tabPress: (event) => {
-            event.preventDefault();
-            navigation.navigate('Profile');
+            event.preventDefault()
+            navigation.navigate('Profile')
           },
         })}
         options={{
@@ -112,15 +112,15 @@ function Main(props) {
         }}
       />
     </Tab.Navigator>
-  );
+  )
 }
 // }
 
 const mapState = (state) => {
   return {
     user: state.currentUser.userInfo,
-  };
-};
+  }
+}
 
 const mapDispatch = (dispatch) => {
   return {
@@ -134,7 +134,7 @@ const mapDispatch = (dispatch) => {
     getUserShowsToWatch: () => dispatch(getUserShowsSeen()),
     getUserShowsSeen: () => dispatch(getUserShowsToWatch()),
     getAllTags: () => dispatch(getAllTags()),
-  };
-};
+  }
+}
 
-export default connect(mapState, mapDispatch)(Main);
+export default connect(mapState, mapDispatch)(Main)

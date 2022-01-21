@@ -182,6 +182,7 @@ export function getUserFollowing(uid) {
         headers
       )
       if (followed) {
+        console.log('i got to this point and this is following', followed.data)
         if (uid) {
           dispatch({
             type: types.GET_OTHER_USER_FOLLOWING,
@@ -189,6 +190,7 @@ export function getUserFollowing(uid) {
           })
           return followed.data
         } else {
+          console.log('following', followed.data)
           dispatch({
             type: types.GET_USER_FOLLOWING,
             following: followed.data,

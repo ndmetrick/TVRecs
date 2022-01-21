@@ -26,6 +26,8 @@ import UsersFollowing from './client/components/Main/UsersFollowing/'
 import PickUserTags from './client/components/Main/PickUserTags/'
 import { clearData } from './client/redux/actions'
 import FAQ from './client/components/Main/FAQ'
+import 'react-native-gesture-handler'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
 
 const Start = (props) => {
   const Stack = createStackNavigator()
@@ -51,6 +53,7 @@ const Start = (props) => {
   return (
     <>
       {user ? (
+        // <GestureHandlerRootView>
         <NavigationContainer>
           <Stack.Navigator initialRouteName="Main">
             <Stack.Screen
@@ -189,6 +192,7 @@ const Start = (props) => {
           </Stack.Navigator>
         </NavigationContainer>
       ) : (
+        // </GestureHandlerRootView>
         <NavigationContainer>
           <Stack.Navigator initialRouteName="MainLoggedOut">
             <Stack.Screen

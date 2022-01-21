@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import {
   StyleSheet,
   View,
@@ -8,21 +8,13 @@ import {
   TouchableOpacity,
   Switch,
   Dimensions,
-  ActivityIndicator,
   Animated,
-  ScrollView,
+  ActivityIndicator,
+  SafeAreaView,
 } from 'react-native'
-
-import {
-  RecyclerListView,
-  DataProvider,
-  LayoutProvider,
-  BaseScrollView,
-} from 'recyclerlistview'
-
 import { useFirstRender } from './helpers.js'
 import RecsFilter from './RecsFilter'
-
+import RecsHeader from './RecsHeader'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 
 import {
@@ -34,6 +26,7 @@ import OtherRecerModal from './OtherRecerModal'
 
 import { connect } from 'react-redux'
 import { useIsFocused } from '@react-navigation/native'
+// import { onScrollEvent, onScroll, useValues } from 'react-native-redash'
 
 let containerCount = 0
 
@@ -50,90 +43,105 @@ const RecShows = (props) => {
   const [advancedSearch, setAdvancedSearch] = useState(false)
   const [loading, setLoading] = useState(true)
   const [headerHeight, setHeaderHeight] = useState(80)
+  const ref = useRef(null)
+  const scrollY = useRef(new Animated.Value(0))
+  const translateYNumber = useRef()
 
   const isFocused = useIsFocused()
   const firstRender = useFirstRender()
 
+  const AnimatedFlatList = Animated.createAnimatedComponent(FlatList)
+
   useEffect(() => {
-    // const getRecShows = async () => {
-    //   try {
-    if (props.allRecShows || props.filterRecs) {
-      console.log(
-        'i am up here above first time and filterREcs is',
-        props.filterRecs
-      )
-      setLoading(true)
-      let shows = filter ? props.filterRecs : props.allRecShows
-      let height = filter ? 80 : 250
-      setHeaderHeight(height)
-      // shows.sort(function (x, y) {
-      //   return new Date(y.updatedAt) - new Date(x.updatedAt)
-      // })
-
-      // if they toggled to only see shows not on their profile, remove shows that appear on their rec, watch, and seen lists
-
-      if (noUserShows) {
-        shows = shows.filter((recShow) => {
-          return (
-            !props.userShows.find(
-              (userShow) => userShow.show.id === recShow.showId
-            ) &&
-            !props.toWatch.find(
-              (watchShow) => watchShow.show.id === recShow.showId
-            ) &&
-            !props.seen.find((seenShow) => seenShow.show.id === recShow.showId)
-          )
-        })
-      }
-      // we only want to see a show recommended once on the timeline, but we want to be able to see how many times it was recommended and by which other users
-      let visibleShows = []
-      let recCounts = {}
-      let loaded = 0
-      for (let recShow of shows) {
-        const count = recCounts[recShow.showId]
-        if (!count) {
-          visibleShows.push(recShow)
-          recCounts[recShow.showId] = {
-            num: 1,
-            recommenders: [{ name: recShow.username, recShow }],
-          }
-          loaded += 1
-        } else {
-          recCounts[recShow.showId].num++
-          recCounts[recShow.showId].recommenders.push({
-            name: recShow.username,
-            recShow,
-          })
-          loaded += 1
-        }
-        if (loaded === shows.length) {
-          setLoading(false)
-        } else {
+    setLoading(true)
+    const getRecShows = async () => {
+      try {
+        if (props.allRecShows || props.filterRecs) {
           console.log(
-            'shows.length is ',
-            shows.length,
-            'and loaded is ',
-            loaded
+            'i am up here above first time and filterREcs is',
+            props.filterRecs
           )
-        }
-      }
-      setRecShows(visibleShows)
-      setMultipleRecInfo(recCounts)
-      if (firstRender) {
-        console.log('i am in the first render')
-      }
-      if (
-        !firstRender &&
-        (!props.following.length || !props.filterRecs.length)
-      ) {
-        console.log('i am not in the first render but there is no following')
-        setLoading(false)
-      }
+          let shows = filter ? props.filterRecs : props.allRecShows
+          let height = filter ? 180 : 75
+          setHeaderHeight(height)
+          // shows.sort(function (x, y) {
+          //   return new Date(y.updatedAt) - new Date(x.updatedAt)
+          // })
 
-      return () => {
-        setRecShows([])
+          // if they toggled to only see shows not on their profile, remove shows that appear on their rec, watch, and seen lists
+
+          if (noUserShows) {
+            shows = shows.filter((recShow) => {
+              return (
+                !props.userShows.find(
+                  (userShow) => userShow.show.id === recShow.showId
+                ) &&
+                !props.toWatch.find(
+                  (watchShow) => watchShow.show.id === recShow.showId
+                ) &&
+                !props.seen.find(
+                  (seenShow) => seenShow.show.id === recShow.showId
+                )
+              )
+            })
+          }
+          // we only want to see a show recommended once on the timeline, but we want to be able to see how many times it was recommended and by which other users
+          let visibleShows = []
+          let recCounts = {}
+          let loaded = 0
+          for (let recShow of shows) {
+            const count = recCounts[recShow.showId]
+            if (!count) {
+              visibleShows.push(recShow)
+              recCounts[recShow.showId] = {
+                num: 1,
+                recommenders: [{ name: recShow.username, recShow }],
+              }
+              loaded += 1
+            } else {
+              recCounts[recShow.showId].num++
+              recCounts[recShow.showId].recommenders.push({
+                name: recShow.username,
+                recShow,
+              })
+              loaded += 1
+            }
+            if (loaded === shows.length) {
+              setLoading(false)
+            } else {
+              console.log(
+                'shows.length is ',
+                shows.length,
+                'and loaded is ',
+                loaded
+              )
+            }
+          }
+          setRecShows(visibleShows)
+          setMultipleRecInfo(recCounts)
+          if (firstRender) {
+            console.log('i am in the first render')
+          }
+          if (
+            !firstRender &&
+            props.currentUser &&
+            (!props.following.length || !props.filterRecs.length)
+          ) {
+            console.log(
+              'i am not in the first render but there is no following'
+            )
+            setLoading(false)
+          }
+
+          return () => {
+            setRecShows([])
+          }
+        }
+      } catch (e) {
+        console.log(e)
       }
     }
+    getRecShows()
   }, [
     isFocused,
     props.following,
@@ -144,66 +152,48 @@ const RecShows = (props) => {
     firstRender,
   ])
 
-  console.log('advanced search', advancedSearch, props.filterRecs)
+  console.log(
+    'advanced search',
+    advancedSearch,
+    props.filterRecs,
+    props.allRecShows,
+    props.following
+  )
 
   console.log('loading', loading)
-  const _dataProvider = useMemo(() => {
-    return new DataProvider((r1, r2) => {
-      return r1.id !== r2.id
-    })
-  }, [])
 
-  const newDataProvider = useMemo(() => {
-    return _dataProvider.cloneWithRows(recShows)
-  }, [recShows])
-
-  const _layoutProvider = useMemo(() => {
-    return new LayoutProvider(
-      (index) => {
-        // console.log(newDataProvider.getDataForIndex(index)) //This will work.
-        return 1
-      },
-      (type, dim) => {
-        switch (type) {
-          case 1:
-            dim.width = width
-            dim.height = (width / 2) * 3 + 40
-            break
-          default:
-            dim.width = 0
-            dim.height = 0
-        }
-      }
-    )
-  }, [newDataProvider])
-
-  const _rowRenderer = (type, data) => {
-    switch (type) {
-      case 1:
-        return (
-          <CellContainer style={styles.containerImage}>
+  const displayRecShows = () => {
+    return (
+      <Animated.FlatList
+        scrollEventThrottle={16}
+        contentContainerStyle={{ paddingTop: headerHeight }}
+        numColumns={1}
+        horizontal={false}
+        data={recShows}
+        renderItem={({ item }) => (
+          <View style={styles.containerImage}>
             <TouchableOpacity
-              onPress={() => getUserShow(data)}
+              onPress={() => getUserShow(item)}
               style={styles.catalogContainer}
             >
-              <Image source={{ uri: data.imageUrl }} style={styles.image} />
+              <Image source={{ uri: item.imageUrl }} style={styles.image} />
             </TouchableOpacity>
             <View>
-              {multipleRecInfo[data.showId].num < 2 ? (
+              {multipleRecInfo[item.showId].num < 2 ? (
                 <View>
-                  <Text style={{ fontWeight: 'bold' }}>{data.name}</Text>
+                  <Text style={{ fontWeight: 'bold' }}>{item.name}</Text>
                   <View style={styles.rowContainer}>
                     <Text>Recommended by: </Text>
                     <TouchableOpacity
                       onPress={() =>
                         props.navigation.navigate("TV rec'er", {
-                          uid: data.userId,
+                          uid: item.userId,
                         })
                       }
                     >
                       <Text
                         style={{ color: 'blue' }}
-                      >{`${data.username}`}</Text>
+                      >{`${item.username}`}</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -212,11 +202,11 @@ const RecShows = (props) => {
                   <Text>Recommended by:</Text>
                   <TouchableOpacity
                     onPress={() =>
-                      seeOtherRecers(multipleRecInfo[data.showId].recommenders)
+                      seeOtherRecers(multipleRecInfo[item.showId].recommenders)
                     }
                   >
                     <Text style={{ color: 'blue' }}>
-                      {`${multipleRecInfo[data.showId].num} people you follow ${
+                      {`${multipleRecInfo[item.showId].num} people you follow ${
                         filter ? `with these filters applied` : ''
                       }`}
                     </Text>
@@ -224,11 +214,12 @@ const RecShows = (props) => {
                 </View>
               )}
             </View>
-          </CellContainer>
-        )
-      default:
-        return null
-    }
+          </View>
+        )}
+        keyExtractor={(item, index) => index.toString()}
+        onScroll={handleScroll}
+      />
+    )
   }
 
   const seeOtherRecers = (recInfo) => {
@@ -290,53 +281,6 @@ const RecShows = (props) => {
         </View>
       )
     })
-    // (
-    // <View>
-    //   <Text>
-    {
-      /* {filter['chooseTags']
-            ? `Only display shows tagged as ${filter['chooseTags']
-                .map((tag, index) =>
-                  index === filter['chooseTags'] - 1 && filter['chooseTags'] > 2
-                    ? `and "${tag.name}"`
-                    : `"${tag.name}"`
-                )
-                .join(', ')}`
-            : filter['chooseAnyTags']
-            ? `Only display shows tagged as ${filter['chooseAnyTags']
-                .map((tag, index) =>
-                  index === filter['chooseAnyTags'] - 1 &&
-                  filter['chooseAnyTags'] > 1
-                    ? `or "${tag.name}"`
-                    : `"${tag.name}"`
-                )
-                .join(', ')}`
-            : filter['nonZeroTags']
-            ? `Only display shows with at least 1 tag`
-            : filter['tagsOrDescription']
-            ? `Only display shows with at least 1 tag or a description`
-            : filter['descriptionValue']
-            ? `Only display shows with "${filter['descriptionValue']
-                .join('" or "')
-                .toLowerCase()}" in their description`
-            : filter['nonZeroDescription']
-            ? `Only display shows with a description`
-            : null}
-        </Text>
-        <Text>
-          {filter['chooseStreamers']
-            ? `Only display shows available on ${filter[
-                'chooseStreamers'
-              ].streamers
-                .map((streamer, index) =>
-                  index === filter['chooseStreamers'].length - 1 &&
-                  filter['chooseStreamers'].length > 2
-                    ? `or ${streamer.name}`
-                    : streamer.name
-                )
-                .join(', ')}`
-            : null} */
-    }
   }
 
   if (loading) {
@@ -359,155 +303,135 @@ const RecShows = (props) => {
     )
   }
 
-  // const scrollY = new Animated.Value(0)
-  // const diffClamp = Animated.diffClamp(scrollY, 0, headerHeight)
-  // const translateY = diffClamp.interpolate({
-  //   inputRange: [0, headerHeight],
-  //   outputRange: [0, -headerHeight],
-  // })
+  const translateY = scrollY.current.interpolate({
+    inputRange: [0, headerHeight],
+    outputRange: [0, -headerHeight],
+    extrapolate: 'clamp',
+  })
+
+  translateY.addListener(({ value }) => {
+    translateYNumber.current = value
+  })
+
+  const handleScroll = Animated.event(
+    [
+      {
+        nativeEvent: {
+          contentOffset: { y: scrollY.current },
+        },
+      },
+    ],
+    {
+      useNativeDriver: true,
+    }
+  )
+
+  console.log('headerheight', headerHeight, filter)
 
   return (
-    <View style={styles.container}>
-      {/* <Animated.View
-        style={{
-          transform: [{ translateY: translateY }],
-          elevation: 4,
-          zIndex: 100,
-        }}
-      > */}
-      <View
-      // style={
-      //   filter
-      //     ? { ...styles.header, height: 250 }
-      //     : { ...styles.header, height: 80 }
-      // }
-      >
-        {!advancedSearch ? (
-          <View style={styles.toggleContainer}>
-            {!noUserShows ? (
-              <Text>Toggle to hide shows saved to your profile</Text>
-            ) : (
-              <Text>Toggle to see shows saved to your profile</Text>
-            )}
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', flex: 1 }}>
-              <View style={{ alignItems: 'flex-start', flex: 1 }}>
-                <Switch
-                  style={{
-                    marginBottom: 5,
-                    marginTop: 5,
-                  }}
-                  ios_backgroundColor="#3e3e3e"
-                  onValueChange={toggleNoUserShows}
-                  value={noUserShows}
-                />
-              </View>
-              <TouchableOpacity
-                // style={styles.button}
-                onPress={() => setAdvancedSearch(true)}
-                style={{ alignItems: 'flex-end', flex: 1 }}
-              >
-                <Text
-                  style={{
-                    marginBottom: 5,
-                    marginTop: 5,
-                    fontSize: 16,
-                    fontWeight: '400',
-                  }}
+    <SafeAreaView style={styles.container}>
+      <View style={{ flex: 1, elevation: 1000, zIndex: 1000 }}>
+        <Animated.View style={[styles.header, { transform: [{ translateY }] }]}>
+          <View>
+            {!advancedSearch ? (
+              <View style={styles.headerHeight}>
+                {!noUserShows ? (
+                  <Text>Toggle to hide shows saved to your profile</Text>
+                ) : (
+                  <Text>Toggle to see shows saved to your profile</Text>
+                )}
+                <View
+                  style={{ flexDirection: 'row', flexWrap: 'wrap', flex: 1 }}
                 >
-                  My filters{' '}
-                  <MaterialCommunityIcons
-                    name="chevron-double-down"
-                    size={18}
-                  />
-                </Text>
-              </TouchableOpacity>
-            </View>
-            {filter ? (
-              <View>
-                <Text style={{ fontWeight: 'bold' }}>
-                  The following {noUserShows ? 'additional ' : null}filters have
-                  been applied to this search:
-                </Text>
-                <View style={styles.filterDisplay}>{displayFilters()}</View>
-                <View style={{ alignItems: 'flex-end' }}>
+                  <View style={{ alignItems: 'flex-start', flex: 1 }}>
+                    <Switch
+                      style={{
+                        marginBottom: 5,
+                        marginTop: 5,
+                      }}
+                      ios_backgroundColor="#3e3e3e"
+                      onValueChange={toggleNoUserShows}
+                      value={noUserShows}
+                    />
+                  </View>
                   <TouchableOpacity
-                    style={styles.button}
-                    onPress={() => setFilter(null)}
+                    // style={styles.button}
+                    onPress={() => setAdvancedSearch(true)}
+                    style={{ alignItems: 'flex-end', flex: 1 }}
                   >
-                    <Text style={styles.buttonText}>Cancel filters</Text>
+                    <Text
+                      style={{
+                        marginBottom: 5,
+                        marginTop: 5,
+                        fontSize: 16,
+                        fontWeight: '400',
+                      }}
+                    >
+                      My filters{' '}
+                      <MaterialCommunityIcons
+                        name="chevron-double-down"
+                        size={18}
+                      />
+                    </Text>
                   </TouchableOpacity>
                 </View>
+                {filter ? (
+                  <View>
+                    <Text style={{ fontWeight: 'bold' }}>
+                      The following {noUserShows ? 'additional ' : null}filters
+                      have been applied to this search:
+                    </Text>
+                    <View style={styles.filterDisplay}>{displayFilters()}</View>
+                    <View style={{ alignItems: 'flex-end' }}>
+                      <TouchableOpacity
+                        style={styles.button}
+                        onPress={() => setFilter(null)}
+                      >
+                        <Text style={styles.buttonText}>Cancel filters</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                ) : null}
               </View>
             ) : null}
           </View>
+        </Animated.View>
+
+        {!advancedSearch ? (
+          <View style={styles.containerGallery}>
+            {displayRecShows()}
+            {!recShows.length ? (
+              <View>
+                <Text style={styles.text}>
+                  Unfortunately you have no recommended shows matching those
+                  filters.
+                </Text>
+              </View>
+            ) : (
+              <OtherRecerModal
+                modalVisible={modalVisible}
+                setModalVisible={setModalVisible}
+                selectedItem={selectedItem}
+                navigation={props.navigation}
+                previous="RecShows"
+                getSingleUserShow={props.getSingleUserShow}
+              />
+            )}
+          </View>
         ) : null}
+        {!advancedSearch ? null : (
+          <RecsFilter
+            setAdvancedSearch={setAdvancedSearch}
+            setMatchingRecs={setMatchingRecs}
+            setFilter={setFilter}
+            setLoading={setLoading}
+            filter={filter}
+          />
+        )}
       </View>
-      {/* </Animated.View> */}
-      {!advancedSearch && !recShows.length ? (
-        <View>
-          <Text style={styles.text}>
-            Unfortunately you have no recommended shows matching those filters.
-          </Text>
-        </View>
-      ) : !advancedSearch &&
-        newDataProvider &&
-        newDataProvider.getSize() > 0 ? (
-        <View style={styles.containerGallery}>
-          <RecyclerListView
-            layoutProvider={_layoutProvider}
-            dataProvider={newDataProvider}
-            rowRenderer={_rowRenderer}
-            // onScroll={(e) => {
-            //   scrollY.setValue(e.nativeEvent.contentOffset.y)
-            // // }}
-            // externalScrollView={ExternalScrollView}
-            // animatedEvent={(e) => {
-            //   scrollY.setValue(e.nativeEvent.contentOffset.y)
-            // }}
-          />
-          <OtherRecerModal
-            modalVisible={modalVisible}
-            setModalVisible={setModalVisible}
-            selectedItem={selectedItem}
-            navigation={props.navigation}
-            previous="RecShows"
-            getSingleUserShow={props.getSingleUserShow}
-          />
-        </View>
-      ) : null}
-      {!advancedSearch ? null : (
-        <RecsFilter
-          setAdvancedSearch={setAdvancedSearch}
-          setMatchingRecs={setMatchingRecs}
-          setFilter={setFilter}
-          setLoading={setLoading}
-          filter={filter}
-        />
-      )}
-    </View>
+    </SafeAreaView>
   )
 }
-class CellContainer extends React.Component {
-  constructor(args) {
-    super(args)
-    this._containerId = containerCount++
-  }
-  render() {
-    return <View {...this.props}>{this.props.children}</View>
-  }
-}
-
-// class ExternalScrollView extends BaseScrollView {
-//   render() {
-//     return (
-//       <ScrollView
-//         onScroll={Animated.event([this.props.animatedEvent], {
-//           useNativeDriver: true,
-//         })}
-//       />
-//     )
-//   }
-// }
 
 const styles = StyleSheet.create({
   container: {
@@ -567,11 +491,11 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   header: {
-    flexDirection: 'row',
     position: 'absolute',
-    top: 0,
     left: 0,
     right: 0,
+    width: '100%',
+    zIndex: 1,
   },
 })
 const mapStateToProps = (store) => ({
