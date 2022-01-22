@@ -108,7 +108,7 @@ const AddShow = (props) => {
                   <View>
                     <View style={styles.buttonContainer}>
                       <TouchableOpacity
-                        style={styles.saveButton}
+                        style={styles.button}
                         onPress={() =>
                           props.navigation.navigate('Save show', {
                             showData: {
@@ -293,7 +293,7 @@ const styles = StyleSheet.create({
     aspectRatio: 2 / 3,
   },
   saveButton: {
-    backgroundColor: '#0C7489',
+    backgroundColor: '#340068',
     padding: 10,
     borderRadius: 40,
     marginHorizontal: 3,

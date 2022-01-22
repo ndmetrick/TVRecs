@@ -69,7 +69,7 @@ function StreamingAndPurchase(props) {
   const getStreaming = (watchProviders) => {
     const stream = watchProviders ? watchProviders.flatrate : null
     let streamingContainer
-    let streaming
+    console.log('stream', stream)
     if (stream) {
       const streamingInfo =
         stream && stream.map((option) => option.provider_name)
@@ -81,6 +81,11 @@ function StreamingAndPurchase(props) {
         })
         streamingContainer = { string, options }
       }
+    }
+    if (!streamingContainer) {
+      const string = ''
+      const options = {}
+      streamingContainer = { string, options }
     }
     return streamingContainer
   }
