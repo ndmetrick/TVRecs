@@ -262,7 +262,7 @@ const RecShows = (props) => {
         ? 'has description'
         : filter['tagsOrDescription']
         ? 'tags or description'
-        : filter[descriptionValue]
+        : filter['descriptionValue']
         ? 'word in description'
         : null
     if (tagFilter) {
