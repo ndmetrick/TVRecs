@@ -2,7 +2,6 @@ import * as AuthSession from 'expo-auth-session'
 import { connect } from 'react-redux'
 import jwtDecode from 'jwt-decode'
 import React, { useState, useEffect } from 'react'
-import 'react-native-gesture-handler'
 import {
   Alert,
   StyleSheet,
@@ -51,9 +50,8 @@ const Start = (props) => {
   // const { isLoggedIn } = props;
 
   return (
-    <>
+    <GestureHandlerRootView style={{ flex: 1 }}>
       {user ? (
-        // <GestureHandlerRootView>
         <NavigationContainer>
           <Stack.Navigator
             initialRouteName="Main"
@@ -198,7 +196,6 @@ const Start = (props) => {
           </Stack.Navigator>
         </NavigationContainer>
       ) : (
-        // </GestureHandlerRootView>
         <NavigationContainer>
           <Stack.Navigator
             initialRouteName="MainLoggedOut"
@@ -276,7 +273,7 @@ const Start = (props) => {
           </Stack.Navigator>
         </NavigationContainer>
       )}
-    </>
+    </GestureHandlerRootView>
   )
 }
 

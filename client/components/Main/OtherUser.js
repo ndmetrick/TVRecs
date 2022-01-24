@@ -3,12 +3,12 @@ import { connect } from 'react-redux'
 import {
   View,
   Text,
-  Image,
-  FlatList,
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native'
+
+import { Tabs } from 'react-native-collapsible-tab-view'
 import {
   getUserShows,
   getOtherUser,
@@ -18,15 +18,11 @@ import {
   getUserFollowing,
   getUserTags,
 } from '../../redux/actions'
-import { createStackNavigator } from '@react-navigation/stack'
-import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs'
+
 import UserTagsAndDescription from './UserTagsAndDescription'
 import ViewShows from './ViewShows'
-
-const Tab = createMaterialTopTabNavigator()
-const Stack = createStackNavigator()
-
-// import { useIsFocused } from '@react-navigation/native';
+import ProfileHeader from './ProfileHeader'
+import { NavigationContainer } from '@react-navigation/native'
 
 function OtherUser(props) {
   const [userShows, setUserShows] = useState([])
@@ -37,7 +33,9 @@ function OtherUser(props) {
   const [userFollowing, setUserFollowing] = useState({})
   const [userTags, setUserTags] = useState(null)
 
-  // const isFocused = useIsFocused();
+  const HEADER_HEIGHT = 150
+
+  const DATA = [0, 1, 2, 3, 4]
 
   useEffect(() => {
     console.log('i got in here to this other user')
@@ -55,10 +53,18 @@ function OtherUser(props) {
           const otherUserShows = await props.getUserShows(uid)
           const otherUserFollowing = await props.getUserFollowing(uid)
           const otherUserTags = await props.getUserTags(uid)
-          setUser(otherUser)
-          setUserShows(otherUserShows)
-          setUserFollowing(otherUserFollowing)
-          setUserTags(otherUserTags)
+          if (otherUser) {
+            setUser(otherUser)
+          }
+          if (otherUserShows) {
+            setUserShows(otherUserShows)
+          }
+          if (otherUserFollowing) {
+            setUserFollowing(otherUserFollowing)
+          }
+          if (otherUserTags) {
+            setUserTags(otherUserTags)
+          }
           if (
             props.following.filter((followed) => followed.id === uid).length
           ) {
@@ -104,169 +110,95 @@ function OtherUser(props) {
     }
   }
 
-  if (loading === null || userTags === null || user === null) {
+  const Header = () => {
+    return (
+      <ProfileHeader
+        style={styles.header}
+        previous="OtherUser"
+        userFollowing={userFollowing}
+        user={user}
+        loggedIn={loggedIn}
+        following={following}
+        navigation={props.navigation}
+      />
+    )
+  }
+
+  if (loading === null || user === null || userTags === null) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#5500dc" />
       </View>
     )
   }
-
   const { uid } = props.route.params ? props.route.params : {}
 
+  const firstTabName = `Recs (${props.otherUserShows.length})`
   return (
-    <View style={styles.container}>
-      <View style={styles.containerInfo}>
-        <Text style={styles.text}>{user.username}</Text>
-
-        {userFollowing.length > 0 ? (
-          <View>
-            <TouchableOpacity
-              onPress={() =>
-                props.navigation.navigate('UsersFollowing', {
-                  previous: 'OtherUser',
-                  userInfo: user,
-                  userFollowing: userFollowing,
-                })
-              }
-            >
-              <Text style={styles.text}>
-                Receiving recs from{' '}
-                <Text style={{ color: 'blue' }}>{userFollowing.length}</Text>{' '}
-                {userFollowing.length === 1 ? 'person' : 'people'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <View>
-            <Text style={styles.text}>
-              Receiving recs from {userFollowing.length} people
-            </Text>
-          </View>
-        )}
-
-        {/* Add in who is following */}
-
-        <Text style={styles.text}>
-          Recommending {userShows.length}{' '}
-          {userShows.length === 1 ? 'show' : 'shows'}
-        </Text>
-
-        <View>
-          {following ? (
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => unfollow()}
-              >
-                <Text style={styles.buttonText}>stop receiving recs</Text>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <View>
-              {props.currentUser ? (
-                <View style={styles.buttonContainer}>
-                  <TouchableOpacity
-                    style={styles.button}
-                    onPress={() => follow()}
-                  >
-                    <Text style={styles.buttonText}>receive recs</Text>
-                  </TouchableOpacity>
-                </View>
-              ) : (
-                <View>
-                  <Text style={styles.text}>
-                    {'\n'}Log in or Sign up to receive recs from this user
-                  </Text>
-                  <View style={styles.buttonContainer}>
-                    <TouchableOpacity
-                      style={styles.button}
-                      onPress={() => props.navigation.navigate('Login')}
-                    >
-                      <Text style={styles.buttonText}>Log in / Sign up</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              )}
-            </View>
-          )}
-        </View>
-      </View>
-      <Tab.Navigator
-        initialRouteName="Feed"
-        screenOptions={{
-          tabBarActiveTintColor: '#FFFFFF',
-          tabBarInactiveTintColor: '#F8F8F8',
-          tabBarLabelStyle: {
-            textAlign: 'center',
-          },
-          tabBarIndicatorStyle: {
-            borderBottomColor: '#21A179',
-            borderBottomWidth: 2,
-          },
-          tabBarStyle: {
-            backgroundColor: '#340068',
-          },
-        }}
-      >
-        <Tab.Screen
-          name="Recs"
-          component={ViewShows}
-          initialParams={{ userToView: user, type: 'recs', userShows }}
-          options={{
-            tabBarLabel: `Recs (${props.otherUserShows.length})`,
-          }}
+    <Tabs.Container renderHeader={Header}>
+      <Tabs.Tab name={firstTabName}>
+        <ViewShows
+          userToView={user}
+          type="recs"
+          userShows={userShows}
+          navigation={props.navigation}
         />
-        {user.description || userTags.length ? (
-          <Tab.Screen
-            name="Tags/Bio"
-            component={UserTagsAndDescription}
-            initialParams={{ user, userTags }}
-            options={{
-              tabBarLabel: 'Tags/Bio',
-            }}
-          />
-        ) : null}
-      </Tab.Navigator>
-    </View>
+      </Tabs.Tab>
+      <Tabs.Tab name="Tags/Bio">
+        <UserTagsAndDescription
+          user={user}
+          userTags={userTags}
+          navigation={props.navigation}
+        />
+      </Tabs.Tab>
+    </Tabs.Container>
   )
 }
+
+// const styles = StyleSheet.create({
+//   box: {
+//     height: 250,
+//     width: '100%',
+//   },
+//   boxA: {
+//     backgroundColor: 'white',
+//   },
+//   boxB: {
+//     backgroundColor: '#D8D8D8',
+//   },
+//   header: {
+//     height: HEADER_HEIGHT,
+//     width: '100%',
+//     backgroundColor: '#2196f3',
+//   },
+// })
+
+// <Tab.Navigator
+//   initialRouteName="Feed"
+//   screenOptions={{
+//     tabBarActiveTintColor: '#FFFFFF',
+//     tabBarInactiveTintColor: '#F8F8F8',
+//     tabBarLabelStyle: {
+//       textAlign: 'center',
+//     },
+//     tabBarIndicatorStyle: {
+//       borderBottomColor: '#36C9C6',
+//       borderBottomWidth: 7,
+//     },
+//     tabBarStyle: {
+//       backgroundColor: '#340068',
+//     },
+//   }}
+//
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  containerInfo: {
-    margin: 5,
-    padding: 5,
-    borderStyle: 'solid',
-    borderColor: 'blue',
-    borderWidth: 2,
-  },
-  containerImage: {
-    flex: 1 / 2,
-  },
-  text: {
-    textAlign: 'left',
-    fontSize: 18,
-  },
-  buttonText: {
-    textAlign: 'center',
-    fontSize: 18,
-    margin: 5,
-    fontWeight: '500',
-    color: 'white',
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
-  button: {
-    padding: 10,
-    borderRadius: 40,
-    marginHorizontal: 3,
+
+  header: {
+    width: '100%',
     backgroundColor: '#340068',
-    marginTop: 5,
   },
 })
 const mapStateToProps = (store) => ({

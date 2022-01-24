@@ -26,11 +26,8 @@ import OtherRecerModal from './OtherRecerModal'
 
 import { connect } from 'react-redux'
 import { useIsFocused } from '@react-navigation/native'
-// import { onScrollEvent, onScroll, useValues } from 'react-native-redash'
 
 let containerCount = 0
-
-let { width } = Dimensions.get('window')
 
 const RecShows = (props) => {
   const [selectedItem, setSelectedItem] = useState(null)
@@ -57,10 +54,7 @@ const RecShows = (props) => {
     const getRecShows = async () => {
       try {
         if (props.allRecShows || props.filterRecs) {
-          console.log(
-            'i am up here above first time and filterREcs is',
-            props.filterRecs
-          )
+          console.log('i am up here above first time and filterREcs')
           let shows = filter ? props.filterRecs : props.allRecShows
           let height = filter ? 150 : 55
           setHeaderHeight(height)
@@ -125,10 +119,13 @@ const RecShows = (props) => {
           if (
             !firstRender &&
             props.currentUser &&
-            (!props.following.length || !props.filterRecs.length)
+            (!props.following.length || (filter && !props.filterRecs.length))
           ) {
             console.log(
-              'i am not in the first render but there is no following'
+              'i am not in the first render but there is no following',
+              props.following,
+              props.filterRecs,
+              props.currentUser
             )
             setLoading(false)
           }
@@ -151,14 +148,6 @@ const RecShows = (props) => {
     props.filterRecs,
     firstRender,
   ])
-
-  console.log(
-    'advanced search',
-    advancedSearch,
-    props.filterRecs,
-    props.allRecShows,
-    props.following
-  )
 
   console.log('loading', loading)
 

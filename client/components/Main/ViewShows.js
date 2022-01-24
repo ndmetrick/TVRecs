@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { connect } from 'react-redux'
 import {
   View,
   Text,
   Image,
   FlatList,
-  Button,
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native'
+import { Tabs } from 'react-native-collapsible-tab-view'
 
 import { getSingleUserShow } from '../../redux/actions'
 import { useIsFocused } from '@react-navigation/native'
@@ -23,9 +23,15 @@ function ViewShows(props) {
   const isFocused = useIsFocused()
 
   useEffect(() => {
-    const { currentUser, currentUserShows, toWatch, otherUserShows, seen } =
-      props
-    const { userToView } = props.route.params
+    const {
+      currentUser,
+      currentUserShows,
+      toWatch,
+      otherUserShows,
+      seen,
+      userToView,
+    } = props
+    console.log('did i get in here?')
     if (currentUser !== null && currentUser.id === userToView.id) {
       setIsCurrentUser(true)
     }
@@ -34,9 +40,9 @@ function ViewShows(props) {
       const shows =
         currentUser === null
           ? otherUserShows
-          : props.route.params.type === 'toWatch'
+          : props.type === 'toWatch'
           ? toWatch
-          : props.route.params.type === 'seen'
+          : props.type === 'seen'
           ? seen
           : userToView.id === currentUser.id
           ? currentUserShows
@@ -58,7 +64,7 @@ function ViewShows(props) {
       setLoading(true)
       setIsCurrentUser(false)
     }
-  }, [props.route.params.type, isFocused, props.otherUserShows])
+  }, [props.type, isFocused, props.otherUserShows])
 
   const getUserShow = async (item) => {
     try {
@@ -90,29 +96,19 @@ function ViewShows(props) {
   }
 
   return (
-    <View style={styles.container}>
-      <View>
-        <FlatList
-          numColumns={2}
-          horizontal={false}
-          data={userShows}
-          renderItem={({ item }) => (
-            <View style={styles.containerImage}>
-              <TouchableOpacity
-                onPress={() => getUserShow(item)}
-                style={styles.catalogContainer}
-              >
-                <Image
-                  style={styles.image}
-                  source={{ uri: item.show.imageUrl }}
-                />
-              </TouchableOpacity>
-            </View>
-          )}
-          keyExtractor={(item, index) => index.toString()}
-        />
-      </View>
-    </View>
+    <Tabs.FlatList
+      numColumns={2}
+      horizontal={false}
+      data={userShows}
+      renderItem={({ item }) => (
+        <View style={styles.containerImage}>
+          <TouchableOpacity onPress={() => getUserShow(item)}>
+            <Image style={styles.image} source={{ uri: item.show.imageUrl }} />
+          </TouchableOpacity>
+        </View>
+      )}
+      keyExtractor={(item, index) => index.toString()}
+    />
   )
 }
 

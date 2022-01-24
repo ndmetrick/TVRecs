@@ -7,9 +7,11 @@ import {
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
+  Animated,
 } from 'react-native'
 import { useIsFocused } from '@react-navigation/native'
 import { logout, changeCountry } from '../../redux/actions'
+import { Tabs } from 'react-native-collapsible-tab-view'
 
 function UserTagsAndDescription(props) {
   const { currentUser } = props
@@ -26,8 +28,8 @@ function UserTagsAndDescription(props) {
       setUserTags(props.currentUserTags)
     } else {
       setIsCurrentUser(false)
-      setUser(props.route.params.user)
-      setUserTags(props.route.params.userTags)
+      setUser(props.user)
+      setUserTags(props.userTags)
     }
 
     return () => {
@@ -57,7 +59,7 @@ function UserTagsAndDescription(props) {
 
   return (
     <View style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <Tabs.ScrollView showsVerticalScrollIndicator={false}>
         <View>
           {!isCurrentUser && !user.description ? null : isCurrentUser ? (
             <Text style={styles.text}>
@@ -91,7 +93,7 @@ function UserTagsAndDescription(props) {
             </View>
           )}
         </View>
-      </ScrollView>
+      </Tabs.ScrollView>
     </View>
   )
 }
