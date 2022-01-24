@@ -183,7 +183,7 @@ export default function userReducer(state = initialState, action) {
           (followed) => followed.id !== action.unfollowed.id
         ),
         recShows: state.recShows.filter(
-          (userShow) => userShow.user.id !== action.unfollowed.id
+          (userShow) => userShow.userId !== action.unfollowed.id
         ),
       }
     case GET_FOLLOWING_RECS:

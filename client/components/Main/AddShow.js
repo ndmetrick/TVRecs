@@ -179,7 +179,7 @@ const AddShow = (props) => {
                     <View style={styles.buttonContainer}>
                       <TouchableOpacity
                         style={styles.saveButton}
-                        onPress={() => props.navigation.navigate('Profile')}
+                        onPress={() => props.navigation.navigate('CurrentUser')}
                       >
                         <Text style={styles.buttonText}>
                           Take me to my profile

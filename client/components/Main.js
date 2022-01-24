@@ -19,7 +19,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 
 import RecShows from './Main/RecShows'
 import Search from './Main/Search'
-import Profile from './Main/Profile'
+import CurrentUser from './Main/CurrentUser'
 import AddShow from './Main/AddShow'
 import Settings from './Main/Settings'
 
@@ -83,12 +83,12 @@ function Main(props) {
       />
 
       <Tab.Screen
-        name="Profile"
-        component={Profile}
+        name="CurrentUser"
+        component={CurrentUser}
         listeners={({ navigation }) => ({
           tabPress: (event) => {
             event.preventDefault()
-            navigation.navigate('Profile')
+            navigation.navigate('CurrentUser')
           },
         })}
         options={{

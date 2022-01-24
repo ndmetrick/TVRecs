@@ -31,7 +31,6 @@ function ProfileHeader(props) {
   const [userFollowing, setUserFollowing] = useState(null)
   const [user, setUser] = useState(null)
   const [previous, setPrevious] = useState(null)
-  const [following, setFollowing] = useState(null)
 
   console.log('props in header', props)
 
@@ -40,9 +39,7 @@ function ProfileHeader(props) {
       setUserFollowing(props.userFollowing)
       setUser(props.user)
       setPrevious(props.previous)
-      if ((props.previous = 'OtherUser')) {
-        setFollowing(props.following)
-      }
+      console.log('following is what here', props.following)
     }
     return () => {
       setUserFollowing(null)
@@ -62,7 +59,7 @@ function ProfileHeader(props) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.containerInfo}>
+      <View style={styles.topContainerInfo}>
         {previous === 'CurrentUser' ? (
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', margin: 10 }}>
             <View style={styles.usernameButton}>
@@ -82,64 +79,79 @@ function ProfileHeader(props) {
             </View>
           </View>
         )}
+      </View>
 
-        <View>
-          {userFollowing.length > 0 ? (
-            <View>
-              <TouchableOpacity
-                onPress={() =>
-                  props.navigation.navigate('UsersFollowing', {
-                    previous,
-                    userInfo: user,
-                    userFollowing: userFollowing,
-                  })
-                }
+      <View style={styles.bottomContainerInfo}>
+        {userFollowing.length > 0 ? (
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+            <View style={styles.invisibleButton}>
+              <Text
+                style={{
+                  ...styles.recText,
+                  marginLeft: 4,
+                  marginRight: 0,
+                  color: 'black',
+                }}
               >
-                <Text style={{ ...styles.text, textAlign: 'left' }}>
-                  {previous === 'OtherUser'
-                    ? `${user.username} follows `
-                    : 'You follow '}
-                  <Text style={{ color: '#008DD5', fontWeight: 'bold' }}>
-                    {props.following.length}
-                  </Text>{' '}
-                  {props.following.length === 1 ? 'person' : 'people'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <View>
-              <Text style={styles.text}>
                 {previous === 'OtherUser'
-                  ? `${user.username} doesn't `
-                  : `You don't`}{' '}
-                follow anyone
+                  ? `${user.username} follows`
+                  : 'You follow'}
               </Text>
             </View>
-          )}
-          {previous !== 'OtherUser' && isLoggedIn ? null : (
-            <View>
-              {following ? (
-                <View style={styles.buttonContainer}>
-                  <TouchableOpacity
-                    style={styles.button}
-                    onPress={() => unfollow()}
-                  >
-                    <Text style={styles.buttonText}>unfollow</Text>
-                  </TouchableOpacity>
-                </View>
-              ) : (
-                <View style={styles.buttonContainer}>
-                  <TouchableOpacity
-                    style={styles.button}
-                    onPress={() => follow()}
-                  >
-                    <Text style={styles.buttonText}>follow</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
+            <TouchableOpacity
+              onPress={() =>
+                props.navigation.navigate('UsersFollowing', {
+                  previous,
+                  userInfo: user,
+                  userFollowing: userFollowing,
+                })
+              }
+              style={styles.followNumButton}
+            >
+              <Text style={styles.followNumText}>
+                {' '}
+                {props.userFollowing.length}{' '}
+              </Text>
+            </TouchableOpacity>
+            <View style={styles.invisibleButton}>
+              <Text style={{ ...styles.recText, color: 'black' }}>
+                {props.userFollowing.length === 1 ? 'person' : 'people'}
+              </Text>
             </View>
-          )}
-        </View>
+          </View>
+        ) : (
+          <View>
+            <Text style={{ ...styles.text, textAlign: 'left' }}>
+              {previous === 'OtherUser'
+                ? `${user.username} doesn't `
+                : `You don't `}
+              follow anyone
+            </Text>
+          </View>
+        )}
+        {previous === 'CurrentUser' || !props.loggedIn ? null : (
+          <View>
+            {props.following ? (
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  style={{ ...styles.button, backgroundColor: 'lightblue' }}
+                  onPress={() => props.unfollow()}
+                >
+                  <Text style={styles.buttonText}>stop following</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={() => props.follow()}
+                >
+                  <Text style={styles.buttonText}>follow {user.username}</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+        )}
       </View>
     </View>
   )
@@ -149,10 +161,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  containerInfo: {
+  topContainerInfo: {
     padding: 5,
     backgroundColor: '#340068',
     alignItems: 'center',
+  },
+  bottomContainerInfo: {
+    // flexDirection: 'row',
+    // flexWrap: 'wrap',
+    backgroundColor: '#E9ECEF',
+    // justifyContent: 'space-between',
   },
   headingText: {
     fontWeight: '500',
@@ -163,14 +181,13 @@ const styles = StyleSheet.create({
     textAlign: 'left',
     fontSize: 18,
     marginLeft: 5,
-    color: 'white',
+    fontWeight: '500',
   },
   buttonText: {
     textAlign: 'center',
     fontSize: 18,
     margin: 5,
     fontWeight: '500',
-    color: 'white',
   },
   buttonContainer: {
     flexDirection: 'row',
@@ -180,8 +197,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 40,
     marginHorizontal: 3,
-    backgroundColor: '#4056F4',
-    marginTop: 5,
+    backgroundColor: '#36C9C6',
     marginBottom: 5,
   },
   usernameButton: {
@@ -189,15 +205,32 @@ const styles = StyleSheet.create({
     elevation: 3,
     backgroundColor: '#4056F4',
   },
-
+  followNumButton: {
+    marginTop: 5,
+    borderRadius: 50,
+    elevation: 3,
+    backgroundColor: '#4056F4',
+    marginBottom: 5,
+  },
   recButton: {
     borderRadius: 25,
     backgroundColor: '#340068',
+  },
+  invisibleButton: {
+    margin: 5,
+    borderRadius: 25,
+    backgroundColor: '#E9ECEF',
   },
   usernameText: {
     fontWeight: '500',
     fontSize: 20,
     letterSpacing: 0.25,
+    margin: 4,
+    color: 'white',
+  },
+  followNumText: {
+    fontWeight: '500',
+    fontSize: 20,
     margin: 4,
     color: 'white',
   },
@@ -216,7 +249,6 @@ const mapStateToProps = (store) => ({
   otherUser: store.otherUser.userInfo,
   currentUserShows: store.currentUser.userShows,
   otherUserShows: store.otherUser.userShows,
-  following: store.currentUser.following,
   otherUsers: store.allOtherUsers.usersInfo,
   toWatch: store.currentUser.toWatch,
   seen: store.currentUser.seen,

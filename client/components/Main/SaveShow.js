@@ -86,10 +86,10 @@ function SaveShow(props) {
   const skipTags = async () => {
     try {
       if (previous === 'AddShow') {
-        props.navigation.navigate('Profile')
+        props.navigation.navigate('CurrentUser')
       } else if (fromCurrentUserShow) {
         if (showInfo.keep === true) {
-          props.navigation.navigate('Profile')
+          props.navigation.navigate('CurrentUser')
         } else {
           await changeShowTagsAndDescription(tags, userShow.id, description)
         }

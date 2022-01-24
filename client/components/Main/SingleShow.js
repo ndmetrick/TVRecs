@@ -140,7 +140,7 @@ function SingleShow(props) {
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', margin: 10 }}>
             <View style={styles.usernameButton}>
               <Text
-                onPress={() => props.navigation.navigate('Profile')}
+                onPress={() => props.navigation.navigate('CurrentUser')}
                 style={styles.usernameText}
               >
                 Your{' '}

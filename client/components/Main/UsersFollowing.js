@@ -30,7 +30,7 @@ function UsersFollowing(props) {
     const { currentUser } = props
     const { userInfo, previous, userFollowing } = props.route.params
     setUser(userInfo)
-    if (previous === 'Profile') {
+    if (previous === 'CurrentUser') {
       setIsCurrentUser(true)
       setFollowing(props.following)
     } else if (previous === 'OtherUser') {
@@ -51,7 +51,7 @@ function UsersFollowing(props) {
       userFollowing.forEach((followedUser) => {
         if (followedUser.id !== props.currentUser.id) {
           followingYesOrNo[followedUser.id] =
-            previous === 'Profile'
+            previous === 'CurrentUser'
               ? true
               : currentUserFollowing[followedUser.id]
               ? true
@@ -80,7 +80,7 @@ function UsersFollowing(props) {
     if (userFollowing[userId] === true) {
       if (props.following.length < 2) {
         await props.unfollow(userId)
-        props.navigation.navigate('profile')
+        props.navigation.navigate('CurrentUser')
       } else {
         await props.unfollow(userId)
         const swap = { ...userFollowing, [userId]: false }
@@ -127,14 +127,14 @@ function UsersFollowing(props) {
                       style={styles.followed}
                       onPress={() => changeFollow(followed.id)}
                     >
-                      <Text style={styles.text}>Stop receiving recs</Text>
+                      <Text style={styles.text}>Stop following</Text>
                     </TouchableOpacity>
                   ) : followed.id === props.currentUser.id ? null : (
                     <TouchableOpacity
                       style={styles.unfollowed}
                       onPress={() => changeFollow(followed.id)}
                     >
-                      <Text style={styles.text}>Receive recs</Text>
+                      <Text style={styles.text}>Follow</Text>
                     </TouchableOpacity>
                   )}
                 </View>

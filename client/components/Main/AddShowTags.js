@@ -120,7 +120,7 @@ function AddShowTags(props) {
       userShow.id,
       description
     )
-    return props.navigation.navigate('Profile')
+    return props.navigation.navigate('CurrentUser')
   }
 
   if (!loaded) {

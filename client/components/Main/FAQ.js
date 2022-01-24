@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { connect } from 'react-redux';
-import { Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import React, { useState, useEffect } from 'react'
+import { connect } from 'react-redux'
+import { Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native'
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 
 function FAQ(props) {
   return (
@@ -13,7 +13,7 @@ function FAQ(props) {
 
       <TouchableOpacity
         onPress={() => {
-          props.navigation.navigate('RecShows');
+          props.navigation.navigate('RecShows')
         }}
       >
         <Text style={styles.headingText}>
@@ -39,7 +39,7 @@ function FAQ(props) {
 
       <TouchableOpacity
         onPress={() => {
-          props.navigation.navigate('AddShow');
+          props.navigation.navigate('AddShow')
         }}
       >
         <Text style={styles.headingText}>
@@ -79,7 +79,7 @@ function FAQ(props) {
 
       <TouchableOpacity
         onPress={() => {
-          props.navigation.navigate('Search');
+          props.navigation.navigate('Search')
         }}
       >
         <Text style={styles.headingText}>
@@ -100,7 +100,7 @@ function FAQ(props) {
 
       <TouchableOpacity
         onPress={() => {
-          props.navigation.navigate('Profile');
+          props.navigation.navigate('CurrentUser')
         }}
       >
         <Text style={styles.headingText}>
@@ -117,7 +117,7 @@ function FAQ(props) {
 
       <TouchableOpacity
         onPress={() => {
-          props.navigation.navigate('Settings');
+          props.navigation.navigate('Settings')
         }}
       >
         <Text style={styles.headingText}>
@@ -129,7 +129,7 @@ function FAQ(props) {
         your tags/bio, or to change your country (and other settings to come).
       </Text>
     </ScrollView>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -150,6 +150,6 @@ const styles = StyleSheet.create({
     margin: 5,
     marginLeft: 7,
   },
-});
+})
 
-export default FAQ;
+export default FAQ

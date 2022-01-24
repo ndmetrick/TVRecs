@@ -31,7 +31,6 @@ function ViewShows(props) {
       seen,
       userToView,
     } = props
-    console.log('did i get in here?')
     if (currentUser !== null && currentUser.id === userToView.id) {
       setIsCurrentUser(true)
     }

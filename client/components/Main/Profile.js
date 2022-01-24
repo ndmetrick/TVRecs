@@ -7,6 +7,7 @@ import {
   FlatList,
   StyleSheet,
   TouchableOpacity,
+  Animated,
 } from 'react-native'
 import * as AuthSession from 'expo-auth-session'
 import {
@@ -29,29 +30,11 @@ function Profile(props) {
   const [userFollowing, setUserFollowing] = useState({})
 
   useEffect(() => {
-    if (props.currentUser) {
-      setUserFollowing(props.following)
-    }
+    if (props.previous)
+      if (props.currentUser) {
+        setUserFollowing(props.following)
+      }
   }, [props.currentUser])
-
-  // const isFocused = useIsFocused();
-  // const [currentUser, setCurrentUser] = useState(null);
-  // const [currentUserShows, setCurrentUserShows] = useState([]);
-
-  // useEffect(() => {
-
-  //   setCurrentUser(props.currentUser);
-  //   setCurrentUserShows(props.currentUserShows);
-  // }, [isFocused]);
-  const logout = async () => {
-    try {
-      await AuthSession.dismiss()
-      await props.logout()
-      return props.navigation.navigate('AddShow')
-    } catch (e) {
-      console.log(e)
-    }
-  }
 
   const { currentUser, currentUserShows } = props
   if (currentUser === null) {
@@ -75,7 +58,7 @@ function Profile(props) {
             <TouchableOpacity
               onPress={() =>
                 props.navigation.navigate('UsersFollowing', {
-                  previous: 'Profile',
+                  previous: 'CurrentUser',
                   userInfo: props.currentUser,
                   userFollowing: userFollowing,
                 })

@@ -7,199 +7,93 @@ import {
   FlatList,
   StyleSheet,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native'
-import * as AuthSession from 'expo-auth-session'
-import {
-  getUserShows,
-  getOtherUser,
-  getUsersFollowingRecs,
-  logout,
-} from '../../redux/actions'
-import { createStackNavigator } from '@react-navigation/stack'
-import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs'
-import AsyncStorage from '@react-native-async-storage/async-storage'
 
 import ViewShows from './ViewShows'
+import ProfileHeader from './ProfileHeader'
 
-const Tab = createMaterialTopTabNavigator()
-const Stack = createStackNavigator()
+import * as Tabs from 'react-native-collapsible-tab-view'
 
-function Profile(props) {
-  const [userFollowing, setUserFollowing] = useState({})
+function CurrentUser(props) {
+  const [headerHeight, setHeaderHeight] = useState(100)
 
-  useEffect(() => {
-    if (props.currentUser) {
-      setUserFollowing(props.following)
-    }
-  }, [props.currentUser])
+  const Header = () => (
+    <ProfileHeader
+      // style={styles.header}
+      previous="CurrentUser"
+      userFollowing={props.following}
+      user={props.currentUser}
+      navigation={props.navigation}
+    />
+  )
 
-  // const isFocused = useIsFocused();
-  // const [currentUser, setCurrentUser] = useState(null);
-  // const [currentUserShows, setCurrentUserShows] = useState([]);
-
-  // useEffect(() => {
-
-  //   setCurrentUser(props.currentUser);
-  //   setCurrentUserShows(props.currentUserShows);
-  // }, [isFocused]);
-  const logout = async () => {
-    try {
-      await AuthSession.dismiss()
-      await props.logout()
-      return props.navigation.navigate('AddShow')
-    } catch (e) {
-      console.log(e)
-    }
+  const TabBar = (props) => {
+    return (
+      <Tabs.MaterialTabBar
+        {...props}
+        activeColor="white"
+        inactiveColor="white"
+        backgroundColor="#340068"
+        inactiveOpacity={0.8}
+        style={{ backgroundColor: '#340068' }}
+        indicatorStyle={{ height: 6, backgroundColor: '#36C9C6' }}
+      />
+    )
   }
 
   const { currentUser, currentUserShows } = props
   if (currentUser === null) {
-    return <View />
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#5500dc" />
+      </View>
+    )
   }
 
-  currentUserShows.forEach((show) =>
-    show.tags.forEach((tag) => console.log(tag.name))
-  )
+  const recsTabName = `Recs (${props.currentUserShows.length})`
+  const toWatchTabName = `To Watch (${props.toWatch.length})`
+  const seenTabName = `Filter Out (${props.seen.length})`
+
   return (
-    <View style={styles.container}>
-      <View style={styles.containerInfo}>
-        <Text style={{ ...styles.headingText, color: 'white' }}>
-          Your {/* </Text> */}
-          profile
-        </Text>
-      </View>
-      <View style={{ backgroundColor: '#EBECF0' }}>
-        {userFollowing.length > 0 ? (
-          <View>
-            <TouchableOpacity
-              onPress={() =>
-                props.navigation.navigate('UsersFollowing', {
-                  previous: 'Profile',
-                  userInfo: props.currentUser,
-                  userFollowing: userFollowing,
-                })
-              }
-            >
-              <Text style={styles.text}>
-                You follow{' '}
-                <Text style={{ color: 'blue' }}>{props.following.length}</Text>{' '}
-                {props.following.length === 1 ? 'person' : 'people'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <View>
-            <Text style={styles.text}>
-              Receiving recs from {userFollowing.length} people
-            </Text>
-          </View>
-        )}
-        {/* Add in who is following */}
-        <Text style={styles.text}>
-          You are recommending {currentUserShows.length}{' '}
-          {currentUserShows.length === 1 ? 'show' : 'shows'}
-        </Text>
-      </View>
-      <Tab.Navigator
-        initialRouteName="Feed"
-        screenOptions={{
-          tabBarActiveTintColor: '#FFFFFF',
-          tabBarInactiveTintColor: '#F8F8F8',
-          tabBarLabelStyle: {
-            textAlign: 'center',
-          },
-          tabBarIndicatorStyle: {
-            borderBottomColor: '#36C9C6',
-            borderBottomWidth: 7,
-          },
-          tabBarStyle: {
-            backgroundColor: '#340068',
-          },
-        }}
-      >
-        <Tab.Screen
-          name="Recs"
-          component={ViewShows}
-          initialParams={{ userToView: currentUser, type: 'recs' }}
-          options={{
-            tabBarLabel: `Recs (${props.currentUserShows.length})`,
-          }}
+    <Tabs.Container
+      renderHeader={Header}
+      renderTabBar={TabBar}
+      headerHeight={headerHeight}
+      revealHeaderOnScroll={true}
+    >
+      <Tabs.Tab name={recsTabName}>
+        <ViewShows
+          userToView={currentUser}
+          type={'recs'}
+          userShows={currentUserShows}
+          navigation={props.navigation}
         />
-        <Tab.Screen
-          name="To Watch"
-          component={ViewShows}
-          initialParams={{ userToView: currentUser, type: 'toWatch' }}
-          options={{
-            tabBarLabel: `To Watch (${props.toWatch.length})`,
-          }}
+      </Tabs.Tab>
+      <Tabs.Tab name={toWatchTabName}>
+        <ViewShows
+          userToView={currentUser}
+          type={'toWatch'}
+          navigation={props.navigation}
         />
-        <Tab.Screen
-          name="Seen"
-          component={ViewShows}
-          initialParams={{ userToView: currentUser, type: 'seen' }}
-          options={{
-            tabBarLabel: `Seen (${props.seen.length})`,
-          }}
+      </Tabs.Tab>
+      <Tabs.Tab name={seenTabName}>
+        <ViewShows
+          userToView={currentUser}
+          type={'seen'}
+          navigation={props.navigation}
         />
-      </Tab.Navigator>
-    </View>
+      </Tabs.Tab>
+    </Tabs.Container>
   )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  containerInfo: {
-    padding: 5,
-    backgroundColor: '#340068',
-    alignItems: 'center',
-  },
-  headingText: {
-    fontWeight: '500',
-    fontSize: 20,
-    margin: 10,
-  },
-  text: {
-    textAlign: 'left',
-    fontSize: 18,
-    marginLeft: 5,
-  },
-  buttonText: {
-    textAlign: 'center',
-    fontSize: 18,
-    margin: 5,
-    fontWeight: '500',
-    color: 'white',
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
-  button: {
-    padding: 10,
-    borderRadius: 40,
-    marginHorizontal: 3,
-    backgroundColor: '#340068',
-    marginTop: 5,
-  },
-})
 const mapStateToProps = (store) => ({
   currentUser: store.currentUser.userInfo,
-  otherUser: store.otherUser.userInfo,
   currentUserShows: store.currentUser.userShows,
-  otherUserShows: store.otherUser.userShows,
   following: store.currentUser.following,
-  otherUsers: store.allOtherUsers.usersInfo,
   toWatch: store.currentUser.toWatch,
   seen: store.currentUser.seen,
 })
-const mapDispatch = (dispatch) => {
-  return {
-    getOtherUser: (uid) => dispatch(getOtherUser(uid)),
-    getUserShows: (uid) => dispatch(getUserShows(uid)),
-    getUsersFollowingRecs: () => dispatch(getUsersFollowingRecs()),
-    logout: () => dispatch(logout()),
-  }
-}
-export default connect(mapStateToProps, mapDispatch)(Profile)
+
+export default connect(mapStateToProps)(CurrentUser)
