@@ -30,7 +30,7 @@ import {
   getCurrentIndex,
 } from 'react-native-collapsible-tab-view'
 
-const RecsFilter = ({ innerRef, ...props }) => {
+const RecsFilter = (props) => {
   const isFocused = useIsFocused()
   const [TVTags, setTVTags] = useState(null)
   const [tagsDescriptionChecked, setTagsDescriptionChecked] = useState('none')
@@ -51,29 +51,36 @@ const RecsFilter = ({ innerRef, ...props }) => {
   // const ref = useRef()
 
   const streamingOptions = [
-    { name: 'Netflix' },
-    { name: 'Amazon Prime Video' },
-    { name: 'Hulu' },
-    { name: 'Disney+' },
-    { name: 'HBO Max' },
-    { name: '[Peacock' },
-    { name: 'Paramount+' },
-    { name: 'Starz' },
-    { name: 'Showtime' },
-    { name: 'Apple TV+' },
-    { name: 'Mubi' },
-    { name: 'Stan' },
-    { name: 'Now' },
-    { name: 'Crave' },
-    { name: 'All 4' },
-    { name: 'BBC iPlayer' },
-    { name: 'BritBox' },
-    { name: 'Hotstar' },
-    { name: 'Zee5' },
-    { name: 'Curiosity Stream' },
+    {
+      label: 'Netflix',
+      value: { name: 'Netflix' },
+    },
+    {
+      label: 'Amazon Prime Video',
+      value: { name: 'Amazon Prime Video' },
+    },
+    { label: 'Hulu', value: { name: 'Hulu' } },
+    { label: 'Disney+', value: { name: 'Disney+' } },
+    { label: 'HBO Max', value: { name: 'HBO Max' } },
+    { label: 'Peacock', value: { name: 'Peacock' } },
+    { label: 'Paramount Plus', value: { name: 'Paramount Plus' } },
+    { label: 'Starz', value: { name: 'Starz' } },
+    { label: 'Showtime', value: { name: 'Showtime' } },
+    { label: 'Apple TV+', value: { name: 'Apple TV+' } },
+    { label: 'Mubi', value: { name: 'Mubi' } },
+    { label: 'Stan', value: { name: 'Stan' } },
+    { label: 'Now', value: { name: 'Now' } },
+    { label: 'Crave', value: { name: 'Crave' } },
+    { label: 'All 4', value: { name: 'All 4' } },
+    { label: 'BBC iPlayer', value: { name: 'BBC iPlayer' } },
+    { label: 'BritBox', value: { name: 'BritBox' } },
+    { label: 'Hotstar', value: { name: 'Hotstar' } },
+    { label: 'Zee5', value: { name: 'Zee5' } },
+    { label: 'Curiosity Stream', value: { name: 'Curiosity Stream' } },
   ]
 
   useEffect(() => {
+    console.log('am I back in here?')
     if (props.filter) {
       if (props.filter['chooseTags']) {
         setTagsDescriptionChecked('chooseTags')
@@ -104,7 +111,7 @@ const RecsFilter = ({ innerRef, ...props }) => {
 
       if (props.filter['chooseStreamers']) {
         setStreamersChecked('chooseStreamers')
-        setStreamersDropdownValue(props.filter['chooseStreamers'])
+        setStreamersDropdownValue(props.filter['chooseStreamers'].streamers)
       }
       // containerRef.current.setIndex(i)
       // console.log('ref', ref, containerRef)
@@ -121,12 +128,7 @@ const RecsFilter = ({ innerRef, ...props }) => {
       tags.push({ label: tag.name, value: tag })
     })
 
-    const streamers = []
-
-    streamingOptions.forEach((streamer) => {
-      streamers.push({ label: streamer.name, value: streamer })
-    })
-    setStreamersDropdownOptions(streamers)
+    setStreamersDropdownOptions(streamingOptions)
 
     setTagsDropdownOptions(tags)
 
@@ -160,7 +162,7 @@ const RecsFilter = ({ innerRef, ...props }) => {
 
   const reset = () => {
     console.log('i am in here')
-    // props.setAdvancedSearch(false)
+    props.setAdvancedSearch(false)
     setMinRecsDropdownValue(null)
     setStreamersDropdownValue([])
     setDescriptionInput('')
@@ -245,17 +247,21 @@ const RecsFilter = ({ innerRef, ...props }) => {
         console.log(filters, 'filters at this point')
         const matches = await props.getMatchingRecs(filters)
         if (matches) {
+          console.log('ADVANCED SEARCH WAS FALSE AND I SET IT TRUE')
+          props.setAdvancedSearch(true)
+          console.log('I JUST SET ADVANCED SEARCH TRUE')
+          props.setShowNum(matches.length)
+          filters['filterCount'] = filterCount
           if (tagsDescriptionChecked === 'chooseTags') {
             filters['chooseTags'] = tagsDropdownValue
           }
           console.log('matches in filterrecs', matches)
           console.log('matches length', matches.length)
           // props.setMatchingRecs(matches)
-          props.setFilter(filters)
+
           console.log('filterCOunt', filterCount)
-          props.setFilterTabName(`Filters(${filterCount})`)
-          props.setShowNum(matches.length)
-          props.setAdvancedSearch(true)
+          props.setFilter(filters)
+          // props.setFilterTabName(`Filters(${filterCount})`)
         }
       }
     } catch (err) {

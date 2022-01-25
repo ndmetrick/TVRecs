@@ -366,7 +366,7 @@ export function getMatchingRecs(filters) {
             recs,
             newWatchProviders
           )
-          return response.data
+          return recs
         } else {
           dispatch({ type: types.GET_MATCHING_RECS, recs: response.data })
           console.log('recs in getmatchingusers', response.data)

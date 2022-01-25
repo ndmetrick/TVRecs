@@ -50,14 +50,12 @@ const RecShows = (props) => {
 
   const isFocused = useIsFocused()
   const firstRender = useFirstRender()
-  const ref = useRef()
+  const ref = useRef(null)
 
   useEffect(() => {
-    setLoading(true)
     const getRecShows = async () => {
       try {
-        if (props.allRecShows || filter) {
-          console.log('i am up here above first time and filterREcs', showNum)
+        if ((!filter && props.allRecShows) || (filter && advancedSearch)) {
           let shows = filter ? props.filterRecs : props.allRecShows
           let height = filter ? 150 : 55
           setHeaderHeight(height)
@@ -68,17 +66,19 @@ const RecShows = (props) => {
 
           // if they toggled to only see shows not on their profile, remove shows that appear on their rec, watch, and seen lists
 
-          if (filter && showNum === 0) {
-            console.log('i got in here in useEffect', filter)
+          if (filter && advancedSearch && showNum === 0) {
+            console.log(
+              'i got in here in useEffect and these should be 0 or null or false',
+              filter,
+              showNum,
+              advancedSearch
+            )
             setRecShows([])
             setMultipleRecInfo({})
             let name = `Recs(0)`
+            let filterName = `Filters(${filter['filterCount']})`
+            setFilterTabName(filterName)
             setRecsTabName(name)
-            if (advancedSearch) {
-              ref.current.jumpToTab(name)
-              setAdvancedSearch(false)
-            }
-            setLoading(false)
           } else {
             if (noUserShows) {
               shows = shows.filter((recShow) => {
@@ -94,11 +94,9 @@ const RecShows = (props) => {
                   )
                 )
               })
-              // if (!shows.length) {
-              //   setShowNum(0)
-              //   // setRecShows([])
-              //   // setMultipleRecInfo({})
-              // }
+              if (!shows.length) {
+                console.log('i got into no shows with noUserShows')
+              }
             }
             // we only want to see a show recommended once on the timeline, but we want to be able to see how many times it was recommended and by which other users
 
@@ -137,37 +135,52 @@ const RecShows = (props) => {
             setMultipleRecInfo(recCounts)
             let name = `Recs(${visibleShows.length})`
             setRecsTabName(name)
-            if (advancedSearch) {
-              ref.current.jumpToTab(name)
-              setAdvancedSearch(false)
-            }
-            if (firstRender) {
-              console.log('i am in the first render')
-            }
-            if (
-              !firstRender &&
-              props.currentUser &&
-              (!props.following.length || (filter && showNum === 0))
-            ) {
-              console.log(
-                'i am not in the first render but there is no following',
-                props.following.length
-              )
-              setLoading(false)
-              setRecsTabName('Recs(0)')
-            }
+            let filterName = filter
+              ? `Filters(${filter['filterCount']})`
+              : 'Filters(0)'
+            setFilterTabName(filterName)
           }
+          if (firstRender) {
+            console.log('i am in the FIRST RENDER')
+            setLoading(true)
+          }
+          if (
+            !firstRender &&
+            props.currentUser &&
+            (!props.following.length ||
+              (advancedSearch && filter && showNum === 0))
+          ) {
+            console.log('i am not in the first render but i am in here')
+            setLoading(false)
+            setRecsTabName('Recs(0)')
+          }
+        }
 
-          return () => {
-            setRecShows([])
-            setMultipleRecInfo({})
-            setRecsTabName(null)
-          }
+        return () => {
+          setRecShows([])
+          setMultipleRecInfo({})
+          setRecsTabName(null)
         }
       } catch (e) {
         console.log(e)
       }
     }
+    console.log(
+      'just before async and refs are',
+      ref.current,
+      'filter is',
+      filter,
+      'advancedsearch is',
+      advancedSearch
+    )
+    // if (!advancedSearch && ref.current && !firstRender) {
+    //   console.log('i got into this one and I know I did it')
+    //   ref.current.setIndex(1)
+    // }
+    // if (advancedSearch && ref.current) {
+    //   console.log('i got into this second one and I know I did it')
+    //   ref.current.setIndex(1)
+    // }
     getRecShows()
   }, [
     isFocused,
@@ -176,10 +189,7 @@ const RecShows = (props) => {
     noUserShows,
     filter,
     props.filterRecs,
-    firstRender,
   ])
-
-  console.log('loading', loading)
 
   const displayRecShows = () => {
     return (
@@ -271,6 +281,7 @@ const RecShows = (props) => {
   const cancelFilters = () => {
     setFilter(null)
     setFilterTabName('Filters(0)')
+    setAdvancedSearch(false)
   }
 
   const displayFilters = () => {
@@ -312,12 +323,7 @@ const RecShows = (props) => {
       ((showNum > 0 && !recShows.length) ||
         (showNum > 0 && multipleRecInfo['loaded'] !== showNum)))
   ) {
-    console.log(
-      'i got in here to loading',
-      multipleRecInfo['loaded'],
-      showNum,
-      recShows.length
-    )
+    console.log('i got in here to loading')
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#5500dc" />
@@ -376,9 +382,7 @@ const RecShows = (props) => {
     )
   }
 
-  function TabBar({ name, ref, ...props }) {
-    console.log('name', name)
-    console.log('ref', ref)
+  function TabBar(props) {
     return (
       <Tabs.MaterialTabBar
         {...props}
@@ -394,17 +398,18 @@ const RecShows = (props) => {
 
   if (props.following.length === 0) {
     console.log('i got into this one up here 1')
-    return (
-      <View>
-        <Text style={styles.text}>
-          Recommendations will come your way as soon as you follow some other
-          users!
-        </Text>
-      </View>
-    )
   }
 
-  console.log('filtername', filterTabName)
+  // console.log('filtername', 'ref.current', ref.current, advancedSearch, loading)
+  // if (advancedSearch && ref.current && !loading && recsTabName === 'Recs(0)') {
+  //   console.log(
+  //     'i got in here',
+  //     recShows.length,
+  //     firstRender,
+  //     recsTabName,
+  //     ref.current.getFocusedTab()
+  //   )
+  // }
 
   return (
     <Tabs.Container
@@ -416,13 +421,30 @@ const RecShows = (props) => {
     >
       <Tabs.Tab name={recsTabName}>
         <View style={styles.container}>
-          {!recShows.length ? (
-            <View>
+          {props.following.length === 0 ? (
+            <Tabs.ScrollView
+              contentContainerStyle={{
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Text style={styles.text}>
+                Recommendations will come your way as soon as you follow some
+                other users!
+              </Text>
+            </Tabs.ScrollView>
+          ) : !recShows.length ? (
+            <Tabs.ScrollView
+              contentContainerStyle={{
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
               <Text style={styles.text}>
                 Unfortunately you have no recommended shows matching those
                 filters.
               </Text>
-            </View>
+            </Tabs.ScrollView>
           ) : (
             <View style={styles.containerGallery}>
               {displayRecShows()}
