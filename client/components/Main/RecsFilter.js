@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { connect } from 'react-redux'
 import {
   View,
@@ -22,11 +22,17 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import DropDownPicker from 'react-native-dropdown-picker'
 
-const RecsFilter = (props) => {
+import {
+  Tabs,
+  jumpToTab,
+  setIndex,
+  getFocusedTab,
+  getCurrentIndex,
+} from 'react-native-collapsible-tab-view'
+
+const RecsFilter = ({ innerRef, ...props }) => {
   const isFocused = useIsFocused()
-  // const [matchingRecs, setMatchingRecs] = useState(null)
   const [TVTags, setTVTags] = useState(null)
-  // const [advancedSearch, setAdvancedSearch] = useState(false)
   const [tagsDescriptionChecked, setTagsDescriptionChecked] = useState('none')
   const [streamersChecked, setStreamersChecked] = useState('none')
   const [minRecs, setMinRecs] = useState('none')
@@ -42,6 +48,7 @@ const RecsFilter = (props) => {
   const [streamersDropdownOptions, setStreamersDropdownOptions] = useState(null)
   const [descriptionValue, setDescriptionValue] = useState([])
   const [filterAnyTags, setFilterAnyTags] = useState(false)
+  // const ref = useRef()
 
   const streamingOptions = [
     { name: 'Netflix' },
@@ -99,6 +106,8 @@ const RecsFilter = (props) => {
         setStreamersChecked('chooseStreamers')
         setStreamersDropdownValue(props.filter['chooseStreamers'])
       }
+      // containerRef.current.setIndex(i)
+      // console.log('ref', ref, containerRef)
 
       if (props.filter['chooseMinRecs']) {
         setMinRecs('chooseMinRecs')
@@ -156,8 +165,12 @@ const RecsFilter = (props) => {
     setStreamersDropdownValue([])
     setDescriptionInput('')
     setTagsDropdownValue([])
+    setTagsDescriptionChecked('none')
+    setStreamersChecked('none')
+    setMinRecs('none')
     setDescriptionValue([])
     setFilterAnyTags(false)
+    props.setFilterTabName('Filters(0)')
     props.setFilter(null)
   }
 
@@ -235,11 +248,14 @@ const RecsFilter = (props) => {
           if (tagsDescriptionChecked === 'chooseTags') {
             filters['chooseTags'] = tagsDropdownValue
           }
-          console.log('i got to the matches and this is', matches)
-          props.setMatchingRecs(matches)
+          console.log('matches in filterrecs', matches)
+          console.log('matches length', matches.length)
+          // props.setMatchingRecs(matches)
           props.setFilter(filters)
-          props.setAdvancedSearch(false)
-          // props.setLoading(true)
+          console.log('filterCOunt', filterCount)
+          props.setFilterTabName(`Filters(${filterCount})`)
+          props.setShowNum(matches.length)
+          props.setAdvancedSearch(true)
         }
       }
     } catch (err) {
@@ -248,490 +264,469 @@ const RecsFilter = (props) => {
   }
 
   return (
-    // <TouchableWithoutFeedback onPress={() => closeOpenDropdown()}>
-    <View style={styles.container}>
-      <ScrollView
-        nestedScrollEnabled={true}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View>
+    <Tabs.ScrollView
+      nestedScrollEnabled={true}
+      keyboardShouldPersistTaps="handled"
+    >
+      <View style={{ flex: 1 }}>
+        <Text style={styles.filterText}>
+          Click 'Filter recommendations' to perform your search
+        </Text>
+        <Text style={styles.tagHeadingText}>Tags / Description</Text>
+        <View style={styles.choiceContainer}>
           <TouchableOpacity
-            // style={styles.button}
-            onPress={() => props.setAdvancedSearch(false)}
+            style={
+              tagsDescriptionChecked === 'none'
+                ? { ...styles.choices, backgroundColor: '#36C9C6' }
+                : { ...styles.choices, backgroundColor: '#9BC1BC' }
+            }
+            onPress={() => setTagsDescriptionChecked('none')}
           >
-            <Text style={{ ...styles.boldText, margin: 5 }}>
-              My filters{' '}
-              <MaterialCommunityIcons name="chevron-double-up" size={18} />
+            <Text style={styles.filterOptionsText}>no filter</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={
+              tagsDescriptionChecked === 'tagsOrDescription'
+                ? { ...styles.choices, backgroundColor: '#36C9C6' }
+                : { ...styles.choices, backgroundColor: '#9BC1BC' }
+            }
+            onPress={() => setTagsDescriptionChecked('tagsOrDescription')}
+          >
+            <Text style={styles.filterOptionsText}>
+              only shows with description or tags
             </Text>
           </TouchableOpacity>
 
-          <View style={{ flex: 1 }}>
-            <Text style={styles.filterText}>
-              Click 'Filter recommendations' to perform your search
+          <TouchableOpacity
+            style={
+              tagsDescriptionChecked === 'nonZeroTags'
+                ? { ...styles.choices, backgroundColor: '#36C9C6' }
+                : { ...styles.choices, backgroundColor: '#9BC1BC' }
+            }
+            onPress={() => setTagsDescriptionChecked('nonZeroTags')}
+          >
+            <Text style={styles.filterOptionsText}>only shows with tags</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.choiceContainer}>
+          <TouchableOpacity
+            style={
+              tagsDescriptionChecked === 'chooseTags'
+                ? { ...styles.choices, backgroundColor: '#36C9C6' }
+                : { ...styles.choices, backgroundColor: '#9BC1BC' }
+            }
+            onPress={() => setTagsDescriptionChecked('chooseTags')}
+          >
+            <Text style={styles.filterOptionsText}>
+              only shows with these tags
             </Text>
-            <Text style={styles.tagHeadingText}>Tags / Description</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={
+              tagsDescriptionChecked === 'nonZeroDescription'
+                ? { ...styles.choices, backgroundColor: '#36C9C6' }
+                : { ...styles.choices, backgroundColor: '#9BC1BC' }
+            }
+            onPress={() => setTagsDescriptionChecked('nonZeroDescription')}
+          >
+            <Text style={styles.filterOptionsText}>
+              only shows with a description
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={
+              tagsDescriptionChecked === 'descriptionWord'
+                ? { ...styles.choices, backgroundColor: '#36C9C6' }
+                : { ...styles.choices, backgroundColor: '#9BC1BC' }
+            }
+            onPress={() => setTagsDescriptionChecked('descriptionWord')}
+          >
+            <Text style={styles.filterOptionsText}>
+              only shows with this description
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {tagsDescriptionChecked === 'descriptionWord' ? (
+          <View style={{ marginTop: 5 }}>
+            <View>
+              <Text style={styles.filterText}>
+                Enter the word (not case-sensitive) you want to see present in
+                the show description (if you choose multiple words, the search
+                will return shows containing any one of those words).
+              </Text>
+              <TextInput
+                style={styles.inputText}
+                label="Enter word"
+                onChangeText={(descriptionInput) =>
+                  setDescriptionInput(descriptionInput)
+                }
+                mode="outlined"
+                outlineColor="#340068"
+                activeOutlineColor="#340068"
+                value={descriptionInput}
+                // onFocus={() => setNotFound(false)}
+              />
+              <View
+                style={{
+                  flex: 1,
+                  alignItems: 'flex-end',
+                  marginBottom: 5,
+                }}
+              >
+                <TouchableOpacity
+                  style={styles.filterButton}
+                  onPress={addWordToDescriptionFilter}
+                >
+                  <Text style={styles.buttonText}>Add word to filter</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        ) : null}
+        {tagsDescriptionChecked === 'descriptionWord' &&
+        descriptionValue.length ? (
+          <View style={{ marginLeft: 15 }}>
+            <Text style={styles.filterText}>
+              Filer description words added: "
+              {descriptionValue.join('", "').toLowerCase()}"
+            </Text>
+          </View>
+        ) : null}
+
+        {tagsDescriptionChecked === 'chooseTags' ? (
+          <View style={{ marginBottom: 5, marginTop: 7 }}>
+            {tagsDropdownValue.length ? (
+              <View>
+                <DropDownPicker
+                  multiple={true}
+                  open={tagsDropdownOpen}
+                  value={tagsDropdownValue}
+                  items={tagsDropdownOptions}
+                  setOpen={setTagsDropdownOpen}
+                  setValue={setTagsDropdownValue}
+                  setItems={setTagsDropdownOptions}
+                  listMode="SCROLLVIEW"
+                  dropDownDirection="TOP"
+                  itemKey="label"
+                  placeholder="Select tags to filter by"
+                />
+                <Text style={{ fontSize: 16, marginTop: 10 }}>
+                  chosen tags:
+                </Text>
+                <View style={[styles.cardContent, styles.tagsContent]}>
+                  {displayChosen(tagsDropdownValue)}
+                </View>
+
+                {tagsDropdownValue.length > 1 ? (
+                  <View>
+                    {!filterAnyTags ? (
+                      <View>
+                        <Text style={styles.tagHeadingText}>
+                          Include shows that have any of these tags
+                        </Text>
+                        <Text style={styles.filterText}>
+                          Filter is currently set to include only shows which
+                          have all selected tags applied
+                        </Text>
+                      </View>
+                    ) : (
+                      <View style={styles.filterText}>
+                        <Text style={styles.tagHeadingText}>
+                          Include only shows that have ALL of these tags
+                        </Text>
+                        <Text>
+                          Filter is currently set to include shows which have
+                          ANY selected tags applied
+                        </Text>
+                      </View>
+                    )}
+                    <Switch
+                      style={{ alignItems: 'flex-end' }}
+                      ios_backgroundColor="#3e3e3e"
+                      onValueChange={() =>
+                        setFilterAnyTags((previousState) => !previousState)
+                      }
+                      value={filterAnyTags}
+                    />
+                  </View>
+                ) : null}
+              </View>
+            ) : (
+              <View>
+                <DropDownPicker
+                  multiple={true}
+                  open={tagsDropdownOpen}
+                  value={tagsDropdownValue}
+                  items={tagsDropdownOptions}
+                  setOpen={setTagsDropdownOpen}
+                  setValue={setTagsDropdownValue}
+                  setItems={setTagsDropdownOptions}
+                  listMode="SCROLLVIEW"
+                  dropDownDirection="TOP"
+                  itemKey="label"
+                  placeholder="Select tag(s) to filter by"
+                />
+              </View>
+            )}
+          </View>
+        ) : null}
+
+        {/* add choice for all or any */}
+
+        <View style={{ marginTop: 5 }}>
+          <Text style={styles.tagHeadingText}>Streamers</Text>
+
+          <View style={styles.choiceContainer}>
+            <TouchableOpacity
+              style={
+                streamersChecked === 'none'
+                  ? {
+                      ...styles.choices,
+                      backgroundColor: '#36C9C6',
+                      flex: 1 / 2,
+                    }
+                  : {
+                      ...styles.choices,
+                      backgroundColor: '#9BC1BC',
+                      flex: 1 / 2,
+                    }
+              }
+              onPress={() => setStreamersChecked('none')}
+            >
+              <Text style={styles.filterOptionsText}>no filter</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={
+                streamersChecked === 'chooseStreamers'
+                  ? {
+                      ...styles.choices,
+                      backgroundColor: '#36C9C6',
+                      flex: 1 / 2,
+                    }
+                  : {
+                      ...styles.choices,
+                      backgroundColor: '#9BC1BC',
+                      flex: 1 / 2,
+                    }
+              }
+              onPress={() => setStreamersChecked('chooseStreamers')}
+            >
+              <Text style={styles.filterText}>
+                only shows available on the following streamers:
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {streamersChecked === 'chooseStreamers' ? (
+          <View>
+            {streamersDropdownValue.length ? (
+              <View>
+                <DropDownPicker
+                  multiple={true}
+                  open={streamersDropdownOpen}
+                  value={streamersDropdownValue}
+                  items={streamersDropdownOptions}
+                  setOpen={setStreamersDropdownOpen}
+                  setValue={setStreamersDropdownValue}
+                  setItems={setStreamersDropdownOptions}
+                  listMode="SCROLLVIEW"
+                  dropDownDirection="TOP"
+                  itemKey="label"
+                  placeholder="Select streamers to filter by"
+                />
+                <Text style={{ fontSize: 16, marginTop: 10 }}>
+                  chosen streamers:
+                </Text>
+                <View style={[styles.cardContent, styles.tagsContent]}>
+                  {displayChosen(streamersDropdownValue)}
+                </View>
+              </View>
+            ) : (
+              <View>
+                <DropDownPicker
+                  multiple={true}
+                  open={streamersDropdownOpen}
+                  value={streamersDropdownValue}
+                  items={streamersDropdownOptions}
+                  setOpen={setStreamersDropdownOpen}
+                  setValue={setStreamersDropdownValue}
+                  setItems={setStreamersDropdownOptions}
+                  listMode="SCROLLVIEW"
+                  dropDownDirection="TOP"
+                  itemKey="label"
+                  placeholder="Select streamers to filter by"
+                />
+              </View>
+            )}
+          </View>
+        ) : null}
+
+        {props.following.length > 1 ? (
+          <View>
+            <Text style={styles.tagHeadingText}>
+              People I follow who recommend this show
+            </Text>
             <View style={styles.choiceContainer}>
               <TouchableOpacity
                 style={
-                  tagsDescriptionChecked === 'none'
-                    ? { ...styles.choices, backgroundColor: '#36C9C6' }
-                    : { ...styles.choices, backgroundColor: '#9BC1BC' }
+                  minRecs === 'none'
+                    ? {
+                        ...styles.choices,
+                        backgroundColor: '#36C9C6',
+                        flex: 1 / 2,
+                      }
+                    : {
+                        ...styles.choices,
+                        backgroundColor: '#9BC1BC',
+                        flex: 1 / 2,
+                      }
                 }
-                onPress={() => setTagsDescriptionChecked('none')}
+                onPress={() => setMinRecs('none')}
               >
                 <Text style={styles.filterOptionsText}>no filter</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={
-                  tagsDescriptionChecked === 'tagsOrDescription'
-                    ? { ...styles.choices, backgroundColor: '#36C9C6' }
-                    : { ...styles.choices, backgroundColor: '#9BC1BC' }
+                  minRecs === 'chooseMinRecs'
+                    ? {
+                        ...styles.choices,
+                        backgroundColor: '#36C9C6',
+                        flex: 1 / 2,
+                      }
+                    : {
+                        ...styles.choices,
+                        backgroundColor: '#9BC1BC',
+                        flex: 1 / 2,
+                      }
                 }
-                onPress={() => setTagsDescriptionChecked('tagsOrDescription')}
+                onPress={() => setMinRecs('chooseMinRecs')}
               >
                 <Text style={styles.filterOptionsText}>
-                  only shows with description or tags
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={
-                  tagsDescriptionChecked === 'nonZeroTags'
-                    ? { ...styles.choices, backgroundColor: '#36C9C6' }
-                    : { ...styles.choices, backgroundColor: '#9BC1BC' }
-                }
-                onPress={() => setTagsDescriptionChecked('nonZeroTags')}
-              >
-                <Text style={styles.filterOptionsText}>
-                  only shows with tags
+                  only shows rec'd by at least this many
                 </Text>
               </TouchableOpacity>
             </View>
-            <View style={styles.choiceContainer}>
-              <TouchableOpacity
-                style={
-                  tagsDescriptionChecked === 'chooseTags'
-                    ? { ...styles.choices, backgroundColor: '#36C9C6' }
-                    : { ...styles.choices, backgroundColor: '#9BC1BC' }
-                }
-                onPress={() => setTagsDescriptionChecked('chooseTags')}
-              >
-                <Text style={styles.filterOptionsText}>
-                  only shows with these tags
-                </Text>
-              </TouchableOpacity>
+          </View>
+        ) : null}
 
-              <TouchableOpacity
-                style={
-                  tagsDescriptionChecked === 'nonZeroDescription'
-                    ? { ...styles.choices, backgroundColor: '#36C9C6' }
-                    : { ...styles.choices, backgroundColor: '#9BC1BC' }
-                }
-                onPress={() => setTagsDescriptionChecked('nonZeroDescription')}
-              >
-                <Text style={styles.filterOptionsText}>
-                  only shows with a description
-                </Text>
-              </TouchableOpacity>
+        {minRecs === 'chooseMinRecs' ? (
+          <View>
+            <View>
+              <Text style={styles.filterText}>
+                You follow {props.following.length} users. Search for shows
+                recommended by at least this many people you follow:
+              </Text>
 
-              <TouchableOpacity
-                style={
-                  tagsDescriptionChecked === 'descriptionWord'
-                    ? { ...styles.choices, backgroundColor: '#36C9C6' }
-                    : { ...styles.choices, backgroundColor: '#9BC1BC' }
-                }
-                onPress={() => setTagsDescriptionChecked('descriptionWord')}
-              >
-                <Text style={styles.filterOptionsText}>
-                  only shows with this description
-                </Text>
-              </TouchableOpacity>
+              <DropDownPicker
+                open={minRecsDropdownOpen}
+                value={minRecsDropdownValue}
+                items={minRecsDropdownOptions}
+                setOpen={setMinRecsDropdownOpen}
+                setValue={setMinRecsDropdownValue}
+                setItems={setMinRecsDropdownOptions}
+                listMode="SCROLLVIEW"
+                dropDownDirection="TOP"
+                itemKey="label"
+                placeholder="Select min # of recommenders"
+              />
             </View>
+          </View>
+        ) : null}
 
-            {tagsDescriptionChecked === 'descriptionWord' ? (
-              <View style={{ marginTop: 5 }}>
-                <View>
-                  <Text style={styles.filterText}>
-                    Enter the word (not case-sensitive) you want to see present
-                    in the show description (if you choose multiple words, the
-                    search will return shows containing any one of those words).
-                  </Text>
-                  <TextInput
-                    style={styles.inputText}
-                    label="Enter word"
-                    onChangeText={(descriptionInput) =>
-                      setDescriptionInput(descriptionInput)
-                    }
-                    mode="outlined"
-                    outlineColor="#340068"
-                    activeOutlineColor="#340068"
-                    value={descriptionInput}
-                    // onFocus={() => setNotFound(false)}
-                  />
-                  <View
-                    style={{
-                      flex: 1,
-                      alignItems: 'flex-end',
-                      marginBottom: 5,
-                    }}
-                  >
-                    <TouchableOpacity
-                      style={styles.filterButton}
-                      onPress={addWordToDescriptionFilter}
-                    >
-                      <Text style={styles.buttonText}>Add word to filter</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </View>
-            ) : null}
-            {tagsDescriptionChecked === 'descriptionWord' &&
-            descriptionValue.length ? (
-              <View style={{ marginLeft: 15 }}>
-                <Text style={styles.filterText}>
-                  Filer description words added: "
-                  {descriptionValue.join('", "').toLowerCase()}"
-                </Text>
-              </View>
-            ) : null}
-
-            {tagsDescriptionChecked === 'chooseTags' ? (
-              <View style={{ marginBottom: 5, marginTop: 7 }}>
-                {tagsDropdownValue.length ? (
-                  <View>
-                    <DropDownPicker
-                      multiple={true}
-                      open={tagsDropdownOpen}
-                      value={tagsDropdownValue}
-                      items={tagsDropdownOptions}
-                      setOpen={setTagsDropdownOpen}
-                      setValue={setTagsDropdownValue}
-                      setItems={setTagsDropdownOptions}
-                      listMode="SCROLLVIEW"
-                      dropDownDirection="TOP"
-                      itemKey="label"
-                      placeholder="Select tags to filter by"
-                    />
-                    <Text style={{ fontSize: 16, marginTop: 10 }}>
-                      chosen tags:
-                    </Text>
-                    <View style={[styles.cardContent, styles.tagsContent]}>
-                      {displayChosen(tagsDropdownValue)}
-                    </View>
-
-                    {tagsDropdownValue.length > 1 ? (
-                      <View>
-                        {!filterAnyTags ? (
-                          <View>
-                            <Text style={styles.tagHeadingText}>
-                              Include shows that have any of these tags
-                            </Text>
-                            <Text style={styles.filterText}>
-                              Filter is currently set to include only shows
-                              which have all selected tags applied
-                            </Text>
-                          </View>
-                        ) : (
-                          <View style={styles.filterText}>
-                            <Text style={styles.tagHeadingText}>
-                              Include only shows that have ALL of these tags
-                            </Text>
-                            <Text>
-                              Filter is currently set to include shows which
-                              have ANY selected tags applied
-                            </Text>
-                          </View>
-                        )}
-                        <Switch
-                          style={{ alignItems: 'flex-end' }}
-                          ios_backgroundColor="#3e3e3e"
-                          onValueChange={() =>
-                            setFilterAnyTags((previousState) => !previousState)
-                          }
-                          value={filterAnyTags}
-                        />
-                      </View>
-                    ) : null}
-                  </View>
-                ) : (
-                  <View>
-                    <DropDownPicker
-                      multiple={true}
-                      open={tagsDropdownOpen}
-                      value={tagsDropdownValue}
-                      items={tagsDropdownOptions}
-                      setOpen={setTagsDropdownOpen}
-                      setValue={setTagsDropdownValue}
-                      setItems={setTagsDropdownOptions}
-                      listMode="SCROLLVIEW"
-                      dropDownDirection="TOP"
-                      itemKey="label"
-                      placeholder="Select tag(s) to filter by"
-                    />
-                  </View>
-                )}
-              </View>
-            ) : null}
-
-            {/* add choice for all or any */}
-
-            <View style={{ marginTop: 5 }}>
-              <Text style={styles.tagHeadingText}>Streamers</Text>
-
-              <View style={styles.choiceContainer}>
-                <TouchableOpacity
-                  style={
-                    streamersChecked === 'none'
-                      ? {
-                          ...styles.choices,
-                          backgroundColor: '#36C9C6',
-                          flex: 1 / 2,
-                        }
-                      : {
-                          ...styles.choices,
-                          backgroundColor: '#9BC1BC',
-                          flex: 1 / 2,
-                        }
-                  }
-                  onPress={() => setStreamersChecked('none')}
-                >
-                  <Text style={styles.filterOptionsText}>no filter</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={
-                    streamersChecked === 'chooseStreamers'
-                      ? {
-                          ...styles.choices,
-                          backgroundColor: '#36C9C6',
-                          flex: 1 / 2,
-                        }
-                      : {
-                          ...styles.choices,
-                          backgroundColor: '#9BC1BC',
-                          flex: 1 / 2,
-                        }
-                  }
-                  onPress={() => setStreamersChecked('chooseStreamers')}
-                >
-                  <Text style={styles.filterText}>
-                    only shows available on the following streamers:
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            {streamersChecked === 'chooseStreamers' ? (
-              <View>
-                {streamersDropdownValue.length ? (
-                  <View>
-                    <DropDownPicker
-                      multiple={true}
-                      open={streamersDropdownOpen}
-                      value={streamersDropdownValue}
-                      items={streamersDropdownOptions}
-                      setOpen={setStreamersDropdownOpen}
-                      setValue={setStreamersDropdownValue}
-                      setItems={setStreamersDropdownOptions}
-                      listMode="SCROLLVIEW"
-                      dropDownDirection="TOP"
-                      itemKey="label"
-                      placeholder="Select streamers to filter by"
-                    />
-                    <Text style={{ fontSize: 16, marginTop: 10 }}>
-                      chosen streamers:
-                    </Text>
-                    <View style={[styles.cardContent, styles.tagsContent]}>
-                      {displayChosen(streamersDropdownValue)}
-                    </View>
-                  </View>
-                ) : (
-                  <View>
-                    <DropDownPicker
-                      multiple={true}
-                      open={streamersDropdownOpen}
-                      value={streamersDropdownValue}
-                      items={streamersDropdownOptions}
-                      setOpen={setStreamersDropdownOpen}
-                      setValue={setStreamersDropdownValue}
-                      setItems={setStreamersDropdownOptions}
-                      listMode="SCROLLVIEW"
-                      dropDownDirection="TOP"
-                      itemKey="label"
-                      placeholder="Select streamers to filter by"
-                    />
-                  </View>
-                )}
-              </View>
-            ) : null}
-
-            {props.following.length > 1 ? (
-              <View>
-                <Text style={styles.tagHeadingText}>
-                  People I follow who recommend this show
-                </Text>
-                <View style={styles.choiceContainer}>
-                  <TouchableOpacity
-                    style={
-                      minRecs === 'none'
-                        ? {
-                            ...styles.choices,
-                            backgroundColor: '#36C9C6',
-                            flex: 1 / 2,
-                          }
-                        : {
-                            ...styles.choices,
-                            backgroundColor: '#9BC1BC',
-                            flex: 1 / 2,
-                          }
-                    }
-                    onPress={() => setMinRecs('none')}
-                  >
-                    <Text style={styles.filterOptionsText}>no filter</Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={
-                      minRecs === 'chooseMinRecs'
-                        ? {
-                            ...styles.choices,
-                            backgroundColor: '#36C9C6',
-                            flex: 1 / 2,
-                          }
-                        : {
-                            ...styles.choices,
-                            backgroundColor: '#9BC1BC',
-                            flex: 1 / 2,
-                          }
-                    }
-                    onPress={() => setMinRecs('chooseMinRecs')}
-                  >
-                    <Text style={styles.filterOptionsText}>
-                      only shows rec'd by at least this many
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ) : null}
-
-            {minRecs === 'chooseMinRecs' ? (
-              <View>
-                <View>
-                  <Text style={styles.filterText}>
-                    You follow {props.following.length} users. Search for shows
-                    recommended by at least this many people you follow:
-                  </Text>
-
-                  <DropDownPicker
-                    open={minRecsDropdownOpen}
-                    value={minRecsDropdownValue}
-                    items={minRecsDropdownOptions}
-                    setOpen={setMinRecsDropdownOpen}
-                    setValue={setMinRecsDropdownValue}
-                    setItems={setMinRecsDropdownOptions}
-                    listMode="SCROLLVIEW"
-                    dropDownDirection="TOP"
-                    itemKey="label"
-                    placeholder="Select min # of recommenders"
-                  />
-                </View>
-              </View>
-            ) : null}
-
-            {tagsDescriptionChecked === 'none' &&
-            streamersChecked === 'none' &&
-            minRecs === 'none' ? null : (
-              <View style={styles.filterCriteriaContainer}>
-                <Text style={styles.boldText}>Filter criteria</Text>
-                {tagsDescriptionChecked === 'None' ? null : (
-                  <Text style={{ ...styles.filterText, marginBottom: 0 }}>
-                    {tagsDescriptionChecked === 'chooseTags' &&
-                    tagsDropdownValue.length
-                      ? `Only display shows tagged as ${tagsDropdownValue
-                          .map((tag, index) =>
-                            index === tagsDropdownValue.length - 1 &&
+        {tagsDescriptionChecked === 'none' &&
+        streamersChecked === 'none' &&
+        minRecs === 'none' ? null : (
+          <View style={styles.filterCriteriaContainer}>
+            <Text style={styles.boldText}>Filter criteria</Text>
+            {tagsDescriptionChecked === 'None' ? null : (
+              <Text style={{ ...styles.filterText, marginBottom: 0 }}>
+                {tagsDescriptionChecked === 'chooseTags' &&
+                tagsDropdownValue.length
+                  ? `Only display shows tagged as ${tagsDropdownValue
+                      .map((tag, index) =>
+                        index === tagsDropdownValue.length - 1 &&
+                        tagsDropdownValue.length > 2 &&
+                        !filterAnyTags
+                          ? `and "${tag.name}"`
+                          : index === tagsDropdownValue.length - 1 &&
                             tagsDropdownValue.length > 2 &&
-                            !filterAnyTags
-                              ? `and "${tag.name}"`
-                              : index === tagsDropdownValue.length - 1 &&
-                                tagsDropdownValue.length > 2 &&
-                                filterAnyTags
-                              ? `or "${tag.name}"`
-                              : `"${tag.name}"`
-                          )
-                          .join(', ')}`
-                      : tagsDescriptionChecked === 'nonZeroTags'
-                      ? `Only display shows with at least 1 tag`
-                      : tagsDescriptionChecked === 'tagsOrDescription'
-                      ? `Only display shows with at least 1 tag or a description`
-                      : tagsDescriptionChecked === 'descriptionWord' &&
-                        descriptionValue.length
-                      ? `Only display shows with "${descriptionValue
-                          .join('" or "')
-                          .toLowerCase()}" in their description`
-                      : tagsDescriptionChecked === 'nonZeroDescription'
-                      ? `Only display shows with a description`
-                      : null}
-                  </Text>
-                )}
-
-                {streamersChecked === 'chooseStreamers' &&
-                streamersDropdownValue.length ? (
-                  <Text style={{ ...styles.filterText, marginBottom: 0 }}>
-                    Only display shows available on{' '}
-                    {streamersDropdownValue
-                      .map((streamer, index) =>
-                        index === streamersDropdownValue.length - 1 &&
-                        tagsDropdownValue.length > 2
-                          ? ` or ${streamer.name}`
-                          : streamer.name
+                            filterAnyTags
+                          ? `or "${tag.name}"`
+                          : `"${tag.name}"`
                       )
-                      .join(', ')}
-                  </Text>
-                ) : null}
-
-                {minRecs === 'chooseMinRecs' && minRecsDropdownValue > 1 ? (
-                  <Text style={{ ...styles.filterText, marginBottom: 0 }}>
-                    Only display shows recommended by at least{' '}
-                    {minRecsDropdownValue} users I follow
-                  </Text>
-                ) : null}
-              </View>
+                      .join(', ')}`
+                  : tagsDescriptionChecked === 'nonZeroTags'
+                  ? `Only display shows with at least 1 tag`
+                  : tagsDescriptionChecked === 'tagsOrDescription'
+                  ? `Only display shows with at least 1 tag or a description`
+                  : tagsDescriptionChecked === 'descriptionWord' &&
+                    descriptionValue.length
+                  ? `Only display shows with "${descriptionValue
+                      .join('" or "')
+                      .toLowerCase()}" in their description`
+                  : tagsDescriptionChecked === 'nonZeroDescription'
+                  ? `Only display shows with a description`
+                  : null}
+              </Text>
             )}
-            <View
-              style={{
-                flex: 1,
-                flexDirection: 'row',
-                flexWrap: 'wrap',
-                justifyContent: 'space-between',
-              }}
-            >
-              <TouchableOpacity
-                style={styles.cancelButton}
-                onPress={() => reset()}
-              >
-                <Text style={styles.buttonText}>Clear filters</Text>
-              </TouchableOpacity>
-              {/* <TouchableOpacity
+
+            {streamersChecked === 'chooseStreamers' &&
+            streamersDropdownValue.length ? (
+              <Text style={{ ...styles.filterText, marginBottom: 0 }}>
+                Only display shows available on{' '}
+                {streamersDropdownValue
+                  .map((streamer, index) =>
+                    index === streamersDropdownValue.length - 1 &&
+                    tagsDropdownValue.length > 2
+                      ? ` or ${streamer.name}`
+                      : streamer.name
+                  )
+                  .join(', ')}
+              </Text>
+            ) : null}
+
+            {minRecs === 'chooseMinRecs' && minRecsDropdownValue > 1 ? (
+              <Text style={{ ...styles.filterText, marginBottom: 0 }}>
+                Only display shows recommended by at least{' '}
+                {minRecsDropdownValue} users I follow
+              </Text>
+            ) : null}
+          </View>
+        )}
+        <View
+          style={{
+            flex: 1,
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            justifyContent: 'space-between',
+          }}
+        >
+          <TouchableOpacity style={styles.cancelButton} onPress={() => reset()}>
+            <Text style={styles.buttonText}>Clear filters</Text>
+          </TouchableOpacity>
+          {/* <TouchableOpacity
                 style={styles.cancelButton}
                 onPress={() => props.setAdvancedSearch(false)}
               >
                 <Text style={styles.buttonText}>Close filter</Text>
               </TouchableOpacity> */}
 
-              <TouchableOpacity
-                style={styles.searchButton}
-                onPress={() => filter()}
-              >
-                <Text style={styles.buttonText}>Filter Recommendations</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+          <TouchableOpacity
+            style={styles.searchButton}
+            onPress={() => filter()}
+          >
+            <Text style={styles.buttonText}>Filter Recommendations</Text>
+          </TouchableOpacity>
         </View>
-      </ScrollView>
-    </View>
-    // </TouchableWithoutFeedback>
+      </View>
+    </Tabs.ScrollView>
   )
 }
 
@@ -894,6 +889,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 3,
     backgroundColor: '#340068',
     marginTop: 5,
+    marginBottom: 5,
   },
   cancelButton: {
     padding: 5,
@@ -901,6 +897,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 3,
     backgroundColor: '#F46036',
     marginTop: 5,
+    marginBottom: 5,
   },
   filterButton: {
     padding: 5,

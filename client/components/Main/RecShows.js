@@ -14,7 +14,13 @@ import {
 } from 'react-native'
 import { useFirstRender } from './helpers.js'
 import RecsFilter from './RecsFilter'
-import RecsHeader from './RecsHeader'
+import * as Tabs from 'react-native-collapsible-tab-view'
+import {
+  jumpToTab,
+  setIndex,
+  getFocusedTab,
+  getCurrentIndex,
+} from 'react-native-collapsible-tab-view'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 
 import {
@@ -27,8 +33,6 @@ import OtherRecerModal from './OtherRecerModal'
 import { connect } from 'react-redux'
 import { useIsFocused } from '@react-navigation/native'
 
-let containerCount = 0
-
 const RecShows = (props) => {
   const [selectedItem, setSelectedItem] = useState(null)
   const [modalVisible, setModalVisible] = useState(false)
@@ -36,102 +40,128 @@ const RecShows = (props) => {
   const [filter, setFilter] = useState(null)
   const [multipleRecInfo, setMultipleRecInfo] = useState({})
   const [noUserShows, setNoUserShows] = useState(false)
-  const [matchingRecs, setMatchingRecs] = useState(null)
+  // const [matchingRecs, setMatchingRecs] = useState(null)
   const [advancedSearch, setAdvancedSearch] = useState(false)
   const [loading, setLoading] = useState(true)
   const [headerHeight, setHeaderHeight] = useState(80)
-  const ref = useRef(null)
-  const scrollY = useRef(new Animated.Value(0))
-  const translateYNumber = useRef()
+  const [filterTabName, setFilterTabName] = useState('Filters(0)')
+  const [showNum, setShowNum] = useState(0)
+  const [recsTabName, setRecsTabName] = useState(null)
 
   const isFocused = useIsFocused()
   const firstRender = useFirstRender()
-
-  const AnimatedFlatList = Animated.createAnimatedComponent(FlatList)
+  const ref = useRef()
 
   useEffect(() => {
     setLoading(true)
     const getRecShows = async () => {
       try {
-        if (props.allRecShows || props.filterRecs) {
-          console.log('i am up here above first time and filterREcs')
+        if (props.allRecShows || filter) {
+          console.log('i am up here above first time and filterREcs', showNum)
           let shows = filter ? props.filterRecs : props.allRecShows
           let height = filter ? 150 : 55
           setHeaderHeight(height)
+
           // shows.sort(function (x, y) {
           //   return new Date(y.updatedAt) - new Date(x.updatedAt)
           // })
 
           // if they toggled to only see shows not on their profile, remove shows that appear on their rec, watch, and seen lists
 
-          if (noUserShows) {
-            shows = shows.filter((recShow) => {
-              return (
-                !props.userShows.find(
-                  (userShow) => userShow.show.id === recShow.showId
-                ) &&
-                !props.toWatch.find(
-                  (watchShow) => watchShow.show.id === recShow.showId
-                ) &&
-                !props.seen.find(
-                  (seenShow) => seenShow.show.id === recShow.showId
-                )
-              )
-            })
-          }
-          // we only want to see a show recommended once on the timeline, but we want to be able to see how many times it was recommended and by which other users
-          let visibleShows = []
-          let recCounts = {}
-          let loaded = 0
-          for (let recShow of shows) {
-            const count = recCounts[recShow.showId]
-            if (!count) {
-              visibleShows.push(recShow)
-              recCounts[recShow.showId] = {
-                num: 1,
-                recommenders: [{ name: recShow.username, recShow }],
-              }
-              loaded += 1
-            } else {
-              recCounts[recShow.showId].num++
-              recCounts[recShow.showId].recommenders.push({
-                name: recShow.username,
-                recShow,
-              })
-              loaded += 1
+          if (filter && showNum === 0) {
+            console.log('i got in here in useEffect', filter)
+            setRecShows([])
+            setMultipleRecInfo({})
+            let name = `Recs(0)`
+            setRecsTabName(name)
+            if (advancedSearch) {
+              ref.current.jumpToTab(name)
+              setAdvancedSearch(false)
             }
-            if (loaded === shows.length) {
-              setLoading(false)
-            } else {
-              console.log(
-                'shows.length is ',
-                shows.length,
-                'and loaded is ',
-                loaded
-              )
-            }
-          }
-          setRecShows(visibleShows)
-          setMultipleRecInfo(recCounts)
-          if (firstRender) {
-            console.log('i am in the first render')
-          }
-          if (
-            !firstRender &&
-            props.currentUser &&
-            (!props.following.length || (filter && !props.filterRecs.length))
-          ) {
-            console.log(
-              'i am not in the first render but there is no following',
-              props.following,
-              props.filterRecs,
-              props.currentUser
-            )
             setLoading(false)
+          } else {
+            if (noUserShows) {
+              shows = shows.filter((recShow) => {
+                return (
+                  !props.userShows.find(
+                    (userShow) => userShow.show.id === recShow.showId
+                  ) &&
+                  !props.toWatch.find(
+                    (watchShow) => watchShow.show.id === recShow.showId
+                  ) &&
+                  !props.seen.find(
+                    (seenShow) => seenShow.show.id === recShow.showId
+                  )
+                )
+              })
+              // if (!shows.length) {
+              //   setShowNum(0)
+              //   // setRecShows([])
+              //   // setMultipleRecInfo({})
+              // }
+            }
+            // we only want to see a show recommended once on the timeline, but we want to be able to see how many times it was recommended and by which other users
+
+            let visibleShows = []
+            let recCounts = {}
+            recCounts['loaded'] = 0
+            for (let recShow of shows) {
+              const count = recCounts[recShow.showId]
+              if (!count) {
+                visibleShows.push(recShow)
+                recCounts[recShow.showId] = {
+                  num: 1,
+                  recommenders: [{ name: recShow.username, recShow }],
+                }
+                recCounts['loaded'] += 1
+              } else {
+                recCounts[recShow.showId].num++
+                recCounts[recShow.showId].recommenders.push({
+                  name: recShow.username,
+                  recShow,
+                })
+                recCounts['loaded'] += 1
+              }
+              if (recCounts['loaded'] === shows.length || showNum === 0) {
+                setLoading(false)
+              } else {
+                console.log(
+                  'shows.length is ',
+                  shows.length,
+                  'and loaded is ',
+                  recCounts['loaded']
+                )
+              }
+            }
+            setRecShows(visibleShows)
+            setMultipleRecInfo(recCounts)
+            let name = `Recs(${visibleShows.length})`
+            setRecsTabName(name)
+            if (advancedSearch) {
+              ref.current.jumpToTab(name)
+              setAdvancedSearch(false)
+            }
+            if (firstRender) {
+              console.log('i am in the first render')
+            }
+            if (
+              !firstRender &&
+              props.currentUser &&
+              (!props.following.length || (filter && showNum === 0))
+            ) {
+              console.log(
+                'i am not in the first render but there is no following',
+                props.following.length
+              )
+              setLoading(false)
+              setRecsTabName('Recs(0)')
+            }
           }
 
           return () => {
             setRecShows([])
+            setMultipleRecInfo({})
+            setRecsTabName(null)
           }
         }
       } catch (e) {
@@ -153,12 +183,9 @@ const RecShows = (props) => {
 
   const displayRecShows = () => {
     return (
-      <Animated.FlatList
-        scrollEventThrottle={16}
-        contentContainerStyle={{ paddingTop: headerHeight }}
+      <Tabs.FlatList
         numColumns={1}
         horizontal={false}
-        bounces={false}
         data={recShows}
         renderItem={({ item }) => (
           <View style={styles.containerImage}>
@@ -181,9 +208,12 @@ const RecShows = (props) => {
                         })
                       }
                     >
-                      <Text
-                        style={{ color: 'blue' }}
-                      >{`${item.username}`}</Text>
+                      <Text style={{ color: 'blue' }}>
+                        {`${item.username}`}
+                        <Text style={{ color: 'black' }}>
+                          {filter ? ` with these filters applied` : ''}
+                        </Text>
+                      </Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -207,7 +237,6 @@ const RecShows = (props) => {
           </View>
         )}
         keyExtractor={(item, index) => index.toString()}
-        onScroll={handleScroll}
       />
     )
   }
@@ -228,7 +257,6 @@ const RecShows = (props) => {
         recShow.showId
       )
       if (userShow) {
-        console.log('userShowbackhere', userShow)
         const userInfo = { id: recShow.userId, username: recShow.username }
         return props.navigation.navigate('Show', {
           userInfo,
@@ -238,6 +266,11 @@ const RecShows = (props) => {
     } catch (err) {
       console.log(err)
     }
+  }
+
+  const cancelFilters = () => {
+    setFilter(null)
+    setFilterTabName('Filters(0)')
   }
 
   const displayFilters = () => {
@@ -273,11 +306,89 @@ const RecShows = (props) => {
     })
   }
 
-  if (loading) {
+  if (
+    loading ||
+    (filter &&
+      ((showNum > 0 && !recShows.length) ||
+        (showNum > 0 && multipleRecInfo['loaded'] !== showNum)))
+  ) {
+    console.log(
+      'i got in here to loading',
+      multipleRecInfo['loaded'],
+      showNum,
+      recShows.length
+    )
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#5500dc" />
       </View>
+    )
+  }
+
+  const Header = () => {
+    return (
+      <View style={styles.header}>
+        {!noUserShows ? (
+          <Text style={{ color: 'white' }}>
+            Toggle to hide shows saved to your profile
+          </Text>
+        ) : (
+          <Text style={{ color: 'white' }}>
+            Toggle to see shows saved to your profile
+          </Text>
+        )}
+
+        <View style={{ alignItems: 'flex-start', flex: 1 }}>
+          <Switch
+            style={{
+              marginBottom: 5,
+              marginTop: 5,
+            }}
+            ios_backgroundColor="#3e3e3e"
+            onValueChange={toggleNoUserShows}
+            value={noUserShows}
+          />
+        </View>
+        {filter ? (
+          <View>
+            <Text style={{ fontWeight: 'bold', color: 'white' }}>
+              The following {noUserShows ? 'additional ' : null}filters have
+              been applied to this search:
+            </Text>
+            <View style={styles.filterDisplay}>{displayFilters()}</View>
+            <View style={{ alignItems: 'flex-end' }}>
+              <TouchableOpacity
+                style={{
+                  ...styles.button,
+                  backgroundColor: '#008DD5',
+                  marginBottom: 5,
+                }}
+                onPress={() => cancelFilters()}
+              >
+                <Text style={{ ...styles.buttonText, color: 'white' }}>
+                  Cancel filters
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ) : null}
+      </View>
+    )
+  }
+
+  function TabBar({ name, ref, ...props }) {
+    console.log('name', name)
+    console.log('ref', ref)
+    return (
+      <Tabs.MaterialTabBar
+        {...props}
+        activeColor="white"
+        inactiveColor="white"
+        backgroundColor="#340068"
+        inactiveOpacity={0.8}
+        style={{ backgroundColor: '#340068' }}
+        indicatorStyle={{ height: 6, backgroundColor: '#36C9C6' }}
+      />
     )
   }
 
@@ -293,124 +404,28 @@ const RecShows = (props) => {
     )
   }
 
-  const diffClamp = Animated.diffClamp(scrollY.current, 0, headerHeight)
-
-  const translateY = diffClamp.interpolate({
-    inputRange: [0, headerHeight],
-    outputRange: [0, -headerHeight],
-    extrapolate: 'clamp',
-  })
-
-  translateY.addListener(({ value }) => {
-    translateYNumber.current = value
-  })
-
-  const handleScroll = Animated.event(
-    [
-      {
-        nativeEvent: {
-          contentOffset: { y: scrollY.current },
-        },
-      },
-    ],
-    {
-      useNativeDriver: true,
-    }
-  )
-
-  console.log('headerheight', headerHeight, filter)
+  console.log('filtername', filterTabName)
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={{ flex: 1, elevation: 1000, zIndex: 1000 }}>
-        <Animated.View style={[styles.header, { transform: [{ translateY }] }]}>
-          <View>
-            {!advancedSearch ? (
-              <View style={styles.headerHeight}>
-                {!noUserShows ? (
-                  <Text style={{ color: 'white' }}>
-                    Toggle to hide shows saved to your profile
-                  </Text>
-                ) : (
-                  <Text style={{ color: 'white' }}>
-                    Toggle to see shows saved to your profile
-                  </Text>
-                )}
-                <View
-                  style={{ flexDirection: 'row', flexWrap: 'wrap', flex: 1 }}
-                >
-                  <View style={{ alignItems: 'flex-start', flex: 1 }}>
-                    <Switch
-                      style={{
-                        marginBottom: 5,
-                        marginTop: 5,
-                      }}
-                      ios_backgroundColor="#3e3e3e"
-                      onValueChange={toggleNoUserShows}
-                      value={noUserShows}
-                    />
-                  </View>
-                  <TouchableOpacity
-                    // style={styles.button}
-                    onPress={() => setAdvancedSearch(true)}
-                    style={{ alignItems: 'flex-end', flex: 1 }}
-                  >
-                    <Text
-                      style={{
-                        marginBottom: 5,
-                        marginTop: 5,
-                        fontSize: 16,
-                        fontWeight: '400',
-                        color: 'white',
-                      }}
-                    >
-                      My filters{' '}
-                      <MaterialCommunityIcons
-                        name="chevron-double-down"
-                        size={18}
-                      />
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-                {filter ? (
-                  <View>
-                    <Text style={{ fontWeight: 'bold', color: 'white' }}>
-                      The following {noUserShows ? 'additional ' : null}filters
-                      have been applied to this search:
-                    </Text>
-                    <View style={styles.filterDisplay}>{displayFilters()}</View>
-                    <View style={{ alignItems: 'flex-end' }}>
-                      <TouchableOpacity
-                        style={{
-                          ...styles.button,
-                          backgroundColor: '#008DD5',
-                          marginBottom: 5,
-                        }}
-                        onPress={() => setFilter(null)}
-                      >
-                        <Text style={{ ...styles.buttonText, color: 'white' }}>
-                          Cancel filters
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                ) : null}
-              </View>
-            ) : null}
-          </View>
-        </Animated.View>
-
-        {!advancedSearch ? (
-          <View style={styles.containerGallery}>
-            {displayRecShows()}
-            {!recShows.length ? (
-              <View>
-                <Text style={styles.text}>
-                  Unfortunately you have no recommended shows matching those
-                  filters.
-                </Text>
-              </View>
-            ) : (
+    <Tabs.Container
+      renderHeader={Header}
+      renderTabBar={TabBar}
+      headerHeight={headerHeight}
+      revealHeaderOnScroll={true}
+      ref={ref}
+    >
+      <Tabs.Tab name={recsTabName}>
+        <View style={styles.container}>
+          {!recShows.length ? (
+            <View>
+              <Text style={styles.text}>
+                Unfortunately you have no recommended shows matching those
+                filters.
+              </Text>
+            </View>
+          ) : (
+            <View style={styles.containerGallery}>
+              {displayRecShows()}
               <OtherRecerModal
                 modalVisible={modalVisible}
                 setModalVisible={setModalVisible}
@@ -419,20 +434,22 @@ const RecShows = (props) => {
                 previous="RecShows"
                 getSingleUserShow={props.getSingleUserShow}
               />
-            )}
-          </View>
-        ) : null}
-        {!advancedSearch ? null : (
-          <RecsFilter
-            setAdvancedSearch={setAdvancedSearch}
-            setMatchingRecs={setMatchingRecs}
-            setFilter={setFilter}
-            setLoading={setLoading}
-            filter={filter}
-          />
-        )}
-      </View>
-    </SafeAreaView>
+            </View>
+          )}
+        </View>
+      </Tabs.Tab>
+      <Tabs.Tab name={filterTabName}>
+        <RecsFilter
+          {...props}
+          setFilter={setFilter}
+          setFilterTabName={setFilterTabName}
+          setLoading={setLoading}
+          filter={filter}
+          setShowNum={setShowNum}
+          setAdvancedSearch={setAdvancedSearch}
+        />
+      </Tabs.Tab>
+    </Tabs.Container>
   )
 }
 
@@ -493,11 +510,6 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   header: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    width: '100%',
-    zIndex: 1,
     backgroundColor: '#340068',
   },
 })
