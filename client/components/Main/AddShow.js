@@ -140,7 +140,7 @@ const AddShow = (props) => {
                         }
                       >
                         <Text style={styles.buttonText}>
-                          Save show to watch list
+                          Save show to Watch list
                         </Text>
                       </TouchableOpacity>
                     </View>
@@ -148,6 +148,12 @@ const AddShow = (props) => {
                       <TouchableOpacity
                         style={styles.saveButton}
                         onPress={() =>
+                          Alert.alert(
+                            'Are you sure you want to filter this show out of recommendations you see?',
+                            '',
+                            [
+                              {
+                                text: 'Yes',    onPress=() =>
                           props.navigation.navigate('Save show', {
                             showData: {
                               showName,
@@ -157,11 +163,15 @@ const AddShow = (props) => {
                             },
                             previous: 'AddShow',
                           })
+                              },
+                              {
+                                text: 'Cancel',
+                              },
+                            ]
+                          )
                         }
                       >
-                        <Text style={styles.buttonText}>
-                          Save show to seen list
-                        </Text>
+                        <Text style={styles.buttonText}>Filter Out</Text>
                       </TouchableOpacity>
                     </View>
                   </View>
@@ -171,10 +181,10 @@ const AddShow = (props) => {
                 }) ? (
                   <View>
                     <Text style={styles.text}>
-                      This show is already on your watch list. If you'd like to
-                      switch it to Recommended or Seen, go to your profile,
-                      click on your Watch list, and open the show to make that
-                      change.
+                      This show is already on your Watch list. If you'd like to
+                      switch it to Recommendations or Filter Out, go to your
+                      profile, click on your Watch list, and open the show to
+                      make that change.
                     </Text>
                     <View style={styles.buttonContainer}>
                       <TouchableOpacity
@@ -192,7 +202,7 @@ const AddShow = (props) => {
                   <View>
                     <Text style={styles.text}>
                       Log in or Sign up to recommend this show or add it to your
-                      watch list
+                      Watch list
                     </Text>
                     <View style={styles.buttonContainer}>
                       <TouchableOpacity

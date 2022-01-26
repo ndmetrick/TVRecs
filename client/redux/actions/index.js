@@ -2,11 +2,11 @@ import axios from 'axios'
 import types from '../constants'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
-const baseUrl = 'https://tvrecs.herokuapp.com'
+// const baseUrl = 'https://tvrecs.herokuapp.com'
 
 // const baseUrl = 'https://10.0.0.98:8080';
 
-// const baseUrl = 'http://10.0.0.171:8080'
+const baseUrl = 'http://10.0.0.171:8080'
 // const baseUrl = 'http://localhost:8080';
 
 const getToken = async () => {
@@ -79,7 +79,6 @@ export function getCurrentUser() {
 export function addToWatchProviders(watchInfo) {
   return async (dispatch) => {
     try {
-      console.log('watchInfo', watchInfo)
       dispatch({
         type: types.ADD_TO_WATCH_PROVIDERS,
         watchInfo,
@@ -189,7 +188,6 @@ export function getUserFollowing(uid) {
           })
           return followed.data
         } else {
-          console.log('following', followed.data)
           dispatch({
             type: types.GET_USER_FOLLOWING,
             following: followed.data,
@@ -334,7 +332,6 @@ export function getMatchingUsers(filters) {
         headers
       )
       if (users) {
-        console.log('users in getmatchingusers', users.data)
         return users.data
       }
     } catch (e) {
@@ -354,22 +351,16 @@ export function getMatchingRecs(filters) {
       )
       if (response) {
         if (filters['chooseStreamers']) {
-          console.log('i got into this', response.data)
           const { recs, newWatchProviders } = response.data
           dispatch({
             type: types.GET_MATCHING_RECS_AND_WATCH,
             recs,
             newWatchProviders,
           })
-          console.log(
-            'recs and watch in getmatchingusers',
-            recs,
-            newWatchProviders
-          )
+          console.log('recs and watch in getmatchingusers')
           return recs
         } else {
           dispatch({ type: types.GET_MATCHING_RECS, recs: response.data })
-          console.log('recs in getmatchingusers', response.data)
           return response.data
         }
       }
@@ -390,7 +381,6 @@ export function changeShowTagsAndDescription(tagIds, userShowId, description) {
         headers
       )
       if (changedUserShow) {
-        console.log('front end userShow', changedUserShow.data)
         dispatch({
           type: types.CHANGE_SHOW_TAGS,
           userShow: changedUserShow.data,
@@ -433,7 +423,7 @@ export function switchShow(userShowId, newType) {
   }
 }
 
-export function deleteShow(showId) {
+export function deleteShow(showId, type) {
   return async (dispatch) => {
     try {
       const headers = await getToken()
@@ -447,6 +437,10 @@ export function deleteShow(showId) {
           type: types.DELETE_SHOW,
           userShow: deletedShow.data,
         })
+        // because seen/to-filter shows are automatically removed from shows recommended to the user, we need to get recShows again if we succeed in deleting the show from the seen list
+        if (type === 'seen') {
+          return 'deleted'
+        }
       } else {
         console.log('Something went wrong trying to delete show')
       }

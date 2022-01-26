@@ -14,7 +14,7 @@ import {
   addShow,
   deleteShow,
   switchShow,
-  getAPIKey,
+  getUsersFollowingRecs,
   getOtherUser,
   getSingleUserShow,
 } from '../../redux/actions'
@@ -107,8 +107,17 @@ function SingleShow(props) {
 
   const deleteShow = async () => {
     try {
-      await props.deleteShow(userShow.show.id)
-      return props.navigation.goBack()
+      if (userShow.type === 'seen') {
+        const deleted = await props.deleteShow(userShow.show.id, userShow.type)
+        // because seen/to-filter shows are automatically removed from shows recommended to the user, we need to get recShows again if we succeed in deleting the show from the seen list
+        if (deleted) {
+          await props.getUsersFollowingRecs()
+          return props.navigation.goBack()
+        }
+      } else {
+        await props.deleteShow(userShow.show.id, userShow.type)
+        return props.navigation.goBack()
+      }
     } catch (err) {
       console.error(err)
     }
@@ -363,7 +372,7 @@ function SingleShow(props) {
                       }
                     >
                       <Text style={styles.buttonText}>
-                        Switch to recommended
+                        Switch to Recommended
                       </Text>
                     </TouchableOpacity>
                   </View>
@@ -411,7 +420,9 @@ function SingleShow(props) {
                         )
                       }
                     >
-                      <Text style={styles.buttonText}>Switch to seen list</Text>
+                      <Text style={styles.buttonText}>
+                        Switch to Filter Out
+                      </Text>
                     </TouchableOpacity>
                   </View>
                 ) : null}
@@ -528,7 +539,7 @@ function SingleShow(props) {
                           )
                         }
                       >
-                        <Text style={styles.buttonText}>Add to watch list</Text>
+                        <Text style={styles.buttonText}>Add to Watch list</Text>
                       </TouchableOpacity>
                     </View>
                     <View style={styles.buttonContainer}>
@@ -578,7 +589,7 @@ function SingleShow(props) {
                           )
                         }
                       >
-                        <Text style={styles.buttonText}>Add to seen list</Text>
+                        <Text style={styles.buttonText}>Filter Out</Text>
                       </TouchableOpacity>
                     </View>
                   </View>
@@ -720,12 +731,13 @@ const mapState = (store) => ({
 const mapDispatch = (dispatch) => {
   return {
     addShow: (showInfo, type) => dispatch(addShow(showInfo, type)),
-    deleteShow: (showId) => dispatch(deleteShow(showId)),
+    deleteShow: (showId, type) => dispatch(deleteShow(showId, type)),
     switchShow: (userShowId, newType) =>
       dispatch(switchShow(userShowId, newType)),
     getOtherUser: (userId) => dispatch(getOtherUser(userId)),
     getSingleUserShow: (uid, showId) =>
       dispatch(getSingleUserShow(uid, showId)),
+    getUsersFollowingRecs: () => dispatch(getUsersFollowingRecs()),
   }
 }
 

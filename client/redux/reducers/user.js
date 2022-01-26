@@ -82,6 +82,9 @@ export default function userReducer(state = initialState, action) {
         : {
             ...state,
             seen: [...state.seen, action.userShow],
+            recShows: state.recShows.filter(
+              (recShow) => recShow.showId !== action.userShow.show.id
+            ),
             // seenList: [...state.seenList, action.userShow.show.name],
           }
     case DELETE_SHOW:
@@ -108,7 +111,7 @@ export default function userReducer(state = initialState, action) {
         : {
             ...state,
             seen: state.seen.filter(
-              (userShow) => userShow.show.id !== action.userShow.show.id
+              (userShow) => userShow.show.id !== action.userShow.showId
             ),
             // seenList: state.seenList.filter(
             //   (showName) => showName !== action.userShow.show.name
@@ -130,6 +133,9 @@ export default function userReducer(state = initialState, action) {
             // showList: [...state.showList, action.userShow.show.name],
             toWatch: state.toWatch.filter(
               (userShow) => userShow.show.id !== action.userShow.show.id
+            ),
+            recShows: state.recShows.filter(
+              (recShow) => recShow.showId !== action.userShow.show.id
             ),
           }
     case GET_USER_TAGS:

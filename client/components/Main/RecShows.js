@@ -304,7 +304,7 @@ const RecShows = (props) => {
     if (filter['chooseStreamers']) {
       filterWords.push('chosen streamers')
     }
-    if (filter['minRecs']) {
+    if (filter['chooseMinRecs']) {
       filterWords.push('number of recs')
     }
 
@@ -321,7 +321,7 @@ const RecShows = (props) => {
     loading ||
     (filter &&
       ((showNum > 0 && !recShows.length) ||
-        (showNum > 0 && multipleRecInfo['loaded'] !== showNum)))
+        (showNum > 0 && !noUserShows && multipleRecInfo['loaded'] !== showNum)))
   ) {
     console.log('i got in here to loading')
     return (

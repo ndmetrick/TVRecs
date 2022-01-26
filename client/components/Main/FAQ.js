@@ -58,17 +58,26 @@ function FAQ(props) {
         the show you're looking for (or if there's only one title matching what
         you entered), you will be taken to a page where you can add the show to
         your profile. You can also search for where to stream or purchase the
-        show online. There are three lists to save shows to on your profile in
-        TV Recs. You can save shows to your RECS list, to your WATCH list, or to
-        your SEEN list. Your Recs list is for shows you want to recommend to
-        other users, and is the only list that other users will be able to see.
-        Your Watch list is for shows you haven't seen yet and want to remember
-        to watch later (if you see a friend recommending a show and want to
-        check it out, add it to your Watch list so you won't forget what it's
-        called). Your Seen list is for shows you've seen but don't want to
-        recommend to others for whatever reason. One reason you might want to
-        add shows to that list is so you can avoid seeing them on your main feed
-        when you filter out the shows saved to your profile.
+        show online.
+        {'\n'}
+        {'\n'}
+        There are three lists to save shows to on your profile in TV Recs. You
+        can save shows to your RECS/RECOMMENDATIONS list, to your WATCH list, or
+        to your FILTER OUT list. Your RECS list is for shows you want to
+        recommend to other users, and is the only list that other users will be
+        able to see. Your WATCH list is for shows you haven't seen yet and want
+        to remember to watch later (if you see a friend recommending a show and
+        want to check it out, add it to your Watch list so you won't forget what
+        it's called). Your FILTER OUT list is for shows you don't want to see
+        recommended to you anymore for whatever reason. You can easily
+        temporarily filter out shows on your Recs/Watch lists but this list is
+        for shows you wouldn't want to put on either of those lists (you already
+        saw the show and didn't like it enough to recommend it, or you just know
+        you wouldn't want to see it). Shows on your Filter Out will not show up
+        on your main feed page (with all the recommendations made by people you
+        follow). However, you will still see them if you go directly to a user's
+        profile. If you change your mind, you can always delete a show from your
+        FILTER OUT list, and it will show up in your main feed again.
         {'\n'}
         {'\n'}
         You can add a description and tags (or not) to shows in any list. You
