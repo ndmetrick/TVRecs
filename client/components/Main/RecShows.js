@@ -1,16 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
 import {
   StyleSheet,
   View,
   Text,
   Image,
-  FlatList,
   TouchableOpacity,
   Switch,
-  Dimensions,
-  Animated,
   ActivityIndicator,
-  SafeAreaView,
 } from 'react-native'
 import { useFirstRender } from './helpers.js'
 import RecsFilter from './RecsFilter'
@@ -47,10 +43,71 @@ const RecShows = (props) => {
   const [filterTabName, setFilterTabName] = useState('Filters(0)')
   const [showNum, setShowNum] = useState(0)
   const [recsTabName, setRecsTabName] = useState(null)
+  const [renderItem, setRenderItem] = useState(null)
 
   const isFocused = useIsFocused()
   const firstRender = useFirstRender()
   const ref = useRef(null)
+
+  const flatlist = useMemo(() => {
+    return (
+      <Tabs.FlatList
+        numColumns={1}
+        horizontal={false}
+        data={recShows}
+        renderItem={({ item }) => (
+          <View style={styles.containerImage}>
+            <TouchableOpacity
+              onPress={() => getUserShow(item)}
+              style={styles.catalogContainer}
+            >
+              <Image source={{ uri: item.imageUrl }} style={styles.image} />
+            </TouchableOpacity>
+            <View>
+              {multipleRecInfo[item.showId].num < 2 ? (
+                <View>
+                  <Text style={{ fontWeight: 'bold' }}>{item.name}</Text>
+                  <View style={styles.rowContainer}>
+                    <Text>Recommended by: </Text>
+                    <TouchableOpacity
+                      onPress={() =>
+                        props.navigation.navigate("TV rec'er", {
+                          uid: item.userId,
+                        })
+                      }
+                    >
+                      <Text style={{ color: 'blue' }}>
+                        {`${item.username}`}
+                        <Text style={{ color: 'black' }}>
+                          {filter ? ` with these filters applied` : ''}
+                        </Text>
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ) : (
+                <View>
+                  <Text>Recommended by:</Text>
+                  <TouchableOpacity
+                    onPress={() =>
+                      seeOtherRecers(multipleRecInfo[item.showId].recommenders)
+                    }
+                  >
+                    <Text style={{ color: 'blue' }}>
+                      {`${multipleRecInfo[item.showId].num} people you follow ${
+                        filter ? `with these filters applied` : ''
+                      }`}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+          </View>
+        )}
+        keyExtractor={(item, index) => index.toString()}
+      />
+    )
+  }, [recShows, multipleRecInfo, noUserShows])
 
   useEffect(() => {
     const getRecShows = async () => {
@@ -173,14 +230,7 @@ const RecShows = (props) => {
       'advancedsearch is',
       advancedSearch
     )
-    // if (!advancedSearch && ref.current && !firstRender) {
-    //   console.log('i got into this one and I know I did it')
-    //   ref.current.setIndex(1)
-    // }
-    // if (advancedSearch && ref.current) {
-    //   console.log('i got into this second one and I know I did it')
-    //   ref.current.setIndex(1)
-    // }
+
     getRecShows()
   }, [
     isFocused,
@@ -190,66 +240,6 @@ const RecShows = (props) => {
     filter,
     props.filterRecs,
   ])
-
-  const displayRecShows = () => {
-    return (
-      <Tabs.FlatList
-        numColumns={1}
-        horizontal={false}
-        data={recShows}
-        renderItem={({ item }) => (
-          <View style={styles.containerImage}>
-            <TouchableOpacity
-              onPress={() => getUserShow(item)}
-              style={styles.catalogContainer}
-            >
-              <Image source={{ uri: item.imageUrl }} style={styles.image} />
-            </TouchableOpacity>
-            <View>
-              {multipleRecInfo[item.showId].num < 2 ? (
-                <View>
-                  <Text style={{ fontWeight: 'bold' }}>{item.name}</Text>
-                  <View style={styles.rowContainer}>
-                    <Text>Recommended by: </Text>
-                    <TouchableOpacity
-                      onPress={() =>
-                        props.navigation.navigate("TV rec'er", {
-                          uid: item.userId,
-                        })
-                      }
-                    >
-                      <Text style={{ color: 'blue' }}>
-                        {`${item.username}`}
-                        <Text style={{ color: 'black' }}>
-                          {filter ? ` with these filters applied` : ''}
-                        </Text>
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              ) : (
-                <View>
-                  <Text>Recommended by:</Text>
-                  <TouchableOpacity
-                    onPress={() =>
-                      seeOtherRecers(multipleRecInfo[item.showId].recommenders)
-                    }
-                  >
-                    <Text style={{ color: 'blue' }}>
-                      {`${multipleRecInfo[item.showId].num} people you follow ${
-                        filter ? `with these filters applied` : ''
-                      }`}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-            </View>
-          </View>
-        )}
-        keyExtractor={(item, index) => index.toString()}
-      />
-    )
-  }
 
   const seeOtherRecers = (recInfo) => {
     setModalVisible(true)
@@ -447,7 +437,7 @@ const RecShows = (props) => {
             </Tabs.ScrollView>
           ) : (
             <View style={styles.containerGallery}>
-              {displayRecShows()}
+              {flatlist}
               <OtherRecerModal
                 modalVisible={modalVisible}
                 setModalVisible={setModalVisible}

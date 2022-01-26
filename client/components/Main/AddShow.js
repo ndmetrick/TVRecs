@@ -153,16 +153,17 @@ const AddShow = (props) => {
                             '',
                             [
                               {
-                                text: 'Yes',    onPress=() =>
-                          props.navigation.navigate('Save show', {
-                            showData: {
-                              showName,
-                              imageUrl,
-                              imdbId,
-                              type: 'seen',
-                            },
-                            previous: 'AddShow',
-                          })
+                                text: 'Yes',
+                                onPress: () =>
+                                  props.navigation.navigate('Save show', {
+                                    showData: {
+                                      showName,
+                                      imageUrl,
+                                      imdbId,
+                                      type: 'seen',
+                                    },
+                                    previous: 'AddShow',
+                                  }),
                               },
                               {
                                 text: 'Cancel',

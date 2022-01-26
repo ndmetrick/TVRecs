@@ -43,6 +43,7 @@ const Search = (props) => {
   const [showName, setShowName] = useState('')
   const [filterShowChosen, setFilterShowChosen] = useState(false)
   const [excludeFollowed, setExcludeFollowed] = useState(false)
+  const [sameShowName, setSameShowName] = useState(false)
 
   useEffect(() => {
     setUsers(props.otherUsers)
@@ -66,8 +67,15 @@ const Search = (props) => {
       }
       setCommonShowDropdownOptions(numCommonUserShows)
       const shows = []
+      const showNames = {}
       props.userShows.forEach((userShow) => {
-        shows.push({ label: userShow.show.name, value: userShow.show })
+        let showName = userShow.show.name
+        if (showNames[showName]) {
+          setSameShowName(true)
+          showName = `${userShow.show.name} (${userShow.show.imdbId})`
+        }
+        shows.push({ label: showName, value: userShow.show })
+        showNames[showName] = true
       })
       setShowsDropdownOptions(shows)
     }
@@ -426,6 +434,20 @@ const Search = (props) => {
                         itemKey="label"
                         placeholder="Select show(s) to filter by"
                       />
+                      {sameShowName ? (
+                        <Text
+                          style={{
+                            fontSize: 16,
+                            marginTop: 10,
+                            fontWeight: '500',
+                            color: '#F46036',
+                          }}
+                        >
+                          To distinguish between multiple shows with the same
+                          name, we have added the IMDB ID to the end of any
+                          duplicate names.
+                        </Text>
+                      ) : null}
                     </View>
                   )}
                 </View>
@@ -490,39 +512,43 @@ const Search = (props) => {
                 <View style={styles.filterCriteriaContainer}>
                   <Text style={styles.boldText}>Filter criteria:</Text>
 
-                  <Text style={{ ...styles.filterText, marginBottom: 0 }}>
-                    {tagsChecked === 'chooseTags' && tagsDropdownValue.length
-                      ? `Only users who have tagged themselves with ${tagsDropdownValue
-                          .map((tag, index) =>
-                            index === tagsDropdownValue.length - 1 &&
-                            tagsDropdownValue.length > 2
-                              ? `and ${tag.name}`
-                              : tag.name
-                          )
-                          .join(', ')}`
-                      : tagsChecked === 'commonTags' && commonTagDropdownValue
-                      ? `Users who have at least ${commonTagDropdownValue} user
-                        tags in common with me`
-                      : null}
+                  {tagsChecked === 'none' ? null : (
+                    <Text style={{ ...styles.filterText, marginBottom: 0 }}>
+                      {tagsChecked === 'chooseTags' && tagsDropdownValue.length
+                        ? `Only display users who have tagged themselves with ${tagsDropdownValue
+                            .map((tag, index) =>
+                              index === tagsDropdownValue.length - 1 &&
+                              tagsDropdownValue.length > 2
+                                ? `and "${tag.name}"`
+                                : `"${tag.name}"`
+                            )
+                            .join(', ')}`
+                        : tagsChecked === 'commonTags' && commonTagDropdownValue
+                        ? `Only display users who have at least ${commonTagDropdownValue} user tags in common with me`
+                        : null}
+                    </Text>
+                  )}
 
-                    {showsChecked === 'chooseShow' && chosenShow
-                      ? `Users who recommend ${showName}`
-                      : showsChecked === 'chooseCommonShows' &&
-                        showsDropdownValue.length
-                      ? `Users who have recommended ${showsDropdownValue
-                          .map((show, index) =>
-                            index === showsDropdownValue.length - 1 &&
-                            showsDropdownValue.length > 2
-                              ? `and ${show.name}`
-                              : show.name
-                          )
-                          .join(', ')}`
-                      : showsChecked === 'commonShows' &&
-                        commonShowDropdownValue
-                      ? `Users who have at least ${commonShowDropdownValue} shows
-                        in common with me`
-                      : null}
-                  </Text>
+                  {showsChecked === 'none' ? null : (
+                    <Text style={{ ...styles.filterText, marginBottom: 0 }}>
+                      {showsChecked === 'chooseShow' && chosenShow
+                        ? `Only display users who recommend ${showName}`
+                        : showsChecked === 'chooseCommonShows' &&
+                          showsDropdownValue.length
+                        ? `Only display users who have recommended ${showsDropdownValue
+                            .map((show, index) =>
+                              index === showsDropdownValue.length - 1 &&
+                              showsDropdownValue.length > 2
+                                ? `and ${show.name}`
+                                : show.name
+                            )
+                            .join(', ')}`
+                        : showsChecked === 'commonShows' &&
+                          commonShowDropdownValue
+                        ? `Only display users who have at least ${commonShowDropdownValue} recommended shows in common with me`
+                        : null}
+                    </Text>
+                  )}
                 </View>
               )}
               <View style={{ flex: 1, flexDirection: 'row' }}>
@@ -660,7 +686,7 @@ const styles = StyleSheet.create({
   },
   filterCriteriaContainer: {
     flex: 1,
-    padding: 3,
+    padding: 6,
     backgroundColor: '#F4F1BB',
     marginTop: 7,
   },

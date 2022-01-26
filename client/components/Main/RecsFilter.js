@@ -3,7 +3,6 @@ import { connect } from 'react-redux'
 import {
   View,
   Text,
-  FlatList,
   TouchableOpacity,
   StyleSheet,
   ScrollView,
