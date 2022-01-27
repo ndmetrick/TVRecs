@@ -152,11 +152,11 @@ function SingleShow(props) {
                 onPress={() => props.navigation.navigate('CurrentUser')}
                 style={styles.usernameText}
               >
-                Your{' '}
+                Your
               </Text>
             </View>
             <View style={styles.recButton}>
-              <Text style={styles.recText}>recommendation:</Text>
+              <Text style={styles.recText}> recommendation:</Text>
             </View>
           </View>
         ) : (

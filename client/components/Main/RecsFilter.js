@@ -123,10 +123,10 @@ const RecsFilter = (props) => {
     }
 
     setTVTags(props.tvTags)
-    // const tags = []
-    // props.tvTags.forEach((tag) => {
-    //   tags.push({ label: tag.name, value: tag })
-    // })
+    const tags = []
+    props.tvTags.forEach((tag) => {
+      tags.push({ label: tag.name, value: tag })
+    })
 
     setStreamersDropdownOptions(streamingOptions)
 

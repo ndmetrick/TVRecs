@@ -119,7 +119,7 @@ function SaveShow(props) {
         {userShow.type === 'watch'
           ? 'Watch'
           : userShow.type === 'seen'
-          ? 'Seen'
+          ? 'Filter out'
           : 'Rec'}{' '}
         list{' '}
       </Text>

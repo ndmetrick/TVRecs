@@ -45,7 +45,6 @@ function ProfileHeader(props) {
       setUserFollowing(null)
       setUser(null)
       setPrevious(null)
-      setFollowing(false)
     }
   }, [props.user])
 
@@ -134,7 +133,7 @@ function ProfileHeader(props) {
             {props.following ? (
               <View style={styles.buttonContainer}>
                 <TouchableOpacity
-                  style={{ ...styles.button, backgroundColor: 'lightblue' }}
+                  style={{ ...styles.button, backgroundColor: 'white' }}
                   onPress={() => props.unfollow()}
                 >
                   <Text style={styles.buttonText}>stop following</Text>
@@ -186,19 +185,20 @@ const styles = StyleSheet.create({
   buttonText: {
     textAlign: 'center',
     fontSize: 18,
-    margin: 5,
-    fontWeight: '500',
+    margin: 2,
   },
   buttonContainer: {
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
   },
   button: {
-    padding: 10,
-    borderRadius: 40,
+    padding: 3,
+    borderRadius: 10,
+    borderWidth: 1,
     marginHorizontal: 3,
-    backgroundColor: '#36C9C6',
+    // backgroundColor: '#36C9C6',
     marginBottom: 5,
+    marginLeft: 8,
   },
   usernameButton: {
     borderRadius: 25,
