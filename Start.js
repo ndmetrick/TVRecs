@@ -28,6 +28,8 @@ import FAQ from './client/components/Main/FAQ'
 import 'react-native-gesture-handler'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 
+let logo = './client/assets/tempTVRecsLogo.png'
+
 const Start = (props) => {
   const Stack = createStackNavigator()
 
@@ -68,7 +70,7 @@ const Start = (props) => {
                   <TouchableOpacity onPress={() => navigation.navigate('Main')}>
                     <Image
                       style={{ width: 50, height: 40, margin: 20 }}
-                      source={require('./tempTVRecsLogo.jpeg')}
+                      source={require(logo)}
                     />
                   </TouchableOpacity>
                 ),
@@ -96,8 +98,8 @@ const Start = (props) => {
                 headerTitle: () => (
                   <TouchableOpacity onPress={() => navigation.navigate('Main')}>
                     <Image
-                      style={{ width: 40, height: 40, margin: 20 }}
-                      source={require('./tempTVRecsLogo.jpeg')}
+                      style={{ width: 50, height: 40, margin: 20 }}
+                      source={require(logo)}
                     />
                   </TouchableOpacity>
                 ),
@@ -112,7 +114,7 @@ const Start = (props) => {
                   <TouchableOpacity onPress={() => navigation.navigate('Main')}>
                     <Image
                       style={{ width: 50, height: 40, margin: 20 }}
-                      source={require('./tempTVRecsLogo.jpeg')}
+                      source={require(logo)}
                     />
                   </TouchableOpacity>
                 ),
@@ -127,7 +129,7 @@ const Start = (props) => {
                   <TouchableOpacity onPress={() => navigation.navigate('Main')}>
                     <Image
                       style={{ width: 50, height: 40, margin: 20 }}
-                      source={require('./tempTVRecsLogo.jpeg')}
+                      source={require(logo)}
                     />
                   </TouchableOpacity>
                 ),
@@ -142,7 +144,7 @@ const Start = (props) => {
                   <TouchableOpacity onPress={() => navigation.navigate('Main')}>
                     <Image
                       style={{ width: 50, height: 40, margin: 20 }}
-                      source={require('./tempTVRecsLogo.jpeg')}
+                      source={require(logo)}
                     />
                   </TouchableOpacity>
                 ),
@@ -157,7 +159,7 @@ const Start = (props) => {
                   <TouchableOpacity onPress={() => navigation.navigate('Main')}>
                     <Image
                       style={{ width: 50, height: 40, margin: 20 }}
-                      source={require('./tempTVRecsLogo.jpeg')}
+                      source={require(logo)}
                     />
                   </TouchableOpacity>
                 ),
@@ -172,7 +174,7 @@ const Start = (props) => {
                   <TouchableOpacity onPress={() => navigation.navigate('Main')}>
                     <Image
                       style={{ width: 50, height: 40, margin: 20 }}
-                      source={require('./tempTVRecsLogo.jpeg')}
+                      source={require(logo)}
                     />
                   </TouchableOpacity>
                 ),
@@ -187,7 +189,7 @@ const Start = (props) => {
                   <TouchableOpacity onPress={() => navigation.navigate('Main')}>
                     <Image
                       style={{ width: 50, height: 40, margin: 20 }}
-                      source={require('./tempTVRecsLogo.jpeg')}
+                      source={require(logo)}
                     />
                   </TouchableOpacity>
                 ),
@@ -211,7 +213,7 @@ const Start = (props) => {
                 headerTitle: () => (
                   <Image
                     style={{ width: 50, height: 40, margin: 20 }}
-                    source={require('./tempTVRecsLogo.jpeg')}
+                    source={require(logo)}
                   />
                 ),
               }}
@@ -224,7 +226,7 @@ const Start = (props) => {
                 headerTitle: () => (
                   <Image
                     style={{ width: 50, height: 40, margin: 20 }}
-                    source={require('./tempTVRecsLogo.jpeg')}
+                    source={require(logo)}
                   />
                 ),
               }}
@@ -237,7 +239,7 @@ const Start = (props) => {
                 headerTitle: () => (
                   <Image
                     style={{ width: 50, height: 40, margin: 20 }}
-                    source={require('./tempTVRecsLogo.jpeg')}
+                    source={require(logo)}
                   />
                 ),
               }}
@@ -250,7 +252,7 @@ const Start = (props) => {
                 headerTitle: () => (
                   <Image
                     style={{ width: 50, height: 40, margin: 20 }}
-                    source={require('./tempTVRecsLogo.jpeg')}
+                    source={require(logo)}
                   />
                 ),
               }}
@@ -264,7 +266,7 @@ const Start = (props) => {
                   <TouchableOpacity onPress={() => navigation.navigate('Main')}>
                     <Image
                       style={{ width: 50, height: 40, margin: 20 }}
-                      source={require('./tempTVRecsLogo.jpeg')}
+                      source={require(logo)}
                     />
                   </TouchableOpacity>
                 ),

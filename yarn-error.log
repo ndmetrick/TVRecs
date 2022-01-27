@@ -1,5 +1,5 @@
 Arguments: 
-  /Users/nate/.nvm/versions/node/v14.16.1/bin/node /Users/nate/.yarn/bin/yarnpkg add react-native-fast-image expo-dev-client@~0.8.0
+  /Users/nate/.nvm/versions/node/v14.16.1/bin/node /Users/nate/.yarn/bin/yarnpkg add expo-app-loading@~1.3.0
 
 PATH: 
   /Users/nate/.yarn/bin:/Users/nate/.config/yarn/global/node_modules/.bin:/Users/nate/.nvm/versions/node/v14.16.1/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/Apple/usr/bin:/Users/nate/Library/Android/sdk/platform-tools/:/Users/nate/.android-sdk-macosx/platform-tools/:/Users/nate/.android-sdk-macosx/platform-tools/adb

@@ -37,12 +37,14 @@ const AddShow = (props) => {
   }, [isFocused])
 
   const addShow = (showName, imageUrl, imdbId, showAdded) => {
+    console.log('image here', imageUrl, showName)
     setShowName(showName)
     setImageUrl(imageUrl)
     setImdbId(imdbId)
     setShowAdded(showAdded)
   }
 
+  console.log(image)
   const image = { uri: imageUrl }
   return (
     <View style={styles.container}>

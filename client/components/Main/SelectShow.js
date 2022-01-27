@@ -86,9 +86,10 @@ const SelectShow = (props) => {
           } else {
             const imageShowText = `http://www.omdbapi.com/?t=${titleString}&apikey=${OMDBKey}`
             const imageShow = await axios.get(imageShowText)
-            const poster = imageShow.data.Poster
-            if (!poster) {
-              console.log('I need a plan here')
+            let poster = imageShow.data.Poster
+            if (!poster || poster === 'N/A') {
+              console.log('i got into this one')
+              poster = 'https://i.postimg.cc/NjTL22vB/temp-Logo2.jpg'
             }
             props.handleShow(show.name, poster, show.id, true)
             setAdded(true)
@@ -118,15 +119,25 @@ const SelectShow = (props) => {
       setShowInput(data.name)
       setShowOptions(null)
       if (data.poster_path) {
+        console.log('actually made it up here')
         const image = 'https://image.tmdb.org/t/p/original' + data.poster_path
         props.handleShow(data.name, image, id, true)
         setAdded(true)
       } else {
+        console.log('nope, here i am')
         const imageShowText = `http://www.omdbapi.com/?t=${data.name}&apikey=${OMDBKey}`
         const imageShow = await axios.get(imageShowText)
-        const poster = imageShow.data.Poster
-        props.handleShow(data.name, poster, id, true)
-        setAdded(true)
+        // console.log('this is the image', imageShow)
+        let poster = imageShow.data.Poster
+        if (!poster || poster === 'N/A') {
+          console.log('i got in here')
+          poster = 'https://i.postimg.cc/NjTL22vB/temp-Logo2.jpg'
+          props.handleShow(data.name, poster, id, true)
+          setAdded(true)
+        } else {
+          props.handleShow(data.name, poster, id, true)
+          setAdded(true)
+        }
       }
     } catch (e) {
       console.error(e)

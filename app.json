@@ -9,7 +9,7 @@
       "fallbackToCacheTimeout": 0
     },
     "privacy": "public",
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": ["assets/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.ndmetrick.TelevisionIsMyFriend"
