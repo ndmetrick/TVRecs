@@ -11,13 +11,12 @@ import {
 import { useFirstRender } from './helpers.js'
 import RecsFilter from './RecsFilter'
 import * as Tabs from 'react-native-collapsible-tab-view'
-import {
-  jumpToTab,
-  setIndex,
-  getFocusedTab,
-  getCurrentIndex,
-} from 'react-native-collapsible-tab-view'
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+// import {
+//   jumpToTab,
+//   setIndex,
+//   getFocusedTab,
+//   getCurrentIndex,
+// } from 'react-native-collapsible-tab-view'
 
 import {
   getUserFollowing,

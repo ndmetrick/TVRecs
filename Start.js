@@ -28,7 +28,7 @@ import FAQ from './client/components/Main/FAQ'
 import 'react-native-gesture-handler'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 
-let logo = './client/assets/tempTVRecsLogo.png'
+let logo = './assets/tempTVRecsLogo.png'
 
 const Start = (props) => {
   const Stack = createStackNavigator()

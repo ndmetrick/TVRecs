@@ -8,11 +8,17 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
+    "splash": {
+      "image": "./assets/splash.png"
+    },
     "privacy": "public",
     "assetBundlePatterns": ["assets/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.ndmetrick.TelevisionIsMyFriend"
+    },
+    "android": {
+      "package": "com.ndmetrick.TelevisionIsMyFriend"
     }
   }
 }
