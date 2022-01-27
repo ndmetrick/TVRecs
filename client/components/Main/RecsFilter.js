@@ -51,31 +51,34 @@ const RecsFilter = (props) => {
 
   const streamingOptions = [
     {
-      label: 'Netflix',
-      value: { name: 'Netflix' },
-    },
-    {
       label: 'Amazon Prime Video',
       value: { name: 'Amazon Prime Video' },
     },
-    { label: 'Hulu', value: { name: 'Hulu' } },
-    { label: 'Disney+', value: { name: 'Disney+' } },
-    { label: 'HBO Max', value: { name: 'HBO Max' } },
-    { label: 'Peacock', value: { name: 'Peacock' } },
-    { label: 'Paramount Plus', value: { name: 'Paramount Plus' } },
-    { label: 'Starz', value: { name: 'Starz' } },
-    { label: 'Showtime', value: { name: 'Showtime' } },
-    { label: 'Apple TV+', value: { name: 'Apple TV+' } },
-    { label: 'Mubi', value: { name: 'Mubi' } },
-    { label: 'Stan', value: { name: 'Stan' } },
-    { label: 'Now', value: { name: 'Now' } },
-    { label: 'Crave', value: { name: 'Crave' } },
-    { label: 'All 4', value: { name: 'All 4' } },
-    { label: 'BBC iPlayer', value: { name: 'BBC iPlayer' } },
+    { label: 'AMC Plus', value: { name: 'AMC Plus' } },
+    { label: 'Apple TV Plus', value: { name: 'Apple TV Plus' } },
+    { label: 'BBC America', value: { name: 'BBC America' } },
     { label: 'BritBox', value: { name: 'BritBox' } },
-    { label: 'Hotstar', value: { name: 'Hotstar' } },
-    { label: 'Zee5', value: { name: 'Zee5' } },
-    { label: 'Curiosity Stream', value: { name: 'Curiosity Stream' } },
+    { label: 'Comedy Central', value: { name: 'Comedy Central' } },
+    { label: 'Crave', value: { name: 'Crave' } },
+    { label: 'DIRECTV', value: { name: 'DIRECTV' } },
+    { label: 'Disney Plus', value: { name: 'Disney Plus' } },
+
+    { label: 'fuboTV', value: { name: 'fuboTV' } },
+    { label: 'HBO Max', value: { name: 'HBO Max' } },
+    { label: 'Hoopla', value: { name: 'Hoopla' } },
+    { label: 'Hulu', value: { name: 'Hulu' } },
+    {
+      label: 'Netflix',
+      value: { name: 'Netflix' },
+    },
+    { label: 'Paramount Plus', value: { name: 'Paramount Plus' } },
+    { label: 'Peacock Premium', value: { name: 'Peacock Premium' } },
+    { label: 'Showtime', value: { name: 'Showtime' } },
+    { label: 'Spectrum On Demand', value: { name: 'Spectrum On Demand' } },
+
+    { label: 'Starz', value: { name: 'Starz' } },
+
+    { label: 'Sling TV', value: { name: 'Sling TV' } },
   ]
 
   useEffect(() => {
@@ -112,8 +115,6 @@ const RecsFilter = (props) => {
         setStreamersChecked('chooseStreamers')
         setStreamersDropdownValue(props.filter['chooseStreamers'].streamers)
       }
-      // containerRef.current.setIndex(i)
-      // console.log('ref', ref, containerRef)
 
       if (props.filter['chooseMinRecs']) {
         setMinRecs('chooseMinRecs')
@@ -122,10 +123,10 @@ const RecsFilter = (props) => {
     }
 
     setTVTags(props.tvTags)
-    const tags = []
-    props.tvTags.forEach((tag) => {
-      tags.push({ label: tag.name, value: tag })
-    })
+    // const tags = []
+    // props.tvTags.forEach((tag) => {
+    //   tags.push({ label: tag.name, value: tag })
+    // })
 
     setStreamersDropdownOptions(streamingOptions)
 

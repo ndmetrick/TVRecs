@@ -251,6 +251,9 @@ export function changeCountry(newCountry) {
           type: types.GET_CURRENT_USER,
           currentUser: updatedUser.data,
         })
+        dispatch({
+          type: types.CLEAR_WATCH_PROVIDERS,
+        })
       }
     } catch (e) {
       console.error(e)

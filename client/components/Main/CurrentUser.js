@@ -53,7 +53,7 @@ function CurrentUser(props) {
 
   const recsTabName = `Recs (${props.currentUserShows.length})`
   const toWatchTabName = `To Watch (${props.toWatch.length})`
-  const seenTabName = `Filer Out (${props.seen.length})`
+  const seenTabName = `Filter Out (${props.seen.length})`
 
   return (
     <Tabs.Container

@@ -18,6 +18,7 @@ import {
   ADD_TO_WATCH_PROVIDERS,
   GET_MATCHING_RECS,
   GET_MATCHING_RECS_AND_WATCH,
+  CLEAR_WATCH_PROVIDERS,
 } from '../constants'
 
 const initialState = {
@@ -212,6 +213,8 @@ export default function userReducer(state = initialState, action) {
       return { ...initialState, loggingOut: true }
     case CLEAR_DATA:
       return initialState
+    case CLEAR_WATCH_PROVIDERS:
+      return { ...state, watchProviders: {} }
     case ADD_TO_WATCH_PROVIDERS:
       // eslint-disable-next-line no-case-declarations
       const showId = action.watchInfo.imdbId
