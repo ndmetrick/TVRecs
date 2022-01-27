@@ -8,6 +8,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  Linking,
 } from 'react-native'
 
 function LoggedOutHome(props) {
@@ -42,6 +43,18 @@ function LoggedOutHome(props) {
         If you've got ideas for tags I'm missing that I should add, or have
         other ideas, feel free to email me at ndmetrick@gmail.com.
       </Text>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() =>
+            Linking.openURL(
+              'https://www.termsfeed.com/live/3d7fd044-566e-4e51-9fd7-aa561f45932a'
+            )
+          }
+        >
+          <Text style={styles.buttonText}>Privacy Policy</Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   )
 }

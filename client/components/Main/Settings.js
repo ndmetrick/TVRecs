@@ -6,6 +6,7 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
+  Linking,
 } from 'react-native'
 import { useIsFocused } from '@react-navigation/native'
 import PickCountry from './PickCountry'
@@ -76,7 +77,6 @@ function Settings(props) {
   return (
     <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <Text style={styles.text}>more settings coming soon...</Text>
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.button} onPress={logout}>
             <Text style={styles.buttonText}>Logout</Text>
@@ -151,6 +151,18 @@ function Settings(props) {
               </Text>
             </TouchableOpacity>
           </View>
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() =>
+                Linking.openURL(
+                  'https://www.termsfeed.com/live/3d7fd044-566e-4e51-9fd7-aa561f45932a'
+                )
+              }
+            >
+              <Text style={styles.buttonText}>Privacy Policy</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
     </View>
@@ -186,10 +198,10 @@ const styles = StyleSheet.create({
   },
   button: {
     padding: 10,
-    borderRadius: 40,
+    borderRadius: 25,
     marginHorizontal: 3,
     backgroundColor: '#340068',
-    marginTop: 5,
+    marginTop: 2,
   },
   cardContent: {
     flexDirection: 'row',
