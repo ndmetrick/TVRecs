@@ -147,29 +147,13 @@ const RecShows = (props) => {
             setFilterTabName(filterName)
             setRecsTabName(name)
           } else {
-            if (noUserShows) {
-              shows = shows.filter((recShow) => {
-                return (
-                  !props.userShows.find(
-                    (userShow) => userShow.show.id === recShow.showId
-                  ) &&
-                  !props.toWatch.find(
-                    (watchShow) => watchShow.show.id === recShow.showId
-                  )
-                )
-              })
-              if (!shows.length) {
-                console.log('i got into no shows with noUserShows')
-              }
-            }
-            // we only want to see a show recommended once on the timeline, but we want to be able to see how many times it was recommended and by which other users
-
             let visibleShows = []
             let recCounts = {}
             recCounts['loaded'] = 0
             for (let recShow of shows) {
               const count = recCounts[recShow.showId]
               if (!count) {
+                // if the show is on the user's profile, in recs or to watch (filter out has already been filtered out on the back end), we want to save that info and have words ready to add to the note below the show. If the show is on their profile and they've checked that they don't want to see any shows on their profile, we shouldn't add it to visible shows.
                 const myProfile = props.userShows.find(
                   (userShow) => userShow.show.id === recShow.showId
                 )
@@ -179,14 +163,22 @@ const RecShows = (props) => {
                     )
                   ? 'and on your To Watch list'
                   : null
-
-                visibleShows.push(recShow)
-                recCounts[recShow.showId] = {
-                  num: 1,
-                  recommenders: [{ name: recShow.username, recShow }],
-                  myProfile: myProfile,
+                if (noUserShows && myProfile !== null) {
+                  recCounts[recShow.showId] = {
+                    num: 1,
+                    recommenders: [{ name: recShow.username, recShow }],
+                    myProfile: myProfile,
+                  }
+                } else {
+                  visibleShows.push(recShow)
+                  recCounts[recShow.showId] = {
+                    num: 1,
+                    recommenders: [{ name: recShow.username, recShow }],
+                    myProfile: myProfile,
+                  }
+                  recCounts['loaded'] += 1
                 }
-                recCounts['loaded'] += 1
+                // if this isn't the first instance of this show we've seen, don't load it to visible shows, but save the information about it so we can add it to multipleRecInfo, which keeps track of all the recommendations they want to see, including the other extras -- shows recommended multiple times by different people they follow.
               } else {
                 recCounts[recShow.showId].num++
                 recCounts[recShow.showId].recommenders.push({

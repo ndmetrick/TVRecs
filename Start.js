@@ -264,12 +264,7 @@ const Start = (props) => {
               component={Login}
               navigation={props.navigation}
               options={{
-                headerTitle: () => (
-                  <Image
-                    style={{ width: 50, height: 40, margin: 20 }}
-                    source={require(logo)}
-                  />
-                ),
+                headerTitle: '',
               }}
             />
             <Stack.Screen

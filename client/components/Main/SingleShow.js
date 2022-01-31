@@ -270,8 +270,7 @@ function SingleShow(props) {
           <Text
             style={{
               fontSize: 16,
-              marginLeft: 10,
-              marginBottom: 10,
+              margin: 10,
               textAlign: 'left',
             }}
           >
@@ -286,8 +285,7 @@ function SingleShow(props) {
         ) : (
           <View
             style={{
-              marginLeft: 10,
-              marginBottom: 10,
+              margin: 10,
               flexDirection: 'row',
               flexWrap: 'wrap',
             }}
