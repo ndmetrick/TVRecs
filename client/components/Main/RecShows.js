@@ -67,7 +67,7 @@ const RecShows = (props) => {
                 <View>
                   <Text style={{ fontWeight: 'bold' }}>{item.name}</Text>
                   <View style={styles.rowContainer}>
-                    <Text>Recommended by: </Text>
+                    <Text>Recommended by </Text>
                     <TouchableOpacity
                       onPress={() =>
                         props.navigation.navigate("TV rec'er", {
@@ -78,7 +78,8 @@ const RecShows = (props) => {
                       <Text style={{ color: 'blue' }}>
                         {`${item.username}`}
                         <Text style={{ color: 'black' }}>
-                          {filter ? ` with these filters applied` : ''}
+                          {filter ? ` with these filters applied` : ''}{' '}
+                          {multipleRecInfo[item.showId].myProfile}
                         </Text>
                       </Text>
                     </TouchableOpacity>
@@ -86,18 +87,28 @@ const RecShows = (props) => {
                 </View>
               ) : (
                 <View>
-                  <Text>Recommended by:</Text>
-                  <TouchableOpacity
-                    onPress={() =>
-                      seeOtherRecers(multipleRecInfo[item.showId].recommenders)
-                    }
-                  >
-                    <Text style={{ color: 'blue' }}>
-                      {`${multipleRecInfo[item.showId].num} people you follow ${
-                        filter ? `with these filters applied` : ''
-                      }`}
-                    </Text>
-                  </TouchableOpacity>
+                  <Text style={{ fontWeight: 'bold' }}>{item.name}</Text>
+                  <View style={styles.rowContainer}>
+                    <Text>Recommended by </Text>
+                    <TouchableOpacity
+                      onPress={() =>
+                        seeOtherRecers(
+                          multipleRecInfo[item.showId].recommenders
+                        )
+                      }
+                    >
+                      <Text style={{ color: 'blue' }}>
+                        {`${
+                          multipleRecInfo[item.showId].num
+                        } people you follow ${
+                          filter ? `with these filters applied` : ''
+                        }`}
+                        <Text style={{ color: 'black' }}>
+                          {multipleRecInfo[item.showId].myProfile}
+                        </Text>
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
               )}
             </View>
@@ -144,9 +155,6 @@ const RecShows = (props) => {
                   ) &&
                   !props.toWatch.find(
                     (watchShow) => watchShow.show.id === recShow.showId
-                  ) &&
-                  !props.seen.find(
-                    (seenShow) => seenShow.show.id === recShow.showId
                   )
                 )
               })
@@ -162,10 +170,21 @@ const RecShows = (props) => {
             for (let recShow of shows) {
               const count = recCounts[recShow.showId]
               if (!count) {
+                const myProfile = props.userShows.find(
+                  (userShow) => userShow.show.id === recShow.showId
+                )
+                  ? 'and you'
+                  : props.toWatch.find(
+                      (watchShow) => watchShow.show.id === recShow.showId
+                    )
+                  ? 'and on your To Watch list'
+                  : null
+
                 visibleShows.push(recShow)
                 recCounts[recShow.showId] = {
                   num: 1,
                   recommenders: [{ name: recShow.username, recShow }],
+                  myProfile: myProfile,
                 }
                 recCounts['loaded'] += 1
               } else {
@@ -389,17 +408,6 @@ const RecShows = (props) => {
     console.log('i got into this one up here 1')
   }
 
-  // console.log('filtername', 'ref.current', ref.current, advancedSearch, loading)
-  // if (advancedSearch && ref.current && !loading && recsTabName === 'Recs(0)') {
-  //   console.log(
-  //     'i got in here',
-  //     recShows.length,
-  //     firstRender,
-  //     recsTabName,
-  //     ref.current.getFocusedTab()
-  //   )
-  // }
-
   return (
     <Tabs.Container
       renderHeader={Header}
@@ -470,6 +478,7 @@ const styles = StyleSheet.create({
   },
   rowContainer: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
   },
   containerInfo: {
     margin: 20,

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { connect } from 'react-redux'
 import {
   View,
@@ -22,6 +22,7 @@ import StreamingAndPurchase from './StreamingAndPurchase'
 import OtherRecerModal from './OtherRecerModal'
 
 import { useIsFocused } from '@react-navigation/native'
+import DropDownPicker from 'react-native-dropdown-picker'
 
 function SingleShow(props) {
   const [userShow, setUserShow] = useState({})
@@ -30,8 +31,13 @@ function SingleShow(props) {
   const [warningTags, setWarningTags] = useState([])
   const [tvTags, setTVTags] = useState([])
   const [isCurrentUser, setIsCurrentUser] = useState(false)
+  const [userHasShow, setUserHasShow] = useState(null)
   const [country, setCountry] = useState(null)
   const [streamingAndPurchase, setStreamingAndPurchase] = useState(false)
+  const [profileShowDropdownOpen, setProfileShowDropdownOpen] = useState(false)
+  const [profileShowDropdownValue, setProfileShowDropdownValue] = useState(null)
+  const [profileShowDropdownOptions, setProfileShowDropdownOptions] =
+    useState(null)
 
   const isFocused = useIsFocused()
 
@@ -44,6 +50,8 @@ function SingleShow(props) {
     const { currentUser } = props
     const { singleShow, userInfo } = props.route.params
 
+    //profileShowOptions is the list of dropdown menu options for what the user can do with the show (delete it from their profile, add it to their profile in different places, etc)
+
     if (currentUser === null && userInfo !== null) {
       console.log('i got in here')
       setUser(userInfo)
@@ -52,12 +60,86 @@ function SingleShow(props) {
       if (userInfo !== null) {
         console.log('userInfo', userInfo)
         if (userInfo.id === currentUser.id) {
+          // if the current user is the same as the person who's page this is (it's their own profile page):
           setUser(currentUser)
           setIsCurrentUser(true)
           setCountry(userInfo.country)
+          const profileShowOptions = [
+            { label: 'Delete it', value: 'delete' },
+            { label: 'Add or edit description/tags', value: 'tags' },
+          ]
+          // If this show is already on the user's profile, depending on where it is, different options to move it will be added to the dropdown menu options.
+          const otherDropdownOptions = props.currentUserShows.find(
+            (currentUserShow) => currentUserShow.show.id === singleShow.show.id
+          )
+            ? [
+                {
+                  label:
+                    'Move it to my Watch list to remind me to watch it later',
+                  value: 'watch',
+                },
+                { label: 'Move it to my Filter Out list', value: 'seen' },
+                { label: 'Nothing', value: 'none' },
+              ]
+            : props.watchShows.find(
+                (watchShow) => watchShow.show.id === singleShow.show.id
+              )
+            ? [
+                { label: 'Recommend it', value: 'rec' },
+                { label: 'Move it to my Filter Out list', value: 'seen' },
+                { label: 'Nothing', value: 'none' },
+              ]
+            : [
+                { label: 'Recommend it', value: 'rec' },
+
+                {
+                  label:
+                    'Move it to my Watch list to remind me to watch it later',
+                  value: 'watch',
+                },
+                { label: 'Nothing', value: 'none' },
+              ]
+          otherDropdownOptions.forEach((option) => {
+            profileShowOptions.push(option)
+          })
+          console.log('profileshowoptions', profileShowOptions)
+          setProfileShowDropdownOptions(profileShowOptions)
         } else {
           setUser(userInfo)
           setCountry(currentUser.country)
+          if (currentUser) {
+            const hasShow = props.currentUserShows.find(
+              (currentUserShow) =>
+                currentUserShow.show.id === singleShow.show.id
+            )
+              ? 'rec'
+              : props.watchShows.find(
+                  (watchShow) => watchShow.show.id === singleShow.show.id
+                )
+              ? 'watch'
+              : props.seenShows.find(
+                  (seenShow) => seenShow.show.id === singleShow.show.id
+                )
+              ? 'seen'
+              : null
+            if (hasShow) {
+              setUserHasShow(hasShow)
+            } else {
+              setProfileShowDropdownOptions([
+                { label: 'Recommend it', value: 'rec' },
+                {
+                  label:
+                    'Save it to my Watch list to remind me to watch it later',
+                  value: 'watch',
+                },
+                {
+                  label: 'Filter it out of recs I see in my main feed',
+                  value: 'seen',
+                },
+                { label: 'Nothing', value: 'none' },
+              ])
+            }
+          }
         }
         const showId = singleShow.show.id
         let recCounts = {}
@@ -102,6 +184,8 @@ function SingleShow(props) {
       setCountry(null)
       setMultipleRecInfo({})
       setModalVisible(false)
+      setUserHasShow(null)
+      setProfileShowDropdownValue(null)
     }
   }, [props.route.params.userInfo, type, isFocused])
 
@@ -179,33 +263,67 @@ function SingleShow(props) {
           </View>
         )}
       </View>
-      {!props.currentUser ||
-      multipleRecInfo[userShow.show.id].num < 2 ? null : (
-        <View style={{ marginLeft: 10, marginBottom: 10 }}>
-          <Text style={{ fontSize: 16 }}>Also recommended by:</Text>
-          <TouchableOpacity onPress={() => setModalVisible(true)}>
-            <Text style={{ color: 'blue', fontSize: 16 }}>
-              {`${multipleRecInfo[userShow.show.id].num - 1}`}{' '}
-              {multipleRecInfo[userShow.show.id].num > 2 && isCurrentUser
-                ? 'people you follow'
-                : multipleRecInfo[userShow.show.id].num > 2 && !isCurrentUser
-                ? 'other people you follow'
-                : multipleRecInfo[userShow.show.id].num < 3 && isCurrentUser
-                ? 'person you follow'
-                : 'other person you follow'}
-            </Text>
-          </TouchableOpacity>
-          <OtherRecerModal
-            modalVisible={modalVisible}
-            setModalVisible={setModalVisible}
-            selectedItem={multipleRecInfo[userShow.show.id].recommenders}
-            navigation={props.navigation}
-            previous="SingleShow"
-            getSingleUserShow={props.getSingleUserShow}
-          />
-        </View>
-      )}
+
       <ScrollView showsVerticalScrollIndicator={false}>
+        {!props.currentUser ? null : multipleRecInfo[userShow.show.id].num <
+          2 ? (
+          <Text
+            style={{
+              fontSize: 16,
+              marginLeft: 10,
+              marginBottom: 10,
+              textAlign: 'left',
+            }}
+          >
+            {userHasShow === 'rec'
+              ? 'You also recommend this show'
+              : userHasShow === 'watch'
+              ? 'This show is on your To Watch list'
+              : userHasShow === 'seen'
+              ? 'This show is on your Filter Out list'
+              : null}
+          </Text>
+        ) : (
+          <View
+            style={{
+              marginLeft: 10,
+              marginBottom: 10,
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+            }}
+          >
+            <Text style={{ fontSize: 16 }}>Also recommended by </Text>
+            <TouchableOpacity onPress={() => setModalVisible(true)}>
+              <Text style={{ color: 'blue', fontSize: 16, textAlign: 'left' }}>
+                {`${multipleRecInfo[userShow.show.id].num - 1}`}{' '}
+                {multipleRecInfo[userShow.show.id].num > 2 && isCurrentUser
+                  ? 'people you follow'
+                  : multipleRecInfo[userShow.show.id].num > 2 && !isCurrentUser
+                  ? 'other people you follow'
+                  : multipleRecInfo[userShow.show.id].num < 3 && isCurrentUser
+                  ? 'person you follow'
+                  : 'other person you follow'}
+              </Text>
+            </TouchableOpacity>
+            <Text style={{ color: 'black', fontSize: 16 }}>
+              {userHasShow === 'rec'
+                ? 'and you'
+                : userHasShow === 'watch'
+                ? 'and on your To Watch list'
+                : userHasShow === 'seen'
+                ? 'and on your Filter Out list'
+                : null}
+            </Text>
+            <OtherRecerModal
+              modalVisible={modalVisible}
+              setModalVisible={setModalVisible}
+              selectedItem={multipleRecInfo[userShow.show.id].recommenders}
+              navigation={props.navigation}
+              previous="SingleShow"
+              getSingleUserShow={props.getSingleUserShow}
+            />
+          </View>
+        )}
         <View>
           <Image
             style={styles.image}
@@ -259,10 +377,12 @@ function SingleShow(props) {
                 ) : null}
               </View>
             ) : null}
-            {!streamingAndPurchase ? (
-              <View style={styles.buttonContainer}>
+            {profileShowDropdownValue !== null &&
+            profileShowDropdownValue !==
+              'none' ? null : !streamingAndPurchase ? (
+              <View style={{ ...styles.buttonContainer, marginBottom: 10 }}>
                 <TouchableOpacity
-                  style={{ ...styles.button, marginBottom: 15 }}
+                  style={styles.button}
                   onPress={() => setStreamingAndPurchase(true)}
                 >
                   <Text style={styles.buttonText}>
@@ -274,7 +394,7 @@ function SingleShow(props) {
               <View>
                 <View style={styles.buttonContainer}>
                   <TouchableOpacity
-                    style={{ ...styles.button, marginBottom: 15 }}
+                    style={styles.button}
                     onPress={() => setStreamingAndPurchase(false)}
                   >
                     <Text style={styles.buttonText}>
@@ -291,79 +411,33 @@ function SingleShow(props) {
             {isCurrentUser ? (
               <View
                 style={{
-                  flexDirection: 'row',
-                  flexWrap: 'wrap',
-                  justifyContent: 'center',
+                  marginLeft: 15,
+                  marginRight: 15,
                 }}
               >
-                <View style={styles.buttonContainer}>
-                  <TouchableOpacity
-                    style={styles.button}
-                    onPress={() =>
-                      Alert.alert(
-                        'Are you sure you want to delete this show?',
-                        '',
-                        [
-                          { text: 'Yes', onPress: () => deleteShow() },
-                          {
-                            text: 'Cancel',
-                          },
-                        ]
-                      )
-                    }
-                  >
-                    <Text style={styles.buttonText}>Delete show</Text>
-                  </TouchableOpacity>
-                </View>
-                <View style={styles.buttonContainer}>
-                  <TouchableOpacity
-                    style={styles.button}
-                    onPress={() =>
-                      props.navigation.navigate('Add/Change Tags', {
-                        userShow,
-                        previous: 'Show',
-                      })
-                    }
-                  >
-                    <Text style={styles.buttonText}>Add/change tags</Text>
-                  </TouchableOpacity>
-                </View>
-                {/* If the show is currently in the watch list, give the user the option to switch it to a recommended show */}
-                {type === 'watch' ? (
+                <DropDownPicker
+                  style={{ borderRadius: 25 }}
+                  open={profileShowDropdownOpen}
+                  value={profileShowDropdownValue}
+                  items={profileShowDropdownOptions}
+                  setOpen={setProfileShowDropdownOpen}
+                  setValue={setProfileShowDropdownValue}
+                  setItems={setProfileShowDropdownOptions}
+                  listMode="SCROLLVIEW"
+                  dropDownDirection="TOP"
+                  itemKey="label"
+                  placeholder="What do you want to do with this show?"
+                />
+                {profileShowDropdownValue === 'delete' ? (
                   <View style={styles.buttonContainer}>
                     <TouchableOpacity
-                      style={styles.button}
+                      style={styles.saveButton}
                       onPress={() =>
                         Alert.alert(
-                          `Save your current description and tags?`,
+                          'Are you sure you want to delete this show?',
                           '',
                           [
-                            {
-                              text: 'Yes',
-                              onPress: () =>
-                                props.navigation.navigate('Save show', {
-                                  showData: {
-                                    userShow,
-                                    type: 'rec',
-                                    keep: true,
-                                  },
-                                  previous: 'SingleShow',
-                                  fromCurrentUserShow: true,
-                                }),
-                            },
-                            {
-                              text: 'No',
-                              onPress: () =>
-                                props.navigation.navigate('Save show', {
-                                  showData: {
-                                    userShow,
-                                    type: 'rec',
-                                    keep: false,
-                                  },
-                                  previous: 'SingleShow',
-                                  fromCurrentUserShow: true,
-                                }),
-                            },
+                            { text: 'Yes', onPress: () => deleteShow() },
                             {
                               text: 'Cancel',
                             },
@@ -372,16 +446,38 @@ function SingleShow(props) {
                       }
                     >
                       <Text style={styles.buttonText}>
-                        Switch to Recommended
+                        Delete{' '}
+                        <Text style={styles.showName}>
+                          {userShow.show.name}
+                        </Text>
                       </Text>
                     </TouchableOpacity>
                   </View>
-                ) : null}
-                {/* If the show is currently in the watch list, give the user the option to switch it to a seen show */}
-                {type === 'watch' ? (
+                ) : profileShowDropdownValue === 'tags' ? (
                   <View style={styles.buttonContainer}>
                     <TouchableOpacity
-                      style={styles.button}
+                      style={styles.saveButton}
+                      onPress={() =>
+                        props.navigation.navigate('Add/Change Tags', {
+                          userShow,
+                          previous: 'Show',
+                        })
+                      }
+                    >
+                      <Text style={styles.buttonText}>
+                        Go to description/tags for{' '}
+                        <Text style={styles.showName}>
+                          {userShow.show.name}
+                        </Text>
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : profileShowDropdownValue === 'rec' ||
+                  profileShowDropdownValue === 'watch' ||
+                  profileShowDropdownValue === 'seen' ? (
+                  <View style={styles.buttonContainer}>
+                    <TouchableOpacity
+                      style={styles.saveButton}
                       onPress={() =>
                         Alert.alert(
                           `Save your current description and tags?`,
@@ -393,7 +489,7 @@ function SingleShow(props) {
                                 props.navigation.navigate('Save show', {
                                   showData: {
                                     userShow,
-                                    type: 'seen',
+                                    type: profileShowDropdownValue,
                                     keep: true,
                                   },
                                   previous: 'SingleShow',
@@ -406,7 +502,7 @@ function SingleShow(props) {
                                 props.navigation.navigate('Save show', {
                                   showData: {
                                     userShow,
-                                    type: 'seen',
+                                    type: profileShowDropdownValue,
                                     keep: false,
                                   },
                                   previous: 'SingleShow',
@@ -421,7 +517,15 @@ function SingleShow(props) {
                       }
                     >
                       <Text style={styles.buttonText}>
-                        Switch to Filter Out
+                        Switch{' '}
+                        <Text style={styles.showName}>
+                          {userShow.show.name}{' '}
+                        </Text>{' '}
+                        {profileShowDropdownValue === 'rec'
+                          ? 'to recommended'
+                          : profileShowDropdownValue === 'watch'
+                          ? 'to To Watch'
+                          : 'to Filter Out'}
                       </Text>
                     </TouchableOpacity>
                   </View>
@@ -430,168 +534,88 @@ function SingleShow(props) {
             ) : (
               <View>
                 {/* If the user isn't logged in or this show (identified by its imdbId) is in any of the current user's lists of shows, don't show them the buttons to add the show to one of their lists. */}
-                {props.currentUser === null ||
-                props.currentUserShows.find(
-                  (currentUserShow) =>
-                    currentUserShow.show.id === userShow.show.id
-                ) ||
-                props.watchShows.find(
-                  (watchShow) => watchShow.show.id === userShow.show.id
-                ) ||
-                props.seenShows.find(
-                  (seenShow) => seenShow.show.id === userShow.show.id
-                ) ? null : (
+                {props.currentUser === null || userHasShow ? null : (
                   <View>
-                    <View style={styles.buttonContainer}>
-                      <TouchableOpacity
-                        style={styles.button}
-                        onPress={() =>
-                          Alert.alert(
-                            `Save this user's description and tags?`,
-                            '',
-                            [
-                              {
-                                text: 'Yes',
-                                onPress: () =>
-                                  props.navigation.navigate('Save show', {
-                                    showData: {
-                                      showName: userShow.show.name,
-                                      imageUrl: userShow.show.imageUrl,
-                                      imdbId: userShow.show.imdbId,
-                                      description: userShow.description,
-                                      tags: userShow.tags,
-                                      type: 'rec',
-                                      keep: true,
-                                    },
-                                    previous: 'SingleShow',
-                                    fromCurrentUserShow: false,
-                                  }),
-                              },
-                              {
-                                text: 'No',
-                                onPress: () =>
-                                  props.navigation.navigate('Save show', {
-                                    showData: {
-                                      showName: userShow.show.name,
-                                      imageUrl: userShow.show.imageUrl,
-                                      imdbId: userShow.show.imdbId,
-                                      type: 'rec',
-                                      keep: false,
-                                    },
-                                    previous: 'SingleShow',
-                                    fromCurrentUserShow: false,
-                                  }),
-                              },
-                              {
-                                text: 'Cancel',
-                              },
-                            ]
-                          )
-                        }
-                      >
-                        <Text style={styles.buttonText}>Recommend</Text>
-                      </TouchableOpacity>
+                    <View style={{ marginRight: 15, marginLeft: 15 }}>
+                      <DropDownPicker
+                        style={{ borderRadius: 25 }}
+                        open={profileShowDropdownOpen}
+                        value={profileShowDropdownValue}
+                        items={profileShowDropdownOptions}
+                        setOpen={setProfileShowDropdownOpen}
+                        setValue={setProfileShowDropdownValue}
+                        setItems={setProfileShowDropdownOptions}
+                        listMode="SCROLLVIEW"
+                        dropDownDirection="TOP"
+                        itemKey="label"
+                        placeholder="What do you want to do with this show?"
+                      />
                     </View>
-                    <View style={styles.buttonContainer}>
-                      <TouchableOpacity
-                        style={styles.button}
-                        onPress={() =>
-                          Alert.alert(
-                            `Save this user's description and tags?`,
-                            '',
-                            [
-                              {
-                                text: 'Yes',
-                                onPress: () =>
-                                  props.navigation.navigate('Save show', {
-                                    showData: {
-                                      showName: userShow.show.name,
-                                      imageUrl: userShow.show.imageUrl,
-                                      imdbId: userShow.show.imdbId,
-                                      description: userShow.description,
-                                      tags: userShow.tags,
-                                      type: 'watch',
-                                      keep: true,
-                                    },
-                                    previous: 'SingleShow',
-                                    fromCurrentUserShow: false,
-                                  }),
-                              },
-                              {
-                                text: 'No',
-                                onPress: () =>
-                                  props.navigation.navigate('Save show', {
-                                    showData: {
-                                      showName: userShow.show.name,
-                                      imageUrl: userShow.show.imageUrl,
-                                      imdbId: userShow.show.imdbId,
-                                      type: 'watch',
-                                      keep: false,
-                                    },
-                                    previous: 'SingleShow',
-                                    fromCurrentUserShow: false,
-                                  }),
-                              },
-                              {
-                                text: 'Cancel',
-                              },
-                            ]
-                          )
-                        }
-                      >
-                        <Text style={styles.buttonText}>Add to Watch list</Text>
-                      </TouchableOpacity>
-                    </View>
-                    <View style={styles.buttonContainer}>
-                      <TouchableOpacity
-                        style={styles.button}
-                        onPress={() =>
-                          Alert.alert(
-                            `Save this user's description and tags?`,
-                            '',
-                            [
-                              {
-                                text: 'Yes',
-                                onPress: () =>
-                                  props.navigation.navigate('Save show', {
-                                    showData: {
-                                      showName: userShow.show.name,
-                                      imageUrl: userShow.show.imageUrl,
-                                      imdbId: userShow.show.imdbId,
-                                      description: userShow.description,
-                                      tags: userShow.tags,
-                                      type: 'seen',
-                                      keep: true,
-                                    },
-                                    previous: 'SingleShow',
-                                    fromCurrentUserShow: false,
-                                  }),
-                              },
-                              {
-                                text: 'No',
-                                onPress: () =>
-                                  props.navigation.navigate('Save show', {
-                                    showData: {
-                                      showName: userShow.show.name,
-                                      imageUrl: userShow.show.imageUrl,
-                                      imdbId: userShow.show.imdbId,
-                                      type: 'seen',
-                                      keep: false,
-                                    },
-                                    previous: 'SingleShow',
-                                    fromCurrentUserShow: false,
-                                  }),
-                              },
-                              {
-                                text: 'Cancel',
-                              },
-                            ]
-                          )
-                        }
-                      >
-                        <Text style={styles.buttonText}>Filter Out</Text>
-                      </TouchableOpacity>
-                    </View>
+                    {profileShowDropdownValue === null ||
+                    profileShowDropdownValue === 'none' ? null : (
+                      <View style={styles.buttonContainer}>
+                        <TouchableOpacity
+                          style={styles.saveButton}
+                          onPress={() =>
+                            Alert.alert(
+                              `Save this user's description and tags?`,
+                              '',
+                              [
+                                {
+                                  text: 'Yes',
+                                  onPress: () =>
+                                    props.navigation.navigate('Save show', {
+                                      showData: {
+                                        showName: userShow.show.name,
+                                        imageUrl: userShow.show.imageUrl,
+                                        imdbId: userShow.show.imdbId,
+                                        description: userShow.description,
+                                        tags: userShow.tags,
+                                        type: profileShowDropdownValue,
+                                        keep: true,
+                                      },
+                                      previous: 'SingleShow',
+                                      fromCurrentUserShow: false,
+                                    }),
+                                },
+                                {
+                                  text: 'No',
+                                  onPress: () =>
+                                    props.navigation.navigate('Save show', {
+                                      showData: {
+                                        showName: userShow.show.name,
+                                        imageUrl: userShow.show.imageUrl,
+                                        imdbId: userShow.show.imdbId,
+                                        type: profileShowDropdownValue,
+                                        keep: false,
+                                      },
+                                      previous: 'SingleShow',
+                                      fromCurrentUserShow: false,
+                                    }),
+                                },
+                                {
+                                  text: 'Cancel',
+                                },
+                              ]
+                            )
+                          }
+                        >
+                          <Text style={styles.buttonText}>
+                            {profileShowDropdownValue === 'rec'
+                              ? 'Recommend '
+                              : profileShowDropdownValue === 'watch'
+                              ? 'Save '
+                              : 'Filter Out '}
+                            <Text style={styles.showName}>
+                              {userShow.show.name}{' '}
+                            </Text>{' '}
+                            {profileShowDropdownValue === 'watch'
+                              ? 'to my Watch List'
+                              : null}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
                   </View>
                 )}
               </View>
@@ -624,7 +648,6 @@ const styles = StyleSheet.create({
   //   marginLeft: 15,
   // },
   containerInfo: {
-    marginBottom: 5,
     padding: 5,
     backgroundColor: '#340068',
     alignItems: 'center',
@@ -717,6 +740,17 @@ const styles = StyleSheet.create({
     marginTop: 5,
     marginLeft: 5,
     marginRight: 5,
+  },
+  saveButton: {
+    backgroundColor: '#4056F4',
+    padding: 8,
+    borderRadius: 40,
+    marginHorizontal: 3,
+    marginTop: 5,
+    marginBottom: 20,
+  },
+  showName: {
+    color: '#ED6A5A',
   },
 })
 const mapState = (store) => ({

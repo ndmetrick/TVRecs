@@ -195,6 +195,21 @@ const Start = (props) => {
                 ),
               })}
             />
+            {/* <Stack.Screen
+              name="UpdateAccount"
+              component={UpdateAccount}
+              navigation={props.navigation}
+              options={({ navigation }) => ({
+                headerTitle: () => (
+                  <TouchableOpacity onPress={() => navigation.navigate('Main')}>
+                    <Image
+                      style={{ width: 50, height: 40, margin: 20 }}
+                      source={require(logo)}
+                    />
+                  </TouchableOpacity>
+                ),
+              })}
+            /> */}
           </Stack.Navigator>
         </NavigationContainer>
       ) : (

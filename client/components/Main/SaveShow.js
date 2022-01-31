@@ -15,6 +15,7 @@ import {
   addShow,
   switchShow,
   changeShowTagsAndDescription,
+  getUsersFollowingRecs,
 } from '../../redux/actions'
 
 function SaveShow(props) {
@@ -56,11 +57,15 @@ function SaveShow(props) {
     const saveShowData = async () => {
       try {
         if (props.route.params.fromCurrentUserShow === true) {
-          const show = await props.switchShow(
+          const showInfo = await props.switchShow(
             showData.userShow.id,
             showData.type
           )
-          setUserShow(show)
+          // because seen/to-filter shows are automatically removed from shows recommended to the user, we need to get recShows again if we succeed in switching a show from seen to something else
+          if (showInfo && showInfo.oldType === 'seen') {
+            await props.getUsersFollowingRecs()
+          }
+          setUserShow(showInfo.userShow)
           setLoading(false)
         } else {
           const show = await props.addShow(showData, showData.type)
@@ -92,6 +97,7 @@ function SaveShow(props) {
           props.navigation.navigate('CurrentUser')
         } else {
           await changeShowTagsAndDescription(tags, userShow.id, description)
+          props.navigation.navigate('CurrentUser')
         }
       } else {
         if (showInfo.keep === false) {
@@ -112,15 +118,17 @@ function SaveShow(props) {
   }
 
   const displayUserShowInfo = () => {
+    console.log('i am here and userShow.type is', userShow.type)
+    const addedOrSwitched = props.fromCurrentUser ? 'moved' : 'added'
     return (
       <Text style={styles.text}>
         <Text style={{ fontWeight: 'bold' }}>{userShow.show.name}</Text> has
-        been added to your{' '}
+        been {addedOrSwitched} to your{' '}
         {userShow.type === 'watch'
           ? 'Watch'
           : userShow.type === 'seen'
-          ? 'Filter out'
-          : 'Rec'}{' '}
+          ? 'Filter Out'
+          : 'Recs'}{' '}
         list{' '}
       </Text>
     )
@@ -221,6 +229,7 @@ const mapDispatch = (dispatch) => {
       dispatch(switchShow(userShowId, newType)),
     changeShowTagsAndDescription: (tagIds, userShowId, description) =>
       dispatch(changeShowTagsAndDescription(tagIds, userShowId, description)),
+    getUsersFollowingRecs: () => dispatch(getUsersFollowingRecs()),
   }
 }
 export default connect(mapStateToProps, mapDispatch)(SaveShow)

@@ -8,4 +8,10 @@ As I said, this is a work in progress. I'm updating this with messy code publicl
 
 This is the repo for the front end of this project. The back end is at https://github.com/ndmetrick/TVRecsAPI.
 
-Also, if you've got an Android phone, you can also see the (often changing, sometimes buggy, not fully styled) current version of the app via Expo at https://expo.dev/@ndmetrick/TelevisionIsMyFriend. (You can download the Expo app and then use the QR code (from the camera on an iPhone or from within the Expo app on Android) to open the app. As it says in the app, most of it can't really be experienced without logging in, but you can try using the guest account if you don't want to create your own.) Also, feel free to email me with tag ideas -- the tag list is still very much in process also! For iPhones, I'm still working on getting the app into their testing app, and I'll update this page when I've added it (hopefully fairly soon).
+If you're interested in testing out the app:
+
+If you have an Android phone, you can also see the current version of the via Expo at https://expo.dev/@ndmetrick/TelevisionIsMyFriend. (You can download the Expo app and then use the QR code (from the camera on an iPhone or from within the Expo app on Android) to open the app.)
+
+If you an iPhone, feel free to email me at ndmetrick@gmail.com and I can add you as a tester and you can test out the app via TestFlight, Apple's App testing software. (For right now I'm trying to manage the size of the testing group, so I'm adding people manually.)
+
+As it says in the app, most of it can't really be experienced without logging in, but you can try using the guest account if you don't want to create your own. Also, feel free to email me with tag ideas -- the tag list is still very much in process also! You can find some instructions about how to use the app in the Settings tab, but if you find anything confusing, let me know!

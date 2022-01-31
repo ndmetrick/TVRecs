@@ -2,11 +2,11 @@ import axios from 'axios'
 import types from '../constants'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
-const baseUrl = 'https://tvrecs.herokuapp.com'
+// const baseUrl = 'https://tvrecs.herokuapp.com'
 
 // const baseUrl = 'https://10.0.0.98:8080';
 
-// const baseUrl = 'http://10.0.0.171:8080'
+const baseUrl = 'http://10.0.0.171:8080'
 // const baseUrl = 'http://localhost:8080';
 
 const getToken = async () => {
@@ -261,6 +261,32 @@ export function changeCountry(newCountry) {
   }
 }
 
+export function changeUsername(newUsername) {
+  return async (dispatch) => {
+    try {
+      const headers = await getToken()
+      const updatedUser = await axios.put(
+        `${baseUrl}/api/users/changeUsername`,
+        { newUsername: newUsername },
+        headers
+      )
+      if (updatedUser) {
+        if (updatedUser.data === 'duplicateUsername') {
+          return updatedUser.data
+        } else {
+          dispatch({
+            type: types.GET_CURRENT_USER,
+            currentUser: updatedUser.data,
+          })
+          return updatedUser.data
+        }
+      }
+    } catch (e) {
+      console.error(e)
+    }
+  }
+}
+
 export function changeUserTagsAndDescription(userTagIds, description) {
   return async (dispatch) => {
     try {
@@ -407,16 +433,20 @@ export function switchShow(userShowId, newType) {
         headers
       )
       if (switchedShow) {
-        console.log(
-          'i got to this same place and switchd show is',
-          switchedShow.data
-        )
+        // console.log(
+        //   'i got to this same place and switchd show is',
+        //   switchedShow.data
+        // )
         dispatch({
           type: types.SWITCH_SHOW,
           oldType: switchedShow.data.oldType,
           userShow: switchedShow.data.userShow,
         })
-        return switchedShow.data.userShow
+        const showInfo = {
+          userShow: switchedShow.data.userShow,
+          oldType: switchedShow.data.oldType,
+        }
+        return showInfo
       } else {
         console.log('Something went wrong trying to add show')
       }
@@ -446,6 +476,28 @@ export function deleteShow(showId, type) {
         }
       } else {
         console.log('Something went wrong trying to delete show')
+      }
+    } catch (e) {
+      console.error(e)
+    }
+  }
+}
+
+export function deleteAccount() {
+  return async (dispatch) => {
+    try {
+      const headers = await getToken()
+      const deletedUser = await axios.delete(
+        `${baseUrl}/api/users/deleteAccount/`,
+        headers
+      )
+      if (deletedUser) {
+        dispatch({
+          type: types.LOGGING_OUT,
+        })
+        return 'deleted'
+      } else {
+        console.log('Something went wrong trying to delete account')
       }
     } catch (e) {
       console.error(e)

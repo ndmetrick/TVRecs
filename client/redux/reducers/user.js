@@ -119,24 +119,34 @@ export default function userReducer(state = initialState, action) {
             // ),
           }
     case SWITCH_SHOW:
-      return action.userShow.type === 'rec'
+      const currentList =
+        action.userShow.type === 'rec'
+          ? 'userShows'
+          : action.userShow.type === 'watch'
+          ? 'toWatch'
+          : 'seen'
+      const pastList =
+        action.oldType === 'rec'
+          ? 'userShows'
+          : action.oldType === 'watch'
+          ? 'toWatch'
+          : 'seen'
+      return currentList === 'seen'
         ? {
             ...state,
-            userShows: [...state.userShows, action.userShow],
-            // showList: [...state.showList, action.userShow.show.name],
-            toWatch: state.toWatch.filter(
-              (userShow) => userShow.show.id !== action.userShow.show.id
-            ),
-          }
-        : {
-            ...state,
             seen: [...state.seen, action.userShow],
-            // showList: [...state.showList, action.userShow.show.name],
-            toWatch: state.toWatch.filter(
+            [pastList]: state[pastList].filter(
               (userShow) => userShow.show.id !== action.userShow.show.id
             ),
             recShows: state.recShows.filter(
               (recShow) => recShow.showId !== action.userShow.show.id
+            ),
+          }
+        : {
+            ...state,
+            [currentList]: [...state[currentList], action.userShow],
+            [pastList]: state[pastList].filter(
+              (userShow) => userShow.show.id !== action.userShow.show.id
             ),
           }
     case GET_USER_TAGS:

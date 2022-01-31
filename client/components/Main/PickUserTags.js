@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
   },
   text: { textAlign: 'left', fontSize: 18 },
   tagText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '500',
     textAlign: 'center',
   },

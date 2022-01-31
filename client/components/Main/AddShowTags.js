@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 40,
     marginHorizontal: 3,
-    backgroundColor: 'lightgreen',
+    backgroundColor: '#9BC1BC',
     marginTop: 5,
   },
   warningTag: {
@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 40,
     marginHorizontal: 3,
-    backgroundColor: '#21A179',
+    backgroundColor: '#36C9C6',
     marginTop: 5,
   },
   highlightWarningTag: {

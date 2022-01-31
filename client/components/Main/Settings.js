@@ -9,22 +9,34 @@ import {
   Linking,
 } from 'react-native'
 import { useIsFocused } from '@react-navigation/native'
-import PickCountry from './PickCountry'
-import { logout, changeCountry } from '../../redux/actions'
+
+import {
+  logout,
+  changeCountry,
+  changeUsername,
+  deleteAccount,
+} from '../../redux/actions'
 import { createStackNavigator } from '@react-navigation/stack'
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs'
 import * as AuthSession from 'expo-auth-session'
 import UserTagsAndDescription from './UserTagsAndDescription'
-import FAQ from './FAQ'
-
-import ViewShows from './ViewShows'
+import UpdateAccount from './UpdateAccount'
+import ChangeCountry from './ChangeCountry'
+import {
+  MaterialIcons,
+  MaterialCommunityIcons,
+} from 'react-native-vector-icons'
 
 function Settings(props) {
   const [countryCode, setCountryCode] = useState(null)
-  const [country, setCountry] = useState(null)
-  const [changeCountry, setChangeCountry] = useState(false)
   const [saveCountry, setSaveCountry] = useState(false)
   const { currentUser, currentUserShows } = props
+
+  const [countryOpen, setCountryOpen] = useState(false)
+  const [tagsOpen, setTagsOpen] = useState(false)
+  const [usernameOpen, setUsernameOpen] = useState(false)
+  const [deleteUserOpen, setDeleteUserOpen] = useState(false)
+
   const isFocused = useIsFocused()
 
   useEffect(() => {
@@ -32,9 +44,10 @@ function Settings(props) {
       setCountryCode(props.currentUser.country)
     }
     return () => {
-      setCountry(null)
-      setChangeCountry(false)
-      setSaveCountry(false)
+      setTagsOpen(false)
+      setUsernameOpen(false)
+      setDeleteUserOpen(false)
+      setCountryOpen(false)
     }
   }, [props.currentUser, isFocused])
 
@@ -50,13 +63,6 @@ function Settings(props) {
     } catch (e) {
       console.log(e)
     }
-  }
-
-  const getCountry = (country) => {
-    setCountry(country.name)
-    setCountryCode(country.cca2)
-    setChangeCountry(false)
-    setSaveCountry(true)
   }
 
   const saveNewCountry = async () => {
@@ -76,93 +82,179 @@ function Settings(props) {
 
   return (
     <View style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button} onPress={logout}>
-            <Text style={styles.buttonText}>Logout</Text>
-          </TouchableOpacity>
-        </View>
-
+      <ScrollView keyboardShouldPersistTaps="handled">
+        <Text style={{ ...styles.buttonText, textAlign: 'center' }}>
+          Settings
+        </Text>
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={styles.button}
             onPress={() => props.navigation.navigate('FAQ')}
           >
-            <Text style={styles.buttonText}>Click to see app instructions</Text>
+            <Text style={styles.buttonText}>User guide</Text>
           </TouchableOpacity>
         </View>
-        {!changeCountry && !saveCountry ? (
-          <Text style={styles.text}>
-            Your country is currently set to {countryCode}. That means that when
-            you search for a show, or add a show to your watch list or
-            recommendation list, the purchase and streaming options provided
-            will be for that country. You can change your country setting at any
-            time by clicking the "Choose new country" button below.
-          </Text>
-        ) : null}
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => setChangeCountry(true)}
-          >
-            <Text style={styles.buttonText}>Choose new country</Text>
-          </TouchableOpacity>
-        </View>
-        {changeCountry ? (
-          <View style={styles.buttonContainer}>
-            <PickCountry onValueChange={getCountry} />
-          </View>
-        ) : null}
-        {saveCountry ? (
-          <View>
-            <Text style={styles.text}>
-              Would you like to change your country to {countryCode}? If yes,
-              click on "Save country to profile" below.
-            </Text>
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity style={styles.button} onPress={saveNewCountry}>
-                <Text style={styles.buttonText}>Save country to profile</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        ) : null}
-
-        <View>
-          <Text style={styles.text}>
-            Just as you can add tags and descriptions to a TV show, you can add
-            them to your own profile. Other users looking at your profile will
-            see these tags and description along with all the shows you're
-            recommending. These will give others a view into what kinds of shows
-            you like and why, and will help them decide if your recommendations
-            might be a good match for them. People you don't know will also be
-            able to search for you based on these tags (for instance if they
-            want to receive recommendations from others who also like TV shows
-            with the 'town comes together' theme or they also like really silly
-            shows.
-          </Text>
-          <UserTagsAndDescription previous="Settings" />
+        {!countryOpen ? (
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={styles.button}
-              onPress={() => props.navigation.navigate('User Tags')}
+              onPress={() => setCountryOpen(true)}
             >
               <Text style={styles.buttonText}>
-                Add/change user tags and tv bio
+                Change country{' '}
+                <MaterialCommunityIcons name="chevron-down" size={18} />
               </Text>
             </TouchableOpacity>
           </View>
+        ) : (
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={styles.button}
-              onPress={() =>
-                Linking.openURL(
-                  'https://www.termsfeed.com/live/3d7fd044-566e-4e51-9fd7-aa561f45932a'
-                )
-              }
+              onPress={() => setCountryOpen(false)}
             >
-              <Text style={styles.buttonText}>Privacy Policy</Text>
+              <Text style={styles.buttonText}>
+                Change country{' '}
+                <MaterialCommunityIcons name="chevron-up" size={18} />
+              </Text>
+            </TouchableOpacity>
+            <ChangeCountry
+              setCountryCode={setCountryCode}
+              saveCountry={saveCountry}
+              setSaveCountry={setSaveCountry}
+              countryCode={countryCode}
+              saveNewCountry={saveNewCountry}
+            />
+          </View>
+        )}
+        {!tagsOpen ? (
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => setTagsOpen(true)}
+            >
+              <Text style={styles.buttonText}>
+                User tags and TV bio{' '}
+                <MaterialCommunityIcons name="chevron-down" size={18} />
+              </Text>
             </TouchableOpacity>
           </View>
+        ) : (
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => setTagsOpen(false)}
+            >
+              <Text style={styles.buttonText}>
+                User tags and TV bio{' '}
+                <MaterialCommunityIcons name="chevron-up" size={18} />
+              </Text>
+            </TouchableOpacity>
+            <View style={{ marginLeft: 15 }}>
+              <Text style={styles.text}>
+                Just as you can add tags and descriptions to a TV show, you can
+                add them to your own profile. Other users looking at your
+                profile will see these tags and description along with all the
+                shows you're recommending. These will give others a view into
+                what kinds of shows you like and why, and will help them decide
+                if your recommendations might be a good match for them. People
+                you don't know will also be able to search for you based on
+                these tags (for instance if they want to receive recommendations
+                from others who also like TV shows with the 'town comes
+                together' theme or they also like really silly shows.
+              </Text>
+              <UserTagsAndDescription
+                style={{ marginTop: 10 }}
+                previous="Settings"
+              />
+
+              <View style={{ ...styles.buttonContainer, alignItems: 'center' }}>
+                <TouchableOpacity
+                  style={styles.centerButton}
+                  onPress={() => props.navigation.navigate('User Tags')}
+                >
+                  <Text style={{ ...styles.buttonText, color: 'white' }}>
+                    Add/change user tags and tv bio
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        )}
+        {!usernameOpen ? (
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => setUsernameOpen(true)}
+            >
+              <Text style={styles.buttonText}>
+                Change username{' '}
+                <MaterialCommunityIcons name="chevron-down" size={18} />
+              </Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => setUsernameOpen(false)}
+            >
+              <Text style={styles.buttonText}>
+                Change username{' '}
+                <MaterialCommunityIcons name="chevron-up" size={18} />
+              </Text>
+            </TouchableOpacity>
+            <UpdateAccount updateAccount="username" />
+          </View>
+        )}
+        {!deleteUserOpen ? (
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => setDeleteUserOpen(true)}
+            >
+              <Text style={styles.buttonText}>
+                Delete Account{' '}
+                <MaterialCommunityIcons name="chevron-down" size={18} />
+              </Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => setDeleteUserOpen(false)}
+            >
+              <Text style={styles.buttonText}>
+                Delete Account{' '}
+                <MaterialCommunityIcons name="chevron-up" size={18} />
+              </Text>
+            </TouchableOpacity>
+            <UpdateAccount updateAccount="delete" />
+          </View>
+        )}
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.button} onPress={logout}>
+            <Text style={styles.buttonText}>Sign out</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View
+          style={{
+            ...styles.buttonContainer,
+            marginTop: 20,
+          }}
+        >
+          <TouchableOpacity
+            onPress={() =>
+              Linking.openURL(
+                'https://www.termsfeed.com/live/3d7fd044-566e-4e51-9fd7-aa561f45932a'
+              )
+            }
+          >
+            <Text style={{ ...styles.text, margin: 5, color: 'blue' }}>
+              Privacy Policy
+            </Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </View>
@@ -175,6 +267,7 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     marginRight: 10,
     marginLeft: 10,
+    flexDirection: 'column',
   },
   containerInfo: {
     margin: 5,
@@ -189,16 +282,15 @@ const styles = StyleSheet.create({
     fontSize: 18,
     margin: 5,
     fontWeight: '500',
-    color: 'white',
   },
   buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    margin: 10,
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    margin: 5,
   },
-  button: {
-    padding: 10,
-    borderRadius: 25,
+  centerButton: {
+    padding: 5,
+    borderRadius: 10,
     marginHorizontal: 3,
     backgroundColor: '#340068',
     marginTop: 2,
@@ -227,11 +319,6 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = (store) => ({
   currentUser: store.currentUser.userInfo,
-  otherUser: store.otherUser.userInfo,
-  currentUserShows: store.currentUser.userShows,
-  otherUserShows: store.otherUser.userShows,
-  following: store.currentUser.following,
-  otherUsers: store.allOtherUsers.usersInfo,
   userTags: store.currentUser.userTags,
 })
 const mapDispatch = (dispatch) => {

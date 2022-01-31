@@ -351,7 +351,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
     flex: 1,
     marginHorizontal: 2,
-    marginBottom: 30,
+    marginBottom: 10,
   },
   optionContainer: {
     flex: 1,

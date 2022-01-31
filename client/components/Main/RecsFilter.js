@@ -273,6 +273,8 @@ const RecsFilter = (props) => {
     <Tabs.ScrollView
       nestedScrollEnabled={true}
       keyboardShouldPersistTaps="handled"
+      contentContainerStyle={{ marginLeft: 5, marginRight: 5 }}
+      showsVerticalScrollIndicator={false}
     >
       <View style={{ flex: 1 }}>
         <Text style={styles.filterText}>

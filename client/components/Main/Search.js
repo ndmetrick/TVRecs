@@ -729,10 +729,6 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     textAlign: 'center',
   },
-  tagGroup: {
-    marginTop: 16,
-    marginBottom: 8,
-  },
   tagStyle: {
     marginTop: 4,
     marginHorizontal: 8,
@@ -758,14 +754,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 40,
     marginHorizontal: 3,
-    backgroundColor: '#36C9C6',
-    marginTop: 5,
-  },
-  unselectedTag: {
-    padding: 10,
-    borderRadius: 40,
-    marginHorizontal: 3,
-    backgroundColor: '#9BC1BC',
+    backgroundColor: '#008DD5',
     marginTop: 5,
   },
   buttonContainer: {

@@ -62,10 +62,10 @@ function ProfileHeader(props) {
         {previous === 'CurrentUser' ? (
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', margin: 10 }}>
             <View style={styles.usernameButton}>
-              <Text style={styles.usernameText}>Your </Text>
+              <Text style={styles.usernameText}>Your</Text>
             </View>
             <View style={styles.recButton}>
-              <Text style={styles.recText}>profile</Text>
+              <Text style={styles.recText}> profile</Text>
             </View>
           </View>
         ) : (
@@ -133,7 +133,7 @@ function ProfileHeader(props) {
             {props.following ? (
               <View style={styles.buttonContainer}>
                 <TouchableOpacity
-                  style={{ ...styles.button, backgroundColor: 'white' }}
+                  style={styles.button}
                   onPress={() => props.unfollow()}
                 >
                   <Text style={styles.buttonText}>stop following</Text>

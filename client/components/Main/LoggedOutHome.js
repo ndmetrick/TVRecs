@@ -26,7 +26,7 @@ function LoggedOutHome(props) {
         This app is a lot more fun if you sign up for an account. If you have an
         account, you can follow other users to receive their recommendations,
         recommend TV shows (and tag them with descriptions), and save TV shows
-        you want to remembet to watch to your private watch list (and more, as
+        you want to remember to watch to your private watch list (and more, as
         development continues).{'\n'}
         {'\n'}
         If you would prefer to play around with the app without making an
@@ -43,16 +43,17 @@ function LoggedOutHome(props) {
         If you've got ideas for tags I'm missing that I should add, or have
         other ideas, feel free to email me at ndmetrick@gmail.com.
       </Text>
-      <View style={styles.buttonContainer}>
+      <View style={{ flex: 1, alignItems: 'flex-start' }}>
         <TouchableOpacity
-          style={styles.button}
           onPress={() =>
             Linking.openURL(
               'https://www.termsfeed.com/live/3d7fd044-566e-4e51-9fd7-aa561f45932a'
             )
           }
         >
-          <Text style={styles.buttonText}>Privacy Policy</Text>
+          <Text style={{ ...styles.buttonText, color: 'blue' }}>
+            Privacy Policy
+          </Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

@@ -58,9 +58,12 @@ function UserTagsAndDescription(props) {
   }
 
   return (
-    <View style={styles.container}>
+    <>
       {!isCurrentUser ? (
-        <Tabs.ScrollView showsVerticalScrollIndicator={false}>
+        <Tabs.ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.container}
+        >
           <View>
             {!user.description ? (
               <View style={styles.otherUser}>
@@ -98,35 +101,33 @@ function UserTagsAndDescription(props) {
           </View>
         </Tabs.ScrollView>
       ) : (
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <View>
+        // <ScrollView showsVerticalScrollIndicator={false}>
+        <View>
+          <Text style={{ ...styles.text, marginBottom: 5, marginTop: 8 }}>
+            <Text style={{ fontWeight: 'bold' }}>TV Bio: </Text>
+            {!props.currentUser.description
+              ? 'Currently you have no tv bio on your profile. Click the button below if you would like to add one.'
+              : props.currentUser.description}
+          </Text>
+          {!userTags.length ? (
             <Text style={styles.text}>
-              <Text style={{ fontWeight: 'bold' }}>TV Bio: </Text>
-              {!props.currentUser.description
-                ? 'Currently you have no tv bio on your profile. Click the button below if you would like to add one.'
-                : props.currentUser.description}
-              {'\n'}
+              <Text style={{ fontWeight: 'bold' }}>User Tags:</Text> Currently
+              you have no user tags. Click the button below if you would like to
+              add some.
             </Text>
-            {userTags.length ? (
-              <Text style={styles.text}>
-                <Text style={{ fontWeight: 'bold' }}>User Tags:</Text> Currently
-                you have no user tags. Click the button below if you would like
-                to add some.
+          ) : (
+            <View>
+              <Text style={{ ...styles.text, fontWeight: 'bold' }}>
+                User Tags:
               </Text>
-            ) : (
-              <View>
-                <Text style={{ ...styles.text, fontWeight: 'bold' }}>
-                  User Tags:
-                </Text>
-                <View style={[styles.cardContent, styles.tagsContent]}>
-                  {displayTags(userTags)}
-                </View>
+              <View style={[styles.cardContent, styles.tagsContent]}>
+                {displayTags(userTags)}
               </View>
-            )}
-          </View>
-        </ScrollView>
+            </View>
+          )}
+        </View>
       )}
-    </View>
+    </>
   )
 }
 
@@ -179,7 +180,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   tagText: {
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '500',
   },
   otherUser: {

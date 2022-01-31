@@ -16,10 +16,12 @@
     "assetBundlePatterns": ["assets/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.ndmetrick.TelevisionIsMyFriend"
+      "bundleIdentifier": "com.ndmetrick.TelevisionIsMyFriend",
+      "buildNumber": "0.0.2"
     },
     "android": {
-      "package": "com.ndmetrick.TelevisionIsMyFriend"
+      "package": "com.ndmetrick.TelevisionIsMyFriend",
+      "versionCode": 0
     }
   }
 }

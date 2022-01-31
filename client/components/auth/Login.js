@@ -10,6 +10,7 @@ import {
   View,
   TouchableOpacity,
   ActivityIndicator,
+  Image,
 } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { getCurrentUser, getAuthInfo } from '../../redux/actions'
@@ -19,9 +20,12 @@ WebBrowser.maybeCompleteAuthSession()
 const useProxy = Platform.select({ web: false, default: true })
 const redirectUri = AuthSession.makeRedirectUri({ useProxy })
 
+let splash = '../../../assets/splash.png'
+
 const Login = (props) => {
   const [clientId, setClientId] = useState(null)
   const authorizationEndpoint = 'https://dev--5p-bz53.us.auth0.com/authorize'
+  const [loggedIn, setLoggedIn] = useState(false)
 
   const [request, result, promptAsync] = AuthSession.useAuthRequest(
     {
@@ -40,8 +44,10 @@ const Login = (props) => {
   useEffect(() => {
     const getAuth = async () => {
       try {
+        console.log('this is when i get here 3')
         const authInfo = await props.getAuthInfo()
         setClientId(authInfo[0])
+        console.log('this is when i get here 4')
       } catch (e) {
         console.log(e)
       }
@@ -49,6 +55,7 @@ const Login = (props) => {
     getAuth()
     const getUser = async () => {
       try {
+        console.log('did i get this far 5')
         if (result) {
           if (result.error) {
             console.log(result.error)
@@ -59,10 +66,11 @@ const Login = (props) => {
             return
           }
           if (result.type === 'success') {
-            //ADD TRY/CATCH and async
-            // Retrieve the JWT token and decode it
+            console.log('this is when i get here 1')
             const jwtToken = result.params.id_token
             await AsyncStorage.setItem('token', jwtToken)
+            console.log('this is when i get here 2')
+            setLoggedIn(true)
             await props.login()
           }
         }
@@ -85,13 +93,20 @@ const Login = (props) => {
 
   return (
     <View style={styles.buttonContainer}>
-      <TouchableOpacity
-        disabled={!request}
-        style={styles.button}
-        onPress={() => promptAsync({ useProxy })}
-      >
-        <Text style={styles.buttonText}>Log in with Auth0</Text>
-      </TouchableOpacity>
+      {!loggedIn ? (
+        <TouchableOpacity
+          disabled={!request}
+          style={styles.button}
+          onPress={() => promptAsync({ useProxy })}
+        >
+          <Text style={styles.buttonText}>Log in with Auth0</Text>
+        </TouchableOpacity>
+      ) : (
+        <Image
+          // style={{ width: 50, height: 40, margin: 20 }}
+          source={require(splash)}
+        />
+      )}
     </View>
   )
 }
