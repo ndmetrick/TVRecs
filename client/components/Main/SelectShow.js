@@ -89,7 +89,7 @@ const SelectShow = (props) => {
             let poster = imageShow.data.Poster
             if (!poster || poster === 'N/A') {
               console.log('i got into this one')
-              poster = 'https://i.postimg.cc/NjTL22vB/temp-Logo2.jpg'
+              poster = 'https://i.postimg.cc/Y2TP5SLv/missing-Poster-Icon.png'
             }
             props.handleShow(show.name, poster, show.id, true)
             setAdded(true)
@@ -131,7 +131,7 @@ const SelectShow = (props) => {
         let poster = imageShow.data.Poster
         if (!poster || poster === 'N/A') {
           console.log('i got in here')
-          poster = 'https://i.postimg.cc/NjTL22vB/temp-Logo2.jpg'
+          poster = 'https://i.postimg.cc/Y2TP5SLv/missing-Poster-Icon.png'
           props.handleShow(data.name, poster, id, true)
           setAdded(true)
         } else {
