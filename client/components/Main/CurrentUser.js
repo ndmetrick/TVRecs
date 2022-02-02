@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { connect } from 'react-redux'
 import {
   View,
@@ -12,11 +12,14 @@ import {
 
 import ViewShows from './ViewShows'
 import ProfileHeader from './ProfileHeader'
-
+// import { useScrollToTop } from '@react-navigation/native'
 import * as Tabs from 'react-native-collapsible-tab-view'
 
 function CurrentUser(props) {
   const [headerHeight, setHeaderHeight] = useState(100)
+  //  const ref = useRef(null)
+
+  //  useScrollToTop(ref)
 
   const Header = () => (
     <ProfileHeader

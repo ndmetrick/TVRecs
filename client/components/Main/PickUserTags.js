@@ -13,13 +13,18 @@ import { TextInput } from 'react-native-paper'
 import { changeUserTagsAndDescription } from '../../redux/actions'
 
 function PickUserTags(props) {
-  const [userTags, setUserTags] = useState([])
+  const [likeTags, setLikeTags] = useState([])
+  const [dislikeTags, setDislikeTags] = useState([])
+  const [describeTags, setDescribeTags] = useState([])
   const [selectedTags, setSelectedTags] = useState(null)
   const [loaded, setLoaded] = useState(false)
   const [description, setDescription] = useState('')
 
   useEffect(() => {
-    setUserTags(props.allUserTags)
+    console.log('tags', props.dislikeTags, props.describeTags)
+    setLikeTags(props.likeTags)
+    setDislikeTags(props.dislikeTags)
+    setDescribeTags(props.describeTags)
     const selected = {}
     props.currentUserTags.forEach((tag) => {
       selected[tag.id] = true
@@ -30,7 +35,9 @@ function PickUserTags(props) {
     }
     setLoaded(true)
     return () => {
-      setUserTags([])
+      setLikeTags([])
+      setDislikeTags([])
+      setDescribeTags([])
       setLoaded(false)
       setSelectedTags(null)
       setDescription('')
@@ -58,9 +65,19 @@ function PickUserTags(props) {
   const displayTags = (tags) => {
     return tags.map((tag, key) => {
       const tagStyle =
-        selectedTags[tag.id] !== true
-          ? styles.unselectedTag
-          : styles.selectedTag
+        selectedTags[tag.id] !== true &&
+        (tag.type === 'profile' || tag.type === 'unassigned')
+          ? styles.likeTag
+          : selectedTags[tag.id] === true &&
+            (tag.type === 'profile' || tag.type === 'unassigned')
+          ? styles.highlightLikeTag
+          : selectedTags[tag.id] !== true && tag.type === 'warning'
+          ? styles.dislikeTag
+          : selectedTags[tag.id] === true && tag.type === 'warning'
+          ? styles.highlightDislikeTag
+          : selectedTags[tag.id] !== true && tag.type === 'profile-describe'
+          ? styles.describeTag
+          : styles.highlightDescribeTag
 
       return (
         <TouchableOpacity
@@ -85,14 +102,14 @@ function PickUserTags(props) {
     return props.navigation.navigate('Settings')
   }
 
-  if (!loaded || !userTags) {
+  if (!loaded || !likeTags || !dislikeTags || !describeTags) {
     console.log('this one is where i am')
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#5500dc" />
       </View>
     )
-  } else if (!userTags.length || !selectedTags) {
+  } else if (!likeTags.length || !dislikeTags.length || !selectedTags) {
     console.log('i got this far')
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -121,13 +138,27 @@ function PickUserTags(props) {
           value={description}
         />
         <Text style={styles.text}>
-          Pick some tags that you feel describe the kinds of shows you like
-          and/or the kind of television watcher you are:
+          Pick some tags that describe genres/attributes of the kinds of shows
+          you like best:
         </Text>
         <View style={[styles.cardContent, styles.tagsContent]}>
-          {displayTags(userTags)}
+          {displayTags(likeTags)}
         </View>
-
+        <Text style={styles.text}>
+          Pick some tags that describe any deal breakers or triggers (i.e., the
+          kinds of things that, if shows contain them, you end up choosing not
+          to watch them / you find yourself needing to be very careful with
+          watching them):
+        </Text>
+        <View style={[styles.cardContent, styles.tagsContent]}>
+          {displayTags(dislikeTags)}
+        </View>
+        <Text style={styles.text}>
+          Pick some tags that describe the kind of television watcher you are:
+        </Text>
+        <View style={[styles.cardContent, styles.tagsContent]}>
+          {displayTags(describeTags)}
+        </View>
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={styles.button}
@@ -210,26 +241,56 @@ const styles = StyleSheet.create({
     marginTop: 10,
     flexWrap: 'wrap',
   },
-  selectedTag: {
+  highlightLikeTag: {
     padding: 10,
     borderRadius: 40,
     marginHorizontal: 3,
     backgroundColor: '#008DD5',
     marginTop: 5,
   },
-  unselectedTag: {
+  likeTag: {
     padding: 10,
     borderRadius: 40,
     marginHorizontal: 3,
     backgroundColor: '#9BC1BC',
     marginTop: 5,
   },
+  highlightDislikeTag: {
+    padding: 10,
+    borderRadius: 40,
+    marginHorizontal: 3,
+    backgroundColor: '#E24E1B',
+    marginTop: 5,
+  },
+  dislikeTag: {
+    padding: 10,
+    borderRadius: 40,
+    marginHorizontal: 3,
+    backgroundColor: '#F2A541',
+    marginTop: 5,
+  },
+  highlightDescribeTag: {
+    padding: 10,
+    borderRadius: 40,
+    marginHorizontal: 3,
+    backgroundColor: '#7B5D96',
+    marginTop: 5,
+  },
+  describeTag: {
+    padding: 10,
+    borderRadius: 40,
+    marginHorizontal: 3,
+    backgroundColor: '#B3A7BB',
+    marginTop: 5,
+  },
 })
 
 const mapStateToProps = (store) => ({
-  allUserTags: store.allOtherUsers.userTags,
   currentUser: store.currentUser.userInfo,
   currentUserTags: store.currentUser.userTags,
+  dislikeTags: store.allOtherUsers.dislikeTags,
+  describeTags: store.allOtherUsers.describeTags,
+  likeTags: store.allOtherUsers.userTags,
 })
 
 const mapDispatchToProps = (dispatch) => {

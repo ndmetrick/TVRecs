@@ -162,7 +162,7 @@ function OtherUser(props) {
       <Tabs.Tab name="Tags/Bio">
         <UserTagsAndDescription
           user={user}
-          userTags={userTags}
+          // userTags={userTags}
           navigation={props.navigation}
         />
       </Tabs.Tab>

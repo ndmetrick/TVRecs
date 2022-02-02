@@ -45,6 +45,11 @@ const Search = (props) => {
   const [excludeFollowed, setExcludeFollowed] = useState(false)
   const [sameShowName, setSameShowName] = useState(false)
 
+  const [likeTags, setLikeTags] = useState([])
+  const [dislikeTags, setDislikeTags] = useState([])
+  const [describeTags, setDescribeTags] = useState([])
+  const [selectedTags, setSelectedTags] = useState(null)
+
   useEffect(() => {
     setUsers(props.otherUsers)
     const tags = []

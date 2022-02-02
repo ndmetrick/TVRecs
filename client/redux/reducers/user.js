@@ -1,3 +1,4 @@
+/* eslint-disable no-case-declarations */
 import {
   GET_CURRENT_USER,
   CLEAR_DATA,
@@ -26,12 +27,9 @@ const initialState = {
   userShows: [],
   following: [],
   recShows: [],
-  // showList: [],
   userTags: [],
   toWatch: [],
-  // watchList: [],
   seen: [],
-  // seenList: [],
   loggingOut: false,
   watchProviders: {},
   filterRecs: [],

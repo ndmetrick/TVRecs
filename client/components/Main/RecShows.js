@@ -10,7 +10,9 @@ import {
 } from 'react-native'
 import { useFirstRender } from './helpers.js'
 import RecsFilter from './RecsFilter'
+import { useScrollToTop } from '@react-navigation/native'
 import * as Tabs from 'react-native-collapsible-tab-view'
+// import { useFocusedTab, useHeaderMeasurements} from 'react-native-collapsible-tab-view'
 // import {
 //   jumpToTab,
 //   setIndex,
@@ -42,11 +44,13 @@ const RecShows = (props) => {
   const [filterTabName, setFilterTabName] = useState('Filters(0)')
   const [showNum, setShowNum] = useState(0)
   const [recsTabName, setRecsTabName] = useState(null)
-  const [renderItem, setRenderItem] = useState(null)
+  // const [renderItem, setRenderItem] = useState(null)
 
   const isFocused = useIsFocused()
   const firstRender = useFirstRender()
   const ref = useRef(null)
+
+  useScrollToTop(ref)
 
   const flatlist = useMemo(() => {
     return (
@@ -54,6 +58,7 @@ const RecShows = (props) => {
         numColumns={1}
         horizontal={false}
         data={recShows}
+        ref={ref}
         renderItem={({ item }) => (
           <View style={styles.containerImage}>
             <TouchableOpacity
@@ -232,14 +237,14 @@ const RecShows = (props) => {
         console.log(e)
       }
     }
-    console.log(
-      'just before async and refs are',
-      ref.current,
-      'filter is',
-      filter,
-      'advancedsearch is',
-      advancedSearch
-    )
+    // console.log(
+    //   'just before async and refs are',
+    //   ref.current,
+    //   'filter is',
+    //   filter,
+    //   'advancedsearch is',
+    //   advancedSearch
+    // )
 
     getRecShows()
   }, [

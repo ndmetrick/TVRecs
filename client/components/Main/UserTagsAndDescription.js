@@ -25,13 +25,34 @@ function UserTagsAndDescription(props) {
     if (props.previous === 'Settings') {
       setIsCurrentUser(true)
       setUser(props.currentUser)
-      setUserTags(props.currentUserTags)
     } else {
       setIsCurrentUser(false)
       setUser(props.user)
-      setUserTags(props.userTags)
     }
-
+    const allUserTags =
+      props.previous === 'Settings'
+        ? props.currentUserTags
+        : props.otherUserTags
+    if (allUserTags) {
+      const like = []
+      const dislike = []
+      const describe = []
+      allUserTags.forEach((tag) => {
+        if (tag.type === 'profile-describe') {
+          describe.push(tag)
+        } else if (tag.type === 'warning' || tag.type === 'profile-dislike') {
+          dislike.push(tag)
+        } else {
+          like.push(tag)
+        }
+      })
+      const tags = []
+      tags.like = like
+      tags.describe = describe
+      tags.dislike = dislike
+      // console.log('tagsHere', tags)
+      setUserTags(tags)
+    }
     return () => {
       setIsCurrentUser(false)
       setUser(null)
@@ -39,7 +60,8 @@ function UserTagsAndDescription(props) {
     }
   }, [props.currentUser, isFocused])
 
-  if (user === null) {
+  if (user === null || !userTags || !userTags.like) {
+    console.log('what is happening', userTags.like)
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#5500dc" />
@@ -47,10 +69,17 @@ function UserTagsAndDescription(props) {
     )
   }
 
-  const displayTags = (tags) => {
+  const displayTags = (tags, type) => {
+    const tagStyle =
+      type === 'like'
+        ? styles.highlightLikeTag
+        : type === 'dislike'
+        ? styles.highlightDislikeTag
+        : styles.highlightDescribeTag
+
     return tags.map((tag, key) => {
       return (
-        <View key={key} style={styles.userTags}>
+        <View key={key} style={tagStyle}>
           <Text style={styles.tagText}>{tag.name}</Text>
         </View>
       )
@@ -79,7 +108,9 @@ function UserTagsAndDescription(props) {
                 </Text>
               </View>
             )}
-            {!userTags.length ? (
+            {!userTags.like.length &&
+            !userTags.dislike.length &&
+            !userTags.describe.length ? (
               <View style={styles.otherUser}>
                 <Text style={styles.text}>
                   <Text style={{ fontWeight: 'bold' }}>User Tags:</Text> None
@@ -89,12 +120,41 @@ function UserTagsAndDescription(props) {
             ) : (
               <View style={styles.otherUser}>
                 <View>
-                  <Text style={{ ...styles.text, fontWeight: 'bold' }}>
-                    User Tags:
-                  </Text>
-                  <View style={[styles.cardContent, styles.tagsContent]}>
-                    {displayTags(userTags)}
-                  </View>
+                  {userTags.like.length ? (
+                    <View>
+                      <Text style={{ ...styles.text, fontWeight: 'bold' }}>
+                        These tags describe the kinds of shows {user.username}{' '}
+                        likes best:
+                      </Text>
+                      <View style={[styles.cardContent, styles.tagsContent]}>
+                        {displayTags(userTags.like, 'like')}
+                      </View>
+                    </View>
+                  ) : null}
+
+                  {userTags.dislike.length ? (
+                    <View>
+                      <Text style={{ ...styles.text, fontWeight: 'bold' }}>
+                        These tags describe things {user.username} tries to
+                        avoid seeing:
+                      </Text>
+                      <View style={[styles.cardContent, styles.tagsContent]}>
+                        {displayTags(userTags.dislike, 'dislike')}
+                      </View>
+                    </View>
+                  ) : null}
+
+                  {userTags.describe.length ? (
+                    <View>
+                      <Text style={{ ...styles.text, fontWeight: 'bold' }}>
+                        These tags describe the kind of television watcher{' '}
+                        {user.username} is:
+                      </Text>
+                      <View style={[styles.cardContent, styles.tagsContent]}>
+                        {displayTags(userTags.describe, 'describe')}
+                      </View>
+                    </View>
+                  ) : null}
                 </View>
               </View>
             )}
@@ -109,7 +169,9 @@ function UserTagsAndDescription(props) {
               ? 'Currently you have no tv bio on your profile. Click the button below if you would like to add one.'
               : props.currentUser.description}
           </Text>
-          {!userTags.length ? (
+          {!userTags.like.length &&
+          !userTags.dislike.length &&
+          !userTags.describe.length ? (
             <Text style={styles.text}>
               <Text style={{ fontWeight: 'bold' }}>User Tags:</Text> Currently
               you have no user tags. Click the button below if you would like to
@@ -117,12 +179,38 @@ function UserTagsAndDescription(props) {
             </Text>
           ) : (
             <View>
-              <Text style={{ ...styles.text, fontWeight: 'bold' }}>
-                User Tags:
-              </Text>
-              <View style={[styles.cardContent, styles.tagsContent]}>
-                {displayTags(userTags)}
-              </View>
+              {userTags.like.length ? (
+                <View>
+                  <Text style={{ ...styles.text, fontWeight: 'bold' }}>
+                    These tags describe the kinds of shows you like best:
+                  </Text>
+                  <View style={[styles.cardContent, styles.tagsContent]}>
+                    {displayTags(userTags.like, 'like')}
+                  </View>
+                </View>
+              ) : null}
+
+              {userTags.dislike.length ? (
+                <View>
+                  <Text style={{ ...styles.text, fontWeight: 'bold' }}>
+                    These tags describe things you try to avoid seeing:
+                  </Text>
+                  <View style={[styles.cardContent, styles.tagsContent]}>
+                    {displayTags(userTags.dislike, 'dislike')}
+                  </View>
+                </View>
+              ) : null}
+
+              {userTags.describe.length ? (
+                <View>
+                  <Text style={{ ...styles.text, fontWeight: 'bold' }}>
+                    These tags describe the kind of television watcher you are:
+                  </Text>
+                  <View style={[styles.cardContent, styles.tagsContent]}>
+                    {displayTags(userTags.describe, 'describe')}
+                  </View>
+                </View>
+              ) : null}
             </View>
           )}
         </View>
@@ -172,16 +260,32 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     marginBottom: 10,
   },
-  userTags: {
+  highlightLikeTag: {
     padding: 10,
     borderRadius: 40,
     marginHorizontal: 3,
     backgroundColor: '#008DD5',
     marginTop: 5,
   },
+  highlightDislikeTag: {
+    padding: 10,
+    borderRadius: 40,
+    marginHorizontal: 3,
+    backgroundColor: '#E24E1B',
+    marginTop: 5,
+  },
+  highlightDescribeTag: {
+    padding: 10,
+    borderRadius: 40,
+    marginHorizontal: 3,
+    backgroundColor: '#7B5D96',
+    marginTop: 5,
+  },
+
   tagText: {
     fontSize: 14,
     fontWeight: '500',
+    textAlign: 'center',
   },
   otherUser: {
     margin: 10,
@@ -196,6 +300,7 @@ const mapStateToProps = (store) => ({
   following: store.currentUser.following,
   otherUsers: store.allOtherUsers.usersInfo,
   currentUserTags: store.currentUser.userTags,
+  otherUserTags: store.otherUser.userTags,
 })
 
 export default connect(mapStateToProps)(UserTagsAndDescription)
