@@ -29,6 +29,8 @@ const AddShow = (props) => {
   const [imageUrl, setImageUrl] = useState('')
   const [imdbId, setImdbId] = useState('')
   const [type, setType] = useState(null)
+  // const [streaming, setStreaming] = useState('')
+  // const [purchase, setPurchase] = useState('')
   const [streamingAndPurchase, setStreamingAndPurchase] = useState(false)
   const [showAdded, setShowAdded] = useState(false)
 
@@ -50,17 +52,28 @@ const AddShow = (props) => {
       setImageUrl('')
       setShowAdded(false)
       setImdbId('')
+      // setStreaming('')
+      // setPurchase('')
       setStreamingAndPurchase(false)
       setProfileShowDropdownValue(null)
       setUserHasShow(null)
     }
   }, [isFocused])
 
-  const addShow = (showName, imageUrl, imdbId, showAdded) => {
+  const addShow = (
+    showName,
+    imageUrl,
+    imdbId,
+    showAdded
+    // streaming,
+    // purchase
+  ) => {
     console.log('image here', imageUrl, showName)
     setShowName(showName)
     setImageUrl(imageUrl)
     setImdbId(imdbId)
+    // setStreaming(streaming)
+    // setPurchase(purchase)
     setShowAdded(showAdded)
     const hasShow = props.watchShows.find(
       (watchShow) => imdbId == watchShow.show.imdbId
@@ -189,6 +202,8 @@ const AddShow = (props) => {
                                 showName,
                                 imageUrl,
                                 imdbId,
+                                streaming,
+                                purchase,
                                 type: profileShowDropdownValue,
                               },
                               previous: 'AddShow',

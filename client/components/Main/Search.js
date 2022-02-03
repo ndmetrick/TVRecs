@@ -14,10 +14,9 @@ import {
 import { TextInput } from 'react-native-paper'
 import { getAllOtherUsers, getMatchingUsers } from '../../redux/actions'
 import { useIsFocused } from '@react-navigation/native'
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import DropDownPicker from 'react-native-dropdown-picker'
 import SelectShow from './SelectShow'
+import { MaterialCommunityIcons } from 'react-native-vector-icons'
 
 const Search = (props) => {
   const isFocused = useIsFocused()
@@ -34,9 +33,9 @@ const Search = (props) => {
   const [commonShowDropdownOptions, setCommonShowDropdownOptions] =
     useState(null)
   const [chosenShow, setChosenShow] = useState(null)
-  const [tagsDropdownOpen, setTagsDropdownOpen] = useState(false)
-  const [tagsDropdownValue, setTagsDropdownValue] = useState([])
-  const [tagsDropdownOptions, setTagsDropdownOptions] = useState(null)
+  // const [tagsDropdownOpen, setTagsDropdownOpen] = useState(false)
+  // const [tagsDropdownValue, setTagsDropdownValue] = useState([])
+  // const [tagsDropdownOptions, setTagsDropdownOptions] = useState(null)
   const [showsDropdownOpen, setShowsDropdownOpen] = useState(false)
   const [showsDropdownValue, setShowsDropdownValue] = useState([])
   const [showsDropdownOptions, setShowsDropdownOptions] = useState(null)
@@ -44,20 +43,26 @@ const Search = (props) => {
   const [filterShowChosen, setFilterShowChosen] = useState(false)
   const [excludeFollowed, setExcludeFollowed] = useState(false)
   const [sameShowName, setSameShowName] = useState(false)
+  const [searchTags, setSearchTags] = useState([])
 
-  const [likeTags, setLikeTags] = useState([])
-  const [dislikeTags, setDislikeTags] = useState([])
-  const [describeTags, setDescribeTags] = useState([])
-  const [selectedTags, setSelectedTags] = useState(null)
-
+  const [allTags, setAllTags] = useState([])
+  // const [dislikeTags, setDislikeTags] = useState([])
+  // const [describeTags, setDescribeTags] = useState([])
+  const [selectedTags, setSelectedTags] = useState({})
+  const [showTags, setShowTags] = useState(false)
   useEffect(() => {
     setUsers(props.otherUsers)
-    const tags = []
-    props.allUserTags.forEach((tag) => {
-      tags.push({ label: tag.name, value: tag })
-    })
+    const tags = [
+      ...props.likeTags,
+      ...props.dislikeTags,
+      ...props.describeTags,
+    ]
+    setAllTags(tags)
+    // props.allUserTags.forEach((tag) => {
+    //   tags.push({ label: tag.name, value: tag })
+    // })
 
-    setTagsDropdownOptions(tags)
+    // setTagsDropdownOptions(tags)
     if (props.currentUser) {
       const numCommonUserTags = []
       const tagsLength = props.userTags.length
@@ -86,47 +91,100 @@ const Search = (props) => {
     }
 
     return () => {
-      setUsers(null)
-      setMatchingUsers(null)
-      setAdvancedSearch(false)
-      setCommonTagDropdownValue(null)
-      setCommonShowDropdownValue(null)
-      setChosenShow(null)
-      setTagsDropdownValue([])
-      setShowName('')
-      setFilterShowChosen(false)
-      setShowsDropdownValue([])
-      setTagsChecked('none')
-      setShowsChecked('none')
-      setExcludeFollowed(false)
+      // setUsers(null)
+      // setMatchingUsers(null)
+      // setAdvancedSearch(false)
+      // setCommonTagDropdownValue(null)
+      // setCommonShowDropdownValue(null)
+      // setChosenShow(null)
+      // // setTagsDropdownValue([])
+      // setShowName('')
+      // setFilterShowChosen(false)
+      // setShowsDropdownValue([])
+      // setTagsChecked('none')
+      // setShowsChecked('none')
+      // setExcludeFollowed(false)
+      // setSelectedTags({})
+      // setShowTags(false)
+      // setSearchTags([])
     }
   }, [isFocused, props.matchingUsers])
 
-  const displayChosenTags = (tags) => {
+  const selectTag = (tag) => {
+    if (selectedTags[tag.id]) {
+      const swap = { ...selectedTags, [tag.id]: false }
+      setSelectedTags(swap)
+    } else {
+      const swap = { ...selectedTags, [tag.id]: tag }
+      setSelectedTags(swap)
+    }
+  }
+
+  const displayChosenTags = () => {
+    return allTags.map((tag, key) => {
+      if (selectedTags[tag.id]) {
+        const tagStyle =
+          tag.type === 'profile' || tag.type === 'unassigned'
+            ? styles.highlightLikeTag
+            : tag.type === 'warning'
+            ? styles.highlightDislikeTag
+            : styles.highlightDescribeTag
+        return (
+          <View key={key} style={tagStyle}>
+            <Text style={styles.tagText}>{tag.name}</Text>
+          </View>
+        )
+      }
+    })
+  }
+
+  const displayTags = (tags) => {
     return tags.map((tag, key) => {
+      const tagStyle =
+        !selectedTags[tag.id] &&
+        (tag.type === 'profile' || tag.type === 'unassigned')
+          ? styles.likeTag
+          : selectedTags[tag.id] &&
+            (tag.type === 'profile' || tag.type === 'unassigned')
+          ? styles.highlightLikeTag
+          : !selectedTags[tag.id] && tag.type === 'warning'
+          ? styles.dislikeTag
+          : selectedTags[tag.id] && tag.type === 'warning'
+          ? styles.highlightDislikeTag
+          : !selectedTags[tag.id] && tag.type === 'profile-describe'
+          ? styles.describeTag
+          : styles.highlightDescribeTag
+
       return (
-        <View key={key} style={styles.selectedTag}>
+        <TouchableOpacity
+          key={key}
+          style={tagStyle}
+          onPress={() => selectTag(tag)}
+        >
           <Text style={styles.tagText}>{tag.name}</Text>
-        </View>
+        </TouchableOpacity>
       )
     })
   }
 
-  const chooseShowToSearch = (showName, imageUrl, imdbId, filterShowChosen) => {
+  const chooseShowToSearch = (showName, imdbId, filterShowChosen) => {
     setShowName(showName)
     setChosenShow(imdbId)
     setFilterShowChosen(filterShowChosen)
   }
 
   const reset = () => {
-    setAdvancedSearch(false)
+    // setAdvancedSearch(false)
     setCommonTagDropdownValue(null)
     setCommonShowDropdownValue(null)
     setChosenShow(null)
-    setTagsDropdownValue([])
+    // setTagsDropdownValue([])
     setShowName('')
     setFilterShowChosen(false)
     setShowsDropdownValue([])
+    setSelectedTags({})
+    setShowTags(false)
+    setSearchTags([])
   }
 
   const getMatchingUsers = async (searchInput) => {
@@ -138,13 +196,24 @@ const Search = (props) => {
     setMatchingUsers(matches)
   }
 
+  const pickTags = () => {
+    const chosenTags = []
+    for (const tagId in selectedTags) {
+      if (selectedTags[tagId]) {
+        chosenTags.push(selectedTags[tagId])
+      }
+    }
+    setSearchTags(chosenTags)
+    setShowTags(false)
+  }
+
   const filter = async () => {
     try {
       const filters = {}
       let filterCount = 0
       if (tagsChecked === 'chooseTags') {
         const chosenTags = []
-        for (const tag of tagsDropdownValue) {
+        for (const tag of searchTags) {
           chosenTags.push(tag.id)
         }
         if (chosenTags.length) {
@@ -255,7 +324,9 @@ const Search = (props) => {
                   }
                   onPress={() => setTagsChecked('chooseTags')}
                 >
-                  <Text style={styles.filterOptionsText}>chosen tags</Text>
+                  <Text style={styles.filterOptionsText}>
+                    Tags to search by
+                  </Text>
                 </TouchableOpacity>
 
                 {!props.currentUser ? null : (
@@ -276,7 +347,90 @@ const Search = (props) => {
 
               {tagsChecked === 'chooseTags' ? (
                 <View style={{ marginBottom: 5 }}>
-                  {tagsDropdownValue.length ? (
+                  {showTags ? (
+                    <View style={styles.displayTagsContainer}>
+                      <TouchableOpacity onPress={pickTags}>
+                        <Text style={styles.boldText}>
+                          Close tags container to save tags to search{' '}
+                          <MaterialCommunityIcons name="chevron-up" size={18} />
+                        </Text>
+                      </TouchableOpacity>
+                      <Text style={styles.displayTagsText}>
+                        Tags that the describe the kinds of shows / attributes
+                        of shows the user likes best
+                      </Text>
+                      <View style={[styles.cardContent, styles.tagsContent]}>
+                        {displayTags(props.likeTags)}
+                      </View>
+                      <Text style={styles.displayTagsText}>
+                        Tags that the describe things the user tries to avoid
+                        seeing:
+                      </Text>
+                      <View style={[styles.cardContent, styles.tagsContent]}>
+                        {displayTags(props.dislikeTags)}
+                      </View>
+                      <Text style={styles.displayTagsText}>
+                        Tags that the describe the kind of television watcher
+                        the user is:
+                      </Text>
+                      <View style={[styles.cardContent, styles.tagsContent]}>
+                        {displayTags(props.describeTags)}
+                      </View>
+                      <TouchableOpacity onPress={pickTags}>
+                        <Text style={styles.boldText}>
+                          Close tags container to save tags to search{' '}
+                          <MaterialCommunityIcons name="chevron-up" size={18} />
+                        </Text>
+                      </TouchableOpacity>
+                      {/* <TouchableOpacity
+                        style={styles.button}
+                        onPress={saveSelectedTags}
+                      >
+                        <Text style={styles.buttonText}>
+                          Save selected tags to search criteria
+                        </Text>
+                      </TouchableOpacity> */}
+                    </View>
+                  ) : (
+                    <View>
+                      <TouchableOpacity onPress={() => setShowTags(true)}>
+                        <Text
+                          style={{
+                            ...styles.boldText,
+                            fontSize: 18,
+                          }}
+                        >
+                          Open Tags Container{' '}
+                          <MaterialCommunityIcons
+                            name="chevron-down"
+                            size={18}
+                          />
+                        </Text>
+                      </TouchableOpacity>
+                      {/* <View style={styles.displayTagsContainer}> */}
+                      {searchTags.length ? (
+                        <View>
+                          <Text
+                            style={{
+                              fontSize: 18,
+                              marginLeft: 7,
+                              fontWeight: '500',
+                            }}
+                          >
+                            Chosen tags:
+                          </Text>
+                          <View
+                            style={[styles.cardContent, styles.tagsContent]}
+                          >
+                            {displayChosenTags()}
+                          </View>
+                        </View>
+                      ) : null}
+                    </View>
+                    // </View>
+                  )}
+
+                  {/* {tagsDropdownValue.length ? (
                     <View>
                       <DropDownPicker
                         multiple={true}
@@ -314,7 +468,7 @@ const Search = (props) => {
                         placeholder="Select tag(s) to filter by"
                       />
                     </View>
-                  )}
+                  )} */}
                 </View>
               ) : tagsChecked === 'commonTags' ? (
                 <View>
@@ -519,16 +673,17 @@ const Search = (props) => {
 
                   {tagsChecked === 'none' ? null : (
                     <Text style={{ ...styles.filterText, marginBottom: 0 }}>
-                      {tagsChecked === 'chooseTags' && tagsDropdownValue.length
-                        ? `Only display users who have tagged themselves with ${tagsDropdownValue
-                            .map((tag, index) =>
-                              index === tagsDropdownValue.length - 1 &&
-                              tagsDropdownValue.length > 2
-                                ? `and "${tag.name}"`
-                                : `"${tag.name}"`
-                            )
-                            .join(', ')}`
-                        : tagsChecked === 'commonTags' && commonTagDropdownValue
+                      {tagsChecked === 'chooseTags' && searchTags.length
+                        ? `Only display users who have tagged themselves with specific tags (see chosen tags above)`
+                        : // ${searchTags
+                        //     .map((tag, index) =>
+                        //       index === searchTags.length - 1 &&
+                        //       searchTags.length > 2
+                        //         ? `and "${tag.name}"`
+                        //         : `"${tag.name}"`
+                        // )
+                        // .join(', ')}`
+                        tagsChecked === 'commonTags' && commonTagDropdownValue
                         ? `Only display users who have at least ${commonTagDropdownValue} user tags in common with me`
                         : null}
                     </Text>
@@ -562,7 +717,7 @@ const Search = (props) => {
                     style={styles.cancelButton}
                     onPress={() => reset()}
                   >
-                    <Text style={styles.buttonText}>Cancel</Text>
+                    <Text style={styles.buttonText}>Clear filters</Text>
                   </TouchableOpacity>
                 </View>
                 <View style={{ flex: 1, alignItems: 'flex-end' }}>
@@ -749,10 +904,10 @@ const styles = StyleSheet.create({
   },
   cardContent: {
     flexDirection: 'row',
-    marginBottom: 10,
+    marginBottom: 5,
   },
   tagsContent: {
-    marginTop: 10,
+    marginTop: 5,
     flexWrap: 'wrap',
   },
   selectedTag: {
@@ -760,6 +915,48 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     marginHorizontal: 3,
     backgroundColor: '#008DD5',
+    marginTop: 5,
+  },
+  highlightLikeTag: {
+    padding: 10,
+    borderRadius: 40,
+    marginHorizontal: 3,
+    backgroundColor: '#008DD5',
+    marginTop: 5,
+  },
+  likeTag: {
+    padding: 10,
+    borderRadius: 40,
+    marginHorizontal: 3,
+    backgroundColor: '#9BC1BC',
+    marginTop: 5,
+  },
+  highlightDislikeTag: {
+    padding: 10,
+    borderRadius: 40,
+    marginHorizontal: 3,
+    backgroundColor: '#E24E1B',
+    marginTop: 5,
+  },
+  dislikeTag: {
+    padding: 10,
+    borderRadius: 40,
+    marginHorizontal: 3,
+    backgroundColor: '#F2A541',
+    marginTop: 5,
+  },
+  highlightDescribeTag: {
+    padding: 10,
+    borderRadius: 40,
+    marginHorizontal: 3,
+    backgroundColor: '#7B5D96',
+    marginTop: 5,
+  },
+  describeTag: {
+    padding: 10,
+    borderRadius: 40,
+    marginHorizontal: 3,
+    backgroundColor: '#B3A7BB',
     marginTop: 5,
   },
   buttonContainer: {
@@ -789,12 +986,26 @@ const styles = StyleSheet.create({
     backgroundColor: '#F46036',
     marginTop: 5,
   },
+  displayTagsContainer: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    margin: 5,
+  },
+  displayTagsText: {
+    textAlign: 'left',
+    fontSize: 16,
+    marginRight: 5,
+    marginLeft: 5,
+    fontWeight: '500',
+  },
 })
 
 const mapStateToProps = (store) => ({
   currentUser: store.currentUser.userInfo,
   otherUsers: store.allOtherUsers.usersInfo,
-  allUserTags: store.allOtherUsers.userTags,
+  dislikeTags: store.allOtherUsers.dislikeTags,
+  describeTags: store.allOtherUsers.describeTags,
+  likeTags: store.allOtherUsers.userTags,
   userTags: store.currentUser.userTags,
   userShows: store.currentUser.userShows,
 })

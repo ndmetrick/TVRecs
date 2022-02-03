@@ -221,9 +221,8 @@ function UserTagsAndDescription(props) {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     marginTop: 10,
-    marginBottom: 10,
+    marginBottom: 30,
   },
   containerInfo: {
     margin: 5,

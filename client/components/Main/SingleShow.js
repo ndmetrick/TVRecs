@@ -566,6 +566,8 @@ function SingleShow(props) {
                                       showData: {
                                         showName: userShow.show.name,
                                         imageUrl: userShow.show.imageUrl,
+                                        // streaming: userShow.show.streaming,
+                                        // purchase: userShow.show.purchase,
                                         imdbId: userShow.show.imdbId,
                                         description: userShow.description,
                                         tags: userShow.tags,
@@ -583,6 +585,8 @@ function SingleShow(props) {
                                       showData: {
                                         showName: userShow.show.name,
                                         imageUrl: userShow.show.imageUrl,
+                                        // streaming: userShow.show.streaming,
+                                        // purchase: userShow.show.purchase,
                                         imdbId: userShow.show.imdbId,
                                         type: profileShowDropdownValue,
                                         keep: false,
