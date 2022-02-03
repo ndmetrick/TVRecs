@@ -2,7 +2,9 @@ import axios from 'axios'
 import types from '../constants'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
-const baseUrl = 'https://tvrecs.herokuapp.com'
+// const baseUrl = 'https://tvrecs.herokuapp.com'
+
+const baseUrl = 'http://srv-captain--tvrecs'
 
 // const baseUrl = 'https://10.0.0.98:8080';
 

@@ -42,6 +42,7 @@ const Login = (props) => {
   )
 
   useEffect(() => {
+    console.log('HELLOOOO')
     const getAuth = async () => {
       try {
         console.log('this is when i get here 3')
