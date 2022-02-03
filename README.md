@@ -12,6 +12,6 @@ If you're interested in testing out the app:
 
 If you have an Android phone, you can also see the current version of the via Expo at https://expo.dev/@ndmetrick/TelevisionIsMyFriend. (You can download the Expo app and then use the QR code (from the camera on an iPhone or from within the Expo app on Android) to open the app.)
 
-If you an iPhone, feel free to email me at ndmetrick@gmail.com and I can add you as a tester and you can test out the app via TestFlight, Apple's App testing software. (For right now I'm trying to manage the size of the testing group, so I'm adding people manually.)
+If you have an iPhone, you can download the app via TestFlight, Apple's app for beta-testing apps. Feel free to email me at ndmetrick@gmail.com and I can add you as a tester and you'll be emailed when there are new versions available. (You can also download the app via TestFlight using this link: https://testflight.apple.com/join/ee1lpJcD.)
 
 As it says in the app, most of it can't really be experienced without logging in, but you can try using the guest account if you don't want to create your own. Also, feel free to email me with tag ideas -- the tag list is still very much in process also! You can find some instructions about how to use the app in the Settings tab, but if you find anything confusing, let me know!
