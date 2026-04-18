@@ -1,17 +1,50 @@
-# TVRecs
+# Welcome to your Expo app 👋
 
-This is a work-in-progress app for people to recommend TV shows to each other and keep track of shows they want to watch in the future. Users are able to add tags to their profile to describe the type of shows they like, and can add tags to the shows they're recommending to communicate how they would describe the show, things they love about it, and anything they want to warn potential viewers about.
+This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
-The three types of lists you can have on your profile are your Recommendations (or 'Recs') list, Watch list (shows you want to keep track of to watch in the future), and Filter Out list (shows you never want to see recommended to you for whatever reason. Shows can only be on one of those lists at a time, and only your Rec list is visible to others. On the main feed page with recommendations from the users you follow, you can toggle on/off seeing shows recommended that you have on your profile on your To Watch and Recs lists (shows in Filter Out will never show up in your main feed).
+## Get started
 
-As I said, this is a work in progress. I'm updating this with messy code publicly because I'm applying for jobs and I want to make clear what I've been working on. But it's not well commented yet, it's still got lots of console.logs, and it's got various bits of commented-out code.
+1. Install dependencies
 
-This is the repo for the front end of this project. The back end is at https://github.com/ndmetrick/TVRecsAPI.
+   ```bash
+   npm install
+   ```
 
-If you're interested in testing out the app:
+2. Start the app
 
-If you have an Android phone, you can also see the current version of the via Expo at https://expo.dev/@ndmetrick/TelevisionIsMyFriend. (You can download the Expo app and then use the QR code (from the camera on an iPhone or from within the Expo app on Android) to open the app.)
+   ```bash
+   npx expo start
+   ```
 
-If you have an iPhone, you can download the app via TestFlight, Apple's app for beta-testing apps. Feel free to email me at ndmetrick@gmail.com and I can add you as a tester and you'll be emailed when there are new versions available. (You can also download the app via TestFlight using this link: https://testflight.apple.com/join/ee1lpJcD.)
+In the output, you'll find options to open the app in a
 
-As it says in the app, most of it can't really be experienced without logging in, but you can try using the guest account if you don't want to create your own. Also, feel free to email me with tag ideas -- the tag list is still very much in process also! You can find some instructions about how to use the app in the Settings tab, but if you find anything confusing, let me know!
+- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
+- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
+- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
+- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+
+You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+
+## Get a fresh project
+
+When you're ready, run:
+
+```bash
+npm run reset-project
+```
+
+This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+
+## Learn more
+
+To learn more about developing your project with Expo, look at the following resources:
+
+- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
+- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+
+## Join the community
+
+Join our community of developers creating universal apps.
+
+- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
+- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
