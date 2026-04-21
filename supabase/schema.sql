@@ -14,10 +14,11 @@ CREATE TABLE public.users (
 CREATE TABLE public.shows (
   id SERIAL PRIMARY KEY,
   name TEXT NOT NULL,
-  imdb_id TEXT NOT NULL UNIQUE,
+  tmdb_id TEXT NOT NULL UNIQUE,
   image_url TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
 
 CREATE TABLE public.tags (
   id SERIAL PRIMARY KEY,
@@ -33,7 +34,7 @@ CREATE TABLE public.user_shows (
   show_id INTEGER NOT NULL REFERENCES public.shows(id) ON DELETE CASCADE,
   type TEXT NOT NULL DEFAULT 'rec' CHECK (type IN ('rec','watch','seen')),
   description TEXT,
-  visible BOOLEAN,
+  visible BOOLEAN DEFAULT true,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(user_id, show_id)
@@ -55,6 +56,7 @@ CREATE TABLE public.user_show_tags (
 CREATE TABLE public.profile_tags (
   user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
   tag_id INTEGER NOT NULL REFERENCES public.tags(id) ON DELETE CASCADE,
+  category TEXT NOT NULL DEFAULT 'like' CHECK (category IN ('like', 'dislike', 'describe')),
   PRIMARY KEY (user_id, tag_id)
 );
 
@@ -77,6 +79,19 @@ CREATE OR REPLACE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
+ -- Function to automatically update updated_at on user_shows
+CREATE OR REPLACE FUNCTION public.handle_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER set_updated_at
+BEFORE UPDATE ON public.user_shows
+FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+
 -- Enable RLS on all tables
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.shows ENABLE ROW LEVEL SECURITY;
@@ -95,27 +110,43 @@ USING (true);
 -- Users can update their own profile
 CREATE POLICY "Users can update own profile"
 ON public.users FOR UPDATE
-USING (auth.uid() = id);
+TO authenticated
+USING (auth.uid() = id)
+WITH CHECK (auth.uid() = id);
 
 -- User shows are viewable by everyone
 CREATE POLICY "User shows are viewable by everyone"
 ON public.user_shows FOR SELECT
 USING (true);
 
+CREATE POLICY "Shows are viewable by everyone"
+ON public.shows FOR SELECT
+USING (true);
+
 -- Users can insert their own shows
 CREATE POLICY "Users can insert own shows"
 ON public.user_shows FOR INSERT
+TO authenticated
 WITH CHECK (auth.uid() = user_id);
 
 -- Users can update their own shows
 CREATE POLICY "Users can update own shows"
 ON public.user_shows FOR UPDATE
-USING (auth.uid() = user_id);
+TO authenticated
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Authenticated users can update shows"
+ON public.shows FOR UPDATE
+TO authenticated
+USING (true);
 
 -- Users can delete their own shows
 CREATE POLICY "Users can delete own shows"
 ON public.user_shows FOR DELETE
+TO authenticated
 USING (auth.uid() = user_id);
+
 
 -- Follows are viewable by everyone
 CREATE POLICY "Follows are viewable by everyone"
@@ -125,17 +156,26 @@ USING (true);
 -- Users can follow others
 CREATE POLICY "Users can insert own follows"
 ON public.follows FOR INSERT
+TO authenticated
 WITH CHECK (auth.uid() = follower);
 
 -- Users can unfollow
 CREATE POLICY "Users can delete own follows"
 ON public.follows FOR DELETE
+TO authenticated
 USING (auth.uid() = follower);
 
 -- Tags are viewable by everyone
 CREATE POLICY "Tags are viewable by everyone"
 ON public.tags FOR SELECT
 USING (true);
+
+-- Users can add shows
+CREATE POLICY "Authenticated users can insert shows"
+ON public.shows FOR INSERT
+TO authenticated
+WITH CHECK (auth.uid() IS NOT NULL);
+
 
 -- Profile tags viewable by everyone
 CREATE POLICY "Profile tags are viewable by everyone"
@@ -145,7 +185,9 @@ USING (true);
 -- Users can update own profile tags
 CREATE POLICY "Users can manage own profile tags"
 ON public.profile_tags FOR ALL
-USING (auth.uid() = user_id);
+TO authenticated
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
 
 -- User show tags viewable by everyone
 CREATE POLICY "User show tags are viewable by everyone"
@@ -155,12 +197,10 @@ USING (true);
 -- Users can manage tags on their own shows
 CREATE POLICY "Users can manage own user show tags"
 ON public.user_show_tags FOR ALL
-USING (
-  auth.uid() = (
-    SELECT user_id FROM public.user_shows
-    WHERE id = user_show_id
-  )
-);
+TO authenticated
+USING (auth.uid() = (SELECT user_id FROM public.user_shows WHERE id = user_show_id))
+WITH CHECK (auth.uid() = (SELECT user_id FROM public.user_shows WHERE id = user_show_id));
+
 
 -- Allow the trigger function to insert into users
 CREATE POLICY "Allow trigger to create user profile"
