@@ -1,33 +1,56 @@
 import { Tabs } from 'expo-router';
-import React from 'react';
-
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
+        tabBarShowLabel: false,
+        tabBarStyle: { backgroundColor: '#340068' },
+        tabBarActiveTintColor: '#36C9C6',
+        tabBarInactiveTintColor: 'white',
+      }}
+    >
       <Tabs.Screen
-        name="index"
+        name="recShows"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons name="home" color={color} size={26} />
+          ),
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="addShow"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons name="television-classic" color={color} size={26} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="search"
+        options={{
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons name="person-add" color={color} size={26} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="currentUser"
+        options={{
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons name="account-circle" color={color} size={26} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons name="settings" color={color} size={26} />
+          ),
         }}
       />
     </Tabs>
