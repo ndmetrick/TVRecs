@@ -3,9 +3,9 @@ import UserTagsAndDescription from '@/components/UserTagsAndDescription';
 import {
 	followUser,
 	getCurrentUser as getOtherUser,
+	getProfileTags,
 	getUserFollowing,
 	getUserShows,
-	getUserTags,
 	unfollowUser,
 } from '@/lib/api';
 import { useAppData } from '@/lib/AppContext';
@@ -62,7 +62,7 @@ const OtherUser = () => {
 						: getOtherUser(supabase, otherUserId),
 					getUserShows(supabase, otherUserId, UserShowType.REC),
 					getUserFollowing(supabase, otherUserId),
-					getUserTags(supabase, otherUserId),
+					getProfileTags(supabase, otherUserId),
 				]);
 				const [fetchedUser, shows, otherFollowing, tags] = results;
 

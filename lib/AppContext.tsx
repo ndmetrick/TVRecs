@@ -51,7 +51,8 @@ type AppData = {
 	allOtherUsers: UserProfile[] | null;
 	tvTags: Tag[];
 	warningTags: Tag[];
-	userTags: Tag[];
+	preferenceTags: Tag[];
+	describeTags: Tag[];
 };
 
 const AppContext = createContext<AppData | undefined>(undefined);
@@ -76,7 +77,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 	);
 	const [tvTags, setTvTags] = useState<Tag[]>([]);
 	const [warningTags, setWarningTags] = useState<Tag[]>([]);
-	const [userTags, setUserTags] = useState<Tag[]>([]);
+	const [preferenceTags, setPreferenceTags] = useState<Tag[]>([]);
+	const [describeTags, setDescribeTags] = useState<Tag[]>([]);
 
 	const followingMap = useMemo(
 		() =>
@@ -148,6 +150,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 		const tv: Tag[] = [];
 		const warning: Tag[] = [];
 		const uTags: Tag[] = [];
+		const describe: Tag[] = [];
 
 		data.forEach((tag) => {
 			if (tag.type === TagType.UNASSIGNED) {
@@ -162,14 +165,14 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 			}
 			if (tag.type === TagType.WARNING) {
 				warning.push(tag);
-				uTags.push(tag);
 			}
 			if (tag.type === TagType.PROFILE_DESCRIBE) {
-				uTags.push(tag);
+				describe.push(tag);
 			}
-			setUserTags(uTags);
+			setPreferenceTags(uTags);
 			setTvTags(tv);
 			setWarningTags(warning);
+			setDescribeTags(describe);
 		});
 	}, []);
 
@@ -238,7 +241,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 				allOtherUsers,
 				tvTags,
 				warningTags,
-				userTags,
+				preferenceTags,
+				describeTags,
 			}}
 		>
 			{children}

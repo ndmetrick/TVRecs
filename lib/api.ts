@@ -41,6 +41,15 @@ export const getAllUsers = async (
 	return data ?? [];
 };
 
+export const updateUser = async (
+	supabase: SupabaseClient,
+	uid: string,
+	updates: Partial<UserProfile>,
+): Promise<void> => {
+	const { error } = await supabase.from('users').update(updates).eq('id', uid);
+	if (error) throw error;
+};
+
 // ── Shows ─────────────────────────────────────────────────────────────────────
 
 export const getUserShows = async (
@@ -300,7 +309,7 @@ export const editUserShow = async (
 
 // ── Tags ──────────────────────────────────────────────────────────────────────
 
-export const getUserTags = async (
+export const getProfileTags = async (
 	supabase: SupabaseClient,
 	uid: string,
 ): Promise<ProfileTag[]> => {
