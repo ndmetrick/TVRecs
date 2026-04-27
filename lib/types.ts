@@ -14,6 +14,23 @@ export type Show = {
 	tmdb_id: string | null;
 	image_url: string;
 };
+export enum ShowFilterType {
+	HAS_TAGS = 'hasTags',
+	HAS_DESCRIPTION = 'hasDescription',
+	TAG_IDS = 'tagIds',
+	MIN_RECS = 'minRecs',
+	DESCRIPTION_STRING = 'descriptionString',
+	NONE = 'none',
+}
+
+export type AppliedFilters = {
+	hasTags?: boolean;
+	hasDescription?: boolean;
+	tagIds?: number[];
+	minRecs?: number;
+	descriptionString?: string;
+	none?: boolean;
+};
 
 export type EditUserShowParams = {
 	userShowId: number;
