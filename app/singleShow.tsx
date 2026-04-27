@@ -16,6 +16,7 @@ import SaveShowModal from '@/components/SaveShowModal';
 import StreamingAndPurchase from '@/components/StreamingAndPurchase';
 import { useAppData } from '@/lib/AppContext';
 import { deleteUserShow } from '@/lib/api';
+import { showErrorToast } from '@/lib/toast';
 import {
 	RecCount,
 	SourcePage,
@@ -28,12 +29,10 @@ import {
 import { useIsFocused } from '@react-navigation/native';
 import { router, useLocalSearchParams } from 'expo-router';
 import DropDownPicker from 'react-native-dropdown-picker';
-import { skipTagsAndSaveShowData } from './utils';
+import { skipTagsAndSaveShowData } from '../lib/utils';
 
 const SingleShow = () => {
 	const { userShowString, userString } = useLocalSearchParams();
-	const singleShow: UserShow = JSON.parse(userShowString as string);
-	const userToView: UserProfile = JSON.parse(userString as string);
 
 	const [user, setUser] = useState<UserProfile | null>(null);
 	const [type, setType] = useState<UserShowType | null>(null);
@@ -68,6 +67,168 @@ const SingleShow = () => {
 		Record<number, RecCount>
 	>({});
 	const [modalVisible, setModalVisible] = useState(false);
+	const [singleShow, setSingleShow] = useState<UserShow | null>(null);
+	const [userToView, setUserToView] = useState<UserProfile | null>(null);
+
+	useEffect(() => {
+		if (!userShowString || !userString) return;
+		const userShow: UserShow = JSON.parse(userShowString as string);
+		const viewUser: UserProfile = JSON.parse(userString as string);
+		setSingleShow(userShow);
+		setUserToView(viewUser);
+		//profileShowOptions is the list of dropdown menu options for what the user can do with the show (delete it from their profile, add it to their profile in different places, etc)
+
+		if (currentUser === null && viewUser !== null) {
+			console.log('i got in here');
+			setUser(viewUser);
+			// setCountry(userInfo.country)
+		} else {
+			if (viewUser.id === currentUser?.id) {
+				// if the current user is the same as the person who's page this is (it's their own profile page):
+				setUser(currentUser);
+				setIsCurrentUser(true);
+				const profileShowOptions = [
+					{ label: 'Delete it', value: 'delete' },
+					{ label: 'Add or edit description/tags', value: 'tags' },
+				];
+				// If this show is already on the user's profile, depending on where it is, different options to move it will be added to the dropdown menu options.
+				const otherDropdownOptions = userShows.find(
+					(currentUserShow) => currentUserShow.show.id === userShow.show.id,
+				)
+					? [
+							{
+								label:
+									'Move it to my Watch list to remind me to watch it later',
+								value: UserShowType.WATCH,
+							},
+							{
+								label: 'Move it to my Filter Out list',
+								value: UserShowType.SEEN,
+							},
+							{ label: 'Nothing', value: 'none' },
+						]
+					: toWatch.find((watchShow) => watchShow.show.id === userShow.show.id)
+						? [
+								{ label: 'Recommend it', value: UserShowType.REC },
+								{
+									label: 'Move it to my Filter Out list',
+									value: UserShowType.SEEN,
+								},
+								{ label: 'Nothing', value: 'none' },
+							]
+						: [
+								{ label: 'Recommend it', value: UserShowType.REC },
+
+								{
+									label:
+										'Move it to my Watch list to remind me to watch it later',
+									value: UserShowType.WATCH,
+								},
+								{ label: 'Nothing', value: 'none' },
+							];
+				otherDropdownOptions.forEach((option) => {
+					profileShowOptions.push(option);
+				});
+				console.log('profileshowoptions', profileShowOptions);
+				setProfileShowDropdownOptions(profileShowOptions);
+			} else {
+				setUser(viewUser);
+
+				const hasShow = userShows.find(
+					(currentUserShow) => currentUserShow.show.id === userShow.show.id,
+				)
+					? UserShowType.REC
+					: toWatch.find((watchShow) => watchShow.show.id === userShow.show.id)
+						? UserShowType.WATCH
+						: seen.find((seenShow) => seenShow.show.id === userShow.show.id)
+							? UserShowType.SEEN
+							: null;
+				if (hasShow) {
+					setUserHasShow(hasShow);
+				} else {
+					setProfileShowDropdownOptions([
+						{ label: 'Recommend it', value: UserShowType.REC },
+						{
+							label: 'Save it to my Watch list to remind me to watch it later',
+							value: UserShowType.WATCH,
+						},
+						{
+							label: 'Filter it out of recs I see in my main feed',
+							value: UserShowType.SEEN,
+						},
+						{ label: 'Nothing', value: 'none' },
+					]);
+				}
+			}
+			const myProfile = userShows.find((us) => us.show.id === userShow.show_id)
+				? 'and you'
+				: toWatch.find((watchShow) => watchShow.show.id === userShow.show_id)
+					? 'and on your To Watch list'
+					: null;
+			const showId = userShow.show_id;
+			let recCounts: Record<number, RecCount> = {};
+			recCounts[showId] = {
+				num: 1,
+				recommenders: [{ userId: userShow.user_id, recShow: userShow }],
+				myProfile,
+			};
+
+			followingRecs.forEach((recShow) => {
+				if (
+					recShow.show_id === showId &&
+					recShow.user_id !== userShow.user_id
+				) {
+					recCounts[showId].num++;
+					recCounts[showId].recommenders.push({
+						userId: recShow.user_id,
+						recShow,
+					});
+				}
+			});
+			console.log('reccounts', JSON.stringify(recCounts));
+			setMultipleRecInfo(recCounts);
+		}
+		const warnings = userShow.tags.filter((tag) => {
+			return tag.type === 'warning';
+		});
+		const tv = userShow.tags.filter((tag) => {
+			return tag.type === 'tv' || tag.type === 'unassigned';
+		});
+		setTVTags(tv);
+		setWarningTags(warnings);
+		setType(userShow.type);
+		setLoading(false);
+		return () => {
+			setStreamingAndPurchase(false);
+			setUser(null);
+			setType(null);
+			setWarningTags([]);
+			setTVTags([]);
+			setIsCurrentUser(false);
+			setMultipleRecInfo({});
+			setModalVisible(false);
+			setUserHasShow(null);
+			setProfileShowDropdownValue(null);
+			setLoading(true);
+		};
+	}, [
+		userShowString,
+		type,
+		isFocused,
+		currentUser,
+		userString,
+		userShows,
+		toWatch,
+		seen,
+		followingRecs,
+	]);
+
+	if (!singleShow || (!isCurrentUser && !userToView))
+		return (
+			<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+				<ActivityIndicator size='large' color='#5500dc' />
+			</View>
+		);
 
 	const saveSingleShow = (keepCurrentTagsAndDesc: boolean) => {
 		if (!currentUser) {
@@ -95,194 +256,29 @@ const SingleShow = () => {
 	};
 
 	const goToAddTags = (keepCurrentTagsAndDesc: boolean) => {
-		if (!currentUser) {
-			router.push({ pathname: '/login' });
-		} else {
-			const showToSave: UserShowToSave = {
-				tags: keepCurrentTagsAndDesc ? singleShow.tags : [],
-				description: keepCurrentTagsAndDesc ? singleShow.description : null,
-				name: singleShow.show.name,
-				tmdb_id: singleShow.show.tmdb_id,
-				image_url: singleShow.show.image_url,
-				type: type ?? UserShowType.REC,
-			};
-			const params = isCurrentUser
-				? {
-						showToSaveString: JSON.stringify(showToSave),
-						previousPage: SourcePage.SINGLE_SHOW,
-						currentShowString: JSON.stringify(singleShow),
-					}
-				: {
-						showToSaveString: JSON.stringify(showToSave),
-						previousString: SourcePage.SINGLE_SHOW,
-					};
-			router.push({
-				pathname: '/addShowTags',
-				params,
-			});
-
-			// MATCH ABOVE!
-		}
-	};
-
-	useEffect(() => {
-		//profileShowOptions is the list of dropdown menu options for what the user can do with the show (delete it from their profile, add it to their profile in different places, etc)
-
-		if (currentUser === null && userToView !== null) {
-			console.log('i got in here');
-			setUser(userToView);
-			// setCountry(userInfo.country)
-		} else {
-			if (currentUser) {
-				if (userToView.id === currentUser.id) {
-					// if the current user is the same as the person who's page this is (it's their own profile page):
-					setUser(currentUser);
-					setIsCurrentUser(true);
-					const profileShowOptions = [
-						{ label: 'Delete it', value: 'delete' },
-						{ label: 'Add or edit description/tags', value: 'tags' },
-					];
-					// If this show is already on the user's profile, depending on where it is, different options to move it will be added to the dropdown menu options.
-					const otherDropdownOptions = userShows.find(
-						(currentUserShow) => currentUserShow.show.id === singleShow.show.id,
-					)
-						? [
-								{
-									label:
-										'Move it to my Watch list to remind me to watch it later',
-									value: UserShowType.WATCH,
-								},
-								{
-									label: 'Move it to my Filter Out list',
-									value: UserShowType.SEEN,
-								},
-								{ label: 'Nothing', value: 'none' },
-							]
-						: toWatch.find(
-									(watchShow) => watchShow.show.id === singleShow.show.id,
-							  )
-							? [
-									{ label: 'Recommend it', value: UserShowType.REC },
-									{
-										label: 'Move it to my Filter Out list',
-										value: UserShowType.SEEN,
-									},
-									{ label: 'Nothing', value: 'none' },
-								]
-							: [
-									{ label: 'Recommend it', value: UserShowType.REC },
-
-									{
-										label:
-											'Move it to my Watch list to remind me to watch it later',
-										value: UserShowType.WATCH,
-									},
-									{ label: 'Nothing', value: 'none' },
-								];
-					otherDropdownOptions.forEach((option) => {
-						profileShowOptions.push(option);
-					});
-					console.log('profileshowoptions', profileShowOptions);
-					setProfileShowDropdownOptions(profileShowOptions);
-				} else {
-					setUser(userToView);
-					if (currentUser) {
-						const hasShow = userShows.find(
-							(currentUserShow) =>
-								currentUserShow.show.id === singleShow.show.id,
-						)
-							? UserShowType.REC
-							: toWatch.find(
-										(watchShow) => watchShow.show.id === singleShow.show.id,
-								  )
-								? UserShowType.WATCH
-								: seen.find(
-											(seenShow) => seenShow.show.id === singleShow.show.id,
-									  )
-									? UserShowType.SEEN
-									: null;
-						if (hasShow) {
-							setUserHasShow(hasShow);
-						} else {
-							setProfileShowDropdownOptions([
-								{ label: 'Recommend it', value: UserShowType.REC },
-								{
-									label:
-										'Save it to my Watch list to remind me to watch it later',
-									value: UserShowType.WATCH,
-								},
-								{
-									label: 'Filter it out of recs I see in my main feed',
-									value: UserShowType.SEEN,
-								},
-								{ label: 'Nothing', value: 'none' },
-							]);
-						}
-					}
-				}
-				const myProfile = userShows.find(
-					(userShow) => userShow.show.id === singleShow.show_id,
-				)
-					? 'and you'
-					: toWatch.find(
-								(watchShow) => watchShow.show.id === singleShow.show_id,
-						  )
-						? 'and on your To Watch list'
-						: null;
-				const showId = singleShow.show_id;
-				let recCounts: Record<number, RecCount> = {};
-				recCounts[showId] = {
-					num: 1,
-					recommenders: [{ userId: singleShow.user_id, recShow: singleShow }],
-					myProfile,
-				};
-
-				followingRecs.forEach((recShow) => {
-					if (recShow.show_id === showId) {
-						recCounts[showId].num++;
-						recCounts[showId].recommenders.push({
-							userId: recShow.user_id,
-							recShow,
-						});
-					}
-				});
-				setMultipleRecInfo(recCounts);
-			}
-		}
-		const warnings = singleShow.tags.filter((tag) => {
-			return tag.type === 'warning';
-		});
-		const tv = singleShow.tags.filter((tag) => {
-			return tag.type === 'tv' || tag.type === 'unassigned';
-		});
-		setTVTags(tv);
-		setWarningTags(warnings);
-		setType(singleShow.type);
-		setLoading(false);
-		return () => {
-			setStreamingAndPurchase(false);
-			setUser(null);
-			setType(null);
-			setWarningTags([]);
-			setTVTags([]);
-			setIsCurrentUser(false);
-			setMultipleRecInfo({});
-			setModalVisible(false);
-			setUserHasShow(null);
-			setProfileShowDropdownValue(null);
-			setLoading(true);
+		const showToSave: UserShowToSave = {
+			tags: keepCurrentTagsAndDesc ? singleShow.tags : [],
+			description: keepCurrentTagsAndDesc ? singleShow.description : null,
+			name: singleShow.show.name,
+			tmdb_id: singleShow.show.tmdb_id,
+			image_url: singleShow.show.image_url,
+			type: type ?? UserShowType.REC,
 		};
-	}, [
-		userToView,
-		type,
-		isFocused,
-		currentUser,
-		singleShow,
-		userShows,
-		toWatch,
-		seen,
-		followingRecs,
-	]);
+		const params = isCurrentUser
+			? {
+					showToSaveString: JSON.stringify(showToSave),
+					previousPage: SourcePage.SINGLE_SHOW,
+					currentShowString: JSON.stringify(singleShow),
+				}
+			: {
+					showToSaveString: JSON.stringify(showToSave),
+					previousString: SourcePage.SINGLE_SHOW,
+				};
+		router.push({
+			pathname: '/addShowTags',
+			params,
+		});
+	};
 
 	const deleteShow = async () => {
 		try {
@@ -298,7 +294,8 @@ const SingleShow = () => {
 				router.back();
 			}
 		} catch (err) {
-			console.error(err);
+			console.error(`Error deleting this show: ${err}`);
+			showErrorToast('Error deleting and updating your account. Try again.');
 		}
 	};
 
@@ -314,7 +311,7 @@ const SingleShow = () => {
 		});
 	};
 
-	if (user === null || loading || Object.keys(multipleRecInfo).length === 0) {
+	if (loading || !user) {
 		return (
 			<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
 				<ActivityIndicator size='large' color='#5500dc' />
@@ -350,8 +347,11 @@ const SingleShow = () => {
 								<Text
 									onPress={() =>
 										router.push({
-											pathname: '/followedUserScreen',
-											params: { uid: user.id },
+											pathname: '/otherUser',
+											params: {
+												uid: user.id,
+												userString: JSON.stringify(user),
+											},
 										})
 									}
 									style={styles.usernameText}
@@ -611,7 +611,7 @@ const SingleShow = () => {
 						) : (
 							<View>
 								{/* If the user isn't logged in or this show (identified by its tmdbId) is in any of the current user's lists of shows, don't show them the buttons to add the show to one of their lists. */}
-								{currentUser === null || userHasShow ? null : (
+								{userHasShow ? null : (
 									<View>
 										<View style={{ marginRight: 15, marginLeft: 15 }}>
 											<DropDownPicker
@@ -633,7 +633,7 @@ const SingleShow = () => {
 											<View style={styles.buttonContainer}>
 												<TouchableOpacity
 													style={styles.saveButton}
-													onPress={() => setModalVisible(true)}
+													onPress={() => setSaveShowModalVisible(true)}
 												>
 													<Text style={styles.buttonText}>
 														{profileShowDropdownValue === UserShowType.REC
@@ -656,30 +656,18 @@ const SingleShow = () => {
 							</View>
 						)}
 					</View>
-					{currentUser === null ? (
-						<View style={styles.buttonContainer}>
-							<TouchableOpacity
-								style={styles.button}
-								onPress={() =>
-									router.push({
-										pathname: '/login',
-									})
-								}
-							>
-								<Text style={styles.buttonText}>Log in / Sign up</Text>
-							</TouchableOpacity>
-						</View>
-					) : null}
 				</View>
 			</ScrollView>
-			<SaveShowModal
-				modalVisible={saveShowModalVisible}
-				setModalVisible={setSaveShowModalVisible}
-				isOwnShow={isCurrentUser}
-				onSaveAsIs={saveSingleShow}
-				onGoToEdit={goToAddTags}
-				username={!isCurrentUser ? userToView.username : null}
-			/>
+			{(isCurrentUser || userToView?.username) && (
+				<SaveShowModal
+					modalVisible={saveShowModalVisible}
+					setModalVisible={setSaveShowModalVisible}
+					isOwnShow={isCurrentUser}
+					onSaveAsIs={saveSingleShow}
+					onGoToEdit={goToAddTags}
+					username={!isCurrentUser ? userToView!.username : null}
+				/>
+			)}
 		</View>
 	);
 };

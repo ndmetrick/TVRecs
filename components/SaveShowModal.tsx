@@ -1,5 +1,12 @@
 import { useState } from 'react';
-import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+	Alert,
+	Modal,
+	StyleSheet,
+	Text,
+	TouchableOpacity,
+	View,
+} from 'react-native';
 
 type KeepChoice = 'keep' | 'clear' | null;
 
@@ -53,7 +60,7 @@ const SaveShowModal = ({
 					<Text style={styles.question}>
 						{isOwnShow
 							? 'Keep your existing description and tags?'
-							: `Save ${username ? username : "this user's"} description and tags?`}
+							: `Keep ${username ? username : 'this user'}'s description and tags?`}
 					</Text>
 
 					{/* Toggle row */}
@@ -71,7 +78,7 @@ const SaveShowModal = ({
 									keepChoice === 'keep' && styles.toggleTextSelected,
 								]}
 							>
-								{isOwnShow ? 'Keep' : 'Save'}
+								Keep them
 							</Text>
 						</TouchableOpacity>
 						<TouchableOpacity
@@ -87,7 +94,7 @@ const SaveShowModal = ({
 									keepChoice === 'clear' && styles.toggleTextSelected,
 								]}
 							>
-								Clear
+								Clear them
 							</Text>
 						</TouchableOpacity>
 					</View>
@@ -97,11 +104,17 @@ const SaveShowModal = ({
 					{/* Action buttons */}
 					<TouchableOpacity
 						style={actionButtonStyle(!!keepChoice)}
-						onPress={handleGoToEdit}
-						disabled={!keepChoice}
+						onPress={
+							keepChoice
+								? () => handleGoToEdit()
+								: () =>
+										Alert.alert('Choose to keep or clear first', '', [
+											{ text: 'OK' },
+										])
+						}
 					>
 						<Text style={styles.actionButtonText}>
-							Yes, take me to add/edit tags and description
+							Take me to tags and description
 						</Text>
 					</TouchableOpacity>
 
@@ -110,10 +123,16 @@ const SaveShowModal = ({
 							actionButtonStyle(!!keepChoice),
 							{ backgroundColor: keepChoice ? '#6B5E8C' : '#9E9E9E' },
 						]}
-						onPress={handleSaveAsIs}
-						disabled={!keepChoice}
+						onPress={
+							keepChoice
+								? () => handleSaveAsIs()
+								: () =>
+										Alert.alert('Choose to keep or clear first', '', [
+											{ text: 'OK' },
+										])
+						}
 					>
-						<Text style={styles.actionButtonText}>No, just save as-is</Text>
+						<Text style={styles.actionButtonText}>Save as-is</Text>
 					</TouchableOpacity>
 
 					<TouchableOpacity
@@ -165,12 +184,12 @@ const styles = StyleSheet.create({
 		borderColor: '#ddd',
 	},
 	toggleButtonKeep: {
-		backgroundColor: '#2D9B6F',
+		backgroundColor: '#36C9C6',
 		borderColor: '#2D9B6F',
 	},
 	toggleButtonClear: {
-		backgroundColor: '#C45C3A',
-		borderColor: '#C45C3A',
+		backgroundColor: '#777',
+		borderColor: '#ddd',
 	},
 	toggleText: {
 		fontSize: 16,
@@ -187,14 +206,18 @@ const styles = StyleSheet.create({
 	},
 	actionButton: {
 		padding: 12,
-		borderRadius: 40,
+		borderRadius: 10,
 		marginBottom: 10,
 		alignItems: 'center',
+		marginRight: 20,
+		marginLeft: 20,
 	},
 	actionButtonText: {
 		color: 'white',
 		fontSize: 16,
 		fontWeight: '500',
+		flexWrap: 'wrap',
+		textAlign: 'center',
 	},
 	cancelButton: {
 		alignItems: 'center',

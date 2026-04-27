@@ -1,4 +1,5 @@
 import { useAuth } from '@/lib/AuthContext';
+import { showErrorToast } from '@/lib/toast';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -8,6 +9,7 @@ import {
 	Text,
 	TextInput,
 	TouchableOpacity,
+	View,
 } from 'react-native';
 
 export default function Login() {
@@ -15,17 +17,16 @@ export default function Login() {
 	const router = useRouter();
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
-	const [error, setError] = useState('');
 	const [loading, setLoading] = useState(false);
 
 	const handleSignIn = async () => {
-		setError('');
 		setLoading(true);
 		try {
 			await signIn(email.trim(), password);
 			router.replace('/(tabs)/recShows');
 		} catch (e: any) {
-			setError(e.message ?? 'Sign in failed');
+			showErrorToast('Could not sign in. Try again.');
+			console.log('Error signing in:', e);
 		} finally {
 			setLoading(false);
 		}
@@ -37,7 +38,6 @@ export default function Login() {
 			behavior={Platform.OS === 'ios' ? 'padding' : undefined}
 		>
 			<Text style={styles.title}>Log In</Text>
-			{error ? <Text style={styles.error}>{error}</Text> : null}
 			<TextInput
 				style={styles.input}
 				placeholder='Email'
@@ -66,6 +66,19 @@ export default function Login() {
 			</TouchableOpacity>
 			<TouchableOpacity onPress={() => router.push('/(auth)/signup')}>
 				<Text style={styles.link}>{"Don't have an account? Sign up"}</Text>
+			</TouchableOpacity>
+			<View style={styles.dividerRow}>
+				<View style={styles.dividerLine} />
+				<Text style={styles.orText}>or</Text>
+				<View style={styles.dividerLine} />
+			</View>
+			<TouchableOpacity
+				style={{ marginTop: 5 }}
+				onPress={() => router.replace('/(tabs)/recShows')}
+			>
+				<Text style={{ ...styles.link, color: '#340068' }}>
+					Continue without account
+				</Text>
 			</TouchableOpacity>
 		</KeyboardAvoidingView>
 	);
@@ -117,5 +130,20 @@ const styles = StyleSheet.create({
 		color: '#4056F4',
 		fontSize: 15,
 		textAlign: 'center',
+	},
+	dividerRow: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		marginVertical: 12,
+	},
+	dividerLine: {
+		flex: 1,
+		height: 0.5,
+		backgroundColor: '#ccc',
+	},
+	orText: {
+		marginHorizontal: 10,
+		color: '#888',
+		fontSize: 14,
 	},
 });

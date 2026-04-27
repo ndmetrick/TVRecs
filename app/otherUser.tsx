@@ -10,6 +10,7 @@ import {
 } from '@/lib/api';
 import { useAppData } from '@/lib/AppContext';
 import { supabase } from '@/lib/supabase';
+import { showErrorToast } from '@/lib/toast';
 import {
 	Follow,
 	ProfileTag,
@@ -33,19 +34,16 @@ const OtherUser = () => {
 	const { uid, userString } = useLocalSearchParams();
 	const otherUserId = uid as string;
 
-	const other: UserProfile | null = userString
-		? JSON.parse(userString as string)
-		: null;
-
 	const [otherUserShows, setOtherUserShows] = useState<UserShow[]>([]);
-	const [otherUser, setOtherUser] = useState<UserProfile | null>(other);
+	const [otherUser, setOtherUser] = useState<UserProfile | null>(null);
 	const [isFollowing, setIsFollowing] = useState(false);
 	const [loading, setLoading] = useState(true);
 	const [otherUserFollowing, setOtherUserFollowing] = useState<Follow[]>([]);
 	const [otherUserTags, setOtherUserTags] = useState<ProfileTag[]>([]);
 	const [activeTab, setActiveTab] = useState<'recs' | 'tags'>('recs');
 
-	const { currentUser, following, refetchFollowingRecs } = useAppData();
+	const { currentUser, following, refetchFollowingRecs, refetchFollowing } =
+		useAppData();
 
 	useEffect(() => {
 		// console.log('i got in here to this other otherUser');
@@ -56,10 +54,11 @@ const OtherUser = () => {
 
 		const getAllUserInfo = async () => {
 			try {
+				const other: UserProfile | null = userString
+					? JSON.parse(userString as string)
+					: null;
 				const results = await Promise.all([
-					otherUser
-						? Promise.resolve(otherUser)
-						: getOtherUser(supabase, otherUserId),
+					other ? Promise.resolve(other) : getOtherUser(supabase, otherUserId),
 					getUserShows(supabase, otherUserId, UserShowType.REC),
 					getUserFollowing(supabase, otherUserId),
 					getProfileTags(supabase, otherUserId),
@@ -67,16 +66,20 @@ const OtherUser = () => {
 				const [fetchedUser, shows, otherFollowing, tags] = results;
 
 				if (fetchedUser) setOtherUser(fetchedUser);
+				console.log('got user');
 				setOtherUserShows(shows);
 				setOtherUserFollowing(otherFollowing);
 				setOtherUserTags(tags);
 				setIsFollowing(following.some((f) => f.followedUserId === otherUserId));
+				console.log('about to set loading false');
 				setLoading(false);
 			} catch (err) {
-				console.error(err);
+				console.error(`Error getting user info: ${err}`);
+				showErrorToast(`Error loading this user's profile`);
 				setLoading(false);
 			}
 		};
+		if (!userString) return;
 		getAllUserInfo();
 		return () => {
 			setOtherUserShows([]);
@@ -85,28 +88,32 @@ const OtherUser = () => {
 			setOtherUserFollowing([]);
 			setOtherUserTags([]);
 		};
-	}, [otherUser, following, otherUserId]);
+	}, [userString, following, otherUserId]);
 
 	const follow = async () => {
 		try {
 			if (currentUser && otherUser) {
 				await followUser(supabase, currentUser.id, otherUser.id);
+				await refetchFollowing();
 				await refetchFollowingRecs();
 				setIsFollowing(true);
 			}
 		} catch (err) {
-			console.log(err);
+			console.log(`Error following user: ${err}`);
+			showErrorToast('Error trying to follow. Try again.');
 		}
 	};
 	const unfollow = async () => {
 		try {
 			if (currentUser && otherUser) {
 				await unfollowUser(supabase, currentUser.id, otherUser.id);
+				await refetchFollowing();
 				await refetchFollowingRecs();
 				setIsFollowing(false);
 			}
 		} catch (err) {
-			console.log(err);
+			console.log(`Error unfollowing user: ${err}`);
+			showErrorToast('Error trying to unfollow. Try again.');
 		}
 	};
 

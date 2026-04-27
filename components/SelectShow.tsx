@@ -1,6 +1,8 @@
 // import { useIsFocused } from '@react-navigation/native';
+import { showErrorToast } from '@/lib/toast';
+import { useIsFocused } from '@react-navigation/native';
 import axios from 'axios';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
 	Alert,
 	Image,
@@ -14,10 +16,10 @@ import { TextInput } from 'react-native-paper';
 
 interface Props {
 	handleShow: (
-		showName: any,
-		imageUrl: any,
-		tmdbId: any,
-		showAdded: any,
+		showName: string,
+		imageUrl: string,
+		tmdbId: number | string,
+		showAdded: boolean,
 	) => void;
 	showAdded: boolean;
 	previous: string;
@@ -30,7 +32,16 @@ const SelectShow = (props: Props) => {
 	const [showPosterPreview, setShowPosterPreview] = useState(false);
 	const [notFound, setNotFound] = useState(false);
 
-	// const isFocused = useIsFocused;
+	const isFocused = useIsFocused();
+
+	useEffect(() => {
+		if (!isFocused) return;
+		setShowInput('');
+		setShowOptions(null);
+		setAdded(false);
+		setShowPosterPreview(false);
+		setNotFound(false);
+	}, [isFocused]);
 
 	type TMDBShow = {
 		name: string;
@@ -90,7 +101,6 @@ const SelectShow = (props: Props) => {
 						const imageShow = await axios.get(imageShowText);
 						let poster = imageShow.data.Poster;
 						if (!poster || poster === 'N/A') {
-							console.log('i got into this one');
 							poster = 'https://i.postimg.cc/Y2TP5SLv/missing-Poster-Icon.png';
 						}
 						props.handleShow(show.name, poster, show.id, true);
@@ -99,7 +109,8 @@ const SelectShow = (props: Props) => {
 				}
 			}
 		} catch (e) {
-			console.error(e);
+			console.error(`Error getting show options: ${e}`);
+			showErrorToast('Error loading shows. Try again.');
 		}
 	};
 
@@ -121,19 +132,14 @@ const SelectShow = (props: Props) => {
 			setShowInput(data.name);
 			setShowOptions(null);
 			if (data.poster_path) {
-				console.log('actually made it up here');
 				const image = 'https://image.tmdb.org/t/p/original' + data.poster_path;
 				props.handleShow(data.name, image, id, true);
-				console.log('about to setAdded true');
 				setAdded(true);
 			} else {
-				console.log('nope, here i am');
 				const imageShowText = `http://www.omdbapi.com/?t=${data.name}&apikey=${process.env.EXPO_PUBLIC_OMDB_KEY}`;
 				const imageShow = await axios.get(imageShowText);
-				// console.log('this is the image', imageShow)
 				let poster = imageShow.data.Poster;
 				if (!poster || poster === 'N/A') {
-					console.log('i got in here');
 					poster = 'https://i.postimg.cc/Y2TP5SLv/missing-Poster-Icon.png';
 					props.handleShow(data.name, poster, id, true);
 					setAdded(true);
@@ -143,11 +149,10 @@ const SelectShow = (props: Props) => {
 				}
 			}
 		} catch (e) {
-			console.error(e);
+			console.error(`Error getting show data: ${e}`);
+			showErrorToast('Error getting show data. Try again.');
 		}
 	};
-
-	console.log('showAdded', added);
 
 	return (
 		<View style={styles.container}>
@@ -315,7 +320,7 @@ const SelectShow = (props: Props) => {
 									<View>
 										<Text style={{ ...styles.text, textAlign: 'left' }}>
 											{
-												"I'm so sorry. We can't find that TV show in the database."
+												"I'm so sorry. We can't find that TV show in the database. "
 											}
 											{
 												"Check to see if there's a spelling error and try again."

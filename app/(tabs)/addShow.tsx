@@ -3,9 +3,10 @@ import StreamingAndPurchase from '@/components/StreamingAndPurchase';
 import { useAppData } from '@/lib/AppContext';
 import { SourcePage, UserShowToSave, UserShowType } from '@/lib/types';
 import { useIsFocused } from '@react-navigation/native';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
+	Alert,
 	Image,
 	ScrollView,
 	StyleSheet,
@@ -14,7 +15,7 @@ import {
 	View,
 } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
-import { skipTagsAndSaveShowData } from '../utils';
+import { skipTagsAndSaveShowData } from '../../lib/utils';
 
 const profileShowOptions = [
 	{ label: 'Recommend it', value: UserShowType.REC },
@@ -29,6 +30,8 @@ const profileShowOptions = [
 	{ label: 'Nothing', value: 'none' },
 ];
 const AddShow = () => {
+	const { addToType } = useLocalSearchParams<{ addToType?: string }>();
+
 	const [showName, setShowName] = useState('');
 	const [imageUrl, setImageUrl] = useState('');
 	const [tmdbId, setTmdbId] = useState('');
@@ -39,7 +42,8 @@ const AddShow = () => {
 	const [showAdded, setShowAdded] = useState(false);
 
 	const [profileShowDropdownOpen, setProfileShowDropdownOpen] = useState(false);
-	const [showType, setShowType] = useState(null);
+	const [showType, setShowType] = useState<string | null>(null);
+
 	const [profileShowDropdownOptions, setProfileShowDropdownOptions] = useState<
 		{
 			label: string;
@@ -67,30 +71,43 @@ const AddShow = () => {
 			setStreamingAndPurchase(false);
 			setShowType(null);
 			setUserHasShow(null);
+			setProfileShowDropdownOpen(false);
 		};
 	}, [currentUser, isFocused]);
 
-	const addShow = (name: string, url: string, id: string, added: boolean) => {
-		console.log('image here', imageUrl, showName);
+	useEffect(() => {
+		if (addToType) {
+			setShowType(addToType);
+		}
+	}, [addToType]);
+
+	const addThisShow = (
+		name: string,
+		url: string,
+		id: string | number,
+		added: boolean,
+	) => {
+		console.log('ADD SHOW');
 		setShowName(name);
 		setImageUrl(url);
-		setTmdbId(id);
+		const stringId = String(id);
+		setTmdbId(stringId);
+		console.log('TMDB', id);
 		// setStreaming(streaming)
 		// setPurchase(purchase)
 		setShowAdded(added);
+
 		const hasShow = toWatch.find(
-			(watchShow) => tmdbId === watchShow.show.tmdb_id,
+			(watchShow) => stringId === watchShow.show.tmdb_id,
 		)
 			? UserShowType.WATCH
-			: userShows.find((userShow) => tmdbId === userShow.show.tmdb_id)
+			: userShows.find((userShow) => stringId === userShow.show.tmdb_id)
 				? UserShowType.REC
-				: seen.find((seenShow) => tmdbId === seenShow.show.tmdb_id)
+				: seen.find((seenShow) => stringId === seenShow.show.tmdb_id)
 					? UserShowType.SEEN
 					: null;
 		setUserHasShow(hasShow);
 	};
-
-	console.log('showAdded', showAdded);
 
 	const image = { uri: imageUrl };
 	return (
@@ -100,7 +117,7 @@ const AddShow = () => {
 				keyboardShouldPersistTaps='handled'
 			>
 				<SelectShow
-					handleShow={addShow}
+					handleShow={addThisShow}
 					showAdded={showAdded}
 					previous='AddShow'
 				/>
@@ -156,9 +173,7 @@ const AddShow = () => {
 												marginLeft: 10,
 											}}
 										>
-											{`This show is already on your ${userHasShow} list. If you'd
-											like to change that, navigate to the show on your profile
-											to see all the options.`}
+											{`This show is already on your ${userHasShow} list. If you'd like to change that, navigate to the show on your profile to see all the options.`}
 										</Text>
 										<View style={styles.buttonContainer}>
 											<TouchableOpacity
@@ -173,7 +188,7 @@ const AddShow = () => {
 											</TouchableOpacity>
 										</View>
 									</View>
-								) : currentUser ? (
+								) : (
 									<View
 										style={{
 											marginLeft: 15,
@@ -214,13 +229,13 @@ const AddShow = () => {
 																tmdb_id: tmdbId,
 																// streaming,
 																// purchase,
-																type: showType,
+																type: showType as UserShowType,
 															};
 															router.push({
 																pathname: '/addShowTags',
 																params: {
-																	userShow: JSON.stringify(showData),
-																	previous: SourcePage.ADD_SHOW,
+																	showToSaveString: JSON.stringify(showData),
+																	previousString: SourcePage.ADD_SHOW,
 																},
 															});
 														}}
@@ -234,22 +249,30 @@ const AddShow = () => {
 													<TouchableOpacity
 														style={styles.skipAndSaveButton}
 														onPress={() => {
-															const showData: UserShowToSave = {
-																name: showName,
-																image_url: imageUrl,
-																tmdb_id: tmdbId,
-																// streaming,
-																// purchase,
-																type: showType,
-															};
-															skipTagsAndSaveShowData(
-																showData,
-																SourcePage.ADD_SHOW,
-																currentUser.id,
-																refetchUserShows,
-																null,
-																false,
-															);
+															if (currentUser) {
+																const showData: UserShowToSave = {
+																	name: showName,
+																	image_url: imageUrl,
+																	tmdb_id: tmdbId,
+																	// streaming,
+																	// purchase,
+																	type: showType as UserShowType,
+																};
+																skipTagsAndSaveShowData(
+																	showData,
+																	SourcePage.ADD_SHOW,
+																	currentUser!.id,
+																	refetchUserShows,
+																	null,
+																	false,
+																);
+															} else {
+																Alert.alert(
+																	'Sign up or log in to enable this feature',
+																	'',
+																	[{ text: 'OK' }],
+																);
+															}
 														}}
 													>
 														<Text style={styles.skipButtonText}>
@@ -268,25 +291,6 @@ const AddShow = () => {
 											</>
 										)}
 									</View>
-								) : (
-									<View>
-										<Text style={styles.text}>
-											Log in or Sign up to recommend this show or add it to your
-											Watch list
-										</Text>
-										<View style={styles.buttonContainer}>
-											<TouchableOpacity
-												style={styles.button}
-												onPress={() =>
-													router.push({
-														pathname: '/login',
-													})
-												}
-											>
-												<Text style={styles.buttonText}>Log in / Sign up</Text>
-											</TouchableOpacity>
-										</View>
-									</View>
 								)}
 							</View>
 						</View>
@@ -301,7 +305,6 @@ const styles = StyleSheet.create({
 	container: {
 		marginTop: 15,
 		flex: 1,
-		// justifyContent: 'center',
 		marginHorizontal: 2,
 		marginBottom: 30,
 	},
@@ -396,6 +399,9 @@ const styles = StyleSheet.create({
 	},
 	skipButtonText: {
 		color: '#340068',
+	},
+	disabledSkipButtonText: {
+		color: '#777',
 	},
 	showTypeText: {
 		fontSize: 20,

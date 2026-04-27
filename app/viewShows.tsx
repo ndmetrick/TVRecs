@@ -8,19 +8,22 @@ import {
 	View,
 } from 'react-native';
 
-import { UserProfile, UserShow } from '@/lib/types';
+import { UserProfile, UserShow, UserShowType } from '@/lib/types';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
-import { router } from 'expo-router';
+import { useRouter } from 'expo-router';
 
 interface Props {
 	userToView: UserProfile;
 	shows: UserShow[];
+	type?: UserShowType;
 }
 
 const ViewShows = (props: Props) => {
-	const { userToView, shows } = props;
+	const { userToView, shows, type } = props;
 	const [userShows, setUserShows] = useState<UserShow[] | null>(null);
 	const [loading, setLoading] = useState(true);
+	const router = useRouter();
 
 	const isFocused = useIsFocused();
 
@@ -59,19 +62,37 @@ const ViewShows = (props: Props) => {
 	}
 
 	return (
-		<FlatList
-			numColumns={2}
-			horizontal={false}
-			data={userShows}
-			renderItem={({ item }) => (
-				<View style={styles.containerImage}>
-					<TouchableOpacity onPress={() => goToUserShow(item)}>
-						<Image style={styles.image} source={{ uri: item.show.image_url }} />
-					</TouchableOpacity>
-				</View>
+		<View style={{ flex: 1 }}>
+			<FlatList
+				numColumns={2}
+				horizontal={false}
+				data={userShows}
+				renderItem={({ item }) => (
+					<View style={styles.containerImage}>
+						<TouchableOpacity onPress={() => goToUserShow(item)}>
+							<Image
+								style={styles.image}
+								source={{ uri: item.show.image_url }}
+							/>
+						</TouchableOpacity>
+					</View>
+				)}
+				keyExtractor={(_item, index) => index.toString()}
+			/>
+			{type && (
+				<TouchableOpacity
+					style={styles.fab}
+					onPress={() =>
+						router.push({
+							pathname: '/(tabs)/addShow',
+							params: { addToType: type },
+						})
+					}
+				>
+					<MaterialCommunityIcons name='plus' size={28} color='white' />
+				</TouchableOpacity>
 			)}
-			keyExtractor={(item, index) => index.toString()}
-		/>
+		</View>
 	);
 };
 
@@ -93,6 +114,22 @@ const styles = StyleSheet.create({
 		flex: 1,
 		aspectRatio: 2 / 3,
 		// resizeMode: 'cover',
+	},
+	fab: {
+		position: 'absolute',
+		bottom: 20,
+		right: 20,
+		width: 52,
+		height: 52,
+		borderRadius: 26,
+		backgroundColor: '#340068',
+		alignItems: 'center',
+		justifyContent: 'center',
+		elevation: 4,
+		shadowColor: '#000',
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.25,
+		shadowRadius: 4,
 	},
 });
 
