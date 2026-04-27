@@ -1,30 +1,16 @@
+import LoggedOutSettings from '@/components/LoggedOutSettings';
 import ProfileHeader from '@/components/ProfileHeader';
 import { useAppData } from '@/lib/AppContext';
 import { SourcePage, UserShowType } from '@/lib/types';
 import { useState } from 'react';
-import {
-	ActivityIndicator,
-	StyleSheet,
-	Text,
-	TouchableOpacity,
-	View,
-} from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import ViewShows from '../viewShows';
 
 const CurrentUser = () => {
 	const [activeTab, setActiveTab] = useState<UserShowType>(UserShowType.REC);
 	const { currentUser, following, userShows, toWatch, seen } = useAppData();
 
-	//  const ref = useRef(null)
-
-	//  useScrollToTop(ref)
-
-	if (!currentUser)
-		return (
-			<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-				<ActivityIndicator size='large' color='#5500dc' />
-			</View>
-		);
+	if (!currentUser) return <LoggedOutSettings />;
 
 	const tabs = [
 		{
@@ -67,7 +53,11 @@ const CurrentUser = () => {
 					</TouchableOpacity>
 				))}
 			</View>
-			<ViewShows userToView={currentUser} shows={activeShows} />
+			<ViewShows
+				userToView={currentUser}
+				shows={activeShows}
+				type={activeTab}
+			/>
 		</View>
 	);
 };
