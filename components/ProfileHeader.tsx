@@ -1,5 +1,6 @@
 import { useAppData } from '@/lib/AppContext';
 import { Follow, SourcePage, UserProfile } from '@/lib/types';
+import { useRouter } from 'expo-router';
 import React from 'react';
 import {
 	ActivityIndicator,
@@ -22,6 +23,7 @@ const ProfileHeader = (props: Props) => {
 	const { previous, user, userFollowing, followingThisUser, follow, unfollow } =
 		props;
 	const { currentUser } = useAppData();
+	const router = useRouter();
 
 	if (userFollowing === null || user === null) {
 		return (
@@ -79,7 +81,14 @@ const ProfileHeader = (props: Props) => {
 								// 	userInfo: user,
 								// 	userFollowing: userFollowing,
 								// })
-								console.log('going to UsersFollowing when ready')
+								// console.log('going to UsersFollowing when ready')
+								router.push({
+									pathname: '/usersFollowing',
+									params: {
+										userString: JSON.stringify(user),
+										userFollowingString: JSON.stringify(userFollowing),
+									},
+								})
 							}
 							style={styles.followNumButton}
 						>
