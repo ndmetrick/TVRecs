@@ -1,32 +1,77 @@
-import { AppProvider } from '@/lib/AppContext';
-import { AuthProvider } from '@/lib/AuthContext';
+import { AppProvider, useAppData } from '@/lib/AppContext';
+import { AuthProvider, useAuth } from '@/lib/AuthContext';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, Stack } from 'expo-router';
-import { Image, TouchableOpacity } from 'react-native';
+import { Alert, Image, TouchableOpacity } from 'react-native';
+import Toast from 'react-native-toast-message';
+
+export const AppShell = () => {
+	const { signOut } = useAuth();
+	const { currentUser } = useAppData();
+	const logout = async () => {
+		try {
+			await signOut();
+			router.replace('/login');
+		} catch (e) {
+			console.log(e);
+		}
+	};
+
+	return (
+		<>
+			<Stack
+				screenOptions={{
+					headerShown: true,
+					headerBackTitle: 'Back',
+					headerTintColor: '#340068',
+					headerTitle: () => (
+						<TouchableOpacity onPress={() => router.push('/(tabs)/recShows')}>
+							<Image
+								style={{ width: 50, height: 40 }}
+								source={require('../assets/images/tempTVRecsLogo.png')}
+							/>
+						</TouchableOpacity>
+					),
+					headerRight: () =>
+						currentUser ? (
+							<TouchableOpacity
+								style={{ marginRight: 12 }}
+								onPress={() =>
+									Alert.alert('Sign out?', '', [
+										{ text: 'Yes', onPress: logout },
+										{
+											text: 'Cancel',
+										},
+									])
+								}
+							>
+								<MaterialCommunityIcons
+									name='logout'
+									size={26}
+									color='#340068'
+								/>
+							</TouchableOpacity>
+						) : null,
+				}}
+			>
+				<Stack.Screen name='index' options={{ headerBackVisible: false }} />
+				<Stack.Screen name='(tabs)' options={{ headerBackVisible: false }} />
+				<Stack.Screen name='(auth)' options={{ headerBackVisible: false }} />
+				<Stack.Screen
+					name='(loggedOut)'
+					options={{ headerBackVisible: false }}
+				/>
+			</Stack>
+			<Toast bottomOffset={60} />
+		</>
+	);
+};
 
 export default function RootLayout() {
 	return (
 		<AuthProvider>
 			<AppProvider>
-				<Stack
-					screenOptions={{
-						headerShown: true,
-						headerBackTitle: 'Back',
-						headerTintColor: '#340068',
-						headerTitle: () => (
-							<TouchableOpacity onPress={() => router.push('/(tabs)/recShows')}>
-								<Image
-									style={{ width: 50, height: 40 }}
-									source={require('../assets/images/tempTVRecsLogo.png')}
-								/>
-							</TouchableOpacity>
-						),
-					}}
-				>
-					<Stack.Screen name='index' />
-					<Stack.Screen name='(tabs)' />
-					<Stack.Screen name='(auth)' />
-					<Stack.Screen name='(loggedOut)' />
-				</Stack>
+				<AppShell />
 			</AppProvider>
 		</AuthProvider>
 	);

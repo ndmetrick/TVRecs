@@ -1,4 +1,5 @@
 import { useAppData } from '@/lib/AppContext';
+import { showErrorToast } from '@/lib/toast';
 import { TMDBWatchProviderResults } from '@/lib/types';
 import { Country } from '@realtril/react-native-country-picker-modal';
 import axios from 'axios';
@@ -10,7 +11,7 @@ import {
 	TouchableOpacity,
 	View,
 } from 'react-native';
-import PickCountry from './PIckCountry';
+import PickCountry from './PickCountry';
 
 interface Props {
 	showId: string;
@@ -31,7 +32,7 @@ const StreamingAndPurchase = (props: Props) => {
 		}
 		const getWatchProviders = async (showId: string) => {
 			try {
-				const tmdbKey = await process.env.EXPO_PUBLIC_TMDB_KEY;
+				const tmdbKey = process.env.EXPO_PUBLIC_TMDB_KEY;
 				const APIString = `https://api.themoviedb.org/3/tv/${showId}?api_key=${tmdbKey}&append_to_response=watch/providers`;
 				const showInfo = await axios.get(APIString);
 				if (showInfo) {
@@ -51,7 +52,8 @@ const StreamingAndPurchase = (props: Props) => {
 					addToWatchProviders(showId, info);
 				}
 			} catch (err) {
-				console.log(err);
+				console.log(`Error getting watch providers: ${err}`);
+				showErrorToast('Error getting streaming and purchase info');
 			}
 		};
 		// if the watch provider info is already on state and it was updated less than a week ago:
@@ -69,14 +71,9 @@ const StreamingAndPurchase = (props: Props) => {
 		}
 	}, [currentUser, country, watchProviders, showId, addToWatchProviders]);
 
-	console.log('here it is', watchProviders);
-
-	console.log('watch providers in streaming and purchase', watchProviders);
-
 	const getStreaming = (watchProviders: TMDBWatchProviderResults) => {
 		const stream = watchProviders ? watchProviders.flatrate : null;
 		let streamingContainer;
-		console.log('stream', stream);
 		if (stream) {
 			const streamingInfo =
 				stream && stream.map((option) => option.provider_name);
@@ -128,9 +125,7 @@ const StreamingAndPurchase = (props: Props) => {
 			{!currentUser && !changeCountry && country === 'US' ? (
 				<View>
 					<Text style={styles.text}>
-						{`This app has been set to search the US by default. If you would like
-						to change the location to a different country to search for
-						streaming and purchase options, click "Change country".`}
+						{`This app has been set to search the US by default. If you would like to change the location to a different country to search for streaming and purchase options, click "Change country".`}
 					</Text>
 				</View>
 			) : null}
