@@ -9,7 +9,7 @@ interface Props {
 	onValueChange: (country: Country) => void;
 }
 
-export default function PickCountry(props: Props) {
+const PickCountry = (props: Props) => {
 	const [countryCode, setCountryCode] = useState<CountryCode>('US');
 
 	const withCountryNameButton = true;
@@ -41,7 +41,7 @@ export default function PickCountry(props: Props) {
 			{/* <Entypo name="chevron-small-down" size={24} color="gray" /> */}
 		</View>
 	);
-}
+};
 const styles = StyleSheet.create({
 	container: {
 		borderWidth: 1,
@@ -65,3 +65,5 @@ const styles = StyleSheet.create({
 		color: '#344953',
 	},
 });
+
+export default PickCountry;
