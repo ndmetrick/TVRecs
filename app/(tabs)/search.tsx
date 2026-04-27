@@ -1,6 +1,5 @@
 import { useAppData } from '@/lib/AppContext';
 import { UserProfile } from '@/lib/types';
-import { useIsFocused } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -13,61 +12,61 @@ import {
 import { TextInput } from 'react-native-paper';
 
 const Search = () => {
-	const isFocused = useIsFocused();
-	const [users, setUsers] = useState([]);
+	// const isFocused = useIsFocused();
+	// const [users, setUsers] = useState([]);
 	const [matchingUsers, setMatchingUsers] = useState<UserProfile[] | null>(
 		null,
 	);
 	const router = useRouter();
 	const [advancedSearch, setAdvancedSearch] = useState(false);
-	const [tagsChecked, setTagsChecked] = useState('none');
-	const [showsChecked, setShowsChecked] = useState('none');
-	const [commonTagDropdownOpen, setCommonTagDropdownOpen] = useState(false);
-	const [commonTagDropdownValue, setCommonTagDropdownValue] = useState(null);
-	const [commonTagDropdownOptions, setCommonTagDropdownOptions] =
-		useState(null);
-	const [commonShowDropdownOpen, setCommonShowDropdownOpen] = useState(false);
-	const [commonShowDropdownValue, setCommonShowDropdownValue] = useState(null);
-	const [commonShowDropdownOptions, setCommonShowDropdownOptions] =
-		useState(null);
-	const [chosenShow, setChosenShow] = useState(null);
+	// const [tagsChecked, setTagsChecked] = useState('none');
+	// const [showsChecked, setShowsChecked] = useState('none');
+	// const [commonTagDropdownOpen, setCommonTagDropdownOpen] = useState(false);
+	// const [commonTagDropdownValue, setCommonTagDropdownValue] = useState(null);
+	// const [commonTagDropdownOptions, setCommonTagDropdownOptions] =
+	// 	useState(null);
+	// const [commonShowDropdownOpen, setCommonShowDropdownOpen] = useState(false);
+	// const [commonShowDropdownValue, setCommonShowDropdownValue] = useState(null);
+	// const [commonShowDropdownOptions, setCommonShowDropdownOptions] =
+	// 	useState(null);
+	// const [chosenShow, setChosenShow] = useState(null);
 	// const [tagsDropdownOpen, setTagsDropdownOpen] = useState(false)
 	// const [tagsDropdownValue, setTagsDropdownValue] = useState([])
 	// const [tagsDropdownOptions, setTagsDropdownOptions] = useState(null)
-	const [showsDropdownOpen, setShowsDropdownOpen] = useState(false);
-	const [showsDropdownValue, setShowsDropdownValue] = useState([]);
-	const [showsDropdownOptions, setShowsDropdownOptions] = useState(null);
-	const [showName, setShowName] = useState('');
-	const [filterShowChosen, setFilterShowChosen] = useState(false);
-	const [excludeFollowed, setExcludeFollowed] = useState(false);
-	const [sameShowName, setSameShowName] = useState(false);
-	const [searchTags, setSearchTags] = useState([]);
-	const { allOtherUsers, currentUser } = useAppData();
-	const [searchInput, setSearchInput] = useState('');
+	// const [showsDropdownOpen, setShowsDropdownOpen] = useState(false);
+	// const [showsDropdownValue, setShowsDropdownValue] = useState([]);
+	// const [showsDropdownOptions, setShowsDropdownOptions] = useState(null);
+	// const [showName, setShowName] = useState('');
+	// const [filterShowChosen, setFilterShowChosen] = useState(false);
+	// const [excludeFollowed, setExcludeFollowed] = useState(false);
+	// const [sameShowName, setSameShowName] = useState(false);
+	// const [searchTags, setSearchTags] = useState([]);
+	const { allOtherUsers } = useAppData();
+	// const [searchInput, setSearchInput] = useState('');
 
-	const [allTags, setAllTags] = useState([]);
+	// const [allTags, setAllTags] = useState([]);
 	// const [dislikeTags, setDislikeTags] = useState([])
 	// const [describeTags, setDescribeTags] = useState([])
-	const [selectedTags, setSelectedTags] = useState({});
-	const [showTags, setShowTags] = useState(false);
+	// const [selectedTags, setSelectedTags] = useState({});
+	// const [showTags, setShowTags] = useState(false);
 
-	const reset = () => {
-		// setAdvancedSearch(false)
-		setCommonTagDropdownValue(null);
-		setCommonShowDropdownValue(null);
-		setChosenShow(null);
-		// setTagsDropdownValue([])
-		setShowName('');
-		setFilterShowChosen(false);
-		setShowsDropdownValue([]);
-		setSelectedTags({});
-		setShowTags(false);
-		setSearchTags([]);
-	};
+	// const reset = () => {
+	// 	// setAdvancedSearch(false)
+	// 	setCommonTagDropdownValue(null);
+	// 	setCommonShowDropdownValue(null);
+	// 	setChosenShow(null);
+	// 	// setTagsDropdownValue([])
+	// 	setShowName('');
+	// 	setFilterShowChosen(false);
+	// 	setShowsDropdownValue([]);
+	// 	setSelectedTags({});
+	// 	setShowTags(false);
+	// 	setSearchTags([]);
+	// };
 
 	const getMatchingUsers = async (input: string) => {
 		console.log('input', input);
-		setSearchInput(input);
+		// setSearchInput(input);
 		if (!input) {
 			setMatchingUsers(null);
 			return;

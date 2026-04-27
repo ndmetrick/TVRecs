@@ -31,7 +31,7 @@ const RecShows = () => {
 	const [multipleRecInfo, setMultipleRecInfo] = useState<
 		Record<number, RecCount>
 	>({});
-	const [loadedCount, setLoadedCount] = useState(0);
+	// const [loadedCount, setLoadedCount] = useState(0);
 	const [noUserShows, setNoUserShows] = useState(false);
 	const [loading, setLoading] = useState(true);
 	const [filterOpen, setFilterOpen] = useState(false);
@@ -167,7 +167,7 @@ const RecShows = () => {
 				(s) => recCounts[s.show_id]?.num > (appliedFilters.minRecs as number),
 			);
 		}
-		setLoadedCount(loaded);
+		// setLoadedCount(loaded);
 		setRecShows(visibleShows);
 		setMultipleRecInfo(recCounts);
 
@@ -191,7 +191,7 @@ const RecShows = () => {
 			setRecShows([]);
 			setMultipleRecInfo({});
 			// setRecsTabName(null);
-			setLoadedCount(0);
+			// setLoadedCount(0);
 		};
 	}, [
 		filtersApplied,
