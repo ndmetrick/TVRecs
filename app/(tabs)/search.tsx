@@ -1,7 +1,7 @@
 import { useAppData } from '@/lib/AppContext';
 import { UserProfile } from '@/lib/types';
 import { useIsFocused } from '@react-navigation/native';
-import { router } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
 	ScrollView,
@@ -18,6 +18,7 @@ const Search = () => {
 	const [matchingUsers, setMatchingUsers] = useState<UserProfile[] | null>(
 		null,
 	);
+	const router = useRouter();
 	const [advancedSearch, setAdvancedSearch] = useState(false);
 	const [tagsChecked, setTagsChecked] = useState('none');
 	const [showsChecked, setShowsChecked] = useState('none');
@@ -42,6 +43,7 @@ const Search = () => {
 	const [sameShowName, setSameShowName] = useState(false);
 	const [searchTags, setSearchTags] = useState([]);
 	const { allOtherUsers, currentUser } = useAppData();
+	const [searchInput, setSearchInput] = useState('');
 
 	const [allTags, setAllTags] = useState([]);
 	// const [dislikeTags, setDislikeTags] = useState([])
@@ -63,13 +65,19 @@ const Search = () => {
 		setSearchTags([]);
 	};
 
-	const getMatchingUsers = async (searchInput: string) => {
-		const matches = !allOtherUsers
-			? null
-			: allOtherUsers.filter((user) => {
-					return user.username.includes(searchInput.toLowerCase());
-				});
-		console.log('matches here', matches);
+	const getMatchingUsers = async (input: string) => {
+		console.log('input', input);
+		setSearchInput(input);
+		if (!input) {
+			setMatchingUsers(null);
+			return;
+		}
+		const matches =
+			allOtherUsers?.filter((user) => {
+				console.log('user', user, 'input', input);
+				return user.username.toLowerCase().includes(input.toLowerCase());
+			}) ?? [];
+		console.log('matches', matches, input);
 		setMatchingUsers(matches);
 	};
 
@@ -207,7 +215,10 @@ const Search = () => {
 										onPress={() =>
 											router.push({
 												pathname: '/otherUser',
-												params: { uid: item.id },
+												params: {
+													uid: item.id,
+													userString: JSON.stringify(item),
+												},
 											})
 										}
 									>
