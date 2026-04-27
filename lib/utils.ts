@@ -7,6 +7,7 @@ import {
 	UserShowToSave,
 } from '@/lib/types';
 import { router } from 'expo-router';
+import { showErrorToast } from './toast';
 
 export const skipTagsAndSaveShowData = async (
 	showData: UserShowToSave,
@@ -61,15 +62,12 @@ export const skipTagsAndSaveShowData = async (
 			};
 			await addShow(supabase, showToAdd);
 			await refetchUserShows();
-			if (previous === SourcePage.ADD_SHOW) {
-				router.push({
-					pathname: '/currentUser',
-				});
-			} else {
-				router.back();
-			}
+			router.push({
+				pathname: '/currentUser',
+			});
 		}
 	} catch (err) {
-		console.log(err);
+		console.log(`Error skipping tags and saving show data: ${err}`);
+		showErrorToast('Error saving the show do your profile');
 	}
 };

@@ -1,10 +1,11 @@
+import ShowTagPicker from '@/components/ShowTagPicker';
 import { addShow, editUserShow } from '@/lib/api';
 import { useAppData } from '@/lib/AppContext';
 import { supabase } from '@/lib/supabase';
+import { showErrorToast } from '@/lib/toast';
 import {
 	EditUserShowParams,
 	SourcePage,
-	Tag,
 	UserShow,
 	UserShowToSave,
 } from '@/lib/types';
@@ -20,15 +21,11 @@ import {
 } from 'react-native';
 import { TextInput } from 'react-native-paper';
 
-const AddShowTags = () => {
-	const { showToSaveString, previousPage, currentShowString } =
-		useLocalSearchParams();
-	const showToSave: UserShowToSave = JSON.parse(showToSaveString as string);
-	const previous = previousPage as SourcePage;
-	const currentUserShow: UserShow | null = currentShowString
-		? JSON.parse(currentShowString as string)
-		: null;
+const generalTagsText =
+	'Pick some tags that you feel describe the show how you experience it:';
+const warningTagsText = 'Pick some warning tags:';
 
+const AddShowTags = () => {
 	const [selectedTags, setSelectedTags] = useState<Record<string, boolean>>({});
 	const [loaded, setLoaded] = useState(false);
 	// const [multilineChecked, setMultilineChecked] = useState(false);
@@ -37,19 +34,27 @@ const AddShowTags = () => {
 		currentUser,
 		refetchFollowingRecs,
 		refetchUserShows,
-		tvTags,
-		warningTags,
+		// tvTags,
+		// warningTags,
 	} = useAppData();
 
+	const { showToSaveString, previousString, currentShowString } =
+		useLocalSearchParams();
+
+	const previous = previousString as SourcePage;
+
 	useEffect(() => {
+		if (!showToSaveString) return;
+		const show: UserShowToSave = JSON.parse(showToSaveString as string);
 		// setAllTags(props.allTags);
-		const tags = showToSave.tags ?? [];
+		setShowToSave(show);
+		const tags = show.tags ?? [];
 		const selected: Record<string, boolean> = {};
 		tags.forEach((tag) => {
 			selected[tag.id] = true;
 		});
 		setSelectedTags(selected);
-		const prevDescription = showToSave.description ?? '';
+		const prevDescription = show.description ?? '';
 		setDescription(prevDescription);
 		// const tv = [];
 		// const warnings = [];
@@ -74,7 +79,7 @@ const AddShowTags = () => {
 			setDescription('');
 			// setMultilineChecked(false);
 		};
-	}, [previous, showToSave.description, showToSave.tags]);
+	}, [previous, showToSaveString]);
 
 	// const unselectAll = () => {
 	//   if (TagGroup.getSelectedIndex() !== -1) {
@@ -84,42 +89,27 @@ const AddShowTags = () => {
 	//   }
 	// };
 
-	const selectTag = (tag: Tag) => {
-		if (selectedTags[tag.id] === true) {
-			const swap = { ...selectedTags, [tag.id]: false };
-			setSelectedTags(swap);
-		} else {
-			const swap = { ...selectedTags, [tag.id]: true };
-			setSelectedTags(swap);
-		}
-	};
+	// const selectTag = (tag: Tag) => {
+	// 	if (selectedTags[tag.id] === true) {
+	// 		const swap = { ...selectedTags, [tag.id]: false };
+	// 		setSelectedTags(swap);
+	// 	} else {
+	// 		const swap = { ...selectedTags, [tag.id]: true };
+	// 		setSelectedTags(swap);
+	// 	}
+	// };
 
-	const displayTags = (tags: Tag[]) => {
-		return tags.map((tag, key) => {
-			const tagStyle =
-				selectedTags[tag.id] !== true &&
-				(tag.type === 'tv' || tag.type === 'unassigned')
-					? styles.tvTag
-					: selectedTags[tag.id] === true &&
-						  (tag.type === 'tv' || tag.type === 'unassigned')
-						? styles.highlightTvTag
-						: selectedTags[tag.id] !== true && tag.type === 'warning'
-							? styles.warningTag
-							: styles.highlightWarningTag;
+	const [showToSave, setShowToSave] = useState<UserShowToSave | null>(null);
 
-			return (
-				<TouchableOpacity
-					key={key}
-					style={tagStyle}
-					onPress={() => selectTag(tag)}
-				>
-					<Text style={styles.tagText}>{tag.name}</Text>
-				</TouchableOpacity>
-			);
-		});
-	};
+	const currentUserShow: UserShow | null = currentShowString
+		? JSON.parse(currentShowString as string)
+		: null;
 
 	const chooseTags = async () => {
+		if (!showToSave) return;
+		if (!currentUser) {
+			return router.push({ pathname: '/login' });
+		}
 		const chosenTags = [];
 		for (const tagId in selectedTags) {
 			if (selectedTags[tagId] === true) {
@@ -142,24 +132,26 @@ const AddShowTags = () => {
 				await refetchFollowingRecs();
 				router.push({ pathname: '/currentUser' });
 			} catch (err) {
-				console.error(`Error editing user show: ${err}`);
+				console.error(`Error editing user show: ${JSON.stringify(err)}`);
+				showErrorToast('Could not save your changes. Try again.');
 			}
 		} else {
-			if (!currentUser) {
-				router.push({ pathname: '/login' });
-			} else {
-				const updatedShow = {
-					tmdbId: showToSave.tmdb_id ?? 'NONE',
-					name: showToSave.name,
-					type: showToSave.type,
-					imageUrl: showToSave.image_url,
-					description,
-					tagIds: chosenTags,
-					userId: currentUser.id,
-				};
+			const updatedShow = {
+				tmdbId: showToSave.tmdb_id ?? 'NONE',
+				name: showToSave.name,
+				type: showToSave.type,
+				imageUrl: showToSave.image_url,
+				description,
+				tagIds: chosenTags,
+				userId: currentUser.id,
+			};
+			try {
 				await addShow(supabase, updatedShow);
 				await refetchUserShows();
 				router.push({ pathname: '/currentUser' });
+			} catch (err) {
+				console.error(`Error adding user show: ${JSON.stringify(err)}`);
+				showErrorToast('Could not save this show to your profile. Try again.');
 			}
 		}
 	};
@@ -199,20 +191,17 @@ const AddShowTags = () => {
 					multiline={true}
 					value={description}
 				/>
-				<Text style={styles.text}>
-					Pick some tags that you feel describe the show how you experience it:
-				</Text>
-				<View style={[styles.cardContent, styles.tagsContent]}>
-					{displayTags(tvTags)}
-				</View>
-
-				<Text style={styles.text}>Pick some warning tags:</Text>
-				<View style={[styles.cardContent, styles.tagsContent]}>
-					{displayTags(warningTags)}
-				</View>
+				<ShowTagPicker
+					selectedTags={selectedTags}
+					setSelectedTags={setSelectedTags}
+					warningTagsText={warningTagsText}
+					generalTagsText={generalTagsText}
+				/>
 				<View style={styles.buttonContainer}>
 					<TouchableOpacity style={styles.button} onPress={chooseTags}>
-						<Text style={styles.buttonText}>Save description and tags</Text>
+						<Text style={styles.buttonText}>
+							{currentUser ? 'Save description and tags' : 'Log in / Sign up'}
+						</Text>
 					</TouchableOpacity>
 				</View>
 			</ScrollView>
