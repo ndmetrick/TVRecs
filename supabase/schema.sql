@@ -114,6 +114,18 @@ TO authenticated
 USING (auth.uid() = id)
 WITH CHECK (auth.uid() = id);
 
+-- Users can delete their own account
+CREATE OR REPLACE FUNCTION delete_own_account()
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+BEGIN
+  DELETE FROM auth.users WHERE id = auth.uid();
+END;
+$$;
+
 -- User shows are viewable by everyone
 CREATE POLICY "User shows are viewable by everyone"
 ON public.user_shows FOR SELECT

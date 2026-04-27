@@ -1,8 +1,9 @@
-import { getProfileTags, setProfileTags, updateUser } from '@/lib/api';
+import { setProfileTags, updateUser } from '@/lib/api';
 import { useAppData } from '@/lib/AppContext';
 import { supabase } from '@/lib/supabase';
-import { ProfileTagCategory, Tag, TagType } from '@/lib/types';
-import { router } from 'expo-router';
+import { showErrorToast } from '@/lib/toast';
+import { ProfileTag, ProfileTagCategory, Tag, TagType } from '@/lib/types';
+import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
 	ActivityIndicator,
@@ -14,10 +15,8 @@ import {
 } from 'react-native';
 import { TextInput } from 'react-native-paper';
 
-function PickUserTags() {
-	// const [like, setLike] = useState<Tag[]>([]);
-	// const [dislike, setDislike] = useState<Tag[]>([]);
-	// const [describe, setDescribe] = useState<Tag[]>([]);
+const PickUserTags = () => {
+	const { profileTagsString } = useLocalSearchParams();
 	const [selectedWarning, setSelectedWarning] = useState<
 		Record<number, boolean>
 	>({});
@@ -37,39 +36,36 @@ function PickUserTags() {
 	} = useAppData();
 
 	useEffect(() => {
-		const getCurrentUserTags = async () => {
-			if (!currentUser) {
-				router.push({ pathname: '/login' });
+		const desc: Record<number, boolean> = {};
+		const warning: Record<number, boolean> = {};
+		if (!profileTagsString) return;
+		const savedProfileTags: ProfileTag[] = JSON.parse(
+			profileTagsString as string,
+		);
+		const preference: Record<number, 'like' | 'dislike'> = {};
+		savedProfileTags.forEach((profileTag) => {
+			if (profileTag.category === ProfileTagCategory.LIKE) {
+				preference[profileTag.tag.id] = ProfileTagCategory.LIKE;
+			} else if (
+				profileTag.category === ProfileTagCategory.DISLIKE &&
+				profileTag.tag.type !== TagType.WARNING
+			) {
+				preference[profileTag.tag.id] = ProfileTagCategory.DISLIKE;
+			} else if (profileTag.category === ProfileTagCategory.DISLIKE) {
+				warning[profileTag.tag.id] = true;
 			} else {
-				const userTags = await getProfileTags(supabase, currentUser.id);
-				const desc: Record<number, boolean> = {};
-				const warning: Record<number, boolean> = {};
-				const preference: Record<number, 'like' | 'dislike'> = {};
-				userTags.forEach((profileTag) => {
-					if (profileTag.category === ProfileTagCategory.LIKE) {
-						preference[profileTag.tag.id] = ProfileTagCategory.LIKE;
-					} else if (
-						profileTag.category === ProfileTagCategory.DISLIKE &&
-						profileTag.tag.type !== TagType.WARNING
-					) {
-						preference[profileTag.tag.id] = ProfileTagCategory.DISLIKE;
-					} else if (profileTag.category === ProfileTagCategory.DISLIKE) {
-						warning[profileTag.tag.id] = true;
-					} else {
-						desc[profileTag.tag.id] = true;
-					}
-				});
-				setSelectedPreference(preference);
-				setSelectedWarning(warning);
-				setSelectedDesc(desc);
-
-				if (currentUser.description) {
-					setDescription(currentUser.description);
-				}
-				setLoaded(true);
+				desc[profileTag.tag.id] = true;
 			}
-		};
-		getCurrentUserTags();
+		});
+		setSelectedPreference(preference);
+		setSelectedWarning(warning);
+		setSelectedDesc(desc);
+
+		if (currentUser?.description) {
+			setDescription(currentUser.description);
+		}
+		setLoaded(true);
+
 		return () => {
 			setLoaded(false);
 			setSelectedPreference({});
@@ -77,15 +73,7 @@ function PickUserTags() {
 			setSelectedDesc({});
 			setDescription('');
 		};
-	}, [currentUser]);
-
-	// const unselectAll = () => {
-	//   if (TagGroup.getSelectedIndex() !== -1) {
-	//     for (let i = 0; i < tvTagNames.length; i++) {
-	//       tagGroup.unselect(i);
-	//     }
-	//   }
-	// };
+	}, [currentUser, profileTagsString]);
 
 	const selectDescTag = (tag: Tag) => {
 		const current = !!selectedDesc[tag.id];
@@ -105,9 +93,9 @@ function PickUserTags() {
 
 	const selectPreferenceTag = (tag: Tag) => {
 		const current = selectedPreference[tag.id];
-		let next: 'none' | 'like' | 'dislike' = 'none';
-		if (current === 'none') {
-			next = ProfileTagCategory.LIKE;
+		let next: 'none' | 'like' | 'dislike' = 'like';
+		if (current === 'dislike') {
+			next = 'none';
 		} else if (current === ProfileTagCategory.LIKE) {
 			next = ProfileTagCategory.DISLIKE;
 		}
@@ -162,7 +150,7 @@ function PickUserTags() {
 		});
 	};
 
-	const saveDescriptionAndTags = async () => {
+	const handlePress = async () => {
 		if (!currentUser) {
 			router.push({ pathname: '/login' });
 		} else {
@@ -208,6 +196,7 @@ function PickUserTags() {
 				router.push({ pathname: '/currentUser' });
 			} catch (err) {
 				console.error(`Error saving profile tags and description: ${err}`);
+				showErrorToast('There was an error updating your profile');
 				router.push({ pathname: '/currentUser' });
 			}
 		}
@@ -226,9 +215,7 @@ function PickUserTags() {
 		<View style={styles.container}>
 			<ScrollView showsVerticalScrollIndicator={false}>
 				<Text style={styles.text}>
-					{`If you'd like, add a tv bio with anything you aren't able to represent
-					with tags -- things about the shows you like and/or the kind of
-					television watcher you are and/or the role TV plays in your life:`}
+					{`If you'd like, add a tv bio with anything you aren't able to represent with tags -- things about the shows you like and/or the kind of television watcher you are and/or the role TV plays in your life:`}
 				</Text>
 				<TextInput
 					style={styles.inputText}
@@ -265,17 +252,16 @@ function PickUserTags() {
 					{displayTags(describeTags)}
 				</View>
 				<View style={styles.buttonContainer}>
-					<TouchableOpacity
-						style={styles.button}
-						onPress={saveDescriptionAndTags}
-					>
-						<Text style={styles.buttonText}>Save tv bio and tags</Text>
+					<TouchableOpacity style={styles.button} onPress={handlePress}>
+						<Text style={styles.buttonText}>
+							{currentUser ? `Save tv bio and tags` : 'Log in / Sign up'}
+						</Text>
 					</TouchableOpacity>
 				</View>
 			</ScrollView>
 		</View>
 	);
-}
+};
 
 const styles = StyleSheet.create({
 	container: {
@@ -357,7 +343,7 @@ const styles = StyleSheet.create({
 		padding: 10,
 		borderRadius: 40,
 		marginHorizontal: 3,
-		backgroundColor: 'orange',
+		backgroundColor: '#B05080',
 		marginTop: 5,
 	},
 	preferenceTag: {
@@ -385,7 +371,7 @@ const styles = StyleSheet.create({
 		padding: 10,
 		borderRadius: 40,
 		marginHorizontal: 3,
-		backgroundColor: '#7B5D96',
+		backgroundColor: '#6B7FD4',
 		marginTop: 5,
 	},
 	describeTag: {
