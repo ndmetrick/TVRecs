@@ -1,67 +1,94 @@
-import { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from './supabase';
 
 type AuthContextType = {
-  session: Session | null;
-  user: User | null;
-  loading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, username: string) => Promise<void>;
-  signOut: () => Promise<void>;
+	session: Session | null;
+	user: User | null;
+	loading: boolean;
+	signIn: (email: string, password: string) => Promise<void>;
+	signUp: (email: string, password: string, username: string) => Promise<void>;
+	signOut: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+	const [session, setSession] = useState<Session | null>(null);
+	const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setLoading(false);
-    });
+	useEffect(() => {
+		supabase.auth.getSession().then(({ data: { session } }) => {
+			setSession(session);
+			setLoading(false);
+		});
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
+		const {
+			data: { subscription },
+		} = supabase.auth.onAuthStateChange((_event, session) => {
+			setSession(session);
+		});
 
-    return () => subscription.unsubscribe();
-  }, []);
+		return () => subscription.unsubscribe();
+	}, []);
 
-  async function signIn(email: string, password: string) {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) throw error;
-  }
+	async function signIn(email: string, password: string) {
+		const { error } = await supabase.auth.signInWithPassword({
+			email,
+			password,
+		});
+		if (error) throw error;
+	}
 
-  async function signUp(email: string, password: string, username: string) {
-    const { data, error } = await supabase.auth.signUp({ email, password });
-    if (error) throw error;
+	async function signUp(email: string, password: string, username: string) {
+		if (username) {
+			const { data: existing } = await supabase
+				.from('users')
+				.select('id')
+				.eq('username', username)
+				.maybeSingle();
+			if (existing) {
+				throw {
+					code: 'USERNAME_TAKEN',
+					message: 'That username is already taken.',
+				};
+			}
+		}
+		const { data, error } = await supabase.auth.signUp({ email, password });
+		if (error) throw error;
 
-    if (data.user) {
-      const { error: updateError } = await supabase
-        .from('users')
-        .update({ username })
-        .eq('id', data.user.id);
-      if (updateError) throw updateError;
-    }
-  }
+		if (data.user && username) {
+			const { error: updateError } = await supabase
+				.from('users')
+				.update({ username })
+				.eq('id', data.user.id);
+			if (updateError) throw updateError;
+		}
+	}
 
-  async function signOut() {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
-  }
+	async function signOut() {
+		const { error } = await supabase.auth.signOut();
+		if (error) throw error;
+	}
 
-  return (
-    <AuthContext.Provider value={{ session, user: session?.user ?? null, loading, signIn, signUp, signOut }}>
-      {children}
-    </AuthContext.Provider>
-  );
+	return (
+		<AuthContext.Provider
+			value={{
+				session,
+				user: session?.user ?? null,
+				loading,
+				signIn,
+				signUp,
+				signOut,
+			}}
+		>
+			{children}
+		</AuthContext.Provider>
+	);
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuth must be used within an AuthProvider');
-  return context;
+	const context = useContext(AuthContext);
+	if (!context) throw new Error('useAuth must be used within an AuthProvider');
+	return context;
 }

@@ -41,6 +41,13 @@ export const getAllUsers = async (
 	return data ?? [];
 };
 
+export const deleteUserAccount = async (
+	supabase: SupabaseClient,
+): Promise<void> => {
+	const { error } = await supabase.rpc('delete_own_account');
+	if (error) throw error;
+};
+
 export const updateUser = async (
 	supabase: SupabaseClient,
 	uid: string,
@@ -74,6 +81,28 @@ export const getUserShows = async (
 		...row,
 		tags: flattenTags(row.user_show_tags),
 	}));
+};
+
+export const getUserShow = async (
+	supabase: SupabaseClient,
+	userId: string,
+	showId: number,
+): Promise<UserShow | null> => {
+	const { data, error } = await supabase
+		.from('user_shows')
+		.select(
+			`
+      *,
+      show:shows(*),
+      user_show_tags(tag:tags(*))
+    `,
+		)
+		.eq('user_id', userId)
+		.eq('show_id', showId)
+		.maybeSingle();
+	if (error) throw error;
+	if (!data) return null;
+	return { ...data, tags: flattenTags(data.user_show_tags) };
 };
 
 // ── Following / Feed ──────────────────────────────────────────────────────────

@@ -16,6 +16,7 @@ import {
 	getUserShows,
 } from './api';
 import { supabase } from './supabase';
+import { showErrorToast } from './toast';
 import {
 	Follow,
 	FollowingRec,
@@ -115,71 +116,102 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 	};
 	const refetchCurrentUser = useCallback(async () => {
 		if (!user) return;
-		const data = await getCurrentUser(supabase, user.id);
-		setCurrentUser(data);
+		try {
+			const data = await getCurrentUser(supabase, user.id);
+			setCurrentUser(data);
+		} catch (err) {
+			console.log(`Error getting user: ${err}`);
+			showErrorToast('Could not load your profile');
+		}
 	}, [user]);
 
 	const refetchFollowing = useCallback(async () => {
 		if (!user) return;
-		const data = await getUserFollowing(supabase, user.id);
-		setFollowing(data);
+		try {
+			const data = await getUserFollowing(supabase, user.id);
+			setFollowing(data);
+		} catch (err) {
+			console.log(`Error fetching following: ${err}`);
+			showErrorToast('Could not load the users you follow');
+		}
 	}, [user]);
 
 	const refetchFollowingRecs = useCallback(async () => {
 		if (!user) return;
-		const data = await getFollowingRecs(supabase, user.id);
-		setFollowingRecs(data);
+		try {
+			const data = await getFollowingRecs(supabase, user.id);
+			setFollowingRecs(data);
+		} catch (err) {
+			console.log(`Error fetching following recs: ${err}`);
+			showErrorToast(
+				'Could not load the recommendations of the people you follow',
+			);
+		}
 	}, [user]);
 
 	const refetchUserShows = useCallback(async () => {
 		if (!user) return;
-		const [recs, watch, seenShows] = await Promise.all([
-			getUserShows(supabase, user.id, UserShowType.REC),
-			getUserShows(supabase, user.id, UserShowType.WATCH),
-			getUserShows(supabase, user.id, UserShowType.SEEN),
-		]);
-		setUserShows(recs);
-		setToWatch(watch);
-		setSeen(seenShows);
+		try {
+			const [recs, watch, seenShows] = await Promise.all([
+				getUserShows(supabase, user.id, UserShowType.REC),
+				getUserShows(supabase, user.id, UserShowType.WATCH),
+				getUserShows(supabase, user.id, UserShowType.SEEN),
+			]);
+			setUserShows(recs);
+			setToWatch(watch);
+			setSeen(seenShows);
+		} catch (err) {
+			console.error(`Error loading recs, watch, seenShows: ${err}`);
+			showErrorToast('There was an error loading the shows on your profile');
+		}
 	}, [user]);
 
 	const refetchAllTags = useCallback(async () => {
-		const data = await getAllTags(supabase);
-		setAllTags(data);
+		try {
+			const data = await getAllTags(supabase);
+			setAllTags(data);
+			const tv: Tag[] = [];
+			const warning: Tag[] = [];
+			const uTags: Tag[] = [];
+			const describe: Tag[] = [];
 
-		const tv: Tag[] = [];
-		const warning: Tag[] = [];
-		const uTags: Tag[] = [];
-		const describe: Tag[] = [];
-
-		data.forEach((tag) => {
-			if (tag.type === TagType.UNASSIGNED) {
-				uTags.push(tag);
-				tv.push(tag);
-			}
-			if (tag.type === TagType.TV) {
-				tv.push(tag);
-			}
-			if (tag.type === TagType.PROFILE) {
-				uTags.push(tag);
-			}
-			if (tag.type === TagType.WARNING) {
-				warning.push(tag);
-			}
-			if (tag.type === TagType.PROFILE_DESCRIBE) {
-				describe.push(tag);
-			}
-			setPreferenceTags(uTags);
-			setTvTags(tv);
-			setWarningTags(warning);
-			setDescribeTags(describe);
-		});
+			data.forEach((tag) => {
+				if (tag.type === TagType.UNASSIGNED) {
+					uTags.push(tag);
+					tv.push(tag);
+				}
+				if (tag.type === TagType.TV) {
+					tv.push(tag);
+				}
+				if (tag.type === TagType.PROFILE) {
+					uTags.push(tag);
+				}
+				if (tag.type === TagType.WARNING) {
+					warning.push(tag);
+				}
+				if (tag.type === TagType.PROFILE_DESCRIBE) {
+					describe.push(tag);
+				}
+				setPreferenceTags(uTags);
+				setTvTags(tv);
+				setWarningTags(warning);
+				setDescribeTags(describe);
+			});
+		} catch (err) {
+			console.error(`Error fetching all tags: ${err}`);
+			showErrorToast('Could not load tags');
+		}
 	}, []);
 
 	const refetchAllUsers = useCallback(async () => {
-		const data = await getAllUsers(supabase);
-		const others = user ? data.filter((u) => u.id !== user.id) : data;
-		setAllOtherUsers(others);
+		try {
+			const data = await getAllUsers(supabase);
+			const others = user ? data.filter((u) => u.id !== user.id) : data;
+			setAllOtherUsers(others);
+		} catch (err) {
+			console.error(`Error fetching users: ${err}`);
+			showErrorToast('Could not load app users');
+		}
 	}, [user]);
 
 	const refetchAll = useCallback(async () => {
@@ -187,7 +219,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 		setLoading(true);
 		setError(null);
 		try {
-			await Promise.all([
+			const results = await Promise.allSettled([
 				refetchCurrentUser(),
 				refetchFollowing(),
 				refetchFollowingRecs(),
@@ -195,8 +227,14 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 				refetchAllTags(),
 				refetchAllUsers(),
 			]);
+
+			const failed = results.filter((r) => r.status === 'rejected');
+			if (failed.length > 0) {
+				showErrorToast('Some data could not be loaded');
+			}
 		} catch (e) {
 			setError(e as Error);
+			showErrorToast('Could not load app data');
 		} finally {
 			setLoading(false);
 		}
@@ -215,8 +253,11 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 			refetchAll();
 		} else {
 			clearAll();
+			refetchAllTags();
+			refetchAllUsers();
 		}
-	}, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [user?.id]);
 
 	return (
 		<AppContext.Provider
