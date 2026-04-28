@@ -50,13 +50,23 @@ type AppData = {
 	) => void;
 	followingMap: Record<string, UserProfile>;
 	allOtherUsers: UserProfile[] | null;
-	tvTags: Tag[];
+	tvTags: TvTags;
 	warningTags: Tag[];
 	preferenceTags: Tag[];
 	describeTags: Tag[];
 };
 
 const AppContext = createContext<AppData | undefined>(undefined);
+
+type TvTags = {
+	mood: Tag[];
+	representation: Tag[];
+	genre: Tag[];
+	themes: Tag[];
+	experience: Tag[];
+	audience: Tag[];
+	misc: Tag[];
+};
 
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 	const { user } = useAuth();
@@ -76,7 +86,15 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 	const [allOtherUsers, setAllOtherUsers] = useState<UserProfile[] | null>(
 		null,
 	);
-	const [tvTags, setTvTags] = useState<Tag[]>([]);
+	const [tvTags, setTvTags] = useState<TvTags>({
+		mood: [],
+		audience: [],
+		genre: [],
+		experience: [],
+		themes: [],
+		misc: [],
+		representation: [],
+	});
 	const [warningTags, setWarningTags] = useState<Tag[]>([]);
 	const [preferenceTags, setPreferenceTags] = useState<Tag[]>([]);
 	const [describeTags, setDescribeTags] = useState<Tag[]>([]);
@@ -170,18 +188,42 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 		try {
 			const data = await getAllTags(supabase);
 			setAllTags(data);
-			const tv: Tag[] = [];
+			const mood: Tag[] = [];
+			const representation: Tag[] = [];
+			const genre: Tag[] = [];
+			const themes: Tag[] = [];
+			const experience: Tag[] = [];
+			const misc: Tag[] = [];
+			const audience: Tag[] = [];
 			const warning: Tag[] = [];
 			const uTags: Tag[] = [];
 			const describe: Tag[] = [];
 
 			data.forEach((tag) => {
-				if (tag.type === TagType.UNASSIGNED) {
-					uTags.push(tag);
-					tv.push(tag);
-				}
-				if (tag.type === TagType.TV) {
-					tv.push(tag);
+				if (tag.type === TagType.UNASSIGNED || tag.type === TagType.TV) {
+					if (tag.type === TagType.UNASSIGNED) uTags.push(tag);
+					switch (tag.section_id) {
+						case 1:
+							mood.push(tag);
+							break;
+						case 2:
+							genre.push(tag);
+							break;
+						case 3:
+							representation.push(tag);
+							break;
+						case 4:
+							themes.push(tag);
+							break;
+						case 5:
+							experience.push(tag);
+							break;
+						case 7:
+							audience.push(tag);
+							break;
+						default:
+							misc.push(tag);
+					}
 				}
 				if (tag.type === TagType.PROFILE) {
 					uTags.push(tag);
@@ -192,10 +234,23 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 				if (tag.type === TagType.PROFILE_DESCRIBE) {
 					describe.push(tag);
 				}
-				setPreferenceTags(uTags);
+				setPreferenceTags(uTags.sort((a, b) => a!.name.localeCompare(b!.name)));
+				const tv: TvTags = {
+					mood: mood.sort((a, b) => a!.name.localeCompare(b!.name)),
+					genre: genre.sort((a, b) => a!.name.localeCompare(b!.name)),
+					representation: representation.sort((a, b) =>
+						a!.name.localeCompare(b!.name),
+					),
+					audience: audience.sort((a, b) => a!.name.localeCompare(b!.name)),
+					misc: misc.sort((a, b) => a!.name.localeCompare(b!.name)),
+					experience: experience.sort((a, b) => a!.name.localeCompare(b!.name)),
+					themes: themes.sort((a, b) => a!.name.localeCompare(b!.name)),
+				};
 				setTvTags(tv);
-				setWarningTags(warning);
-				setDescribeTags(describe);
+				setWarningTags(warning.sort((a, b) => a!.name.localeCompare(b!.name)));
+				setDescribeTags(
+					describe.sort((a, b) => a!.name.localeCompare(b!.name)),
+				);
 			});
 		} catch (err) {
 			console.error(`Error fetching all tags: ${err}`);

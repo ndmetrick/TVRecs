@@ -21,8 +21,7 @@ import {
 } from 'react-native';
 import { TextInput } from 'react-native-paper';
 
-const generalTagsText =
-	'Pick some tags that you feel describe the show how you experience it:';
+const generalTagsText = 'Pick some tags that you think describe the show:';
 const warningTagsText = 'Pick some warning tags:';
 
 const AddShowTags = () => {
@@ -183,7 +182,7 @@ const AddShowTags = () => {
 				<TextInput
 					style={styles.inputText}
 					label='description (optional)'
-					placeholder='Write a description of the show. . .'
+					// placeholder='Write a description of the show. . .'
 					onChangeText={(description) => setDescription(description)}
 					mode='outlined'
 					outlineColor='#340068'
@@ -218,7 +217,7 @@ const styles = StyleSheet.create({
 		marginBottom: 20,
 	},
 	text: {
-		fontSize: 20,
+		fontSize: 16,
 		margin: 10,
 	},
 	tagText: {
@@ -308,8 +307,8 @@ const styles = StyleSheet.create({
 	},
 	inputText: {
 		margin: 10,
-		textAlign: 'center',
-		fontSize: 20,
+		textAlign: 'left',
+		fontSize: 16,
 	},
 });
 

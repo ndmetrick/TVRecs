@@ -1,5 +1,7 @@
 import { useAppData } from '@/lib/AppContext';
 import { Tag } from '@/lib/types';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface Props {
@@ -11,10 +13,107 @@ interface Props {
 	generalTagsText: string;
 }
 
+interface SectionProps {
+	label: string;
+	tags: Tag[];
+	selectedTags: Record<string, boolean>;
+	onSelectTag: (tag: Tag) => void;
+	isWarning?: boolean;
+	open: boolean;
+	setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const TagSection = ({
+	label,
+	tags,
+	selectedTags,
+	onSelectTag,
+	isWarning = false,
+	open,
+	setOpen,
+}: SectionProps) => {
+	const selectedTagsArray = tags.filter((t) => selectedTags[t.id] === true);
+
+	return (
+		<View>
+			<TouchableOpacity
+				style={styles.sectionHeader}
+				onPress={() => setOpen((prev) => !prev)}
+			>
+				<View style={styles.sectionHeaderLeft}>
+					<Text style={styles.sectionLabel}>{label}</Text>
+					{!open && (
+						<View style={styles.selectedPillsRow}>
+							{selectedTagsArray.map((tag, index) => (
+								<View
+									key={index}
+									style={[
+										styles.badge,
+										isWarning ? styles.warningBadge : styles.tvBadge,
+									]}
+								>
+									<Text style={styles.badgeText}>{tag.name}</Text>
+								</View>
+							))}
+						</View>
+					)}
+				</View>
+				<View style={styles.chevronContainer}>
+					<MaterialCommunityIcons
+						name={open ? 'chevron-up' : 'chevron-down'}
+						size={20}
+						color='#777'
+					/>
+				</View>
+			</TouchableOpacity>
+			<View style={styles.divider} />
+			{open && (
+				<View style={[styles.cardContent, styles.tagsContent]}>
+					{tags.map((tag) => {
+						const selected = selectedTags[tag.id] === true;
+						const tagStyle = isWarning
+							? selected
+								? styles.highlightWarningTag
+								: styles.warningTag
+							: selected
+								? styles.highlightTvTag
+								: styles.tvTag;
+						return (
+							<TouchableOpacity
+								key={tag.id}
+								style={tagStyle}
+								onPress={() => onSelectTag(tag)}
+							>
+								<Text style={styles.tagText}>{tag.name}</Text>
+							</TouchableOpacity>
+						);
+					})}
+				</View>
+			)}
+		</View>
+	);
+};
+
 const ShowTagPicker = (props: Props) => {
 	const { selectedTags, setSelectedTags, warningTagsText, generalTagsText } =
 		props; // does this come from the parent? does the SAVE go in here and it's just what gets set to save? no, bc the other one is description...	const [loaded, setLoaded] = useState(false);
 	const { tvTags, warningTags } = useAppData();
+	const tagSections: { label: string; tags: Tag[] }[] = [
+		{ label: 'Mood', tags: tvTags.mood },
+		{ label: 'Genre', tags: tvTags.genre },
+		{ label: 'Representation', tags: tvTags.representation },
+		{ label: 'Themes', tags: tvTags.themes },
+		{
+			label: 'Viewing experience',
+			tags: tvTags.experience,
+		},
+		{ label: 'Audience', tags: tvTags.audience },
+		{ label: 'Misc', tags: tvTags.misc },
+		{ label: 'Content Warnings', tags: warningTags },
+	];
+	const [openSections, setOpenSections] = useState<Record<string, boolean>>(
+		Object.fromEntries(tagSections.map((section) => [section.label, true])),
+	);
 
 	const selectTag = (tag: Tag) => {
 		if (selectedTags[tag.id] === true) {
@@ -26,42 +125,46 @@ const ShowTagPicker = (props: Props) => {
 		}
 	};
 
-	const displayTags = (tags: Tag[]) => {
-		return tags.map((tag, key) => {
-			const tagStyle =
-				selectedTags[tag.id] !== true &&
-				(tag.type === 'tv' || tag.type === 'unassigned')
-					? styles.tvTag
-					: selectedTags[tag.id] === true &&
-						  (tag.type === 'tv' || tag.type === 'unassigned')
-						? styles.highlightTvTag
-						: selectedTags[tag.id] !== true && tag.type === 'warning'
-							? styles.warningTag
-							: styles.highlightWarningTag;
+	const warningSection = tagSections[7];
 
-			return (
-				<TouchableOpacity
-					key={key}
-					style={tagStyle}
-					onPress={() => selectTag(tag)}
-				>
-					<Text style={styles.tagText}>{tag.name}</Text>
-				</TouchableOpacity>
-			);
-		});
+	const toggleSection = (label: string) => {
+		setOpenSections((prev) => ({ ...prev, [label]: !prev[label] }));
+	};
+
+	const collapseAll = () => {
+		setOpenSections(
+			Object.fromEntries(tagSections.map((section) => [section.label, false])),
+		);
 	};
 
 	return (
 		<View>
+			<TouchableOpacity onPress={collapseAll} style={styles.collapseAllButton}>
+				<Text style={styles.collapseAllText}>collapse all</Text>
+			</TouchableOpacity>
 			<Text style={styles.text}>{generalTagsText}</Text>
-			<View style={[styles.cardContent, styles.tagsContent]}>
-				{displayTags(tvTags)}
-			</View>
+			{tagSections.map((section, i) => (
+				<TagSection
+					key={section.label}
+					label={section.label}
+					tags={section.tags}
+					selectedTags={selectedTags}
+					onSelectTag={selectTag}
+					open={openSections[section.label]}
+					setOpen={() => toggleSection(section.label)}
+				/>
+			))}
 
 			<Text style={styles.text}>{warningTagsText}</Text>
-			<View style={[styles.cardContent, styles.tagsContent]}>
-				{displayTags(warningTags)}
-			</View>
+			<TagSection
+				key={warningSection.label}
+				label={warningSection.label}
+				tags={warningSection.tags}
+				selectedTags={selectedTags}
+				onSelectTag={selectTag}
+				open={openSections[warningSection.label]}
+				setOpen={() => toggleSection(warningSection.label)}
+			/>
 		</View>
 	);
 };
@@ -70,19 +173,8 @@ const styles = StyleSheet.create({
 	container: {
 		marginTop: 15,
 		flex: 1,
-		// justifyContent: 'center',
 		marginHorizontal: 2,
 		marginBottom: 20,
-	},
-	text: {
-		fontSize: 16,
-		marginRight: 5,
-		margin: 10,
-	},
-	tagText: {
-		fontSize: 13.5,
-		fontWeight: '500',
-		textAlign: 'center',
 	},
 	title: {
 		color: '#FF3F00',
@@ -111,6 +203,37 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 24,
 		paddingVertical: 8,
 	},
+	badge: {
+		borderRadius: 40,
+		paddingHorizontal: 7,
+		paddingVertical: 4,
+		minWidth: 20,
+		alignItems: 'center',
+	},
+	tvBadge: {
+		backgroundColor: '#36C9C6',
+	},
+	warningBadge: {
+		backgroundColor: '#E24E1B',
+	},
+	tagText: {
+		fontSize: 13.5,
+		fontWeight: '500',
+		textAlign: 'center',
+	},
+	highlightTvTag: {
+		paddingVertical: 6,
+		paddingHorizontal: 10,
+		borderRadius: 40,
+		marginHorizontal: 3,
+		backgroundColor: '#36C9C6',
+		marginTop: 5,
+	},
+	badgeText: {
+		fontSize: 12,
+		fontWeight: '500',
+		color: 'black',
+	},
 	textStyle: {
 		color: 'black',
 		fontSize: 14,
@@ -128,46 +251,92 @@ const styles = StyleSheet.create({
 		fontWeight: '500',
 		color: 'white',
 	},
-	cardContent: {
+	sectionHeader: {
 		flexDirection: 'row',
-		marginLeft: 10,
+		paddingHorizontal: 12,
+		paddingVertical: 8,
+		position: 'relative',
+		paddingRight: 36,
 	},
-
-	tagsContent: {
+	sectionHeaderLeft: {
+		flex: 1,
+		flexDirection: 'column',
+		marginRight: 8,
+	},
+	chevronContainer: {
+		position: 'absolute',
+		right: 12,
+		top: 8,
+	},
+	selectedPillsRow: {
+		flexDirection: 'row',
 		flexWrap: 'wrap',
+		gap: 4,
+		marginTop: 4,
+	},
+	sectionLabel: {
+		fontSize: 16,
+		fontWeight: '600',
+		color: '#444',
+		marginRight: 4,
+	},
+	chevron: {
+		fontSize: 13,
+		color: '#888',
+	},
+	divider: {
+		height: 1,
+		backgroundColor: '#888',
+		marginHorizontal: 10,
 	},
 	tvTag: {
-		padding: 10,
+		paddingVertical: 6,
+		paddingHorizontal: 10,
 		borderRadius: 40,
 		marginHorizontal: 3,
 		backgroundColor: '#9BC1BC',
 		marginTop: 5,
 	},
 	warningTag: {
-		padding: 10,
+		paddingVertical: 6,
+		paddingHorizontal: 10,
 		borderRadius: 40,
 		marginHorizontal: 3,
 		backgroundColor: '#F2A541',
 		marginTop: 5,
 	},
-	highlightTvTag: {
-		padding: 10,
-		borderRadius: 40,
-		marginHorizontal: 3,
-		backgroundColor: '#36C9C6',
-		marginTop: 5,
-	},
+
 	highlightWarningTag: {
-		padding: 10,
+		paddingVertical: 6,
+		paddingHorizontal: 10,
 		borderRadius: 40,
 		marginHorizontal: 3,
 		backgroundColor: '#E24E1B',
 		marginTop: 5,
 	},
-	inputText: {
+	text: {
+		fontSize: 16,
+		marginRight: 5,
 		margin: 10,
 		textAlign: 'center',
-		fontSize: 20,
+	},
+	cardContent: {
+		flexDirection: 'row',
+		marginLeft: 10,
+	},
+	tagsContent: {
+		flexWrap: 'wrap',
+		marginBottom: 8,
+	},
+	collapseAllButton: {
+		alignSelf: 'flex-end',
+		paddingHorizontal: 12,
+		paddingVertical: 4,
+		marginBottom: 4,
+	},
+	collapseAllText: {
+		fontSize: 13,
+		color: '#777',
 	},
 });
 

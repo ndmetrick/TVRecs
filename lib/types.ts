@@ -64,6 +64,7 @@ export type Tag = {
 	id: number;
 	name: string;
 	type: string | null;
+	section_id: number | null;
 };
 
 export type UserShow = {

@@ -395,7 +395,16 @@ const RecShows = () => {
 				noUserShows={noUserShows}
 				toggleNoUserShows={toggleNoUserShows}
 				cancelFilters={cancelFilters}
-				allShowTags={[...tvTags, ...warningTags]}
+				allShowTags={[
+					...tvTags.mood,
+					...tvTags.genre,
+					...tvTags.representation,
+					...tvTags.themes,
+					...tvTags.experience,
+					...tvTags.audience,
+					...tvTags.misc,
+					...warningTags,
+				]}
 				appliedFilters={appliedFilters}
 				setAppliedFilters={setAppliedFilters}
 				filterOpen={filterOpen}
