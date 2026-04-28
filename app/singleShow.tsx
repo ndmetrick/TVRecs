@@ -287,10 +287,12 @@ const SingleShow = () => {
 				// because seen/to-filter shows are automatically removed from shows recommended to the user, we need to get recShows again if we succeed in deleting the show from the seen list
 				if (deleted) {
 					await refetchFollowingRecs();
+					await refetchUserShows();
 					router.back();
 				}
 			} else {
 				await deleteUserShow(supabase, singleShow.id);
+				await refetchUserShows();
 				router.back();
 			}
 		} catch (err) {
