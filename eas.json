@@ -11,9 +11,16 @@
 			"distribution": "internal",
 			"android": {
 				"buildType": "apk"
+			},
+			"env": {
+				"SENTRY_DISABLE_AUTO_UPLOAD": "true"
 			}
 		},
-		"production": {}
+		"production": {
+			"env": {
+				"SENTRY_DISABLE_AUTO_UPLOAD": "true"
+			}
+		}
 	},
 	"submit": {
 		"production": {}

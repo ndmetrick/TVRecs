@@ -1,9 +1,15 @@
 import { AppProvider, useAppData } from '@/lib/AppContext';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import * as Sentry from '@sentry/react-native';
 import { router, Stack } from 'expo-router';
 import { Alert, Image, TouchableOpacity } from 'react-native';
 import Toast from 'react-native-toast-message';
+
+Sentry.init({
+	dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
+	debug: false,
+});
 
 export const AppShell = () => {
 	const { signOut } = useAuth();

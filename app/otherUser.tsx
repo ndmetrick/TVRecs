@@ -19,6 +19,7 @@ import {
 	UserShow,
 	UserShowType,
 } from '@/lib/types';
+import * as Sentry from '@sentry/react-native';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
@@ -77,6 +78,9 @@ const OtherUser = () => {
 				console.error(`Error getting user info: ${err}`);
 				showErrorToast(`Error loading this user's profile`);
 				setLoading(false);
+				Sentry.captureException(err, {
+					tags: { location: 'getOtherUserInfo' },
+				});
 			}
 		};
 		if (!userString) return;
@@ -101,6 +105,9 @@ const OtherUser = () => {
 		} catch (err) {
 			console.log(`Error following user: ${err}`);
 			showErrorToast('Error trying to follow. Try again.');
+			Sentry.captureException(err, {
+				tags: { location: 'otherUserFollow' },
+			});
 		}
 	};
 	const unfollow = async () => {
@@ -114,6 +121,9 @@ const OtherUser = () => {
 		} catch (err) {
 			console.log(`Error unfollowing user: ${err}`);
 			showErrorToast('Error trying to unfollow. Try again.');
+			Sentry.captureException(err, {
+				tags: { location: 'otherUserUnfollow' },
+			});
 		}
 	};
 

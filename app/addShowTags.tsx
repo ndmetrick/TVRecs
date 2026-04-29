@@ -9,6 +9,7 @@ import {
 	UserShow,
 	UserShowToSave,
 } from '@/lib/types';
+import * as Sentry from '@sentry/react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
@@ -130,6 +131,7 @@ const AddShowTags = () => {
 			} catch (err) {
 				console.error(`Error editing user show: ${JSON.stringify(err)}`);
 				showErrorToast('Could not save your changes. Try again.');
+				Sentry.captureException(err, { tags: { location: 'editUserShow' } });
 			}
 		} else {
 			const updatedShow = {
@@ -148,6 +150,7 @@ const AddShowTags = () => {
 			} catch (err) {
 				console.error(`Error adding user show: ${JSON.stringify(err)}`);
 				showErrorToast('Could not save this show to your profile. Try again.');
+				Sentry.captureException(err, { tags: { location: 'addUserShow' } });
 			}
 		}
 	};
