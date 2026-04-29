@@ -148,9 +148,9 @@ const SelectShow = (props: Props) => {
 					}
 				}
 			}
-		} catch (e) {
+		} catch (e: any) {
 			console.error(`Error getting show options: ${e}`);
-			showErrorToast('Error loading shows. Try again.');
+			showErrorToast(e?.message ?? String(e));
 		}
 	};
 
@@ -188,9 +188,9 @@ const SelectShow = (props: Props) => {
 					setAdded(true);
 				}
 			}
-		} catch (e) {
-			console.error(`Error getting show data: ${e}`);
-			showErrorToast('Error getting show data. Try again.');
+		} catch (e: any) {
+			console.error(`Error getting show options: ${e}`);
+			showErrorToast(e?.message ?? String(e));
 		}
 	};
 
