@@ -1,5 +1,6 @@
 import { Session, User } from '@supabase/supabase-js';
 import { createContext, useContext, useEffect, useState } from 'react';
+import { AppState } from 'react-native';
 import { supabase } from './supabase';
 
 type AuthContextType = {
@@ -29,7 +30,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 			setSession(session);
 		});
 
-		return () => subscription.unsubscribe();
+		const appStateSubscription = AppState.addEventListener(
+			'change',
+			(state) => {
+				if (state === 'active') {
+					supabase.auth.startAutoRefresh();
+				} else {
+					supabase.auth.stopAutoRefresh();
+				}
+			},
+		);
+
+		return () => {
+			subscription.unsubscribe();
+			appStateSubscription.remove();
+		};
 	}, []);
 
 	async function signIn(email: string, password: string) {
@@ -39,7 +54,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		});
 		if (error) throw error;
 	}
-
 	async function signUp(email: string, password: string, username: string) {
 		if (username) {
 			const { data: existing } = await supabase
