@@ -1,5 +1,6 @@
 import { useAuth } from '@/lib/AuthContext';
 import { showErrorToast } from '@/lib/toast';
+import * as Sentry from '@sentry/react-native';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -27,6 +28,9 @@ export default function Login() {
 		} catch (e: any) {
 			showErrorToast('Could not sign in. Try again.');
 			console.log('Error signing in:', e);
+			Sentry.captureException(e, {
+				tags: { location: 'login' },
+			});
 		} finally {
 			setLoading(false);
 		}

@@ -4,6 +4,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { isUniqueViolation } from '@/lib/errors';
 import { supabase } from '@/lib/supabase';
 import { showErrorToast } from '@/lib/toast';
+import * as Sentry from '@sentry/react-native';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -73,6 +74,9 @@ const UpdateAccount = (props: Props) => {
 		} catch (err) {
 			console.log(err);
 			showErrorToast('Could not delete your account');
+			Sentry.captureException(err, {
+				tags: { location: 'deleteAccount' },
+			});
 		}
 	};
 

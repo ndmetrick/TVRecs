@@ -2,6 +2,7 @@
 import { showErrorToast } from '@/lib/toast';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
+import * as Sentry from '@sentry/react-native';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import {
@@ -151,6 +152,9 @@ const SelectShow = (props: Props) => {
 		} catch (e: any) {
 			console.error(`Error getting show options: ${e}`);
 			showErrorToast(e?.message ?? String(e));
+			Sentry.captureException(e, {
+				tags: { location: 'gettingShowOptions' },
+			});
 		}
 	};
 
@@ -191,6 +195,9 @@ const SelectShow = (props: Props) => {
 		} catch (e: any) {
 			console.error(`Error getting show options: ${e}`);
 			showErrorToast(e?.message ?? String(e));
+			Sentry.captureException(e, {
+				tags: { location: 'getShowData' },
+			});
 		}
 	};
 

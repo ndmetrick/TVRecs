@@ -2,6 +2,7 @@ import { useAppData } from '@/lib/AppContext';
 import { showErrorToast } from '@/lib/toast';
 import { TMDBWatchProviderResults } from '@/lib/types';
 import { Country } from '@realtril/react-native-country-picker-modal';
+import * as Sentry from '@sentry/react-native';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import {
@@ -54,6 +55,9 @@ const StreamingAndPurchase = (props: Props) => {
 			} catch (err) {
 				console.log(`Error getting watch providers: ${err}`);
 				showErrorToast('Error getting streaming and purchase info');
+				Sentry.captureException(err, {
+					tags: { location: 'streamingAndPurchase' },
+				});
 			}
 		};
 		// if the watch provider info is already on state and it was updated less than a week ago:

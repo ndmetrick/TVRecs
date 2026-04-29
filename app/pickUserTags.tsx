@@ -3,6 +3,7 @@ import { useAppData } from '@/lib/AppContext';
 import { supabase } from '@/lib/supabase';
 import { showErrorToast } from '@/lib/toast';
 import { ProfileTag, ProfileTagCategory, Tag, TagType } from '@/lib/types';
+import * as Sentry from '@sentry/react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
@@ -198,6 +199,9 @@ const PickUserTags = () => {
 				console.error(`Error saving profile tags and description: ${err}`);
 				showErrorToast('There was an error updating your profile');
 				router.push({ pathname: '/currentUser' });
+				Sentry.captureException(err, {
+					tags: { location: 'profileTags' },
+				});
 			}
 		}
 	};

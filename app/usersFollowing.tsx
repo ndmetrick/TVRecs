@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/react-native';
 import {
 	ActivityIndicator,
 	StyleSheet,
@@ -59,6 +60,9 @@ function UsersFollowing() {
 		} catch (err) {
 			console.error(`Error following user: ${err}`);
 			showErrorToast('Error trying to follow. Try again.');
+			Sentry.captureException(err, {
+				tags: { location: 'follow' },
+			});
 		}
 	};
 	const unfollow = async (otherUserId: string) => {
@@ -71,6 +75,9 @@ function UsersFollowing() {
 		} catch (err) {
 			console.error(`Error unfollowing user: ${err}`);
 			showErrorToast('Error trying to unfollow. Try again.');
+			Sentry.captureException(err, {
+				tags: { location: 'unfollow' },
+			});
 		}
 	};
 

@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/react-native';
 import {
 	createContext,
 	useCallback,
@@ -6,7 +7,6 @@ import {
 	useMemo,
 	useState,
 } from 'react';
-import { useAuth } from './AuthContext';
 import {
 	getAllTags,
 	getAllUsers,
@@ -15,6 +15,7 @@ import {
 	getUserFollowing,
 	getUserShows,
 } from './api';
+import { useAuth } from './AuthContext';
 import { supabase } from './supabase';
 import { showErrorToast } from './toast';
 import {
@@ -140,6 +141,9 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 		} catch (err) {
 			console.log(`Error getting user: ${err}`);
 			showErrorToast('Could not load your profile');
+			Sentry.captureException(err, {
+				tags: { location: 'getUserAppContext' },
+			});
 		}
 	}, [user]);
 
@@ -151,6 +155,9 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 		} catch (err) {
 			console.log(`Error fetching following: ${err}`);
 			showErrorToast('Could not load the users you follow');
+			Sentry.captureException(err, {
+				tags: { location: 'getFollowingAppContext' },
+			});
 		}
 	}, [user]);
 
@@ -164,6 +171,9 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 			showErrorToast(
 				'Could not load the recommendations of the people you follow',
 			);
+			Sentry.captureException(err, {
+				tags: { location: 'getFollowingRecs' },
+			});
 		}
 	}, [user]);
 
@@ -181,6 +191,9 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 		} catch (err) {
 			console.error(`Error loading recs, watch, seenShows: ${err}`);
 			showErrorToast('There was an error loading the shows on your profile');
+			Sentry.captureException(err, {
+				tags: { location: 'loadingProfileShows' },
+			});
 		}
 	}, [user]);
 
@@ -255,6 +268,9 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 		} catch (err) {
 			console.error(`Error fetching all tags: ${err}`);
 			showErrorToast('Could not load tags');
+			Sentry.captureException(err, {
+				tags: { location: 'loadingTags' },
+			});
 		}
 	}, []);
 
@@ -266,6 +282,9 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 		} catch (err) {
 			console.error(`Error fetching users: ${err}`);
 			showErrorToast('Could not load app users');
+			Sentry.captureException(err, {
+				tags: { location: 'getAllUsers' },
+			});
 		}
 	}, [user]);
 
@@ -290,6 +309,9 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 		} catch (e) {
 			setError(e as Error);
 			showErrorToast('Could not load app data');
+			Sentry.captureException(e, {
+				tags: { location: 'loadAppData' },
+			});
 		} finally {
 			setLoading(false);
 		}

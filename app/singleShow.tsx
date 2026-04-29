@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import * as Sentry from '@sentry/react-native';
 import { useEffect, useState } from 'react';
 import {
 	ActivityIndicator,
@@ -246,6 +247,9 @@ const SingleShow = () => {
 		} catch (err) {
 			console.error(`Error deleting this show: ${err}`);
 			showErrorToast('Error deleting and updating your account. Try again.');
+			Sentry.captureException(err, {
+				tags: { location: 'singleShow' },
+			});
 		}
 	};
 

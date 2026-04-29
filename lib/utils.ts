@@ -6,6 +6,7 @@ import {
 	UserShow,
 	UserShowToSave,
 } from '@/lib/types';
+import * as Sentry from '@sentry/react-native';
 import { router } from 'expo-router';
 import { showErrorToast } from './toast';
 
@@ -69,5 +70,8 @@ export const skipTagsAndSaveShowData = async (
 	} catch (err) {
 		console.log(`Error skipping tags and saving show data: ${err}`);
 		showErrorToast('Error saving the show do your profile');
+		Sentry.captureException(err, {
+			tags: { location: 'skipAndSave' },
+		});
 	}
 };

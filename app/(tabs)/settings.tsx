@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/react-native';
 import React, { useState } from 'react';
 import {
 	Linking,
@@ -44,6 +45,9 @@ const Settings = () => {
 		} catch (err) {
 			console.error(`Error getting profile tags: ${err}`);
 			showErrorToast('Could not load your profile tags');
+			Sentry.captureException(err, {
+				tags: { location: 'getProfileTags' },
+			});
 		}
 	};
 
@@ -54,6 +58,9 @@ const Settings = () => {
 		} catch (e) {
 			console.log(`Error signing out: ${e}`);
 			showErrorToast('There was an error signing out');
+			Sentry.captureException(e, {
+				tags: { location: 'settingsLogout' },
+			});
 		}
 	};
 
@@ -65,6 +72,9 @@ const Settings = () => {
 			} catch (err) {
 				console.log(`Error saving new country: ${err}`);
 				showErrorToast('There was an error changing your country');
+				Sentry.captureException(err, {
+					tags: { location: 'saveNewCountry' },
+				});
 			}
 		}
 	};
