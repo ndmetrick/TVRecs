@@ -33,7 +33,7 @@ const StreamingAndPurchase = (props: Props) => {
 		}
 		const getWatchProviders = async (showId: string) => {
 			try {
-				const tmdbKey = process.env.EXPO_PUBLIC_TMDB_KEY;
+				const tmdbKey = process.env.EXPO_PUBLIC_TMDB_API_KEY;
 				const APIString = `https://api.themoviedb.org/3/tv/${showId}?api_key=${tmdbKey}&append_to_response=watch/providers`;
 				const showInfo = await axios.get(APIString);
 				if (showInfo) {

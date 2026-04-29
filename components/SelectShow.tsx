@@ -109,7 +109,7 @@ const SelectShow = (props: Props) => {
 				]);
 			} else {
 				const titleString = showInput.split(' ').join('+');
-				const getShowOptions = `https://api.themoviedb.org/3/search/tv?api_key=${process.env.EXPO_PUBLIC_TMDB_KEY}&query=${titleString}`;
+				const getShowOptions = `https://api.themoviedb.org/3/search/tv?api_key=${process.env.EXPO_PUBLIC_TMDB_API_KEY}&query=${titleString}`;
 
 				const { data } = await axios.get(getShowOptions);
 				if (!data.results.length) {
@@ -138,7 +138,7 @@ const SelectShow = (props: Props) => {
 						props.handleShow(show.name, image, show.id, true);
 						setAdded(true);
 					} else {
-						const imageShowText = `https://www.omdbapi.com/?t=${titleString}&apikey=${process.env.EXPO_PUBLIC_OMDB_KEY}`;
+						const imageShowText = `https://www.omdbapi.com/?t=${titleString}&apikey=${process.env.EXPO_PUBLIC_OMDB_API_KEY}`;
 						const imageShow = await axios.get(imageShowText);
 						let poster = imageShow.data.Poster;
 						if (!poster || poster === 'N/A') {
@@ -171,7 +171,7 @@ const SelectShow = (props: Props) => {
 
 	const getShowData = async (id: number) => {
 		try {
-			const getShow = `https://api.themoviedb.org/3/tv/${id}?api_key=${process.env.EXPO_PUBLIC_TMDB_KEY}&language=en-US&append_to_response=watch%2Fproviders`;
+			const getShow = `https://api.themoviedb.org/3/tv/${id}?api_key=${process.env.EXPO_PUBLIC_TMDB_API_KEY}&language=en-US&append_to_response=watch%2Fproviders`;
 			const { data } = await axios.get(getShow);
 			setShowInput(data.name);
 			setShowOptions(null);
@@ -180,7 +180,7 @@ const SelectShow = (props: Props) => {
 				props.handleShow(data.name, image, id, true);
 				setAdded(true);
 			} else {
-				const imageShowText = `https://www.omdbapi.com/?t=${data.name}&apikey=${process.env.EXPO_PUBLIC_OMDB_KEY}`;
+				const imageShowText = `https://www.omdbapi.com/?t=${data.name}&apikey=${process.env.EXPO_PUBLIC_OMDB_API_KEY}`;
 				const imageShow = await axios.get(imageShowText);
 				let poster = imageShow.data.Poster;
 				if (!poster || poster === 'N/A') {
