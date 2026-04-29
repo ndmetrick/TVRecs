@@ -18,7 +18,10 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import { skipTagsAndSaveShowData } from '../../lib/utils';
 
 const profileShowOptions = [
-	{ label: 'Recommend it', value: UserShowType.REC },
+	{
+		label: 'Recommend it',
+		value: UserShowType.REC,
+	},
 	{
 		label: 'Save it to my Watch list to remind me to watch it later',
 		value: UserShowType.WATCH,
@@ -27,7 +30,10 @@ const profileShowOptions = [
 		label: 'Filter it out of recs I see in my main feed',
 		value: UserShowType.SEEN,
 	},
-	{ label: 'Nothing', value: 'none' },
+	{
+		label: 'Nothing',
+		value: 'none',
+	},
 ];
 const AddShow = () => {
 	const { addToType } = useLocalSearchParams<{ addToType?: string }>();
@@ -131,7 +137,7 @@ const AddShow = () => {
 									height: 300,
 									resizeMode: 'contain',
 									margin: 5,
-									marginBottom: 10,
+									marginBottom: 15,
 								}}
 							/>
 
@@ -196,7 +202,6 @@ const AddShow = () => {
 										}}
 									>
 										<DropDownPicker
-											style={{ borderRadius: 25 }}
 											open={profileShowDropdownOpen}
 											value={showType}
 											items={profileShowDropdownOptions}
@@ -206,6 +211,15 @@ const AddShow = () => {
 											listMode='SCROLLVIEW'
 											dropDownDirection='TOP'
 											itemKey='label'
+											labelStyle={{
+												flexWrap: 'wrap',
+												fontSize: 15,
+												margin: 15,
+												marginLeft: 10,
+											}}
+											style={{
+												borderRadius: 25,
+											}}
 											placeholder='What do you want to do with this show?'
 										/>
 
@@ -327,7 +341,7 @@ const styles = StyleSheet.create({
 	},
 	inputText: {
 		margin: 10,
-		textAlign: 'center',
+		textAlign: 'left',
 		fontSize: 20,
 	},
 	optionsText: {

@@ -42,8 +42,9 @@ const SingleShow = () => {
 	const [userHasShow, setUserHasShow] = useState<UserShowType | null>(null);
 	const [streamingAndPurchase, setStreamingAndPurchase] = useState(false);
 	const [profileShowDropdownOpen, setProfileShowDropdownOpen] = useState(false);
-	const [profileShowDropdownValue, setProfileShowDropdownValue] =
-		useState(null);
+	const [profileShowDropdownValue, setProfileShowDropdownValue] = useState<
+		string | null
+	>(null);
 	const [loading, setLoading] = useState(true);
 	const [profileShowDropdownOptions, setProfileShowDropdownOptions] = useState<
 		{ label: string; value: string }[]
@@ -185,7 +186,6 @@ const SingleShow = () => {
 					});
 				}
 			});
-			console.log('reccounts', JSON.stringify(recCounts));
 			setMultipleRecInfo(recCounts);
 		}
 		const warnings = userShow.tags.filter((tag) => {
@@ -207,6 +207,7 @@ const SingleShow = () => {
 			setIsCurrentUser(false);
 			setMultipleRecInfo({});
 			setModalVisible(false);
+			setSaveShowModalVisible(false);
 			setUserHasShow(null);
 			setProfileShowDropdownValue(null);
 			setLoading(true);
@@ -222,6 +223,67 @@ const SingleShow = () => {
 		seen,
 		followingRecs,
 	]);
+
+	const deleteShow = async () => {
+		if (!singleShow) return;
+		try {
+			if (singleShow.type === UserShowType.SEEN) {
+				const deleted = await deleteUserShow(supabase, singleShow.id);
+				// because seen/to-filter shows are automatically removed from shows recommended to the user, we need to get recShows again if we succeed in deleting the show from the seen list
+				if (deleted) {
+					await refetchFollowingRecs();
+					await refetchUserShows();
+					router.back();
+				}
+			} else {
+				await deleteUserShow(supabase, singleShow.id);
+				await refetchUserShows();
+				router.back();
+			}
+		} catch (err) {
+			console.error(`Error deleting this show: ${err}`);
+			showErrorToast('Error deleting and updating your account. Try again.');
+		}
+	};
+
+	const chooseWhatToDoWithShow = (value: string) => {
+		if (!singleShow) {
+			return;
+		}
+		if (value === 'delete') {
+			return Alert.alert('Are you sure you want to delete this show?', '', [
+				{ text: 'Yes', onPress: () => deleteShow() },
+				{
+					text: 'Cancel',
+				},
+			]);
+		}
+		if (value === 'tags') {
+			return router.push({
+				pathname: '/addShowTags',
+				params: {
+					currentShowString: JSON.stringify(singleShow),
+					previousString: SourcePage.SINGLE_SHOW,
+					showToSaveString: JSON.stringify({
+						tags: singleShow.tags,
+						description: singleShow.description,
+						name: singleShow.show.name,
+						tmdb_id: singleShow.show.tmdb_id,
+						image_url: singleShow.show.image_url,
+						type: type ?? UserShowType.REC,
+					}),
+				},
+			});
+		}
+		if (
+			value === UserShowType.REC ||
+			value === UserShowType.WATCH ||
+			value === UserShowType.SEEN
+		) {
+			console.log('i am doing this', saveShowModalVisible);
+			setSaveShowModalVisible(true);
+		}
+	};
 
 	if (!singleShow || (!isCurrentUser && !userToView))
 		return (
@@ -278,27 +340,6 @@ const SingleShow = () => {
 			pathname: '/addShowTags',
 			params,
 		});
-	};
-
-	const deleteShow = async () => {
-		try {
-			if (singleShow.type === UserShowType.SEEN) {
-				const deleted = await deleteUserShow(supabase, singleShow.id);
-				// because seen/to-filter shows are automatically removed from shows recommended to the user, we need to get recShows again if we succeed in deleting the show from the seen list
-				if (deleted) {
-					await refetchFollowingRecs();
-					await refetchUserShows();
-					router.back();
-				}
-			} else {
-				await deleteUserShow(supabase, singleShow.id);
-				await refetchUserShows();
-				router.back();
-			}
-		} catch (err) {
-			console.error(`Error deleting this show: ${err}`);
-			showErrorToast('Error deleting and updating your account. Try again.');
-		}
 	};
 
 	const displayTags = (tags: Tag[]) => {
@@ -429,7 +470,7 @@ const SingleShow = () => {
 						/>
 					</View>
 				)}
-				<View>
+				<View style={{ gap: 8 }}>
 					<Image
 						style={styles.image}
 						source={{ uri: singleShow.show.image_url }}
@@ -520,19 +561,41 @@ const SingleShow = () => {
 								}}
 							>
 								<DropDownPicker
-									style={{ borderRadius: 25 }}
+									style={{
+										borderRadius: 25,
+									}}
+									labelStyle={{
+										flexWrap: 'wrap',
+										fontSize: 15,
+										margin: 15,
+										marginLeft: 10,
+									}}
 									open={profileShowDropdownOpen}
 									value={profileShowDropdownValue}
 									items={profileShowDropdownOptions}
 									setOpen={setProfileShowDropdownOpen}
 									setValue={setProfileShowDropdownValue}
+									onChangeValue={(value) => {
+										if (value) chooseWhatToDoWithShow(value);
+									}}
 									setItems={setProfileShowDropdownOptions}
+									listItemContainerStyle={{
+										height: 'auto',
+										minHeight: 44,
+										paddingVertical: 10,
+										paddingHorizontal: 16,
+									}}
+									listItemLabelStyle={{
+										flexWrap: 'wrap',
+										fontSize: 15,
+										lineHeight: 20,
+									}}
 									listMode='SCROLLVIEW'
 									dropDownDirection='TOP'
 									itemKey='label'
 									placeholder='What do you want to do with this show?'
 								/>
-								{profileShowDropdownValue === 'delete' ? (
+								{/* {profileShowDropdownValue === 'delete' ? (
 									<View style={styles.buttonContainer}>
 										<TouchableOpacity
 											style={styles.saveButton}
@@ -608,7 +671,7 @@ const SingleShow = () => {
 											</Text>
 										</TouchableOpacity>
 									</View>
-								) : null}
+								) : null} */}
 							</View>
 						) : (
 							<View>
@@ -617,20 +680,31 @@ const SingleShow = () => {
 									<View>
 										<View style={{ marginRight: 15, marginLeft: 15 }}>
 											<DropDownPicker
-												style={{ borderRadius: 25 }}
 												open={profileShowDropdownOpen}
 												value={profileShowDropdownValue}
 												items={profileShowDropdownOptions}
 												setOpen={setProfileShowDropdownOpen}
 												setValue={setProfileShowDropdownValue}
 												setItems={setProfileShowDropdownOptions}
+												onChangeValue={(value) => {
+													if (value) chooseWhatToDoWithShow(value);
+												}}
+												labelStyle={{
+													flexWrap: 'wrap',
+													fontSize: 15,
+													margin: 15,
+													marginLeft: 10,
+												}}
+												style={{
+													borderRadius: 25,
+												}}
 												listMode='SCROLLVIEW'
 												dropDownDirection='TOP'
 												itemKey='label'
 												placeholder='What do you want to do with this show?'
 											/>
 										</View>
-										{profileShowDropdownValue === null ||
+										{/* {profileShowDropdownValue === null ||
 										profileShowDropdownValue === 'none' ? null : (
 											<View style={styles.buttonContainer}>
 												<TouchableOpacity
@@ -652,7 +726,7 @@ const SingleShow = () => {
 													</Text>
 												</TouchableOpacity>
 											</View>
-										)}
+										)} */}
 									</View>
 								)}
 							</View>

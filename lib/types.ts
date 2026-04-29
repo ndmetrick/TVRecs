@@ -17,16 +17,18 @@ export type Show = {
 export enum ShowFilterType {
 	HAS_TAGS = 'hasTags',
 	HAS_DESCRIPTION = 'hasDescription',
-	TAG_IDS = 'tagIds',
+	HAS_TAG_IDS = 'hasTagIds',
+	NOT_HAS_TAG_IDS = 'notHasTagIds',
 	MIN_RECS = 'minRecs',
 	DESCRIPTION_STRING = 'descriptionString',
 	NONE = 'none',
 }
 
-export type AppliedFilters = {
+export type AppliedShowFilters = {
 	hasTags?: boolean;
 	hasDescription?: boolean;
-	tagIds?: number[];
+	hasTagIds?: number[];
+	notHasTagIds?: number[];
 	minRecs?: number;
 	descriptionString?: string;
 	none?: boolean;

@@ -1,4 +1,4 @@
-import { AppliedFilters, ShowFilterType, Tag } from '@/lib/types';
+import { AppliedShowFilters, ShowFilterType, Tag } from '@/lib/types';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 import {
@@ -146,8 +146,8 @@ interface RecsHeaderProps {
 	toggleNoUserShows: () => void;
 	cancelFilters: () => void;
 	allShowTags: Tag[];
-	appliedFilters: AppliedFilters;
-	setAppliedFilters: React.Dispatch<React.SetStateAction<AppliedFilters>>;
+	appliedFilters: AppliedShowFilters;
+	setAppliedFilters: React.Dispatch<React.SetStateAction<AppliedShowFilters>>;
 	filterOpen: boolean;
 	setFilterOpen: React.Dispatch<React.SetStateAction<boolean>>;
 	showsLength: number;
@@ -165,6 +165,9 @@ const RecsHeader = ({
 	showsLength,
 }: RecsHeaderProps) => {
 	const [selectedTags, setSelectedTags] = useState<Record<string, boolean>>({});
+	const [selectedWarningTags, setSelectedWarningTags] = useState<
+		Record<string, boolean>
+	>({});
 	const [activeFilterType, setActiveFilterType] =
 		useState<ShowFilterType | null>(null);
 	// const [loaded, setLoaded] = useState(false);
@@ -173,7 +176,17 @@ const RecsHeader = ({
 	// 	null,
 	// );
 
+	const clearAllFilters = () => {
+		setSelectedTags({});
+		setSelectedWarningTags({});
+		setPendingMinRecs(null);
+		cancelFilters();
+	};
+
 	const filterLength = Object.keys(appliedFilters).length;
+	const tagIdsFilterLength =
+		(appliedFilters.hasTagIds?.length ?? 0) +
+		(appliedFilters.notHasTagIds?.length ?? 0);
 
 	const getPillState = (pillType: ShowFilterType): PillState => {
 		if (appliedFilters[pillType]) return 'applied';
@@ -238,7 +251,7 @@ const RecsHeader = ({
 						<Pill
 							label='no filter'
 							pillState={getPillState(ShowFilterType.NONE)}
-							onPress={cancelFilters}
+							onPress={clearAllFilters}
 						/>
 						<Pill
 							label='has tags'
@@ -256,12 +269,19 @@ const RecsHeader = ({
 						/>
 						<Pill
 							label='choose tags'
-							pillState={getPillState(ShowFilterType.TAG_IDS)}
+							pillState={
+								appliedFilters.hasTagIds?.length ||
+								appliedFilters.notHasTagIds?.length
+									? 'applied'
+									: activeFilterType === ShowFilterType.HAS_TAG_IDS
+										? 'pending'
+										: 'inactive'
+							}
 							onPress={() =>
 								setActiveFilterType((prev) =>
-									prev === ShowFilterType.TAG_IDS
+									prev === ShowFilterType.HAS_TAG_IDS
 										? null
-										: ShowFilterType.TAG_IDS,
+										: ShowFilterType.HAS_TAG_IDS,
 								)
 							}
 						/>
@@ -299,7 +319,7 @@ const RecsHeader = ({
 						/>
 					</ScrollView>
 
-					{activeFilterType === 'tagIds' && (
+					{activeFilterType === 'hasTagIds' && (
 						<View style={styles.panelContainer}>
 							<ScrollView
 								showsVerticalScrollIndicator={false}
@@ -309,6 +329,8 @@ const RecsHeader = ({
 								<ShowTagPicker
 									selectedTags={selectedTags}
 									setSelectedTags={setSelectedTags}
+									selectedWarningTags={selectedWarningTags}
+									setSelectedWarningTags={setSelectedWarningTags}
 									warningTagsText={warningTagsText}
 									generalTagsText={generalTagsText}
 								/>
@@ -318,8 +340,9 @@ const RecsHeader = ({
 									style={styles.panelClearButton}
 									onPress={() => {
 										setSelectedTags({});
+										setSelectedWarningTags({});
 										setAppliedFilters((prev) => {
-											const { tagIds, ...rest } = prev;
+											const { hasTagIds, notHasTagIds, ...rest } = prev;
 											return rest;
 										});
 									}}
@@ -330,18 +353,25 @@ const RecsHeader = ({
 									style={styles.panelApplyButton}
 									onPress={() => {
 										const chosenTags: number[] = [];
+										const chosenWarningTags: number[] = [];
 										for (const tagId in selectedTags) {
 											if (selectedTags[tagId] === true) {
 												chosenTags.push(Number(tagId));
 											}
 										}
-										setAppliedFilters((prev) => {
-											if (!chosenTags.length) {
-												const { tagIds, ...rest } = prev;
-												return rest;
-											} else {
-												return { ...prev, tagIds: chosenTags };
+										for (const tagId in selectedWarningTags) {
+											if (selectedWarningTags[tagId] === true) {
+												chosenWarningTags.push(Number(tagId));
 											}
+										}
+										setAppliedFilters((prev) => {
+											const next = { ...prev };
+											if (chosenTags.length) next.hasTagIds = chosenTags;
+											else delete next.hasTagIds;
+											if (chosenWarningTags.length)
+												next.notHasTagIds = chosenWarningTags;
+											else delete next.notHasTagIds;
+											return next;
 										});
 										setActiveFilterType(null);
 									}}
@@ -421,11 +451,11 @@ const RecsHeader = ({
 								<Text style={styles.activeFilterChipText}>has tags</Text>
 							</View>
 						)}
-						{appliedFilters.tagIds?.length ? (
+						{tagIdsFilterLength || appliedFilters.notHasTagIds?.length ? (
 							<View style={styles.activeFilterChip}>
 								<Text style={styles.activeFilterChipText}>
-									{appliedFilters.tagIds.length} specific{' '}
-									{appliedFilters.tagIds.length > 1 ? 'tags' : 'tag'}
+									{tagIdsFilterLength} specific{' '}
+									{tagIdsFilterLength > 1 ? 'tags' : 'tag'}
 								</Text>
 							</View>
 						) : null}
@@ -449,7 +479,7 @@ const RecsHeader = ({
 							<TouchableOpacity
 								style={styles.clearAllChip}
 								onPress={() => {
-									cancelFilters();
+									clearAllFilters();
 									if (noUserShows) toggleNoUserShows();
 								}}
 							>

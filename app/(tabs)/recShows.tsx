@@ -3,7 +3,7 @@ import RecsHeader from '@/components/RecsHeader';
 import { useFirstRender } from '@/hooks/useFirstRender';
 import { useAppData } from '@/lib/AppContext';
 import {
-	AppliedFilters,
+	AppliedShowFilters,
 	RecCount,
 	Recommender,
 	SourcePage,
@@ -38,7 +38,7 @@ const RecShows = () => {
 	const [showsLength, setShowsLength] = useState(0);
 
 	// applied filters — what actually affects the list
-	const [appliedFilters, setAppliedFilters] = useState<AppliedFilters>({});
+	const [appliedFilters, setAppliedFilters] = useState<AppliedShowFilters>({});
 	const router = useRouter();
 
 	useEffect(() => {
@@ -68,19 +68,29 @@ const RecShows = () => {
 	const filteredRecs = useMemo(() => {
 		let shows = followingRecs;
 		if (appliedFilters.hasTags) {
-			shows = shows.filter((s) => s.tags.length > 0);
+			shows = shows.filter((show) => show.tags.length > 0);
 		}
 		if (appliedFilters.hasDescription) {
-			shows = shows.filter((s) => !!s.description);
+			shows = shows.filter((show) => !!show.description);
 		}
-		if (appliedFilters.tagIds?.length) {
-			shows = shows.filter((s) =>
-				appliedFilters.tagIds?.every((id) => s.tags.some((t) => t.id === id)),
+		if (appliedFilters.hasTagIds?.length) {
+			shows = shows.filter((show) =>
+				appliedFilters.hasTagIds?.every((id) =>
+					show.tags.some((t) => t.id === id),
+				),
+			);
+		}
+		// does not have warning tags filtered out
+		if (appliedFilters.notHasTagIds?.length) {
+			shows = shows.filter((show) =>
+				appliedFilters.notHasTagIds?.every(
+					(id) => !show.tags.some((t) => t.id === id),
+				),
 			);
 		}
 		if (appliedFilters.descriptionString) {
-			shows = shows.filter((s) =>
-				s.description?.includes(appliedFilters.descriptionString as string),
+			shows = shows.filter((show) =>
+				show.description?.includes(appliedFilters.descriptionString as string),
 			);
 		}
 		setFiltersApplied(!!Object.keys(appliedFilters).length);

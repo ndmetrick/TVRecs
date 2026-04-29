@@ -65,6 +65,19 @@ export default function TabLayout() {
 				}}
 			/>
 			<Tabs.Screen
+				name='search'
+				options={{
+					tabBarIcon: ({ color }) => (
+						<ComposedSearchIcon
+							size={26}
+							color={color}
+							backgroundColor='#340068'
+							baseIcon='account'
+						/>
+					),
+				}}
+			/>
+			<Tabs.Screen
 				name='addShow'
 				options={{
 					tabBarLabel: 'Add shows',
@@ -74,19 +87,6 @@ export default function TabLayout() {
 							color={color}
 							backgroundColor='#340068'
 							baseIcon='television-classic'
-						/>
-					),
-				}}
-			/>
-			<Tabs.Screen
-				name='search'
-				options={{
-					tabBarIcon: ({ color }) => (
-						<ComposedSearchIcon
-							size={26}
-							color={color}
-							backgroundColor='#340068'
-							baseIcon='account'
 						/>
 					),
 				}}

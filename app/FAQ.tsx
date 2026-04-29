@@ -46,6 +46,28 @@ const FAQ = () => {
 
 			<TouchableOpacity
 				onPress={() => {
+					router.push({ pathname: '/search' });
+				}}
+			>
+				<Text style={styles.headingText}>
+					<MaterialCommunityIcons name='account-search' size={20} />{' '}
+					Search/Follow Users:
+				</Text>
+			</TouchableOpacity>
+			<Text style={styles.text}>
+				This is the page to go to when you want to search for another user to
+				potentially receive recommendations from. You should search by their
+				username. You will also soon be able to search by what someone tagged
+				their account with. Click on the username you want to choose, and it
+				will take you to their page. On their page, you will be able to click on
+				their followers list and see who they follow and easily follow those
+				people if you want. You can see all the shows they recommend, and then
+				swipe over or click on the righthand tab to see their bio and user tags.
+				{'\n'}
+			</Text>
+
+			<TouchableOpacity
+				onPress={() => {
 					router.push({ pathname: '/addShow' });
 				}}
 			>
@@ -71,28 +93,6 @@ const FAQ = () => {
 				You can add a description and tags (or not) to shows in any list. You
 				can also easily transfer shows from your Watch list to your Seen list or
 				your Recs list. You can always change the tags and description later.
-				{'\n'}
-			</Text>
-
-			<TouchableOpacity
-				onPress={() => {
-					router.push({ pathname: '/search' });
-				}}
-			>
-				<Text style={styles.headingText}>
-					<MaterialCommunityIcons name='account-search' size={20} />{' '}
-					Search/Follow Users:
-				</Text>
-			</TouchableOpacity>
-			<Text style={styles.text}>
-				This is the page to go to when you want to search for another user to
-				potentially receive recommendations from. You should search by their
-				username. You will also soon be able to search by what someone tagged
-				their account with. Click on the username you want to choose, and it
-				will take you to their page. On their page, you will be able to click on
-				their followers list and see who they follow and easily follow those
-				people if you want. You can see all the shows they recommend, and then
-				swipe over or click on the righthand tab to see their bio and user tags.
 				{'\n'}
 			</Text>
 

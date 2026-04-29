@@ -4,15 +4,6 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-interface Props {
-	selectedTags: Record<string, boolean>;
-	setSelectedTags: React.Dispatch<
-		React.SetStateAction<Record<string, boolean>>
-	>;
-	warningTagsText: string;
-	generalTagsText: string;
-}
-
 interface SectionProps {
 	label: string;
 	tags: Tag[];
@@ -94,9 +85,28 @@ const TagSection = ({
 	);
 };
 
+interface Props {
+	selectedTags: Record<string, boolean>;
+	setSelectedTags: React.Dispatch<
+		React.SetStateAction<Record<string, boolean>>
+	>;
+	selectedWarningTags?: Record<string, boolean>;
+	setSelectedWarningTags?: React.Dispatch<
+		React.SetStateAction<Record<string, boolean>>
+	>;
+	warningTagsText: string;
+	generalTagsText: string;
+}
+
 const ShowTagPicker = (props: Props) => {
-	const { selectedTags, setSelectedTags, warningTagsText, generalTagsText } =
-		props; // does this come from the parent? does the SAVE go in here and it's just what gets set to save? no, bc the other one is description...	const [loaded, setLoaded] = useState(false);
+	const {
+		selectedTags,
+		setSelectedTags,
+		warningTagsText,
+		generalTagsText,
+		selectedWarningTags,
+		setSelectedWarningTags,
+	} = props; // does this come from the parent? does the SAVE go in here and it's just what gets set to save? no, bc the other one is description...	const [loaded, setLoaded] = useState(false);
 	const { tvTags, warningTags } = useAppData();
 	const tagSections: { label: string; tags: Tag[] }[] = [
 		{ label: 'Mood', tags: tvTags.mood },
@@ -109,8 +119,9 @@ const ShowTagPicker = (props: Props) => {
 		},
 		{ label: 'Audience', tags: tvTags.audience },
 		{ label: 'Misc', tags: tvTags.misc },
-		{ label: 'Content Warnings', tags: warningTags },
 	];
+
+	const warningSection = { label: 'Content Warnings', tags: warningTags };
 	const [openSections, setOpenSections] = useState<Record<string, boolean>>(
 		Object.fromEntries(tagSections.map((section) => [section.label, true])),
 	);
@@ -125,7 +136,18 @@ const ShowTagPicker = (props: Props) => {
 		}
 	};
 
-	const warningSection = tagSections[7];
+	const selectWarningTag =
+		selectedWarningTags && setSelectedWarningTags
+			? (tag: Tag) => {
+					if (selectedWarningTags[tag.id] === true) {
+						const swap = { ...selectedWarningTags, [tag.id]: false };
+						setSelectedWarningTags(swap);
+					} else {
+						const swap = { ...selectedWarningTags, [tag.id]: true };
+						setSelectedWarningTags(swap);
+					}
+				}
+			: null;
 
 	const toggleSection = (label: string) => {
 		setOpenSections((prev) => ({ ...prev, [label]: !prev[label] }));
@@ -133,7 +155,12 @@ const ShowTagPicker = (props: Props) => {
 
 	const collapseAll = () => {
 		setOpenSections(
-			Object.fromEntries(tagSections.map((section) => [section.label, false])),
+			Object.fromEntries(
+				[...tagSections, warningSection].map((section) => [
+					section.label,
+					false,
+				]),
+			),
 		);
 	};
 
@@ -143,7 +170,7 @@ const ShowTagPicker = (props: Props) => {
 				<Text style={styles.collapseAllText}>collapse all</Text>
 			</TouchableOpacity>
 			<Text style={styles.text}>{generalTagsText}</Text>
-			{tagSections.map((section, i) => (
+			{tagSections.map((section) => (
 				<TagSection
 					key={section.label}
 					label={section.label}
@@ -160,10 +187,11 @@ const ShowTagPicker = (props: Props) => {
 				key={warningSection.label}
 				label={warningSection.label}
 				tags={warningSection.tags}
-				selectedTags={selectedTags}
-				onSelectTag={selectTag}
+				selectedTags={selectedWarningTags ? selectedWarningTags : selectedTags}
+				onSelectTag={selectWarningTag ? selectWarningTag : selectTag}
 				open={openSections[warningSection.label]}
 				setOpen={() => toggleSection(warningSection.label)}
+				isWarning={true}
 			/>
 		</View>
 	);
@@ -205,10 +233,22 @@ const styles = StyleSheet.create({
 	},
 	badge: {
 		borderRadius: 40,
-		paddingHorizontal: 7,
+		paddingHorizontal: 8,
 		paddingVertical: 4,
 		minWidth: 20,
+		maxWidth: 250,
 		alignItems: 'center',
+		flexShrink: 1,
+		alignSelf: 'flex-start',
+		fontSize: 12,
+		fontWeight: '500',
+	},
+	badgeText: {
+		fontSize: 12,
+		fontWeight: '500',
+		color: 'black',
+		flexShrink: 1,
+		textAlign: 'center',
 	},
 	tvBadge: {
 		backgroundColor: '#36C9C6',
@@ -229,11 +269,7 @@ const styles = StyleSheet.create({
 		backgroundColor: '#36C9C6',
 		marginTop: 5,
 	},
-	badgeText: {
-		fontSize: 12,
-		fontWeight: '500',
-		color: 'black',
-	},
+
 	textStyle: {
 		color: 'black',
 		fontSize: 14,
