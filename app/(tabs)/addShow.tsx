@@ -1,4 +1,4 @@
-import SelectShow from '@/components/SelectShow';
+import SelectShow, { ShowImagePlaceholder } from '@/components/SelectShow';
 import StreamingAndPurchase from '@/components/StreamingAndPurchase';
 import { useAppData } from '@/lib/AppContext';
 import { SourcePage, UserShowToSave, UserShowType } from '@/lib/types';
@@ -39,7 +39,7 @@ const AddShow = () => {
 	const { addToType } = useLocalSearchParams<{ addToType?: string }>();
 
 	const [showName, setShowName] = useState('');
-	const [imageUrl, setImageUrl] = useState('');
+	const [imageUrl, setImageUrl] = useState<string | null>(null);
 	const [tmdbId, setTmdbId] = useState('');
 	// const [type, setType] = useState(null);
 	// const [streaming, setStreaming] = useState('')
@@ -49,6 +49,7 @@ const AddShow = () => {
 
 	const [profileShowDropdownOpen, setProfileShowDropdownOpen] = useState(false);
 	const [showType, setShowType] = useState<string | null>(null);
+	const [imageError, setImageError] = useState(false);
 
 	const [profileShowDropdownOptions, setProfileShowDropdownOptions] = useState<
 		{
@@ -69,7 +70,7 @@ const AddShow = () => {
 
 		return () => {
 			setShowName('');
-			setImageUrl('');
+			setImageUrl(null);
 			setShowAdded(false);
 			setTmdbId('');
 			// setStreaming('')
@@ -78,6 +79,7 @@ const AddShow = () => {
 			setShowType(null);
 			setUserHasShow(null);
 			setProfileShowDropdownOpen(false);
+			setImageError(false);
 		};
 	}, [currentUser, isFocused]);
 
@@ -115,7 +117,8 @@ const AddShow = () => {
 		setUserHasShow(hasShow);
 	};
 
-	const image = { uri: imageUrl };
+	const image = imageUrl ? { uri: imageUrl } : null;
+
 	return (
 		<View style={styles.container}>
 			<ScrollView
@@ -131,15 +134,20 @@ const AddShow = () => {
 					{showAdded ? (
 						<View>
 							<Text style={styles.boldText}>{showName}</Text>
-							<Image
-								source={image}
-								style={{
-									height: 300,
-									resizeMode: 'contain',
-									margin: 5,
-									marginBottom: 15,
-								}}
-							/>
+							{image ? (
+								<Image
+									source={image}
+									style={{
+										height: 300,
+										resizeMode: 'contain',
+										margin: 5,
+										marginBottom: 15,
+									}}
+									onError={() => setImageError(true)}
+								/>
+							) : (
+								<ShowImagePlaceholder name={showName} style={styles.image} />
+							)}
 
 							{showType !== null &&
 							showType !== 'none' ? null : !streamingAndPurchase ? (
