@@ -175,8 +175,10 @@ const StreamingAndPurchase = (props: Props) => {
 				</Text>
 			)}
 			{overview ? (
-				<Text style={styles.text}>
-					<Text style={{ fontWeight: 'bold' }}>Official overview: </Text>
+				<Text selectable={true} style={styles.text}>
+					<Text selectable={true} style={{ fontWeight: 'bold' }}>
+						Official overview:{' '}
+					</Text>
 					{overview}
 				</Text>
 			) : (

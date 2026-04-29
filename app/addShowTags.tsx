@@ -21,9 +21,6 @@ import {
 } from 'react-native';
 import { TextInput } from 'react-native-paper';
 
-const generalTagsText = 'Pick some tags that you think describe the show:';
-const warningTagsText = 'Pick some warning tags:';
-
 const AddShowTags = () => {
 	const [selectedTags, setSelectedTags] = useState<Record<string, boolean>>({});
 	const [loaded, setLoaded] = useState(false);
@@ -193,8 +190,6 @@ const AddShowTags = () => {
 				<ShowTagPicker
 					selectedTags={selectedTags}
 					setSelectedTags={setSelectedTags}
-					warningTagsText={warningTagsText}
-					generalTagsText={generalTagsText}
 				/>
 				<View style={styles.buttonContainer}>
 					<TouchableOpacity style={styles.button} onPress={chooseTags}>

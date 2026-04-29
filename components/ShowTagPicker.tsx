@@ -94,8 +94,8 @@ interface Props {
 	setSelectedWarningTags?: React.Dispatch<
 		React.SetStateAction<Record<string, boolean>>
 	>;
-	warningTagsText: string;
-	generalTagsText: string;
+	warningTagsText?: string;
+	generalTagsText?: string;
 }
 
 const ShowTagPicker = (props: Props) => {
@@ -167,9 +167,9 @@ const ShowTagPicker = (props: Props) => {
 	return (
 		<View>
 			<TouchableOpacity onPress={collapseAll} style={styles.collapseAllButton}>
-				<Text style={styles.collapseAllText}>collapse all</Text>
+				<Text style={styles.collapseAllText}>collapse all tags</Text>
 			</TouchableOpacity>
-			<Text style={styles.text}>{generalTagsText}</Text>
+			{generalTagsText && <Text style={styles.text}>{generalTagsText}</Text>}
 			{tagSections.map((section) => (
 				<TagSection
 					key={section.label}
@@ -182,7 +182,7 @@ const ShowTagPicker = (props: Props) => {
 				/>
 			))}
 
-			<Text style={styles.text}>{warningTagsText}</Text>
+			{warningTagsText && <Text style={styles.text}>{warningTagsText}</Text>}
 			<TagSection
 				key={warningSection.label}
 				label={warningSection.label}
