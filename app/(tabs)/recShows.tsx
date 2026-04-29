@@ -1,5 +1,6 @@
 import OtherRecerModal from '@/components/OtherRecerModal';
 import RecsHeader from '@/components/RecsHeader';
+import { ShowImagePlaceholder } from '@/components/SelectShow';
 import { useFirstRender } from '@/hooks/useFirstRender';
 import { useAppData } from '@/lib/AppContext';
 import {
@@ -36,6 +37,7 @@ const RecShows = () => {
 	const [loading, setLoading] = useState(true);
 	const [filterOpen, setFilterOpen] = useState(false);
 	const [showsLength, setShowsLength] = useState(0);
+	const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({});
 
 	// applied filters — what actually affects the list
 	const [appliedFilters, setAppliedFilters] = useState<AppliedShowFilters>({});
@@ -101,26 +103,12 @@ const RecShows = () => {
 		setLoading(true);
 		let shows = filtersApplied ? filteredRecs : followingRecs;
 
-		// shows.sort(function (x, y) {
-		//   return new Date(y.updatedAt) - new Date(x.updatedAt)
-		// })
+		shows.sort(function (x, y) {
+			return (
+				new Date(y.updated_at).getTime() - new Date(x.updated_at).getTime()
+			);
+		});
 
-		// if they toggled to only see shows not on their profile, remove shows that appear on their rec, watch, and seen lists
-
-		// if (filter && advancedSearch && showNum === 0) {
-		// 	console.log(
-		// 		'i got in here in useEffect and these should be 0 or null or false',
-		// 		filter,
-		// 		showNum,
-		// 		advancedSearch,
-		// 	);
-		// 	setRecShows([]);
-		// 	setMultipleRecInfo({});
-		// 	const name = `Recs(0)`;
-		// 	const filterName = `Filters(${filter['filterCount']})`;
-		// 	setFilterTabName(filterName);
-		// 	// setRecsTabName(name);
-		// } else {
 		let visibleShows = [];
 		const recCounts: Record<number, RecCount> = {};
 		let loaded = 0;
@@ -314,10 +302,23 @@ const RecShows = () => {
 							onPress={() => handleShowPress(item)}
 							// style={styles.catalogContainer}
 						>
-							<Image
-								source={{ uri: item.show.image_url ?? undefined }}
-								style={styles.image}
-							/>
+							{item.show.image_url && !imageErrors[item.show.id] ? (
+								<Image
+									source={{ uri: item.show.image_url }}
+									style={styles.image}
+									onError={() =>
+										setImageErrors((prev) => ({
+											...prev,
+											[item.show.id]: true,
+										}))
+									}
+								/>
+							) : (
+								<ShowImagePlaceholder
+									name={item.show.name}
+									style={styles.image}
+								/>
+							)}
 						</TouchableOpacity>
 						<View>
 							{multipleRecInfo[item.show_id].num < 2 ? (
@@ -386,6 +387,7 @@ const RecShows = () => {
 		appliedFilters,
 		followingMap,
 		router,
+		imageErrors,
 		multipleRecInfo,
 		filtersApplied,
 	]);

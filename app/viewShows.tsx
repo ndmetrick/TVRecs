@@ -8,6 +8,7 @@ import {
 	View,
 } from 'react-native';
 
+import { ShowImagePlaceholder } from '@/components/SelectShow';
 import { UserProfile, UserShow, UserShowType } from '@/lib/types';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
@@ -24,6 +25,7 @@ const ViewShows = (props: Props) => {
 	const [userShows, setUserShows] = useState<UserShow[] | null>(null);
 	const [loading, setLoading] = useState(true);
 	const router = useRouter();
+	const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({});
 
 	const isFocused = useIsFocused();
 
@@ -70,10 +72,23 @@ const ViewShows = (props: Props) => {
 				renderItem={({ item }) => (
 					<View style={styles.containerImage}>
 						<TouchableOpacity onPress={() => goToUserShow(item)}>
-							<Image
-								style={styles.image}
-								source={{ uri: item.show.image_url }}
-							/>
+							{item.show.image_url && !imageErrors[item.show.id] ? (
+								<Image
+									style={styles.image}
+									source={{ uri: item.show.image_url }}
+									onError={() =>
+										setImageErrors((prev) => ({
+											...prev,
+											[item.show.id]: true,
+										}))
+									}
+								/>
+							) : (
+								<ShowImagePlaceholder
+									name={item.show.name}
+									style={styles.image}
+								/>
+							)}
 						</TouchableOpacity>
 					</View>
 				)}

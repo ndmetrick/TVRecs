@@ -13,6 +13,7 @@ import {
 
 import OtherRecerModal from '@/components/OtherRecerModal';
 import SaveShowModal from '@/components/SaveShowModal';
+import { ShowImagePlaceholder } from '@/components/SelectShow';
 import StreamingAndPurchase from '@/components/StreamingAndPurchase';
 import { useAppData } from '@/lib/AppContext';
 import { deleteUserShow } from '@/lib/api';
@@ -70,6 +71,7 @@ const SingleShow = () => {
 	const [modalVisible, setModalVisible] = useState(false);
 	const [singleShow, setSingleShow] = useState<UserShow | null>(null);
 	const [userToView, setUserToView] = useState<UserProfile | null>(null);
+	const [imageError, setImageError] = useState(false);
 
 	useEffect(() => {
 		if (!userShowString || !userString) return;
@@ -211,6 +213,7 @@ const SingleShow = () => {
 			setUserHasShow(null);
 			setProfileShowDropdownValue(null);
 			setLoading(true);
+			setImageError(false);
 		};
 	}, [
 		userShowString,
@@ -471,10 +474,18 @@ const SingleShow = () => {
 					</View>
 				)}
 				<View style={{ gap: 8 }}>
-					<Image
-						style={styles.image}
-						source={{ uri: singleShow.show.image_url }}
-					/>
+					{singleShow.show.image_url && !imageError ? (
+						<Image
+							style={styles.image}
+							source={{ uri: singleShow.show.image_url }}
+							onError={() => setImageError(true)}
+						/>
+					) : (
+						<ShowImagePlaceholder
+							name={singleShow.show.name}
+							style={styles.image}
+						/>
+					)}
 					<Text
 						style={{ fontWeight: 'bold', textAlign: 'center', fontSize: 18 }}
 					>

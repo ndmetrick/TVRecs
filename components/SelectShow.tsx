@@ -1,5 +1,6 @@
 // import { useIsFocused } from '@react-navigation/native';
 import { showErrorToast } from '@/lib/toast';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
@@ -24,6 +25,45 @@ interface Props {
 	showAdded: boolean;
 	previous: string;
 }
+
+export const ShowImagePlaceholder = ({
+	name,
+	style,
+}: {
+	name: string;
+	style?: any;
+}) => {
+	return (
+		<View
+			style={[
+				{
+					backgroundColor: '#340068',
+					alignItems: 'center',
+					justifyContent: 'center',
+					padding: 12,
+				},
+				style,
+			]}
+		>
+			<MaterialCommunityIcons
+				name='television-classic'
+				size={80}
+				color='#36C9C6'
+			/>
+			<Text
+				style={{
+					color: 'white',
+					fontSize: 20,
+					fontWeight: '500',
+					textAlign: 'center',
+					marginTop: 8,
+				}}
+			>
+				{name}
+			</Text>
+		</View>
+	);
+};
 
 const SelectShow = (props: Props) => {
 	const [showInput, setShowInput] = useState('');
@@ -101,7 +141,7 @@ const SelectShow = (props: Props) => {
 						const imageShow = await axios.get(imageShowText);
 						let poster = imageShow.data.Poster;
 						if (!poster || poster === 'N/A') {
-							poster = 'https://i.postimg.cc/Y2TP5SLv/missing-Poster-Icon.png';
+							poster = null;
 						}
 						props.handleShow(show.name, poster, show.id, true);
 						setAdded(true);
@@ -140,7 +180,7 @@ const SelectShow = (props: Props) => {
 				const imageShow = await axios.get(imageShowText);
 				let poster = imageShow.data.Poster;
 				if (!poster || poster === 'N/A') {
-					poster = 'https://i.postimg.cc/Y2TP5SLv/missing-Poster-Icon.png';
+					poster = null;
 					props.handleShow(data.name, poster, id, true);
 					setAdded(true);
 				} else {
