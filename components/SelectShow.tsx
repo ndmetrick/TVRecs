@@ -137,7 +137,7 @@ const SelectShow = (props: Props) => {
 						props.handleShow(show.name, image, show.id, true);
 						setAdded(true);
 					} else {
-						const imageShowText = `http://www.omdbapi.com/?t=${titleString}&apikey=${process.env.EXPO_PUBLIC_OMDB_KEY}`;
+						const imageShowText = `https://www.omdbapi.com/?t=${titleString}&apikey=${process.env.EXPO_PUBLIC_OMDB_KEY}`;
 						const imageShow = await axios.get(imageShowText);
 						let poster = imageShow.data.Poster;
 						if (!poster || poster === 'N/A') {
@@ -176,7 +176,7 @@ const SelectShow = (props: Props) => {
 				props.handleShow(data.name, image, id, true);
 				setAdded(true);
 			} else {
-				const imageShowText = `http://www.omdbapi.com/?t=${data.name}&apikey=${process.env.EXPO_PUBLIC_OMDB_KEY}`;
+				const imageShowText = `https://www.omdbapi.com/?t=${data.name}&apikey=${process.env.EXPO_PUBLIC_OMDB_KEY}`;
 				const imageShow = await axios.get(imageShowText);
 				let poster = imageShow.data.Poster;
 				if (!poster || poster === 'N/A') {
