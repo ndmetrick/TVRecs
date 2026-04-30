@@ -18,6 +18,7 @@ import {
 	ActivityIndicator,
 	FlatList,
 	Image,
+	RefreshControl,
 	StyleSheet,
 	Text,
 	TouchableOpacity,
@@ -38,6 +39,7 @@ const RecShows = () => {
 	const [filterOpen, setFilterOpen] = useState(false);
 	const [showsLength, setShowsLength] = useState(0);
 	const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({});
+	const [refreshing, setRefreshing] = useState(false);
 
 	// applied filters — what actually affects the list
 	const [appliedFilters, setAppliedFilters] = useState<AppliedShowFilters>({});
@@ -48,7 +50,7 @@ const RecShows = () => {
 	}, [recShows.length]);
 
 	const {
-		followingRecs,
+		filteredFollowingRecs,
 		following,
 		followingMap,
 		userShows,
@@ -58,8 +60,14 @@ const RecShows = () => {
 		tvTags,
 		warningTags,
 		loading: appLoading,
+		refetchAll,
 	} = useAppData();
 
+	const onRefresh = async () => {
+		setRefreshing(true);
+		await refetchAll();
+		setRefreshing(false);
+	};
 	const firstRender = useFirstRender();
 	const ref = useRef(null);
 
@@ -68,7 +76,7 @@ const RecShows = () => {
 	};
 
 	const filteredRecs = useMemo(() => {
-		let shows = followingRecs;
+		let shows = filteredFollowingRecs;
 		if (appliedFilters.hasTags) {
 			shows = shows.filter((show) => show.tags.length > 0);
 		}
@@ -97,11 +105,11 @@ const RecShows = () => {
 		}
 		setFiltersApplied(!!Object.keys(appliedFilters).length);
 		return shows;
-	}, [followingRecs, appliedFilters]);
+	}, [filteredFollowingRecs, appliedFilters]);
 
 	useEffect(() => {
 		setLoading(true);
-		let shows = filtersApplied ? filteredRecs : followingRecs;
+		let shows = filtersApplied ? filteredRecs : filteredFollowingRecs;
 
 		shows.sort(function (x, y) {
 			return (
@@ -114,7 +122,6 @@ const RecShows = () => {
 		let loaded = 0;
 
 		for (let recShow of filteredRecs) {
-			console.log('here');
 			const count = recCounts[recShow.show_id];
 			if (!count) {
 				// if the show is on the user's profile, in recs or to watch (filter out has already been filtered out on the back end), we want to save that info and have words ready to add to the note below the show. If the show is on their profile and they've checked that they don't want to see any shows on their profile, we shouldn't add it to visible shows.
@@ -156,8 +163,6 @@ const RecShows = () => {
 			}
 			if (loaded === shows.length) {
 				setLoading(false);
-			} else {
-				console.log('shows.length is ', shows.length, 'and loaded is ', loaded);
 			}
 		}
 		if (appliedFilters.minRecs) {
@@ -193,7 +198,7 @@ const RecShows = () => {
 		};
 	}, [
 		filtersApplied,
-		followingRecs,
+		filteredFollowingRecs,
 		noUserShows,
 		firstRender,
 		currentUser,
@@ -256,7 +261,7 @@ const RecShows = () => {
 			);
 		}
 
-		if (!following.length || !followingRecs.length) {
+		if (!following.length || !filteredFollowingRecs.length) {
 			return (
 				<View style={styles.emptyState}>
 					<MaterialCommunityIcons
@@ -293,6 +298,13 @@ const RecShows = () => {
 		return (
 			<FlatList
 				numColumns={1}
+				refreshControl={
+					<RefreshControl
+						refreshing={refreshing}
+						onRefresh={onRefresh}
+						tintColor='#340068'
+					/>
+				}
 				horizontal={false}
 				data={recShows}
 				style={{ flex: 1 }}
@@ -382,7 +394,7 @@ const RecShows = () => {
 		appLoading,
 		currentUser,
 		following.length,
-		followingRecs.length,
+		filteredFollowingRecs.length,
 		recShows,
 		appliedFilters,
 		followingMap,

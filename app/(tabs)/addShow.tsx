@@ -15,6 +15,7 @@ import {
 	View,
 } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
+import { ActivityIndicator } from 'react-native-paper';
 import { skipTagsAndSaveShowData } from '../../lib/utils';
 
 const profileShowOptions = [
@@ -46,7 +47,7 @@ const AddShow = () => {
 	// const [purchase, setPurchase] = useState('')
 	const [streamingAndPurchase, setStreamingAndPurchase] = useState(false);
 	const [showAdded, setShowAdded] = useState(false);
-
+	const [saving, setSaving] = useState(false);
 	const [profileShowDropdownOpen, setProfileShowDropdownOpen] = useState(false);
 	const [showType, setShowType] = useState<string | null>(null);
 	const [imageError, setImageError] = useState(false);
@@ -80,6 +81,7 @@ const AddShow = () => {
 			setUserHasShow(null);
 			setProfileShowDropdownOpen(false);
 			setImageError(false);
+			setSaving(false);
 		};
 	}, [currentUser, isFocused]);
 
@@ -121,6 +123,11 @@ const AddShow = () => {
 
 	return (
 		<View style={styles.container}>
+			{saving && (
+				<View style={styles.savingOverlay}>
+					<ActivityIndicator size='large' color='white' />
+				</View>
+			)}
 			<ScrollView
 				showsVerticalScrollIndicator={false}
 				keyboardShouldPersistTaps='handled'
@@ -272,6 +279,7 @@ const AddShow = () => {
 														style={styles.skipAndSaveButton}
 														onPress={() => {
 															if (currentUser) {
+																setSaving(true);
 																const showData: UserShowToSave = {
 																	name: showName,
 																	image_url: imageUrl,
@@ -286,6 +294,7 @@ const AddShow = () => {
 																	currentUser!.id,
 																	refetchUserShows,
 																	null,
+																	setSaving,
 																	false,
 																);
 															} else {
@@ -433,6 +442,13 @@ const styles = StyleSheet.create({
 		marginBottom: 10,
 		marginHorizontal: 15,
 		color: '#340068',
+	},
+	savingOverlay: {
+		...StyleSheet.absoluteFillObject,
+		backgroundColor: 'rgba(0,0,0,0.4)',
+		justifyContent: 'center',
+		alignItems: 'center',
+		zIndex: 999,
 	},
 });
 

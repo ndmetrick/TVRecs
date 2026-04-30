@@ -33,6 +33,7 @@ type AppData = {
 	currentUser: UserProfile | null;
 	following: Follow[];
 	followingRecs: FollowingRec[];
+	filteredFollowingRecs: FollowingRec[];
 	userShows: UserShow[];
 	toWatch: UserShow[];
 	seen: UserShow[];
@@ -164,6 +165,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 	const refetchFollowingRecs = useCallback(async () => {
 		if (!user) return;
 		try {
+			console.log('REFETCH');
 			const data = await getFollowingRecs(supabase, user.id);
 			setFollowingRecs(data);
 		} catch (err) {
@@ -176,6 +178,11 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 			});
 		}
 	}, [user]);
+
+	const filteredFollowingRecs = useMemo(() => {
+		const seenShowIds = new Set(seen.map((userShow) => userShow.show_id));
+		return followingRecs.filter((rec) => !seenShowIds.has(rec.show_id));
+	}, [seen, followingRecs]);
 
 	const refetchUserShows = useCallback(async () => {
 		if (!user) return;
@@ -361,6 +368,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 				warningTags,
 				preferenceTags,
 				describeTags,
+				filteredFollowingRecs,
 			}}
 		>
 			{children}

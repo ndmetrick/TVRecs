@@ -12,10 +12,11 @@ import { TextInput } from 'react-native-paper';
 
 interface Props {
 	updateType: 'username' | 'delete';
+	setUsernameOpen?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const UpdateAccount = (props: Props) => {
-	const { updateType } = props;
+	const { updateType, setUsernameOpen } = props;
 	const [newUsername, setNewUsername] = useState('');
 	const { currentUser, refetchCurrentUser } = useAppData();
 	const [error, setError] = useState<string | null>(null);
@@ -58,6 +59,9 @@ const UpdateAccount = (props: Props) => {
 			}
 		} catch (err) {
 			console.log(`Error updating username: ${err}`);
+			Sentry.captureException(err, { tags: { location: 'updating username' } });
+		} finally {
+			if (setUsernameOpen) setUsernameOpen(false);
 		}
 	};
 
@@ -147,7 +151,7 @@ const styles = StyleSheet.create({
 	},
 	inputText: {
 		margin: 10,
-		textAlign: 'center',
+		textAlign: 'left',
 		fontSize: 20,
 	},
 	text: {

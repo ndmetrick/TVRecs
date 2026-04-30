@@ -14,6 +14,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
 	ActivityIndicator,
+	Modal,
 	ScrollView,
 	StyleSheet,
 	Text,
@@ -27,13 +28,8 @@ const AddShowTags = () => {
 	const [loaded, setLoaded] = useState(false);
 	// const [multilineChecked, setMultilineChecked] = useState(false);
 	const [description, setDescription] = useState('');
-	const {
-		currentUser,
-		refetchFollowingRecs,
-		refetchUserShows,
-		// tvTags,
-		// warningTags,
-	} = useAppData();
+	const { currentUser, refetchUserShows } = useAppData();
+	const [saving, setSaving] = useState(false);
 
 	const { showToSaveString, previousString, currentShowString } =
 		useLocalSearchParams();
@@ -108,12 +104,19 @@ const AddShowTags = () => {
 			return router.push({ pathname: '/login' });
 		}
 		const chosenTags = [];
+		setSaving(true);
 		for (const tagId in selectedTags) {
 			if (selectedTags[tagId] === true) {
 				chosenTags.push(Number(tagId));
 			}
 		}
 		if (currentUserShow) {
+			console.log(
+				'showTosave',
+				showToSave.type,
+				'current',
+				currentUserShow.type,
+			);
 			const updates: EditUserShowParams = {
 				userShowId: currentUserShow.id,
 				oldUserShow: currentUserShow,
@@ -126,12 +129,13 @@ const AddShowTags = () => {
 			try {
 				await editUserShow(supabase, updates);
 				await refetchUserShows();
-				await refetchFollowingRecs();
 				router.push({ pathname: '/currentUser' });
 			} catch (err) {
 				console.error(`Error editing user show: ${JSON.stringify(err)}`);
 				showErrorToast('Could not save your changes. Try again.');
 				Sentry.captureException(err, { tags: { location: 'editUserShow' } });
+			} finally {
+				setSaving(false);
 			}
 		} else {
 			const updatedShow = {
@@ -151,6 +155,8 @@ const AddShowTags = () => {
 				console.error(`Error adding user show: ${JSON.stringify(err)}`);
 				showErrorToast('Could not save this show to your profile. Try again.');
 				Sentry.captureException(err, { tags: { location: 'addUserShow' } });
+			} finally {
+				setSaving(false);
 			}
 		}
 	};
@@ -171,9 +177,17 @@ const AddShowTags = () => {
 
 	return (
 		<View style={styles.container}>
+			{saving && (
+				<Modal transparent animationType='none' statusBarTranslucent>
+					<View style={styles.savingOverlay}>
+						<ActivityIndicator size='large' color='white' />
+					</View>
+				</Modal>
+			)}
 			<ScrollView
 				showsVerticalScrollIndicator={false}
 				keyboardShouldPersistTaps='handled'
+				keyboardDismissMode='on-drag'
 			>
 				<Text style={styles.text}>
 					Describe anything about the show you would like potential viewers to
@@ -307,6 +321,13 @@ const styles = StyleSheet.create({
 		margin: 10,
 		textAlign: 'left',
 		fontSize: 16,
+	},
+	savingOverlay: {
+		...StyleSheet.absoluteFillObject,
+		backgroundColor: 'rgba(0,0,0,0.4)',
+		justifyContent: 'center',
+		alignItems: 'center',
+		zIndex: 999,
 	},
 });
 

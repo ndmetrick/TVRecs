@@ -314,7 +314,7 @@ const styles = StyleSheet.create({
 	},
 	inputText: {
 		margin: 10,
-		textAlign: 'center',
+		textAlign: 'left',
 		fontSize: 20,
 	},
 	optionsText: {

@@ -8,6 +8,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
 	ActivityIndicator,
+	Modal,
 	ScrollView,
 	StyleSheet,
 	Text,
@@ -27,6 +28,7 @@ const PickUserTags = () => {
 	>({});
 	const [loaded, setLoaded] = useState(false);
 	const [description, setDescription] = useState('');
+	const [saving, setSaving] = useState(false);
 
 	const {
 		currentUser,
@@ -155,6 +157,7 @@ const PickUserTags = () => {
 		if (!currentUser) {
 			router.push({ pathname: '/login' });
 		} else {
+			setSaving(true);
 			try {
 				const chosenTags: { tagId: number; category: ProfileTagCategory }[] =
 					[];
@@ -194,7 +197,7 @@ const PickUserTags = () => {
 					await refetchCurrentUser();
 				}
 
-				router.push({ pathname: '/currentUser' });
+				router.push({ pathname: '/settings' });
 			} catch (err) {
 				console.error(`Error saving profile tags and description: ${err}`);
 				showErrorToast('There was an error updating your profile');
@@ -202,6 +205,8 @@ const PickUserTags = () => {
 				Sentry.captureException(err, {
 					tags: { location: 'profileTags' },
 				});
+			} finally {
+				setSaving(false);
 			}
 		}
 	};
@@ -217,6 +222,13 @@ const PickUserTags = () => {
 
 	return (
 		<View style={styles.container}>
+			{saving && (
+				<Modal transparent animationType='none' statusBarTranslucent>
+					<View style={styles.savingOverlay}>
+						<ActivityIndicator size='large' color='white' />
+					</View>
+				</Modal>
+			)}
 			<ScrollView showsVerticalScrollIndicator={false}>
 				<Text style={styles.text}>
 					{`If you'd like, add a tv bio with anything you aren't able to represent with tags -- things about the shows you like and/or the kind of television watcher you are and/or the role TV plays in your life:`}
@@ -329,7 +341,7 @@ const styles = StyleSheet.create({
 	},
 	inputText: {
 		margin: 10,
-		textAlign: 'center',
+		textAlign: 'left',
 		fontSize: 20,
 	},
 	tagsContent: {
@@ -384,6 +396,13 @@ const styles = StyleSheet.create({
 		marginHorizontal: 3,
 		backgroundColor: '#B3A7BB',
 		marginTop: 5,
+	},
+	savingOverlay: {
+		...StyleSheet.absoluteFillObject,
+		backgroundColor: 'rgba(0,0,0,0.4)',
+		justifyContent: 'center',
+		alignItems: 'center',
+		zIndex: 999,
 	},
 });
 

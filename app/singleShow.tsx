@@ -56,8 +56,7 @@ const SingleShow = () => {
 		userShows,
 		toWatch,
 		seen,
-		refetchFollowingRecs,
-		followingRecs,
+		filteredFollowingRecs,
 		refetchUserShows,
 	} = useAppData();
 	const [saveShowModalVisible, setSaveShowModalVisible] = useState(false);
@@ -73,6 +72,7 @@ const SingleShow = () => {
 	const [singleShow, setSingleShow] = useState<UserShow | null>(null);
 	const [userToView, setUserToView] = useState<UserProfile | null>(null);
 	const [imageError, setImageError] = useState(false);
+	const [saving, setSaving] = useState(false);
 
 	useEffect(() => {
 		if (!userShowString || !userString) return;
@@ -133,7 +133,6 @@ const SingleShow = () => {
 				otherDropdownOptions.forEach((option) => {
 					profileShowOptions.push(option);
 				});
-				console.log('profileshowoptions', profileShowOptions);
 				setProfileShowDropdownOptions(profileShowOptions);
 			} else {
 				setUser(viewUser);
@@ -177,7 +176,7 @@ const SingleShow = () => {
 				myProfile,
 			};
 
-			followingRecs.forEach((recShow) => {
+			filteredFollowingRecs.forEach((recShow) => {
 				if (
 					recShow.show_id === showId &&
 					recShow.user_id !== userShow.user_id
@@ -202,6 +201,7 @@ const SingleShow = () => {
 		setType(userShow.type);
 		setLoading(false);
 		return () => {
+			console.log('RETURN');
 			setStreamingAndPurchase(false);
 			setUser(null);
 			setType(null);
@@ -218,38 +218,37 @@ const SingleShow = () => {
 		};
 	}, [
 		userShowString,
-		type,
 		isFocused,
 		currentUser,
 		userString,
 		userShows,
 		toWatch,
 		seen,
-		followingRecs,
+		filteredFollowingRecs,
 	]);
+
+	const cancelSave = () => {
+		setStreamingAndPurchase(false);
+		setType(null);
+		setProfileShowDropdownValue(null);
+		setSaveShowModalVisible(false);
+	};
 
 	const deleteShow = async () => {
 		if (!singleShow) return;
+		setSaving(true);
 		try {
-			if (singleShow.type === UserShowType.SEEN) {
-				const deleted = await deleteUserShow(supabase, singleShow.id);
-				// because seen/to-filter shows are automatically removed from shows recommended to the user, we need to get recShows again if we succeed in deleting the show from the seen list
-				if (deleted) {
-					await refetchFollowingRecs();
-					await refetchUserShows();
-					router.back();
-				}
-			} else {
-				await deleteUserShow(supabase, singleShow.id);
-				await refetchUserShows();
-				router.back();
-			}
+			await deleteUserShow(supabase, singleShow.id);
+			router.back();
+			await refetchUserShows();
 		} catch (err) {
 			console.error(`Error deleting this show: ${err}`);
 			showErrorToast('Error deleting and updating your account. Try again.');
 			Sentry.captureException(err, {
 				tags: { location: 'singleShow' },
 			});
+		} finally {
+			setSaving(false);
 		}
 	};
 
@@ -287,7 +286,7 @@ const SingleShow = () => {
 			value === UserShowType.WATCH ||
 			value === UserShowType.SEEN
 		) {
-			console.log('i am doing this', saveShowModalVisible);
+			setType(value);
 			setSaveShowModalVisible(true);
 		}
 	};
@@ -303,6 +302,8 @@ const SingleShow = () => {
 		if (!currentUser) {
 			router.push({ pathname: '/login' });
 		} else {
+			console.log('SAVE SINGLE SHOW');
+			setSaving(true);
 			const showToSave: UserShowToSave = {
 				name: singleShow.show.name,
 				tmdb_id: singleShow.show.tmdb_id,
@@ -318,8 +319,8 @@ const SingleShow = () => {
 				currentUser.id,
 				refetchUserShows,
 				currentUserShow,
+				setSaving,
 				keepCurrentTagsAndDesc,
-				refetchFollowingRecs,
 			);
 		}
 	};
@@ -749,6 +750,11 @@ const SingleShow = () => {
 					</View>
 				</View>
 			</ScrollView>
+			{saving && (
+				<View style={styles.savingOverlay}>
+					<ActivityIndicator size='large' color='white' />
+				</View>
+			)}
 			{(isCurrentUser || userToView?.username) && (
 				<SaveShowModal
 					modalVisible={saveShowModalVisible}
@@ -757,6 +763,10 @@ const SingleShow = () => {
 					onSaveAsIs={saveSingleShow}
 					onGoToEdit={goToAddTags}
 					username={!isCurrentUser ? userToView!.username : null}
+					showHasTagsOrDescription={
+						!!(singleShow.description || singleShow.tags.length)
+					}
+					cancelSave={cancelSave}
 				/>
 			)}
 		</View>
@@ -869,6 +879,13 @@ const styles = StyleSheet.create({
 		marginTop: 5,
 		marginLeft: 5,
 		marginRight: 5,
+	},
+	savingOverlay: {
+		...StyleSheet.absoluteFillObject,
+		backgroundColor: 'rgba(0,0,0,0.4)',
+		justifyContent: 'center',
+		alignItems: 'center',
+		zIndex: 999,
 	},
 	saveButton: {
 		backgroundColor: '#4056F4',

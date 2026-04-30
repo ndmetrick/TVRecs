@@ -16,8 +16,8 @@ export const skipTagsAndSaveShowData = async (
 	userId: string,
 	refetchUserShows: () => Promise<void>,
 	currentUserShow: UserShow | null,
+	setSaving: React.Dispatch<React.SetStateAction<boolean>>,
 	keepTagsAndDescription?: boolean, // keep previous tags and description when switching type on own show / keep other user's tags and description when saving their show
-	refetchFollowingRecs?: () => Promise<void>,
 ) => {
 	try {
 		if (currentUserShow) {
@@ -32,10 +32,6 @@ export const skipTagsAndSaveShowData = async (
 			}
 			await editUserShow(supabase, updates);
 			await refetchUserShows();
-			// because seen/to-filter shows are automatically removed from shows recommended to the user, we need to get recShows again if we succeed in switching a show from seen to something else
-			if (refetchFollowingRecs) {
-				await refetchFollowingRecs();
-			}
 			router.push({
 				pathname: '/currentUser',
 			});
@@ -73,5 +69,7 @@ export const skipTagsAndSaveShowData = async (
 		Sentry.captureException(err, {
 			tags: { location: 'skipAndSave' },
 		});
+	} finally {
+		setSaving(false);
 	}
 };

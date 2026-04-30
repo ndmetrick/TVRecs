@@ -1,6 +1,7 @@
 import * as Sentry from '@sentry/react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
+	ActivityIndicator,
 	Linking,
 	ScrollView,
 	StyleSheet,
@@ -23,16 +24,21 @@ const Settings = () => {
 	const { currentUser } = useAppData();
 	const [countryCode, setCountryCode] = useState(currentUser?.country ?? 'US');
 	const [saveCountry, setSaveCountry] = useState(false);
-
 	const [countryOpen, setCountryOpen] = useState(false);
 	const [tagsOpen, setTagsOpen] = useState(false);
 	const [usernameOpen, setUsernameOpen] = useState(false);
 	const [deleteUserOpen, setDeleteUserOpen] = useState(false);
 	const { signOut } = useAuth();
+	const [saving, setSaving] = useState(false);
 	const router = useRouter();
+
+	useEffect(() => {
+		if (tagsOpen) setSaving(false);
+	}, [tagsOpen]);
 
 	const goToUserTags = async () => {
 		try {
+			setSaving(true);
 			const profileTags = currentUser
 				? await getProfileTags(supabase, currentUser.id)
 				: [];
@@ -48,6 +54,8 @@ const Settings = () => {
 			Sentry.captureException(err, {
 				tags: { location: 'getProfileTags' },
 			});
+		} finally {
+			setSaving(false);
 		}
 	};
 
@@ -149,12 +157,26 @@ const Settings = () => {
 							}}
 						>
 							<TouchableOpacity
-								style={styles.centerButton}
+								style={[styles.centerButton, saving && styles.buttonDisabled]}
 								onPress={goToUserTags}
+								disabled={saving}
 							>
 								<Text style={{ ...styles.buttonText, color: 'white' }}>
 									Create/update user tags and tv bio
 								</Text>
+								{saving && (
+									<ActivityIndicator
+										size='small'
+										color='white'
+										style={{
+											position: 'absolute',
+											top: 0,
+											bottom: 0,
+											left: 0,
+											right: 0,
+										}}
+									/>
+								)}
 							</TouchableOpacity>
 						</View>
 					</View>
@@ -176,7 +198,10 @@ const Settings = () => {
 				</TouchableOpacity>
 				{usernameOpen ? (
 					<View style={styles.expandedContent}>
-						<UpdateAccount updateType='username' />
+						<UpdateAccount
+							updateType='username'
+							setUsernameOpen={setUsernameOpen}
+						/>
 					</View>
 				) : null}
 
@@ -290,6 +315,10 @@ const styles = StyleSheet.create({
 		marginHorizontal: 3,
 		backgroundColor: '#008DD5',
 		marginTop: 5,
+	},
+	buttonDisabled: {
+		backgroundColor: '#777',
+		opacity: 0.7,
 	},
 	tagText: {
 		fontSize: 13.5,

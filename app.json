@@ -1,58 +1,59 @@
 {
-  "expo": {
-    "name": "TVRecs",
-    "slug": "TVRecs",
-    "version": "1.0.1",
-    "orientation": "portrait",
-    "icon": "./assets/images/splash-logo.png",
-    "scheme": "tvrecs",
-    "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.ndmetrick.tvrecs",
-      "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
-      }
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundColor": "#ffffff"
-      },
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
-    },
-    "web": {
-      "output": "static",
-      "favicon": "./assets/images/tempTVRecsLogo.png"
-    },
-    "plugins": [
-      "expo-router",
-      [
-        "expo-splash-screen",
-        {
-          "image": "./assets/images/splash-logo.png",
-          "imageWidth": 350,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
-          "dark": {
-            "backgroundColor": "#000000"
-          }
-        }
-      ],
-      "@sentry/react-native"
-    ],
-    "experiments": {
-      "typedRoutes": true,
-      "reactCompiler": true
-    },
-    "extra": {
-      "router": {},
-      "eas": {
-        "projectId": "ef2bb273-1281-4d39-978b-8f50cdded4e1"
-      }
-    },
-    "owner": "ndmetrick"
-  }
+	"expo": {
+		"name": "TVRecs",
+		"slug": "TVRecs",
+		"version": "1.0.2",
+		"orientation": "portrait",
+		"icon": "./assets/images/splash-logo.png",
+		"scheme": "tvrecs",
+		"userInterfaceStyle": "automatic",
+		"newArchEnabled": true,
+		"ios": {
+			"supportsTablet": true,
+			"bundleIdentifier": "com.ndmetrick.tvrecs",
+			"infoPlist": {
+				"ITSAppUsesNonExemptEncryption": false
+			}
+		},
+		"android": {
+			"adaptiveIcon": {
+				"foregroundImage": "./assets/images/android-icon-foreground.png",
+				"backgroundColor": "#ffffff"
+			},
+			"edgeToEdgeEnabled": true,
+			"predictiveBackGestureEnabled": false,
+			"package": "com.ndmetrick.tvrecs"
+		},
+		"web": {
+			"output": "static",
+			"favicon": "./assets/images/tempTVRecsLogo.png"
+		},
+		"plugins": [
+			"expo-router",
+			[
+				"expo-splash-screen",
+				{
+					"image": "./assets/images/splash-logo.png",
+					"imageWidth": 350,
+					"resizeMode": "contain",
+					"backgroundColor": "#ffffff",
+					"dark": {
+						"backgroundColor": "#000000"
+					}
+				}
+			],
+			"@sentry/react-native"
+		],
+		"experiments": {
+			"typedRoutes": true,
+			"reactCompiler": true
+		},
+		"extra": {
+			"router": {},
+			"eas": {
+				"projectId": "ef2bb273-1281-4d39-978b-8f50cdded4e1"
+			}
+		},
+		"owner": "ndmetrick"
+	}
 }

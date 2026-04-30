@@ -17,6 +17,8 @@ interface Props {
 	onSaveAsIs: (keep: boolean) => void;
 	onGoToEdit: (keep: boolean) => void;
 	username: string | null;
+	showHasTagsOrDescription: boolean;
+	cancelSave: () => void;
 }
 
 const SaveShowModal = ({
@@ -26,8 +28,14 @@ const SaveShowModal = ({
 	onSaveAsIs,
 	onGoToEdit,
 	username,
+	showHasTagsOrDescription,
+	cancelSave,
 }: Props) => {
-	const [keepChoice, setKeepChoice] = useState<KeepChoice>(null);
+	const [keepChoice, setKeepChoice] = useState<KeepChoice>(
+		showHasTagsOrDescription ? null : 'clear',
+	);
+	const keep = keepChoice === 'keep';
+	const clear = keepChoice === 'clear';
 
 	const handleSaveAsIs = () => {
 		if (!keepChoice) return;
@@ -43,6 +51,8 @@ const SaveShowModal = ({
 		setKeepChoice(null);
 	};
 
+	console.log('modal visible...', modalVisible);
+
 	const actionButtonStyle = (active: boolean) => ({
 		...styles.actionButton,
 		backgroundColor: active ? '#4056F4' : '#9E9E9E',
@@ -57,49 +67,48 @@ const SaveShowModal = ({
 		>
 			<View style={styles.overlay}>
 				<View style={styles.modalView}>
-					<Text style={styles.question}>
-						{isOwnShow
-							? 'Keep your existing description and tags?'
-							: `Keep ${username ? username : 'this user'}'s description and tags?`}
-					</Text>
-
-					{/* Toggle row */}
-					<View style={styles.toggleRow}>
-						<TouchableOpacity
-							style={[
-								styles.toggleButton,
-								keepChoice === 'keep' && styles.toggleButtonKeep,
-							]}
-							onPress={() => setKeepChoice('keep')}
-						>
-							<Text
-								style={[
-									styles.toggleText,
-									keepChoice === 'keep' && styles.toggleTextSelected,
-								]}
-							>
-								Keep them
+					{showHasTagsOrDescription && (
+						<>
+							<Text style={styles.question}>
+								{isOwnShow
+									? 'Keep your existing description/tags?'
+									: `Keep ${username ? username : 'this user'}'s description/tags?`}
 							</Text>
-						</TouchableOpacity>
-						<TouchableOpacity
-							style={[
-								styles.toggleButton,
-								keepChoice === 'clear' && styles.toggleButtonClear,
-							]}
-							onPress={() => setKeepChoice('clear')}
-						>
-							<Text
-								style={[
-									styles.toggleText,
-									keepChoice === 'clear' && styles.toggleTextSelected,
-								]}
-							>
-								Clear them
-							</Text>
-						</TouchableOpacity>
-					</View>
-
-					<View style={styles.divider} />
+							{/* Toggle row */}
+							<View style={styles.toggleRow}>
+								<TouchableOpacity
+									style={[styles.toggleButton, keep && styles.toggleButtonKeep]}
+									onPress={() => setKeepChoice('keep')}
+								>
+									<Text
+										style={[
+											styles.toggleText,
+											keep && styles.toggleTextSelected,
+										]}
+									>
+										Keep them
+									</Text>
+								</TouchableOpacity>
+								<TouchableOpacity
+									style={[
+										styles.toggleButton,
+										clear && styles.toggleButtonClear,
+									]}
+									onPress={() => setKeepChoice('clear')}
+								>
+									<Text
+										style={[
+											styles.toggleText,
+											clear && styles.toggleTextSelected,
+										]}
+									>
+										Clear them
+									</Text>
+								</TouchableOpacity>
+							</View>
+							<View style={styles.divider} />
+						</>
+					)}
 
 					{/* Action buttons */}
 					<TouchableOpacity
@@ -132,14 +141,16 @@ const SaveShowModal = ({
 										])
 						}
 					>
-						<Text style={styles.actionButtonText}>Save as-is</Text>
+						<Text style={styles.actionButtonText}>
+							{showHasTagsOrDescription ? 'Save as-is' : 'Skip tags and save'}
+						</Text>
 					</TouchableOpacity>
 
 					<TouchableOpacity
 						style={styles.cancelButton}
 						onPress={() => {
-							setModalVisible(false);
-							setKeepChoice(null);
+							setKeepChoice(showHasTagsOrDescription ? null : 'clear');
+							cancelSave();
 						}}
 					>
 						<Text style={styles.cancelText}>Cancel</Text>
