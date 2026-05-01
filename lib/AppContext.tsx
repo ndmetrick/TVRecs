@@ -37,6 +37,7 @@ type AppData = {
 	userShows: UserShow[];
 	toWatch: UserShow[];
 	seen: UserShow[];
+	allProfileShows: UserShow[];
 	allTags: Tag[];
 	loading: boolean;
 	error: Error | null;
@@ -78,6 +79,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 	const [followingRecs, setFollowingRecs] = useState<FollowingRec[]>([]);
 	const [userShows, setUserShows] = useState<UserShow[]>([]);
 	const [toWatch, setToWatch] = useState<UserShow[]>([]);
+	const [allProfileShows, setAllProfileShows] = useState<UserShow[]>([]);
 	const [seen, setSeen] = useState<UserShow[]>([]);
 	const [allTags, setAllTags] = useState<Tag[]>([]);
 	const [loading, setLoading] = useState(false);
@@ -123,6 +125,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 		setAllTags([]);
 		setError(null);
 		setWatchProviders({});
+		setAllProfileShows([]);
 	};
 
 	const addToWatchProviders = (
@@ -195,6 +198,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 			setUserShows(recs);
 			setToWatch(watch);
 			setSeen(seenShows);
+			setAllProfileShows([...watch, ...recs, ...seenShows]);
 		} catch (err) {
 			console.error(`Error loading recs, watch, seenShows: ${err}`);
 			showErrorToast('There was an error loading the shows on your profile');
@@ -352,6 +356,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 				userShows,
 				toWatch,
 				seen,
+				allProfileShows,
 				allTags,
 				loading,
 				error,

@@ -1,6 +1,11 @@
-import { AppliedShowFilters, ShowFilterType, Tag } from '@/lib/types';
+import {
+	AppliedShowFilters,
+	ShowFilterType,
+	SourcePage,
+	UserShowType,
+} from '@/lib/types';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
 	ScrollView,
 	StyleSheet,
@@ -142,27 +147,35 @@ const Pill = (props: PillProps) => {
 };
 
 interface RecsHeaderProps {
-	noUserShows: boolean;
-	toggleNoUserShows: () => void;
+	noUserShows?: boolean;
+	toggleNoUserShows?: () => void;
 	cancelFilters: () => void;
-	allShowTags: Tag[];
+	// allShowTags: Tag[];
 	appliedFilters: AppliedShowFilters;
 	setAppliedFilters: React.Dispatch<React.SetStateAction<AppliedShowFilters>>;
 	filterOpen: boolean;
 	setFilterOpen: React.Dispatch<React.SetStateAction<boolean>>;
 	showsLength: number;
+	sourcePage: SourcePage;
+	excludedSourceTypes?: Set<UserShowType>;
+	setExcludedSourceTypes?: React.Dispatch<
+		React.SetStateAction<Set<UserShowType>>
+	>;
 }
 
 const RecsHeader = ({
 	noUserShows,
 	toggleNoUserShows,
 	cancelFilters,
-	allShowTags,
+	// allShowTags,
 	appliedFilters,
 	setAppliedFilters,
 	filterOpen,
 	setFilterOpen,
 	showsLength,
+	sourcePage,
+	excludedSourceTypes,
+	setExcludedSourceTypes,
 }: RecsHeaderProps) => {
 	const [selectedTags, setSelectedTags] = useState<Record<string, boolean>>({});
 	const [selectedWarningTags, setSelectedWarningTags] = useState<
@@ -194,34 +207,80 @@ const RecsHeader = ({
 		else return 'inactive';
 	};
 
-	useEffect(() => {
-		console.log('filterLEngth', filterLength);
-		Object.keys(appliedFilters).forEach((filter) =>
-			console.log('applied filter', filter),
-		);
-	}, [appliedFilters, filterLength]);
+	const toggleType = (type: UserShowType) => {
+		if (setExcludedSourceTypes)
+			setExcludedSourceTypes((prev) => {
+				const newSet = new Set(prev);
+				if (newSet.has(type)) newSet.delete(type);
+				else newSet.add(type);
+				return newSet;
+			});
+	};
+
+	// useEffect(() => {
+	// 	console.log('filterLEngth', filterLength);
+	// 	Object.keys(appliedFilters).forEach((filter) =>
+	// 		console.log('applied filter', filter),
+	// 	);
+	// }, [appliedFilters, filterLength]);
 
 	return (
 		<View style={styles.header}>
-			<View style={styles.toggleContainer}>
-				<Text style={{ color: 'white' }}>
-					{noUserShows
-						? 'Toggle to see shows saved to your profile'
-						: 'Toggle to hide shows saved to your profile'}
-				</Text>
+			{sourcePage === SourcePage.REC_SHOWS && toggleNoUserShows ? (
+				<View style={styles.toggleContainer}>
+					<Text style={{ color: 'white' }}>
+						{noUserShows
+							? 'Toggle to see shows saved to your profile'
+							: 'Toggle to hide shows saved to your profile'}
+					</Text>
 
-				<Switch
-					style={{
-						marginBottom: 5,
-						marginTop: 5,
-					}}
-					ios_backgroundColor='#3e3e3e'
-					onValueChange={toggleNoUserShows}
-					value={noUserShows}
-					trackColor={{ false: '#3e3e3e', true: '#36C9C6' }}
-					thumbColor='white'
-				/>
-			</View>
+					<Switch
+						style={{
+							marginBottom: 5,
+							marginTop: 5,
+						}}
+						ios_backgroundColor='#3e3e3e'
+						onValueChange={toggleNoUserShows}
+						value={noUserShows}
+						trackColor={{ false: '#3e3e3e', true: '#36C9C6' }}
+						thumbColor='white'
+					/>
+				</View>
+			) : excludedSourceTypes ? (
+				<View style={styles.sourcesRow}>
+					<Text style={styles.sourceLabel}>Include:</Text>
+					{(
+						[
+							{ key: UserShowType.REC, label: 'Recs' },
+							{ key: UserShowType.WATCH, label: 'To Watch' },
+							{ key: UserShowType.SEEN, label: 'Hidden' },
+						] as const
+					).map(({ key, label }) => {
+						const checked = !excludedSourceTypes.has(key);
+						return (
+							<View style={styles.checkboxItem} key={key}>
+								<TouchableOpacity onPress={() => toggleType(key)}>
+									<View
+										style={[
+											styles.checkboxBox,
+											checked && styles.checkboxBoxChecked,
+										]}
+									>
+										{checked && (
+											<MaterialCommunityIcons
+												name='check-bold'
+												size={12}
+												color='#043028'
+											/>
+										)}
+									</View>
+								</TouchableOpacity>
+								<Text style={styles.checkboxLabel}>{label}</Text>
+							</View>
+						);
+					})}
+				</View>
+			) : null}
 
 			{filterOpen ? (
 				<View style={styles.filterHeader}>
@@ -306,17 +365,19 @@ const RecsHeader = ({
 								});
 							}}
 						/>
-						<Pill
-							label='min recs'
-							pillState={getPillState(ShowFilterType.MIN_RECS)}
-							onPress={() =>
-								setActiveFilterType((prev) =>
-									prev === ShowFilterType.MIN_RECS
-										? null
-										: ShowFilterType.MIN_RECS,
-								)
-							}
-						/>
+						{sourcePage === SourcePage.REC_SHOWS && (
+							<Pill
+								label='min recs'
+								pillState={getPillState(ShowFilterType.MIN_RECS)}
+								onPress={() =>
+									setActiveFilterType((prev) =>
+										prev === ShowFilterType.MIN_RECS
+											? null
+											: ShowFilterType.MIN_RECS,
+									)
+								}
+							/>
+						)}
 					</ScrollView>
 
 					{activeFilterType === 'hasTagIds' && (
@@ -381,30 +442,31 @@ const RecsHeader = ({
 							</View>
 						</View>
 					)}
-					{activeFilterType === 'minRecs' && (
-						<MinRecsPanel
-							pendingMinRecs={pendingMinRecs}
-							setPendingMinRecs={setPendingMinRecs}
-							onApply={() => {
-								setAppliedFilters((prev) => {
-									if (pendingMinRecs === null) {
+					{sourcePage === SourcePage.REC_SHOWS &&
+						activeFilterType === 'minRecs' && (
+							<MinRecsPanel
+								pendingMinRecs={pendingMinRecs}
+								setPendingMinRecs={setPendingMinRecs}
+								onApply={() => {
+									setAppliedFilters((prev) => {
+										if (pendingMinRecs === null) {
+											const { minRecs, ...rest } = prev;
+											return rest;
+										} else {
+											return { ...prev, minRecs: pendingMinRecs };
+										}
+									});
+									setActiveFilterType(null);
+								}}
+								onClear={() => {
+									setPendingMinRecs(null);
+									setAppliedFilters((prev) => {
 										const { minRecs, ...rest } = prev;
 										return rest;
-									} else {
-										return { ...prev, minRecs: pendingMinRecs };
-									}
-								});
-								setActiveFilterType(null);
-							}}
-							onClear={() => {
-								setPendingMinRecs(null);
-								setAppliedFilters((prev) => {
-									const { minRecs, ...rest } = prev;
-									return rest;
-								});
-							}}
-						/>
-					)}
+									});
+								}}
+							/>
+						)}
 					{/* {activeFilterType === 'descriptionString' && (
 						<ChooseDescriptionPanel
 							pendingDescription={pendingDescription}
@@ -431,13 +493,16 @@ const RecsHeader = ({
 					<TouchableOpacity onPress={() => setFilterOpen(true)}>
 						<View style={styles.filterHiddenTopRow}>
 							<Text style={styles.filterHiddenTitle}>
-								Recs ({showsLength})
-								{Object.keys(appliedFilters).length > 0 || noUserShows
-									? ` · Filters (${Object.keys(appliedFilters).length + Number(`${noUserShows ? 1 : 0}`)} active)`
+								{sourcePage === SourcePage.REC_SHOWS ? 'Recs' : 'Shows'} (
+								{showsLength})
+								{filterLength > 0 || noUserShows
+									? ` · Filters (${filterLength + Number(`${noUserShows ? 1 : 0}`)} active)`
 									: ''}
 							</Text>
 
-							<Text style={styles.filterExpandText}>edit ›</Text>
+							<Text style={styles.filterExpandText}>
+								{filterLength > 0 ? 'edit' : 'filters'} ›
+							</Text>
 						</View>
 					</TouchableOpacity>
 					<View style={styles.filterHiddenLeft}>
@@ -465,22 +530,22 @@ const RecsHeader = ({
 							</View>
 						)}
 
-						{appliedFilters.minRecs ? (
+						{sourcePage === SourcePage.REC_SHOWS && appliedFilters.minRecs ? (
 							<View style={styles.activeFilterChip}>
 								<Text style={styles.activeFilterChipText}>
 									min {appliedFilters.minRecs} recs
 								</Text>
 							</View>
 						) : null}
-						{!noUserShows && Object.keys(appliedFilters).length === 0 && (
+						{!noUserShows && filterLength === 0 && (
 							<Text style={styles.filterHiddenLabel}>no filters active</Text>
 						)}
-						{(Object.keys(appliedFilters).length > 0 || noUserShows) && (
+						{(filterLength > 0 || noUserShows) && (
 							<TouchableOpacity
 								style={styles.clearAllChip}
 								onPress={() => {
 									clearAllFilters();
-									if (noUserShows) toggleNoUserShows();
+									if (noUserShows && toggleNoUserShows) toggleNoUserShows();
 								}}
 							>
 								<Text style={styles.clearAllChipText}>clear all</Text>
@@ -728,6 +793,40 @@ const styles = StyleSheet.create({
 		fontSize: 14,
 		fontWeight: '500',
 		color: 'white',
+	},
+	sourcesRow: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		paddingHorizontal: 12,
+		paddingVertical: 4,
+		gap: 10,
+	},
+	sourceLabel: {
+		fontSize: 12,
+		color: 'rgba(255,255,255,0.75)',
+	},
+	checkboxItem: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		gap: 6,
+	},
+	checkboxBox: {
+		width: 16,
+		height: 16,
+		borderRadius: 3,
+		borderWidth: 1.5,
+		borderColor: 'rgba(255,255,255,0.5)',
+		alignItems: 'center',
+		justifyContent: 'center',
+	},
+	checkboxBoxChecked: {
+		backgroundColor: '#36C9C6',
+		borderColor: '#36C9C6',
+	},
+	checkboxLabel: {
+		fontSize: 13,
+		color: 'rgba(255,255,255,0.85)',
+		fontWeight: '500',
 	},
 });
 

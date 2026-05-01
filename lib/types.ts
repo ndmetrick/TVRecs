@@ -123,6 +123,7 @@ export enum SourcePage {
 	REC_SHOWS = 'REC_SHOWS',
 	CURRENT_USER = 'CURRENT_USER',
 	OTHER_USER = 'OTHER_USER',
+	VIEW_SHOWS = 'VIEW_SHOWS',
 }
 
 export enum UserShowType {
