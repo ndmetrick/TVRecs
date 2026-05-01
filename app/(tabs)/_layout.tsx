@@ -1,5 +1,4 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Tabs } from 'expo-router';
 import { View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
@@ -33,15 +32,38 @@ export const ComposedSearchIcon = ({
 				position: 'absolute',
 				bottom: -2,
 				right: -2,
-				width: size * 0.62,
-				height: size * 0.62,
-				borderRadius: (size * 0) / 2,
+				width: size * 0.65,
+				height: size * 0.65,
+				borderRadius: 50,
 				backgroundColor: backgroundColor,
 			}}
 		/>
 		<View style={{ position: 'absolute', bottom: -2, right: -2 }}>
 			<BoldMagnify size={size * 0.58} color={color} />
 		</View>
+	</View>
+);
+
+export const ComposedHeartIcon = ({
+	baseIcon,
+	size = 24,
+	color,
+	backgroundColor,
+}: Props) => (
+	<View>
+		<MaterialCommunityIcons name={baseIcon} size={size} color={color} />
+		<MaterialCommunityIcons
+			name='heart'
+			size={21}
+			color={backgroundColor}
+			style={{ position: 'absolute', bottom: -4.5, right: -4.5 }}
+		/>
+		<MaterialCommunityIcons
+			name='heart'
+			size={16}
+			color={color}
+			style={{ position: 'absolute', bottom: -2, right: -2 }}
+		/>
 	</View>
 );
 
@@ -95,10 +117,11 @@ export default function TabLayout() {
 				name='currentUser'
 				options={{
 					tabBarIcon: ({ color }) => (
-						<MaterialCommunityIcons
-							name='account-circle'
-							color={color}
+						<ComposedHeartIcon
 							size={26}
+							color={color}
+							backgroundColor='#340068'
+							baseIcon='television-classic'
 						/>
 					),
 				}}
@@ -107,7 +130,11 @@ export default function TabLayout() {
 				name='settings'
 				options={{
 					tabBarIcon: ({ color }) => (
-						<MaterialIcons name='settings' color={color} size={26} />
+						<MaterialCommunityIcons
+							name='account-circle'
+							color={color}
+							size={26}
+						/>
 					),
 				}}
 			/>

@@ -63,11 +63,6 @@ const RecShows = () => {
 		refetchAll,
 	} = useAppData();
 
-	const onRefresh = async () => {
-		setRefreshing(true);
-		await refetchAll();
-		setRefreshing(false);
-	};
 	const firstRender = useFirstRender();
 	const ref = useRef(null);
 
@@ -98,11 +93,11 @@ const RecShows = () => {
 				),
 			);
 		}
-		if (appliedFilters.descriptionString) {
-			shows = shows.filter((show) =>
-				show.description?.includes(appliedFilters.descriptionString as string),
-			);
-		}
+		// if (appliedFilters.descriptionString) {
+		// 	shows = shows.filter((show) =>
+		// 		show.description?.includes(appliedFilters.descriptionString as string),
+		// 	);
+		// }
 		setFiltersApplied(!!Object.keys(appliedFilters).length);
 		return shows;
 	}, [filteredFollowingRecs, appliedFilters]);
@@ -170,31 +165,14 @@ const RecShows = () => {
 				(s) => recCounts[s.show_id]?.num > (appliedFilters.minRecs as number),
 			);
 		}
-		// setLoadedCount(loaded);
 		setRecShows(visibleShows);
 		setMultipleRecInfo(recCounts);
 
 		setLoading(false);
-		// }
-		// if (firstRender) {
-		// 	console.log('i am in the FIRST RENDER');
-		// 	setLoading(true);
-		// }
-		// if (
-		// 	!firstRender &&
-		// 	currentUser &&
-		// 	(!following.length || (advancedSearch && filter && showNum === 0))
-		// ) {
-		// 	console.log('i am not in the first render but i am in here');
-		// 	setLoading(false);
-		// 	// setRecsTabName('Recs(0)');
-		// }
 
 		return () => {
 			setRecShows([]);
 			setMultipleRecInfo({});
-			// setRecsTabName(null);
-			// setLoadedCount(0);
 		};
 	}, [
 		filtersApplied,
@@ -221,6 +199,11 @@ const RecShows = () => {
 	};
 
 	const flatlist = useMemo(() => {
+		const onRefresh = async () => {
+			setRefreshing(true);
+			await refetchAll();
+			setRefreshing(false);
+		};
 		const handleShowPress = async (show: UserShow) => {
 			const user = followingMap[show.user_id];
 			router.push({
@@ -397,6 +380,8 @@ const RecShows = () => {
 		filteredFollowingRecs.length,
 		recShows,
 		appliedFilters,
+		refreshing,
+		refetchAll,
 		followingMap,
 		router,
 		imageErrors,
@@ -419,21 +404,12 @@ const RecShows = () => {
 				noUserShows={noUserShows}
 				toggleNoUserShows={toggleNoUserShows}
 				cancelFilters={cancelFilters}
-				allShowTags={[
-					...tvTags.mood,
-					...tvTags.genre,
-					...tvTags.representation,
-					...tvTags.themes,
-					...tvTags.experience,
-					...tvTags.audience,
-					...tvTags.misc,
-					...warningTags,
-				]}
 				appliedFilters={appliedFilters}
 				setAppliedFilters={setAppliedFilters}
 				filterOpen={filterOpen}
 				setFilterOpen={setFilterOpen}
 				showsLength={showsLength}
+				sourcePage={SourcePage.REC_SHOWS}
 			/>
 			{/* <View style={styles.tabSwitcher}>
 				<TouchableOpacity

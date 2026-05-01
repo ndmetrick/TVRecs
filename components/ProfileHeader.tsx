@@ -42,7 +42,7 @@ const ProfileHeader = (props: Props) => {
 							<Text style={styles.usernameText}>Your</Text>
 						</View>
 						<View style={styles.recButton}>
-							<Text style={styles.recText}> profile</Text>
+							<Text style={styles.recText}> shows</Text>
 						</View>
 					</View>
 				) : (

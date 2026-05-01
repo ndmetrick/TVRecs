@@ -5,6 +5,7 @@ import {
 	ActivityIndicator,
 	Alert,
 	Image,
+	Modal,
 	ScrollView,
 	StyleSheet,
 	Text,
@@ -751,9 +752,11 @@ const SingleShow = () => {
 				</View>
 			</ScrollView>
 			{saving && (
-				<View style={styles.savingOverlay}>
-					<ActivityIndicator size='large' color='white' />
-				</View>
+				<Modal transparent animationType='none' statusBarTranslucent>
+					<View style={styles.savingOverlay}>
+						<ActivityIndicator size='large' color='white' />
+					</View>
+				</Modal>
 			)}
 			{(isCurrentUser || userToView?.username) && (
 				<SaveShowModal

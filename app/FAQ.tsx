@@ -9,6 +9,7 @@ import {
 	TouchableOpacity,
 	View,
 } from 'react-native';
+import { ComposedHeartIcon, ComposedSearchIcon } from './(tabs)/_layout';
 
 const FAQ = () => {
 	const router = useRouter();
@@ -24,7 +25,7 @@ const FAQ = () => {
 				}}
 			>
 				<Text style={styles.headingText}>
-					<MaterialCommunityIcons name='home' size={20} /> Home:
+					<MaterialCommunityIcons name='home' size={20} /> Home / Recs:
 				</Text>
 			</TouchableOpacity>
 			<Text style={styles.text}>
@@ -41,6 +42,9 @@ const FAQ = () => {
 				will be taken to their profile and all their recommendations. On the
 				home screen, you can also choose to only see shows which you have not
 				saved to your own profile yet (via the toggle at the top of the page).
+				You can also add all sorts of filters to see shows with tags /
+				description, with particular tags (or without particular warning tags),
+				or recommended by a minimum number of people you follow.
 				{'\n'}
 			</Text>
 
@@ -72,12 +76,12 @@ const FAQ = () => {
 				}}
 			>
 				<Text style={styles.headingText}>
-					<View style={{ width: 24, height: 24 }}>
-						<MaterialCommunityIcons name='television-classic' size={20} />
-						<MaterialCommunityIcons
-							name='magnify'
-							size={16}
-							style={{ position: 'absolute', bottom: -2, right: -2 }}
+					<View style={{ width: 26, height: 26 }}>
+						<ComposedSearchIcon
+							size={26}
+							color={'black'}
+							backgroundColor='white'
+							baseIcon='television-classic'
 						/>
 					</View>{' '}
 					Search/Add Show:
@@ -102,14 +106,17 @@ const FAQ = () => {
 				}}
 			>
 				<Text style={styles.headingText}>
-					<MaterialCommunityIcons name='account-circle' size={20} /> Profile:
+					<ComposedHeartIcon
+						size={26}
+						color={'black'}
+						backgroundColor='#white'
+						baseIcon='television-classic'
+					/>{' '}
+					Your shows:
 				</Text>
 			</TouchableOpacity>
 			<Text style={styles.text}>
-				This is the page to go to to see the list of who you follow and to see
-				all your lists. You can swipe or click on the tabs to switch between
-				lists. You can also click on any of the shows and update
-				tags/descriptions.
+				{`This is the page to go to to see the shows you recommend, the ones you want to watch, and the ones you want to filter out of recommendations. You can also go to the filter tab and see all the shows you've saved in one place, and filter for different tags, etc. For example, you could tag shows with 'curently watching', and then filter for that and see a list of your current shows. You can swipe or click on the tabs to switch between lists. You can also click on any of the shows and update tags/descriptions.`}
 				{'\n'}
 			</Text>
 
@@ -119,7 +126,7 @@ const FAQ = () => {
 				}}
 			>
 				<Text style={styles.headingText}>
-					<MaterialIcons name='settings' size={20} /> Settings:
+					<MaterialIcons name='account-circle' size={20} /> User Profile:
 				</Text>
 			</TouchableOpacity>
 			<Text style={styles.text}>

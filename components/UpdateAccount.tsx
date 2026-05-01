@@ -147,6 +147,7 @@ const styles = StyleSheet.create({
 		// marginBottom: 30,
 		marginRight: 10,
 		marginLeft: 15,
+
 		// marginTop: 20,
 	},
 	inputText: {

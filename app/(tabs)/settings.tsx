@@ -103,146 +103,151 @@ const Settings = () => {
 				</View>
 			)}
 			<ScrollView keyboardShouldPersistTaps='handled'>
-				<TouchableOpacity
-					style={styles.row}
-					onPress={() => router.push({ pathname: '../FAQ' })}
-				>
-					<Text style={styles.rowText}>User guide</Text>
-				</TouchableOpacity>
-
-				<TouchableOpacity
-					style={countryOpen ? styles.openRow : styles.row}
-					onPress={() => setCountryOpen(!countryOpen)}
-				>
-					<Text style={styles.rowText}>Change country </Text>
-					<MaterialCommunityIcons
-						name={countryOpen ? 'chevron-down' : 'chevron-right'}
-						size={18}
-						color='#777'
-					/>
-				</TouchableOpacity>
-				{countryOpen ? (
-					<View style={styles.expandedContent}>
-						<ChangeCountry
-							setCountryCode={setCountryCode}
-							saveCountry={saveCountry}
-							setSaveCountry={setSaveCountry}
-							countryCode={countryCode}
-							saveNewCountry={saveNewCountry}
-						/>
-					</View>
-				) : null}
-
-				<TouchableOpacity
-					style={tagsOpen ? styles.openRow : styles.row}
-					onPress={() => setTagsOpen(!tagsOpen)}
-				>
-					<Text style={styles.rowText}>User tags and TV bio </Text>
-					<MaterialCommunityIcons
-						name={tagsOpen ? 'chevron-down' : 'chevron-right'}
-						size={18}
-						color='#777'
-					/>
-				</TouchableOpacity>
-				{tagsOpen ? (
-					<View style={styles.expandedContent}>
-						<Text style={styles.text}>
-							{`Just as you can add tags and descriptions to a TV show, you can add them to your own profile. Other users looking at your profile will see these tags and description along with all the shows you're recommending. These will give others a view into what kinds of shows you like and why, and will help them decide if your recommendations might be a good match for them. People you don't know will also be able to search for you based on these tags (for instance if they want to receive recommendations from others who also like TV shows with the 'town comes together' theme or they also like really silly shows.`}
-						</Text>
-						<View
-							style={{
-								...styles.buttonContainer,
-								alignItems: 'center',
-								marginTop: 5,
-							}}
-						>
-							<TouchableOpacity
-								style={[styles.centerButton, saving && styles.buttonDisabled]}
-								onPress={goToUserTags}
-								disabled={saving}
-							>
-								<Text style={{ ...styles.buttonText, color: 'white' }}>
-									Create/update user tags and tv bio
-								</Text>
-								{saving && (
-									<ActivityIndicator
-										size='small'
-										color='white'
-										style={{
-											position: 'absolute',
-											top: 0,
-											bottom: 0,
-											left: 0,
-											right: 0,
-										}}
-									/>
-								)}
-							</TouchableOpacity>
-						</View>
-					</View>
-				) : null}
-
-				<TouchableOpacity
-					disabled={!currentUser}
-					style={usernameOpen ? styles.openRow : styles.row}
-					onPress={() => setUsernameOpen(!usernameOpen)}
-				>
-					<Text style={currentUser ? styles.rowText : styles.disabledRowText}>
-						Change username{' '}
-					</Text>
-					<MaterialCommunityIcons
-						name={usernameOpen ? 'chevron-down' : 'chevron-right'}
-						size={18}
-						color='#777'
-					/>
-				</TouchableOpacity>
-				{usernameOpen ? (
-					<View style={styles.expandedContent}>
-						<UpdateAccount
-							updateType='username'
-							setUsernameOpen={setUsernameOpen}
-						/>
-					</View>
-				) : null}
-
-				<TouchableOpacity
-					disabled={!currentUser}
-					style={deleteUserOpen ? styles.openRow : styles.row}
-					onPress={() => setDeleteUserOpen(!deleteUserOpen)}
-				>
-					<Text style={currentUser ? styles.rowText : styles.disabledRowText}>
-						Delete Account{' '}
-					</Text>
-					<MaterialCommunityIcons
-						name={deleteUserOpen ? 'chevron-down' : 'chevron-right'}
-						size={18}
-						color='#777'
-					/>
-				</TouchableOpacity>
-				{deleteUserOpen ? (
-					<View style={styles.expandedContent}>
-						<UpdateAccount updateType='delete' />
-					</View>
-				) : null}
-
-				<TouchableOpacity
-					disabled={!currentUser}
-					style={styles.row}
-					onPress={logout}
-				>
-					<Text
-						style={currentUser ? styles.rowTextDanger : styles.disabledRowText}
+				<View style={styles.tagsCard}>
+					<TouchableOpacity
+						style={styles.tagsCardHeader}
+						onPress={() => setTagsOpen(!tagsOpen)}
 					>
-						Sign out
-					</Text>
-				</TouchableOpacity>
+						<View>
+							<Text style={styles.tagsCardLabel}>your tv identity</Text>
+							<Text style={styles.tagsCardTitle}>User tags and TV bio</Text>
+						</View>
+						<MaterialCommunityIcons
+							name={tagsOpen ? 'chevron-down' : 'chevron-right'}
+							size={18}
+							color='#340068'
+						/>
+					</TouchableOpacity>
+					{tagsOpen && (
+						<View style={styles.tagsCardExpanded}>
+							<Text style={styles.tagsText}>
+								{`Just as you can add tags and descriptions to a TV show, you can add them to your own profile...`}
+							</Text>
+							<View style={{ alignItems: 'center', marginTop: 5 }}>
+								<TouchableOpacity
+									style={[styles.centerButton, saving && styles.buttonDisabled]}
+									onPress={goToUserTags}
+									disabled={saving}
+								>
+									<Text style={{ ...styles.buttonText, color: 'white' }}>
+										Create/update user tags and tv bio
+									</Text>
+									{saving && (
+										<ActivityIndicator
+											size='small'
+											color='white'
+											style={{
+												position: 'absolute',
+												top: 0,
+												bottom: 0,
+												left: 0,
+												right: 0,
+											}}
+										/>
+									)}
+								</TouchableOpacity>
+							</View>
+						</View>
+					)}
+				</View>
 
-				<View
-					style={{
-						...styles.buttonContainer,
-						marginTop: 20,
-					}}
-				>
+				<Text style={styles.sectionLabel}>Account</Text>
+
+				<View style={styles.accountCard}>
+					<TouchableOpacity
+						style={styles.row}
+						onPress={() => router.push({ pathname: '../FAQ' })}
+					>
+						<Text style={styles.rowText}>User guide</Text>
+					</TouchableOpacity>
+
+					<TouchableOpacity
+						style={countryOpen ? styles.openRow : styles.row}
+						onPress={() => setCountryOpen(!countryOpen)}
+					>
+						<Text style={styles.rowText}>Change country</Text>
+						<MaterialCommunityIcons
+							name={countryOpen ? 'chevron-down' : 'chevron-right'}
+							size={18}
+							color='#777'
+						/>
+					</TouchableOpacity>
+					{countryOpen && (
+						<View style={styles.expandedContent}>
+							<ChangeCountry
+								setCountryCode={setCountryCode}
+								saveCountry={saveCountry}
+								setSaveCountry={setSaveCountry}
+								countryCode={countryCode}
+								saveNewCountry={saveNewCountry}
+							/>
+						</View>
+					)}
+
+					<TouchableOpacity
+						disabled={!currentUser}
+						style={usernameOpen ? styles.openRow : styles.row}
+						onPress={() => setUsernameOpen(!usernameOpen)}
+					>
+						<Text style={currentUser ? styles.rowText : styles.disabledRowText}>
+							Change username
+						</Text>
+						<MaterialCommunityIcons
+							name={usernameOpen ? 'chevron-down' : 'chevron-right'}
+							size={18}
+							color='#777'
+						/>
+					</TouchableOpacity>
+					{usernameOpen && (
+						<View style={styles.expandedContent}>
+							<UpdateAccount
+								updateType='username'
+								setUsernameOpen={setUsernameOpen}
+							/>
+						</View>
+					)}
+
+					<TouchableOpacity
+						disabled={!currentUser}
+						style={[
+							deleteUserOpen ? styles.openRow : styles.row,
+							styles.lastRow,
+						]}
+						onPress={() => setDeleteUserOpen(!deleteUserOpen)}
+					>
+						<Text style={currentUser ? styles.rowText : styles.disabledRowText}>
+							Delete Account
+						</Text>
+						<MaterialCommunityIcons
+							name={deleteUserOpen ? 'chevron-down' : 'chevron-right'}
+							size={18}
+							color='#777'
+						/>
+					</TouchableOpacity>
+					{deleteUserOpen && (
+						<View style={[styles.expandedContent, styles.lastExpandedContent]}>
+							<UpdateAccount updateType='delete' />
+						</View>
+					)}
+				</View>
+
+				<View style={styles.accountCard}>
+					<TouchableOpacity
+						disabled={!currentUser}
+						style={[styles.row, styles.lastRow]}
+						onPress={logout}
+					>
+						<Text
+							style={
+								currentUser ? styles.rowTextDanger : styles.disabledRowText
+							}
+						>
+							Sign out
+						</Text>
+					</TouchableOpacity>
+				</View>
+
+				<View style={{ marginTop: 8, marginLeft: 15 }}>
 					<TouchableOpacity
 						onPress={() =>
 							Linking.openURL(
@@ -250,14 +255,7 @@ const Settings = () => {
 							)
 						}
 					>
-						<Text
-							style={{
-								...styles.text,
-								marginLeft: 15,
-								margin: 5,
-								color: 'blue',
-							}}
-						>
+						<Text style={{ ...styles.text, color: 'blue' }}>
 							Privacy Policy
 						</Text>
 					</TouchableOpacity>
@@ -272,6 +270,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 		marginBottom: 30,
 		flexDirection: 'column',
+		backgroundColor: '#eef1f8',
 	},
 	containerInfo: {
 		margin: 5,
@@ -280,6 +279,11 @@ const styles = StyleSheet.create({
 	text: {
 		textAlign: 'left',
 		fontSize: 18,
+	},
+	tagsText: {
+		textAlign: 'left',
+		fontSize: 18,
+		color: 'rgba(255,255,255,0.75)',
 	},
 	buttonText: {
 		textAlign: 'center',
@@ -325,6 +329,7 @@ const styles = StyleSheet.create({
 		fontWeight: '500',
 	},
 	userCard: {
+		marginTop: 6,
 		flexDirection: 'row',
 		alignItems: 'center',
 		gap: 12,
@@ -362,10 +367,12 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 15,
 		borderBottomWidth: 0.5,
 		borderColor: '#ddd',
+		justifyContent: 'space-between',
 	},
 	openRow: {
 		flexDirection: 'row',
 		alignItems: 'center',
+		justifyContent: 'space-between',
 		paddingVertical: 14,
 		paddingHorizontal: 15,
 	},
@@ -389,6 +396,61 @@ const styles = StyleSheet.create({
 		paddingLeft: 20,
 		borderBottomWidth: 0.5,
 		borderColor: '#ddd',
+	},
+	sectionLabel: {
+		fontSize: 11,
+		color: '#888',
+		textTransform: 'uppercase',
+		letterSpacing: 0.6,
+		paddingHorizontal: 15,
+		paddingTop: 16,
+		paddingBottom: 6,
+	},
+	tagsCard: {
+		marginHorizontal: 15,
+		marginVertical: 10,
+		borderRadius: 10,
+		borderWidth: 1.5,
+		borderColor: '#340068',
+		overflow: 'hidden',
+		backgroundColor: '#4056F4',
+	},
+	accountCard: {
+		marginHorizontal: 15,
+		marginVertical: 4,
+		borderRadius: 10,
+		backgroundColor: 'white',
+		overflow: 'hidden',
+	},
+	tagsCardHeader: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+		paddingVertical: 14,
+		paddingHorizontal: 15,
+	},
+	tagsCardLabel: {
+		fontSize: 11,
+		color: 'white',
+		marginBottom: 2,
+	},
+	tagsCardTitle: {
+		fontSize: 18,
+		fontWeight: '500',
+		color: 'white',
+	},
+	tagsCardExpanded: {
+		borderTopWidth: 1,
+		borderTopColor: '#36C9C6',
+		paddingHorizontal: 15,
+		paddingVertical: 10,
+	},
+
+	lastRow: {
+		borderBottomWidth: 0,
+	},
+	lastExpandedContent: {
+		borderBottomWidth: 0,
 	},
 });
 

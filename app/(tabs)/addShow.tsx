@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import {
 	Alert,
 	Image,
+	Modal,
 	ScrollView,
 	StyleSheet,
 	Text,
@@ -124,9 +125,11 @@ const AddShow = () => {
 	return (
 		<View style={styles.container}>
 			{saving && (
-				<View style={styles.savingOverlay}>
-					<ActivityIndicator size='large' color='white' />
-				</View>
+				<Modal transparent animationType='none' statusBarTranslucent>
+					<View style={styles.savingOverlay}>
+						<ActivityIndicator size='large' color='white' />
+					</View>
+				</Modal>
 			)}
 			<ScrollView
 				showsVerticalScrollIndicator={false}
