@@ -30,6 +30,7 @@ import {
 	TouchableOpacity,
 	View,
 } from 'react-native';
+import { TextInput } from 'react-native-paper';
 
 enum PanelType {
 	profileTags = 'profileTags',
@@ -67,6 +68,10 @@ const SearchUsers = () => {
 	const [showMatch, setShowMatch] = useState<'any' | 'all'>('any');
 
 	const [showTagMatch, setShowTagMatch] = useState<'any' | 'all'>('any');
+	const [matchingUsersByUsername, setMatchingUsersByUsername] = useState<
+		UserProfile[] | null
+	>(null);
+	const [usernameInput, setUsernameInput] = useState('');
 
 	const matchStateMap = {
 		profileTags: profileTagMatch,
@@ -94,7 +99,7 @@ const SearchUsers = () => {
 	const [results, setResults] = useState<UserSearchFilterResults | null>(null);
 	const [loading, setLoading] = useState(false);
 
-	const { followingMap, tagMap } = useAppData();
+	const { followingMap, tagMap, allOtherUsers } = useAppData();
 
 	const chosenShowTagIds = useMemo(() => {
 		const chosen: number[] = [];
@@ -385,7 +390,23 @@ const SearchUsers = () => {
 		}
 	};
 
-	// const getProfileTagGroups = ()
+	// search by username:
+	const getMatchingUsersByUsername = async (input: string) => {
+		console.log('input', input);
+		setUsernameInput(input);
+		// setSearchInput(input);
+		if (!input) {
+			setMatchingUsersByUsername(null);
+			return;
+		}
+		const matches =
+			allOtherUsers?.filter((user) => {
+				console.log('user', user, 'input', input);
+				return user.username.toLowerCase().includes(input.toLowerCase());
+			}) ?? [];
+		console.log('matches', matches, input);
+		setMatchingUsersByUsername(matches);
+	};
 
 	return (
 		<View style={styles.container}>
@@ -759,7 +780,83 @@ const SearchUsers = () => {
 				showsVerticalScrollIndicator={false}
 			>
 				{/* Username mode */}
-				{searchMode === 'username' && <View>{/* TextInput + results  */}</View>}
+				{searchMode === 'username' && (
+					<View>
+						<TextInput
+							label='Search by username...'
+							onChangeText={(searchInput) =>
+								getMatchingUsersByUsername(searchInput)
+							}
+							mode='outlined'
+							outlineColor='#340068'
+							activeOutlineColor='#340068'
+							style={styles.usernameInput}
+						/>
+						<View style={styles.resultsSection}>
+							{!matchingUsersByUsername ? (
+								<View style={styles.usernameEmptyState}>
+									<MaterialCommunityIcons name='magnify' size={18} />
+									<Text style={styles.usernameEmptyText}>
+										Type at least 2 characters to search
+									</Text>
+								</View>
+							) : !matchingUsersByUsername.length ? (
+								<View style={styles.usernameNoResults}>
+									<Text style={styles.usernameEmptyText}>
+										No users found matching &quot;{usernameInput}&quot;
+									</Text>
+								</View>
+							) : (
+								<View>
+									<Text style={styles.usernameResultsLabel}>
+										{matchingUsersByUsername.length} Users
+									</Text>
+									{matchingUsersByUsername.map((user) => {
+										return (
+											<TouchableOpacity
+												key={user.id}
+												style={styles.usernameResultCard}
+												onPress={() =>
+													router.push({
+														pathname: '/otherUser',
+														params: {
+															uid: user.id,
+															userString: JSON.stringify(user),
+														},
+													})
+												}
+											>
+												<View
+													style={{
+														flexDirection: 'row',
+														alignItems: 'center',
+														flex: 1,
+														flexShrink: 1,
+													}}
+												>
+													<View style={styles.avatar}>
+														<Text style={styles.avatarText}>
+															{user.username.slice(0, 2).toUpperCase()}
+														</Text>
+													</View>
+													<Text style={styles.usernameResultName}>
+														{user.username}
+													</Text>
+												</View>
+												<MaterialCommunityIcons
+													name='chevron-right'
+													size={20}
+													color='#aaa'
+													style={{ marginLeft: 'auto', alignSelf: 'center' }}
+												/>
+											</TouchableOpacity>
+										);
+									})}
+								</View>
+							)}
+						</View>
+					</View>
+				)}
 
 				{/* Filters mode — summary panel */}
 				{searchMode === 'filters' &&
@@ -1164,131 +1261,140 @@ const SearchUsers = () => {
 								Unfortunately no users matched that search.
 							</Text>
 						) : (
-							Object.keys(displayedUsers).map((userId) => {
-								const userDetails = displayedUsers[userId];
-								const user = userDetails.user;
-								return (
-									<TouchableOpacity
-										key={userId}
-										style={styles.resultCard}
-										onPress={() =>
-											router.push({
-												pathname: '/otherUser',
-												params: {
-													uid: userId,
-													userString: JSON.stringify(user),
-												},
-											})
-										}
-									>
-										<View
-											style={{ flexDirection: 'row', alignItems: 'center' }}
+							<View>
+								<Text style={styles.resultsLabel}>
+									RESULTS · {Object.keys(displayedUsers).length}{' '}
+									{Object.keys(displayedUsers).length === 1 ? 'user' : 'users'}
+								</Text>
+								{Object.keys(displayedUsers).map((userId) => {
+									const userDetails = displayedUsers[userId];
+									const user = userDetails.user;
+									return (
+										<TouchableOpacity
+											key={userId}
+											style={styles.resultCard}
+											onPress={() =>
+												router.push({
+													pathname: '/otherUser',
+													params: {
+														uid: userId,
+														userString: JSON.stringify(user),
+													},
+												})
+											}
 										>
-											<View style={styles.avatar}>
-												<Text style={styles.avatarText}>
-													{user.username.slice(0, 2).toUpperCase()}
-												</Text>
-											</View>
 											<View
 												style={{
-													flexDirection: 'column',
-													flex: 1,
-													flexShrink: 1,
+													flexDirection: 'row',
+													alignItems: 'flex-start',
 												}}
 											>
-												<Text style={styles.resultName}>{user.username}</Text>
+												<View style={styles.avatar}>
+													<Text style={styles.avatarText}>
+														{user.username.slice(0, 2).toUpperCase()}
+													</Text>
+												</View>
+												<View
+													style={{
+														flexDirection: 'column',
+														flex: 1,
+														flexShrink: 1,
+													}}
+												>
+													<Text style={styles.resultName}>{user.username}</Text>
 
-												<Text>
-													{userDetails.showNamesString && (
-														<Text
-															style={[
-																styles.resultMatchLabel,
-																{ color: getResultLabelColor('rec') },
-															]}
-														>
-															recs:{' '}
-															<Text style={styles.resultMatch}>
-																{userDetails.showNamesString}{' '}
+													<Text>
+														{userDetails.showNamesString && (
+															<Text
+																style={[
+																	styles.resultMatchLabel,
+																	{ color: getResultLabelColor('rec') },
+																]}
+															>
+																recs:{' '}
+																<Text style={styles.resultMatch}>
+																	{userDetails.showNamesString}{' '}
+																</Text>
 															</Text>
-														</Text>
-													)}
-													{userDetails.profileTagsDescribeString && (
-														<Text
-															style={[
-																styles.resultMatchLabel,
-																{ color: getResultLabelColor('desc') },
-															]}
-														>
-															how they watch TV:{' '}
-															<Text style={styles.resultMatch}>
-																{userDetails.profileTagsDescribeString}{' '}
+														)}
+														{userDetails.profileTagsDescribeString && (
+															<Text
+																style={[
+																	styles.resultMatchLabel,
+																	{ color: getResultLabelColor('desc') },
+																]}
+															>
+																how they watch TV:{' '}
+																<Text style={styles.resultMatch}>
+																	{userDetails.profileTagsDescribeString}{' '}
+																</Text>
 															</Text>
-														</Text>
-													)}
-													{userDetails.profileTagsLikeString && (
-														<Text
-															style={[
-																styles.resultMatchLabel,
-																{ color: getResultLabelColor('like') },
-															]}
-														>
-															likes:{' '}
-															<Text style={styles.resultMatch}>
-																{userDetails.profileTagsLikeString}{' '}
+														)}
+														{userDetails.profileTagsLikeString && (
+															<Text
+																style={[
+																	styles.resultMatchLabel,
+																	{ color: getResultLabelColor('like') },
+																]}
+															>
+																likes:{' '}
+																<Text style={styles.resultMatch}>
+																	{userDetails.profileTagsLikeString}{' '}
+																</Text>
 															</Text>
-														</Text>
-													)}
-													{userDetails.profileTagsDislikeString && (
-														<Text
-															style={[
-																styles.resultMatchLabel,
-																{ color: getResultLabelColor('dislike') },
-															]}
-														>
-															dislikes:{' '}
-															<Text style={styles.resultMatch}>
-																{userDetails.profileTagsDislikeString}{' '}
+														)}
+														{userDetails.profileTagsDislikeString && (
+															<Text
+																style={[
+																	styles.resultMatchLabel,
+																	{ color: getResultLabelColor('dislike') },
+																]}
+															>
+																dislikes:{' '}
+																<Text style={styles.resultMatch}>
+																	{userDetails.profileTagsDislikeString}{' '}
+																</Text>
 															</Text>
-														</Text>
-													)}
-													{userDetails.profileTagsWarningString && (
-														<Text
-															style={[
-																styles.resultMatchLabel,
-																{ color: getResultLabelColor('warning') },
-															]}
-														>
-															avoids:{' '}
-															<Text style={styles.resultMatch}>
-																{userDetails.profileTagsWarningString}{' '}
+														)}
+														{userDetails.profileTagsWarningString && (
+															<Text
+																style={[
+																	styles.resultMatchLabel,
+																	{ color: getResultLabelColor('warning') },
+																]}
+															>
+																avoids:{' '}
+																<Text style={styles.resultMatch}>
+																	{userDetails.profileTagsWarningString}{' '}
+																</Text>
 															</Text>
-														</Text>
-													)}
-													{userDetails.showTagsString && (
-														<Text
-															style={[
-																styles.resultMatchLabel,
-																{ color: getResultLabelColor('showTag') },
-															]}
-														>
-															tagged shows with:{' '}
-															<Text style={styles.resultMatch}>
-																{userDetails.showTagsString}
+														)}
+														{userDetails.showTagsString && (
+															<Text
+																style={[
+																	styles.resultMatchLabel,
+																	{ color: getResultLabelColor('showTag') },
+																]}
+															>
+																tagged shows with:{' '}
+																<Text style={styles.resultMatch}>
+																	{userDetails.showTagsString}
+																</Text>
 															</Text>
-														</Text>
-													)}
-												</Text>
+														)}
+													</Text>
+												</View>
+												<MaterialCommunityIcons
+													name='chevron-right'
+													size={20}
+													color='#aaa'
+													style={{ marginLeft: 'auto', alignSelf: 'center' }}
+												/>
 											</View>
-											<MaterialCommunityIcons
-												name='chevron-right'
-												size={20}
-												color='#aaa'
-												style={{ marginLeft: 'auto' }}
-											/>
-										</View>
-									</TouchableOpacity>
-								);
-							})
+										</TouchableOpacity>
+									);
+								})}
+							</View>
 						)}
 					</View>
 				)}
@@ -1692,9 +1798,60 @@ const styles = StyleSheet.create({
 		backgroundColor: 'rgba(255,255,255,0.3)',
 		alignSelf: 'stretch',
 	},
+	resultsLabel: {
+		fontSize: 11,
+		color: '#777',
+		textTransform: 'uppercase',
+		letterSpacing: 0.6,
+		marginBottom: 8,
+		marginLeft: 2,
+	},
+	// username search
+	usernameInput: {
+		margin: 12,
+		marginBottom: 8,
+	},
+	usernameResultsLabel: {
+		fontSize: 11,
+		color: '#888',
+		textTransform: 'uppercase',
+		letterSpacing: 0.6,
+		marginBottom: 8,
+		marginHorizontal: 12,
+	},
+	usernameEmptyState: {
+		alignItems: 'center',
+		padding: 24,
+		gap: 6,
+	},
+	usernameEmptyText: {
+		fontSize: 14,
+		color: '#888',
+		textAlign: 'center',
+	},
+	usernameNoResults: {
+		fontSize: 14,
+		color: '#aaa',
+		textAlign: 'center',
+		padding: 16,
+	},
+	usernameResultCard: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		gap: 10,
+		backgroundColor: 'white',
+		borderRadius: 8,
+		padding: 10,
+		paddingHorizontal: 12,
+		marginBottom: 6,
+		marginHorizontal: 12,
+	},
+	usernameResultName: {
+		flex: 1,
+		fontSize: 14,
+		color: '#222',
+		fontWeight: '500',
+	},
 });
-
-{
-}
 
 export default SearchUsers;
