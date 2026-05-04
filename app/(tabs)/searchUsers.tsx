@@ -63,10 +63,10 @@ const SearchUsers = () => {
 		Record<number, 'like' | 'dislike'>
 	>({});
 
-	const [profileTagMatch, setProfileTagMatch] = useState<'any' | 'all'>('all');
-	const [showMatch, setShowMatch] = useState<'any' | 'all'>('all');
+	const [profileTagMatch, setProfileTagMatch] = useState<'any' | 'all'>('any');
+	const [showMatch, setShowMatch] = useState<'any' | 'all'>('any');
 
-	const [showTagMatch, setShowTagMatch] = useState<'any' | 'all'>('all');
+	const [showTagMatch, setShowTagMatch] = useState<'any' | 'all'>('any');
 
 	const matchStateMap = {
 		profileTags: profileTagMatch,
@@ -123,14 +123,14 @@ const SearchUsers = () => {
 			setSelectedWarning({});
 			setSelectedPreference({});
 			setSelectedDesc({});
-			setProfileTagMatch('all');
+			setProfileTagMatch('any');
 			setProfileTagFilters({});
 		} else if (type === 'shows') {
 			setSelectedShows([]);
-			setShowMatch('all');
+			setShowMatch('any');
 		} else {
 			setSelectedShowTags({});
-			setShowTagMatch('all');
+			setShowTagMatch('any');
 		}
 	};
 
@@ -480,23 +480,6 @@ const SearchUsers = () => {
 					activePanel !== 'summary' && (
 						<View style={styles.anyAllRow}>
 							<TouchableOpacity
-								onPress={() => setMatchMap[activePanel]('all')}
-								style={[
-									styles.anyAllBtn,
-									matchStateMap[activePanel] === 'all' && styles.anyAllBtnOn,
-								]}
-							>
-								<Text
-									style={
-										matchStateMap[activePanel] === 'all'
-											? styles.anyAllBtnOnText
-											: styles.anyAllBtnText
-									}
-								>
-									all of
-								</Text>
-							</TouchableOpacity>
-							<TouchableOpacity
 								style={[
 									styles.anyAllBtn,
 									matchStateMap[activePanel] === 'any' && styles.anyAllBtnOn,
@@ -511,6 +494,23 @@ const SearchUsers = () => {
 									}
 								>
 									any of
+								</Text>
+							</TouchableOpacity>
+							<TouchableOpacity
+								onPress={() => setMatchMap[activePanel]('all')}
+								style={[
+									styles.anyAllBtn,
+									matchStateMap[activePanel] === 'all' && styles.anyAllBtnOn,
+								]}
+							>
+								<Text
+									style={
+										matchStateMap[activePanel] === 'all'
+											? styles.anyAllBtnOnText
+											: styles.anyAllBtnText
+									}
+								>
+									all of
 								</Text>
 							</TouchableOpacity>
 						</View>
@@ -545,22 +545,6 @@ const SearchUsers = () => {
 													<View
 														style={[
 															styles.aaOptWrap,
-															profileTagMatch === 'all' && styles.aaOptWrapOn,
-														]}
-													>
-														<Text
-															style={[
-																styles.aaOpt,
-																profileTagMatch === 'all' && styles.aaOptOn,
-															]}
-														>
-															all
-														</Text>
-													</View>
-													<View style={styles.aaDivider} />
-													<View
-														style={[
-															styles.aaOptWrap,
 															profileTagMatch === 'any' && styles.aaOptWrapOn,
 														]}
 													>
@@ -571,6 +555,22 @@ const SearchUsers = () => {
 															]}
 														>
 															any
+														</Text>
+													</View>
+													<View style={styles.aaDivider} />
+													<View
+														style={[
+															styles.aaOptWrap,
+															profileTagMatch === 'all' && styles.aaOptWrapOn,
+														]}
+													>
+														<Text
+															style={[
+																styles.aaOpt,
+																profileTagMatch === 'all' && styles.aaOptOn,
+															]}
+														>
+															all
 														</Text>
 													</View>
 												</TouchableOpacity>
@@ -620,22 +620,6 @@ const SearchUsers = () => {
 													<View
 														style={[
 															styles.aaOptWrap,
-															showMatch === 'all' && styles.aaOptWrapOn,
-														]}
-													>
-														<Text
-															style={[
-																styles.aaOpt,
-																showMatch === 'all' && styles.aaOptOn,
-															]}
-														>
-															all
-														</Text>
-													</View>
-													<View style={styles.aaDivider} />
-													<View
-														style={[
-															styles.aaOptWrap,
 															showMatch === 'any' && styles.aaOptWrapOn,
 														]}
 													>
@@ -646,6 +630,22 @@ const SearchUsers = () => {
 															]}
 														>
 															any
+														</Text>
+													</View>
+													<View style={styles.aaDivider} />
+													<View
+														style={[
+															styles.aaOptWrap,
+															showMatch === 'all' && styles.aaOptWrapOn,
+														]}
+													>
+														<Text
+															style={[
+																styles.aaOpt,
+																showMatch === 'all' && styles.aaOptOn,
+															]}
+														>
+															all
 														</Text>
 													</View>
 												</TouchableOpacity>
@@ -689,22 +689,6 @@ const SearchUsers = () => {
 													<View
 														style={[
 															styles.aaOptWrap,
-															showTagMatch === 'all' && styles.aaOptWrapOn,
-														]}
-													>
-														<Text
-															style={[
-																styles.aaOpt,
-																showTagMatch === 'all' && styles.aaOptOn,
-															]}
-														>
-															all
-														</Text>
-													</View>
-													<View style={styles.aaDivider} />
-													<View
-														style={[
-															styles.aaOptWrap,
 															showTagMatch === 'any' && styles.aaOptWrapOn,
 														]}
 													>
@@ -715,6 +699,22 @@ const SearchUsers = () => {
 															]}
 														>
 															any
+														</Text>
+													</View>
+													<View style={styles.aaDivider} />
+													<View
+														style={[
+															styles.aaOptWrap,
+															showTagMatch === 'all' && styles.aaOptWrapOn,
+														]}
+													>
+														<Text
+															style={[
+																styles.aaOpt,
+																showTagMatch === 'all' && styles.aaOptOn,
+															]}
+														>
+															all
 														</Text>
 													</View>
 												</TouchableOpacity>
@@ -803,24 +803,6 @@ const SearchUsers = () => {
 											<TouchableOpacity
 												style={[
 													styles.summaryAnyAllBtn,
-													profileTagMatch === 'all' &&
-														styles.summaryAnyAllBtnOn,
-												]}
-												onPress={() => setProfileTagMatch('all')}
-											>
-												<Text
-													style={
-														profileTagMatch === 'all'
-															? styles.summaryAnyAllBtnOnText
-															: styles.summaryAnyAllBtnText
-													}
-												>
-													all of
-												</Text>
-											</TouchableOpacity>
-											<TouchableOpacity
-												style={[
-													styles.summaryAnyAllBtn,
 													profileTagMatch === 'any' &&
 														styles.summaryAnyAllBtnOn,
 												]}
@@ -834,6 +816,24 @@ const SearchUsers = () => {
 													}
 												>
 													any of
+												</Text>
+											</TouchableOpacity>
+											<TouchableOpacity
+												style={[
+													styles.summaryAnyAllBtn,
+													profileTagMatch === 'all' &&
+														styles.summaryAnyAllBtnOn,
+												]}
+												onPress={() => setProfileTagMatch('all')}
+											>
+												<Text
+													style={
+														profileTagMatch === 'all'
+															? styles.summaryAnyAllBtnOnText
+															: styles.summaryAnyAllBtnText
+													}
+												>
+													all of
 												</Text>
 											</TouchableOpacity>
 										</View>
@@ -902,23 +902,6 @@ const SearchUsers = () => {
 											<TouchableOpacity
 												style={[
 													styles.summaryAnyAllBtn,
-													showMatch === 'all' && styles.summaryAnyAllBtnOn,
-												]}
-												onPress={() => setShowMatch('all')}
-											>
-												<Text
-													style={
-														showMatch === 'all'
-															? styles.summaryAnyAllBtnOnText
-															: styles.summaryAnyAllBtnText
-													}
-												>
-													all of
-												</Text>
-											</TouchableOpacity>
-											<TouchableOpacity
-												style={[
-													styles.summaryAnyAllBtn,
 													showMatch === 'any' && styles.summaryAnyAllBtnOn,
 												]}
 												onPress={() => setShowMatch('any')}
@@ -931,6 +914,23 @@ const SearchUsers = () => {
 													}
 												>
 													any of
+												</Text>
+											</TouchableOpacity>
+											<TouchableOpacity
+												style={[
+													styles.summaryAnyAllBtn,
+													showMatch === 'all' && styles.summaryAnyAllBtnOn,
+												]}
+												onPress={() => setShowMatch('all')}
+											>
+												<Text
+													style={
+														showMatch === 'all'
+															? styles.summaryAnyAllBtnOnText
+															: styles.summaryAnyAllBtnText
+													}
+												>
+													all of
 												</Text>
 											</TouchableOpacity>
 										</View>
@@ -977,23 +977,6 @@ const SearchUsers = () => {
 											<TouchableOpacity
 												style={[
 													styles.summaryAnyAllBtn,
-													showTagMatch === 'all' && styles.summaryAnyAllBtnOn,
-												]}
-												onPress={() => setShowTagMatch('all')}
-											>
-												<Text
-													style={
-														showTagMatch === 'all'
-															? styles.summaryAnyAllBtnOnText
-															: styles.summaryAnyAllBtnText
-													}
-												>
-													all of
-												</Text>
-											</TouchableOpacity>
-											<TouchableOpacity
-												style={[
-													styles.summaryAnyAllBtn,
 													showTagMatch === 'any' && styles.summaryAnyAllBtnOn,
 												]}
 												onPress={() => setShowTagMatch('any')}
@@ -1006,6 +989,23 @@ const SearchUsers = () => {
 													}
 												>
 													any of
+												</Text>
+											</TouchableOpacity>
+											<TouchableOpacity
+												style={[
+													styles.summaryAnyAllBtn,
+													showTagMatch === 'all' && styles.summaryAnyAllBtnOn,
+												]}
+												onPress={() => setShowTagMatch('all')}
+											>
+												<Text
+													style={
+														showTagMatch === 'all'
+															? styles.summaryAnyAllBtnOnText
+															: styles.summaryAnyAllBtnText
+													}
+												>
+													all of
 												</Text>
 											</TouchableOpacity>
 										</View>
@@ -1147,6 +1147,7 @@ const SearchUsers = () => {
 							// setSelectedWarningTags={setSelectedWarningShowTags}
 							// warningTagsText={warningShowTagsText}
 							generalTagsText={generalShowTagsText}
+							skipWarning={true}
 						/>
 					</View>
 				)}
@@ -1550,12 +1551,6 @@ const styles = StyleSheet.create({
 	},
 	resultMatchLabel: {
 		fontSize: 12,
-	},
-	resultArrow: {
-		fontSize: 16,
-		color: '#ccc',
-		alignSelf: 'center',
-		marginLeft: 'auto',
 	},
 	compactBar: {
 		flexDirection: 'row',
