@@ -96,6 +96,7 @@ interface Props {
 	>;
 	warningTagsText?: string;
 	generalTagsText?: string;
+	skipWarning?: boolean;
 }
 
 const ShowTagPicker = (props: Props) => {
@@ -106,6 +107,7 @@ const ShowTagPicker = (props: Props) => {
 		generalTagsText,
 		selectedWarningTags,
 		setSelectedWarningTags,
+		skipWarning,
 	} = props;
 	const { tvTags, warningTags } = useAppData();
 	const tagSections: { label: string; tags: Tag[] }[] = [
@@ -183,16 +185,20 @@ const ShowTagPicker = (props: Props) => {
 			))}
 
 			{warningTagsText && <Text style={styles.text}>{warningTagsText}</Text>}
-			<TagSection
-				key={warningSection.label}
-				label={warningSection.label}
-				tags={warningSection.tags}
-				selectedTags={selectedWarningTags ? selectedWarningTags : selectedTags}
-				onSelectTag={selectWarningTag ? selectWarningTag : selectTag}
-				open={openSections[warningSection.label]}
-				setOpen={() => toggleSection(warningSection.label)}
-				isWarning={true}
-			/>
+			{!skipWarning && (
+				<TagSection
+					key={warningSection.label}
+					label={warningSection.label}
+					tags={warningSection.tags}
+					selectedTags={
+						selectedWarningTags ? selectedWarningTags : selectedTags
+					}
+					onSelectTag={selectWarningTag ? selectWarningTag : selectTag}
+					open={openSections[warningSection.label]}
+					setOpen={() => toggleSection(warningSection.label)}
+					isWarning={true}
+				/>
+			)}
 		</View>
 	);
 };
