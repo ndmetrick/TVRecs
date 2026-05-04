@@ -184,6 +184,7 @@ const RecsHeader = ({
 	const [activeFilterType, setActiveFilterType] =
 		useState<ShowFilterType | null>(null);
 	// const [loaded, setLoaded] = useState(false);
+	// const [loaded, setLoaded] = useState(false);
 	const [pendingMinRecs, setPendingMinRecs] = useState<number | null>(null);
 	// const [pendingDescription, setPendingDescription] = useState<string | null>(
 	// 	null,
@@ -286,7 +287,7 @@ const RecsHeader = ({
 				<View style={styles.filterHeader}>
 					<TouchableOpacity
 						onPress={() => {
-							console.log(Object.keys(appliedFilters)); // see what keys exist
+							console.log(Object.keys(appliedFilters));
 							console.log(Object.entries(appliedFilters));
 							setFilterOpen(false);
 						}}

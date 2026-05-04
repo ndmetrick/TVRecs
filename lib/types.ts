@@ -14,6 +14,7 @@ export type Show = {
 	tmdb_id: string | null;
 	image_url: string;
 };
+
 export enum ShowFilterType {
 	HAS_TAGS = 'hasTags',
 	HAS_DESCRIPTION = 'hasDescription',
@@ -32,6 +33,33 @@ export type AppliedShowFilters = {
 	minRecs?: number;
 	descriptionString?: string;
 	none?: boolean;
+};
+
+export type ProfileTagFilter = {
+	[tagId: number]: ProfileTagCategory;
+};
+
+export type UserSearchFilters = {
+	profileTagFilters?: ProfileTagFilter;
+	showTmdb?: string[];
+	showTagIds?: number[];
+};
+
+export type UserSearchResultsWithDetails = {
+	user: UserProfile;
+	showTagsString?: string;
+	profileTagsLikeString?: string;
+	profileTagsDislikeString?: string;
+	profileTagsWarningString?: string;
+	profileTagsDescribeString?: string;
+	showNamesString?: string;
+};
+
+export type UserSearchFilterResults = {
+	profileTagMatches: Record<string, ProfileTagMatch[]>;
+	showMatches: Record<string, ShowMatch[]>;
+	showTagMatches: Record<string, ShowTagMatch[]>;
+	users: Record<string, UserProfile>;
 };
 
 export type EditUserShowParams = {
@@ -60,6 +88,24 @@ export enum TagType {
 export type ProfileTag = {
 	tag: Tag;
 	category: ProfileTagCategory;
+};
+
+export type ProfileTagMatch = {
+	user_id: string;
+	tag_id: number;
+	category: ProfileTagCategory;
+};
+
+export type ShowMatch = {
+	user_id: string;
+	show_id: number;
+	name: string;
+};
+
+export type ShowTagMatch = {
+	tag_id: number;
+	user_id: string;
+	type: TagType;
 };
 
 export type Tag = {

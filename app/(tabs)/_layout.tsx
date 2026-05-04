@@ -33,7 +33,7 @@ export const ComposedSearchIcon = ({
 				bottom: -2,
 				right: -2,
 				width: size * 0.65,
-				height: size * 0.65,
+				height: size * 0.6,
 				borderRadius: 50,
 				backgroundColor: backgroundColor,
 			}}
@@ -87,7 +87,7 @@ export default function TabLayout() {
 				}}
 			/>
 			<Tabs.Screen
-				name='search'
+				name='searchUsers'
 				options={{
 					tabBarIcon: ({ color }) => (
 						<ComposedSearchIcon

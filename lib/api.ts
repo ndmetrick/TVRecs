@@ -4,9 +4,14 @@ import {
 	FollowingRec,
 	ProfileTag,
 	ProfileTagCategory,
+	ProfileTagMatch,
 	Show,
+	ShowMatch,
+	ShowTagMatch,
 	Tag,
 	UserProfile,
+	UserSearchFilterResults,
+	UserSearchFilters,
 	UserShow,
 	UserShowType,
 } from './types';
@@ -30,9 +35,6 @@ export const getCurrentUser = async (
 	return data;
 };
 
-// Structured for getMatchingUsers(supabase, tagIds) extension:
-// add a second query against profile_tags to get user_ids matching tagIds,
-// then append .in('id', matchingIds) before returning.
 export const getAllUsers = async (
 	supabase: SupabaseClient,
 ): Promise<UserProfile[]> => {
@@ -57,32 +59,138 @@ export const updateUser = async (
 	if (error) throw error;
 };
 
-// ── Shows ─────────────────────────────────────────────────────────────────────
-
-export const getUserShows = async (
+export const getMatchingUsers = async (
 	supabase: SupabaseClient,
-	uid: string,
-	type: UserShowType,
-): Promise<UserShow[]> => {
-	const { data, error } = await supabase
-		.from('user_shows')
-		.select(
-			`
-      *,
-      show:shows(*),
-      user_show_tags(tag:tags(*))
-    `,
-		)
-		.eq('user_id', uid)
-		.eq('type', type);
+	filters: UserSearchFilters,
+): Promise<UserSearchFilterResults> => {
+	// ── Profile tags filter ───────────────────────────────────────
+
+	const profileTagMatches: Record<string, ProfileTagMatch[]> = {};
+	const showMatches: Record<string, ShowMatch[]> = {};
+	const showTagMatches: Record<string, ShowTagMatch[]> = {};
+	const uniqueMatchedUserIds = new Set<string>();
+
+	const runProfileTagFilter = async () => {
+		const profileTagFilters = !filters.profileTagFilters
+			? null
+			: Object.keys(filters.profileTagFilters).map(Number);
+		if (!profileTagFilters?.length) return;
+
+		const { data: profileTags, error: profileTagError } = await supabase
+			.from('profile_tags')
+			.select('user_id, tag_id, category')
+			.in('tag_id', profileTagFilters);
+
+		if (profileTagError) {
+			console.error(`${profileTagError}`);
+			throw profileTagError;
+		}
+
+		const matchedProfileTags = profileTags.filter(
+			(ptag) => ptag.category === filters.profileTagFilters![ptag.tag_id],
+		);
+
+		matchedProfileTags.forEach((match) => {
+			uniqueMatchedUserIds.add(match.user_id);
+			if (profileTagMatches[match.user_id]) {
+				profileTagMatches[match.user_id].push(match);
+			} else {
+				profileTagMatches[match.user_id] = [match];
+			}
+		});
+	};
+
+	// ── Shows filter ──────────────────────────────────────────────
+	const runShowFilter = async () => {
+		if (!filters.showTmdb?.length) return;
+
+		const { data: shows, error: showError } = await supabase
+			.from('shows')
+			.select('id, tmdb_id, name')
+			.in('tmdb_id', filters.showTmdb);
+		if (showError) throw showError;
+
+		const showIds = shows.map((show) => show.id);
+		const showNameMap: Record<string, string> = {};
+		for (const show of shows) {
+			showNameMap[show.id] = show.name;
+		}
+
+		const { data: matchedShows, error: userShowError } = await supabase
+			.from('user_shows')
+			.select('user_id, show_id')
+			.in('show_id', showIds)
+			.eq('type', UserShowType.REC);
+		if (userShowError) throw userShowError;
+
+		matchedShows.forEach((match) => {
+			uniqueMatchedUserIds.add(match.user_id);
+			const matchWithName = {
+				...match,
+				name: showNameMap[match.show_id],
+			};
+			if (showMatches[match.user_id]) {
+				showMatches[match.user_id].push(matchWithName);
+			} else {
+				showMatches[match.user_id] = [matchWithName];
+			}
+		});
+	};
+
+	// ── Show tags ──────────────────────────────────────────
+	const runShowTagFilter = async () => {
+		if (!filters.showTagIds?.length) return;
+		const { data: matchedTags, error: showTagError } = await supabase
+			.from('user_show_tags')
+			.select('tag_id, user_show:user_shows!inner(user_id, type)')
+			.in('tag_id', filters.showTagIds)
+			.eq('user_show.type', UserShowType.REC);
+		if (showTagError) throw showTagError;
+
+		const matchedTagsSet = new Set<number>();
+
+		matchedTags.forEach((match) => {
+			console.log('tagtype', (match.user_show as any).type);
+			uniqueMatchedUserIds.add((match.user_show as any).user_id);
+			const userShow = match.user_show as any;
+			const userId = userShow.user_id;
+			if (!matchedTagsSet.has(match.tag_id)) {
+				matchedTagsSet.add(match.tag_id);
+				const formattedMatch = {
+					tag_id: match.tag_id,
+					user_id: userId,
+					type: userShow.type,
+				};
+				if (showTagMatches[userId]) {
+					showTagMatches[userId].push(formattedMatch);
+				} else {
+					showTagMatches[userId] = [formattedMatch];
+				}
+			}
+		});
+	};
+
+	await Promise.all([
+		runProfileTagFilter(),
+		runShowFilter(),
+		runShowTagFilter(),
+	]);
+
+	const { data: users, error } = await supabase
+		.from('users')
+		.select('*')
+		.in('id', [...uniqueMatchedUserIds]);
 	if (error) throw error;
 
-	return (data ?? []).map((row) => ({
-		...row,
-		tags: flattenTags(row.user_show_tags),
-	}));
+	const usersById: Record<string, UserProfile> = {};
+	users.forEach((user) => {
+		usersById[user.id] = user;
+	});
+
+	return { users: usersById, profileTagMatches, showMatches, showTagMatches };
 };
 
+// ── Shows ─────────────────────────────────────────────────────────────────────
 export const getUserShow = async (
 	supabase: SupabaseClient,
 	userId: string,
@@ -103,6 +211,21 @@ export const getUserShow = async (
 	if (error) throw error;
 	if (!data) return null;
 	return { ...data, tags: flattenTags(data.user_show_tags) };
+};
+
+export const findShowWithTmdbId = async (
+	supabase: SupabaseClient,
+	tmdbId: string,
+): Promise<Show | null> => {
+	const { data: existingShow, error: findError } = await supabase
+		.from('shows')
+		.select('*')
+		.eq('tmdb_id', tmdbId)
+		.maybeSingle();
+	if (findError) throw findError;
+
+	const show = existingShow ?? null;
+	return show;
 };
 
 // ── Following / Feed ──────────────────────────────────────────────────────────

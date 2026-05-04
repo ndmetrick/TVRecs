@@ -57,6 +57,7 @@ type AppData = {
 	warningTags: Tag[];
 	preferenceTags: Tag[];
 	describeTags: Tag[];
+	tagMap: Record<string, Tag>;
 };
 
 const AppContext = createContext<AppData | undefined>(undefined);
@@ -115,6 +116,18 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 		[following],
 	);
 
+	const tagMap = useMemo(
+		() =>
+			allTags.reduce(
+				(accum: Record<string, Tag>, curr: Tag) => {
+					accum[curr.id] = curr;
+					return accum;
+				},
+				{} as Record<string, Tag>,
+			),
+		[allTags],
+	);
+
 	const clearAll = () => {
 		setCurrentUser(null);
 		setFollowing([]);
@@ -122,7 +135,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 		setUserShows([]);
 		setToWatch([]);
 		setSeen([]);
-		setAllTags([]);
 		setError(null);
 		setWatchProviders({});
 		setAllProfileShows([]);
@@ -374,6 +386,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 				preferenceTags,
 				describeTags,
 				filteredFollowingRecs,
+				tagMap,
 			}}
 		>
 			{children}

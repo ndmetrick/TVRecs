@@ -1,5 +1,6 @@
 // import { useIsFocused } from '@react-navigation/native';
 import { showErrorToast } from '@/lib/toast';
+import { Show } from '@/lib/types';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
 import * as Sentry from '@sentry/react-native';
@@ -25,6 +26,7 @@ interface Props {
 	) => void;
 	showAdded: boolean;
 	previous: string;
+	onShowSelected?: (show: Show) => void;
 }
 
 export const ShowImagePlaceholder = ({
@@ -454,8 +456,8 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 	},
 	button: {
-		padding: 10,
-		borderRadius: 40,
+		padding: 5,
+		borderRadius: 15,
 		marginHorizontal: 3,
 		backgroundColor: '#340068',
 		marginTop: 5,

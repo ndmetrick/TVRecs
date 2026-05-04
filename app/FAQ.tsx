@@ -50,7 +50,7 @@ const FAQ = () => {
 
 			<TouchableOpacity
 				onPress={() => {
-					router.push({ pathname: '/search' });
+					router.push({ pathname: '/searchUsers' });
 				}}
 			>
 				<Text style={styles.headingText}>

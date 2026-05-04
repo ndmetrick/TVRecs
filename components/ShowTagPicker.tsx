@@ -106,7 +106,7 @@ const ShowTagPicker = (props: Props) => {
 		generalTagsText,
 		selectedWarningTags,
 		setSelectedWarningTags,
-	} = props; // does this come from the parent? does the SAVE go in here and it's just what gets set to save? no, bc the other one is description...	const [loaded, setLoaded] = useState(false);
+	} = props;
 	const { tvTags, warningTags } = useAppData();
 	const tagSections: { label: string; tags: Tag[] }[] = [
 		{ label: 'Mood', tags: tvTags.mood },

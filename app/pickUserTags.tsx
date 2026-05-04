@@ -1,8 +1,9 @@
+import PickUserTagsContent from '@/components/PickUserTagsContent';
 import { setProfileTags, updateUser } from '@/lib/api';
 import { useAppData } from '@/lib/AppContext';
 import { supabase } from '@/lib/supabase';
 import { showErrorToast } from '@/lib/toast';
-import { ProfileTag, ProfileTagCategory, Tag, TagType } from '@/lib/types';
+import { ProfileTag, ProfileTagCategory, TagType } from '@/lib/types';
 import * as Sentry from '@sentry/react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
@@ -17,6 +18,13 @@ import {
 } from 'react-native';
 import { TextInput } from 'react-native-paper';
 
+const preferenceTagsText =
+	'Pick some tags that describe genres/attributes of the kinds of shows you like best. Tap once to mark as a favorite, tap again to mark as something you actively avoid, tap a third time to clear:';
+const warningTagsText =
+	'Pick some tags that describe any deal breakers or triggers (i.e., the kinds of things that, if shows contain them, you end up choosing not to watch them / you find yourself needing to be very careful with watching them):';
+const descTagsText =
+	'Pick some tags that describe the kind of television watcher you are:';
+
 const PickUserTags = () => {
 	const { profileTagsString } = useLocalSearchParams();
 	const [selectedWarning, setSelectedWarning] = useState<
@@ -24,19 +32,13 @@ const PickUserTags = () => {
 	>({});
 	const [selectedDesc, setSelectedDesc] = useState<Record<number, boolean>>({});
 	const [selectedPreference, setSelectedPreference] = useState<
-		Record<number, 'like' | 'dislike' | 'none'>
+		Record<number, 'like' | 'dislike'>
 	>({});
 	const [loaded, setLoaded] = useState(false);
 	const [description, setDescription] = useState('');
 	const [saving, setSaving] = useState(false);
 
-	const {
-		currentUser,
-		warningTags,
-		preferenceTags,
-		describeTags,
-		refetchCurrentUser,
-	} = useAppData();
+	const { currentUser, refetchCurrentUser } = useAppData();
 
 	useEffect(() => {
 		const desc: Record<number, boolean> = {};
@@ -77,81 +79,6 @@ const PickUserTags = () => {
 			setDescription('');
 		};
 	}, [currentUser, profileTagsString]);
-
-	const selectDescTag = (tag: Tag) => {
-		const current = !!selectedDesc[tag.id];
-		setSelectedDesc((prev) => ({
-			...prev,
-			[tag.id]: !current,
-		}));
-	};
-
-	const selectWarningTag = (tag: Tag) => {
-		const current = !!selectedWarning[tag.id];
-		setSelectedWarning((prev) => ({
-			...prev,
-			[tag.id]: !current,
-		}));
-	};
-
-	const selectPreferenceTag = (tag: Tag) => {
-		const current = selectedPreference[tag.id];
-		let next: 'none' | 'like' | 'dislike' = 'like';
-		if (current === 'dislike') {
-			next = 'none';
-		} else if (current === ProfileTagCategory.LIKE) {
-			next = ProfileTagCategory.DISLIKE;
-		}
-		setSelectedPreference((prev) => ({
-			...prev,
-			[tag.id]: next,
-		}));
-	};
-
-	const getDisplayTagStyle = (tag: Tag) => {
-		switch (tag.type) {
-			case TagType.WARNING:
-				return selectedWarning[tag.id]
-					? styles.highlightWarningTag
-					: styles.warningTag;
-			case TagType.PROFILE_DESCRIBE:
-				return selectedDesc[tag.id]
-					? styles.highlightDescribeTag
-					: styles.describeTag;
-			case TagType.PROFILE:
-			case TagType.UNASSIGNED:
-				return selectedPreference[tag.id] === 'dislike'
-					? styles.dislikePreferenceTag
-					: selectedPreference[tag.id] === 'like'
-						? styles.likePreferenceTag
-						: styles.preferenceTag;
-		}
-	};
-
-	const displayTags = (tags: Tag[]) => {
-		return tags.map((tag, key) => {
-			const isWarning = tag.type === TagType.WARNING;
-			const isDesc = tag.type === TagType.PROFILE_DESCRIBE;
-			const tagStyle = getDisplayTagStyle(tag);
-
-			if (tagStyle)
-				return (
-					<TouchableOpacity
-						key={key}
-						style={tagStyle}
-						onPress={
-							isWarning
-								? () => selectWarningTag(tag)
-								: isDesc
-									? () => selectDescTag(tag)
-									: () => selectPreferenceTag(tag)
-						}
-					>
-						<Text style={styles.tagText}>{tag.name}</Text>
-					</TouchableOpacity>
-				);
-		});
-	};
 
 	const handlePress = async () => {
 		if (!currentUser) {
@@ -244,29 +171,17 @@ const PickUserTags = () => {
 					multiline={true}
 					value={description}
 				/>
-				<Text style={styles.text}>
-					Pick some tags that describe genres/attributes of the kinds of shows
-					you like best. Tap once to mark as a favorite, tap again to mark as
-					something you actively avoid, tap a third time to clear:
-				</Text>
-				<View style={[styles.cardContent, styles.tagsContent]}>
-					{displayTags(preferenceTags)}
-				</View>
-				<Text style={styles.text}>
-					Pick some tags that describe any deal breakers or triggers (i.e., the
-					kinds of things that, if shows contain them, you end up choosing not
-					to watch them / you find yourself needing to be very careful with
-					watching them):
-				</Text>
-				<View style={[styles.cardContent, styles.tagsContent]}>
-					{displayTags(warningTags)}
-				</View>
-				<Text style={styles.text}>
-					Pick some tags that describe the kind of television watcher you are:
-				</Text>
-				<View style={[styles.cardContent, styles.tagsContent]}>
-					{displayTags(describeTags)}
-				</View>
+				<PickUserTagsContent
+					selectedPreference={selectedPreference}
+					setSelectedPreference={setSelectedPreference}
+					selectedWarning={selectedWarning}
+					setSelectedWarning={setSelectedWarning}
+					selectedDesc={selectedDesc}
+					setSelectedDesc={setSelectedDesc}
+					preferenceTagsText={preferenceTagsText}
+					warningTagsText={warningTagsText}
+					descTagsText={descTagsText}
+				/>
 				<View style={styles.buttonContainer}>
 					<TouchableOpacity style={styles.button} onPress={handlePress}>
 						<Text style={styles.buttonText}>

@@ -257,7 +257,7 @@ const RecShows = () => {
 						{following.length ? 'more' : 'other'}
 						users!
 					</Text>
-					<TouchableOpacity onPress={() => router.push('/(tabs)/search')}>
+					<TouchableOpacity onPress={() => router.push('/(tabs)/searchUsers')}>
 						<Text style={styles.emptyStateLink}>Find users to follow →</Text>
 					</TouchableOpacity>
 				</View>
