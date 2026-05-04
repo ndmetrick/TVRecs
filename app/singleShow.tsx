@@ -388,7 +388,13 @@ const SingleShow = () => {
 								</Text>
 							</View>
 							<View style={styles.recButton}>
-								<Text style={styles.recText}> recommendation:</Text>
+								<Text style={styles.recText}>
+									{type === 'rec'
+										? ' recommendation:'
+										: type === 'watch'
+											? ' show to watch:'
+											: ' show to filter out'}{' '}
+								</Text>
 							</View>
 						</View>
 					) : (
