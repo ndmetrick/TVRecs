@@ -191,6 +191,31 @@ export const getMatchingUsers = async (
 };
 
 // ── Shows ─────────────────────────────────────────────────────────────────────
+
+export const getUserShows = async (
+	supabase: SupabaseClient,
+	uid: string,
+	type: UserShowType,
+): Promise<UserShow[]> => {
+	const { data, error } = await supabase
+		.from('user_shows')
+		.select(
+			`
+      *,
+      show:shows(*),
+      user_show_tags(tag:tags(*))
+    `,
+		)
+		.eq('user_id', uid)
+		.eq('type', type);
+	if (error) throw error;
+
+	return (data ?? []).map((row) => ({
+		...row,
+		tags: flattenTags(row.user_show_tags),
+	}));
+};
+
 export const getUserShow = async (
 	supabase: SupabaseClient,
 	userId: string,
