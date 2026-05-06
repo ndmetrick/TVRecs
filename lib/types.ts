@@ -165,7 +165,7 @@ export type TMDBWatchProviderResults = {
 export enum SourcePage {
 	SINGLE_SHOW = 'SINGLE_SHOW',
 	ADD_SHOW = 'ADD_SHOW',
-	SEARCH = 'SEARCH',
+	USER_SEARCH = 'USER_SEARCH',
 	REC_SHOWS = 'REC_SHOWS',
 	CURRENT_USER = 'CURRENT_USER',
 	OTHER_USER = 'OTHER_USER',

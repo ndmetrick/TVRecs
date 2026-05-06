@@ -9,6 +9,7 @@ import {
 	ProfileTagCategory,
 	ProfileTagFilter,
 	Show,
+	SourcePage,
 	Tag,
 	TagType,
 	UserProfile,
@@ -141,6 +142,18 @@ const SearchUsers = () => {
 			setSelectedShowTags({});
 			setShowTagMatch('any');
 		}
+	};
+
+	const clearAllFilters = () => {
+		setSelectedWarning({});
+		setSelectedPreference({});
+		setSelectedDesc({});
+		setProfileTagMatch('any');
+		setProfileTagFilters({});
+		setSelectedShows([]);
+		setShowMatch('any');
+		setSelectedShowTags({});
+		setShowTagMatch('any');
 	};
 
 	const getPillColor = (tag: Tag) => {
@@ -416,18 +429,42 @@ const SearchUsers = () => {
 		<View style={styles.container}>
 			<View style={styles.header}>
 				{/* Exclude toggle row */}
-				<View style={styles.headerTop}>
-					<Switch
-						value={excludeFollowed}
-						onValueChange={setExcludeFollowed}
-						trackColor={{ false: '#3e3e3e', true: '#36C9C6' }}
-						thumbColor='white'
-						ios_backgroundColor='#3e3e3e'
-					/>
-					<View>
-						<Text style={styles.excludeLabel}>Exclude users I follow</Text>
-						<Text style={styles.excludeSub}>Only show unfollowed users</Text>
+				<View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+					<View style={styles.headerTop}>
+						<Switch
+							value={excludeFollowed}
+							onValueChange={setExcludeFollowed}
+							trackColor={{ false: '#3e3e3e', true: '#36C9C6' }}
+							thumbColor='white'
+							ios_backgroundColor='#3e3e3e'
+						/>
+						<View>
+							<Text style={styles.excludeLabel}>Exclude users I follow</Text>
+							<Text style={styles.excludeSub}>Only show unfollowed users</Text>
+						</View>
 					</View>
+					{searchMode === 'filters' && (
+						<TouchableOpacity
+							style={styles.clearAllFiltersButton}
+							onPress={clearAllFilters}
+						>
+							<Text
+								style={
+									[
+										...chosenDescTags,
+										...chosenPreferenceTags,
+										...chosenWarningTags,
+										...selectedShows,
+										...chosenShowTagIds,
+									].length < 1
+										? styles.clearAllFiltersText
+										: styles.clearAllFiltersHighlight
+								}
+							>
+								clear all
+							</Text>
+						</TouchableOpacity>
+					)}
 				</View>
 
 				{/* Mode tabs */}
@@ -1188,8 +1225,7 @@ const SearchUsers = () => {
 						>
 							<SelectShow
 								handleShow={handleShow}
-								showAdded={false}
-								previous='UserSearch'
+								sourcePage={SourcePage.USER_SEARCH}
 							/>
 						</ScrollView>
 
@@ -1288,7 +1324,7 @@ const SearchUsers = () => {
 											setSelectedShowTags({});
 										}}
 									>
-										<Text style={styles.panelClearText}>clear all</Text>
+										<Text style={styles.panelClearText}>clear all tags</Text>
 									</TouchableOpacity>
 								</View>
 							</Portal>
@@ -1465,6 +1501,25 @@ const styles = StyleSheet.create({
 		paddingBottom: 8,
 		borderBottomWidth: 0.5,
 		borderBottomColor: 'rgba(255,255,255,0.15)',
+	},
+	clearAllFiltersButton: {
+		alignSelf: 'flex-start',
+		marginTop: 10,
+		marginRight: 5,
+		paddingVertical: 3,
+		paddingHorizontal: 9,
+		borderRadius: 999,
+		borderWidth: 1,
+		borderColor: 'rgba(255,255,255,0.55)',
+	},
+	clearAllFiltersText: {
+		color: 'rgba(255,255,255,0.55)',
+		fontWeight: '500',
+		fontSize: 12,
+	},
+	clearAllFiltersHighlight: {
+		color: 'rgba(255, 255, 255, 0.9)',
+		fontSize: 12,
 	},
 	excludeLabel: {
 		fontSize: 13,

@@ -267,10 +267,6 @@ const AddShowTags = () => {
 						style={styles.panelClearButton}
 						onPress={() => {
 							setSelectedTags({});
-							// setAppliedFilters((prev) => {
-							// 	const { hasTagIds, notHasTagIds, ...rest } = prev;
-							// 	return rest;
-							// });
 						}}
 					>
 						<Text style={styles.panelClearText}>clear all</Text>
@@ -283,11 +279,7 @@ const AddShowTags = () => {
 
 const styles = StyleSheet.create({
 	container: {
-		// marginTop: 15,
 		flex: 1,
-		// justifyContent: 'center',
-		// marginHorizontal: 2,
-		// marginBottom: 20,
 	},
 	text: {
 		fontSize: 16,

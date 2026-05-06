@@ -1,6 +1,6 @@
 // import { useIsFocused } from '@react-navigation/native';
 import { showErrorToast } from '@/lib/toast';
-import { Show } from '@/lib/types';
+import { SourcePage } from '@/lib/types';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
 import * as Sentry from '@sentry/react-native';
@@ -24,9 +24,7 @@ interface Props {
 		tmdbId: number | string,
 		showAdded: boolean,
 	) => void;
-	showAdded: boolean;
-	previous: string;
-	onShowSelected?: (show: Show) => void;
+	sourcePage: SourcePage;
 }
 
 export const ShowImagePlaceholder = ({
@@ -68,7 +66,7 @@ export const ShowImagePlaceholder = ({
 	);
 };
 
-const SelectShow = (props: Props) => {
+const SelectShow = ({ sourcePage, handleShow }: Props) => {
 	const [showInput, setShowInput] = useState('');
 	const [showOptions, setShowOptions] = useState<ShowOptions[] | null>(null);
 	const [added, setAdded] = useState(false);
@@ -137,7 +135,7 @@ const SelectShow = (props: Props) => {
 					if (show.poster_path) {
 						const image =
 							'https://image.tmdb.org/t/p/original' + show.poster_path;
-						props.handleShow(show.name, image, show.id, true);
+						handleShow(show.name, image, show.id, true);
 						setAdded(true);
 					} else {
 						const imageShowText = `https://www.omdbapi.com/?t=${titleString}&apikey=${process.env.EXPO_PUBLIC_OMDB_API_KEY}`;
@@ -146,7 +144,7 @@ const SelectShow = (props: Props) => {
 						if (!poster || poster === 'N/A') {
 							poster = null;
 						}
-						props.handleShow(show.name, poster, show.id, true);
+						handleShow(show.name, poster, show.id, true);
 						setAdded(true);
 					}
 				}
@@ -168,7 +166,7 @@ const SelectShow = (props: Props) => {
 		setAdded(false);
 		setShowInput('');
 		setShowOptions(null);
-		props.handleShow('', '', '', false);
+		handleShow('', '', '', false);
 	};
 
 	const getShowData = async (id: number) => {
@@ -179,7 +177,7 @@ const SelectShow = (props: Props) => {
 			setShowOptions(null);
 			if (data.poster_path) {
 				const image = 'https://image.tmdb.org/t/p/original' + data.poster_path;
-				props.handleShow(data.name, image, id, true);
+				handleShow(data.name, image, id, true);
 				setAdded(true);
 			} else {
 				const imageShowText = `https://www.omdbapi.com/?t=${data.name}&apikey=${process.env.EXPO_PUBLIC_OMDB_API_KEY}`;
@@ -187,10 +185,10 @@ const SelectShow = (props: Props) => {
 				let poster = imageShow.data.Poster;
 				if (!poster || poster === 'N/A') {
 					poster = null;
-					props.handleShow(data.name, poster, id, true);
+					handleShow(data.name, poster, id, true);
 					setAdded(true);
 				} else {
-					props.handleShow(data.name, poster, id, true);
+					handleShow(data.name, poster, id, true);
 					setAdded(true);
 				}
 			}
@@ -221,7 +219,9 @@ const SelectShow = (props: Props) => {
 										onPress={chooseNewShow}
 									>
 										<Text style={styles.buttonText}>
-											Search for a different show
+											{sourcePage === SourcePage.USER_SEARCH
+												? 'Search for another show'
+												: 'Search for a different show'}
 										</Text>
 									</TouchableOpacity>
 								</View>
@@ -343,22 +343,16 @@ const SelectShow = (props: Props) => {
 									value={showInput}
 									onFocus={() => setNotFound(false)}
 								/>
-								<View
-									style={
-										props.previous === 'Search'
-											? { flex: 1, alignItems: 'flex-end' }
-											: styles.buttonContainer
-									}
-								>
+								<View style={styles.buttonContainer}>
 									<TouchableOpacity
 										style={
-											props.previous === 'Search'
+											sourcePage === SourcePage.USER_SEARCH
 												? styles.searchPageButton
 												: styles.button
 										}
 										onPress={findShowOptions}
 									>
-										{props.previous === 'Search' ? (
+										{sourcePage === SourcePage.USER_SEARCH ? (
 											<Text style={styles.buttonText}>Filter by show</Text>
 										) : (
 											<Text style={styles.buttonText}>Find show</Text>
@@ -384,27 +378,28 @@ const SelectShow = (props: Props) => {
 					<View>
 						<View
 							style={
-								props.previous === 'Search'
+								sourcePage === SourcePage.USER_SEARCH
 									? { flex: 1, alignItems: 'flex-end' }
 									: styles.buttonContainer
 							}
 						>
 							<TouchableOpacity
 								style={
-									props.previous === 'Search'
+									sourcePage === SourcePage.USER_SEARCH
 										? styles.searchPageButton
 										: styles.button
 								}
 								onPress={chooseNewShow}
 							>
 								<Text style={styles.buttonText}>
-									Search for a different show
+									{sourcePage === SourcePage.USER_SEARCH
+										? 'Search for another show'
+										: 'Search for a different show'}
 								</Text>
 							</TouchableOpacity>
 						</View>
 					</View>
 				)}
-				<View></View>
 			</ScrollView>
 		</View>
 	);
