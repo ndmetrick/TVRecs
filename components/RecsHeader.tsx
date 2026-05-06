@@ -5,7 +5,8 @@ import {
 	UserShowType,
 } from '@/lib/types';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useIsFocused } from '@react-navigation/native';
+import { useEffect, useState } from 'react';
 import {
 	ScrollView,
 	StyleSheet,
@@ -14,80 +15,52 @@ import {
 	TouchableOpacity,
 	View,
 } from 'react-native';
+import { Portal } from 'react-native-paper';
 import ShowTagPicker from './ShowTagPicker';
 
 type PillState = 'inactive' | 'pending' | 'applied';
 const generalTagsText = 'Pick tags to include in filter:';
 const warningTagsText = 'Pick warning tags to filter out:';
 
-// interface ChooseDescriptionPanelProps {
-// 	pendingDescription: string | null;
-// 	setPendingDescription: React.Dispatch<React.SetStateAction<string | null>>;
-// 	onApply: () => void;
-// 	onClear: () => void;
-// }
-
-// const ChooseDescriptionPanel = ({
-// 	pendingDescription,
-// 	setPendingDescription,
-// 	onApply,
-// 	onClear,
-// }: ChooseDescriptionPanelProps) => {
-// 	return (
-// 		<View style={styles.panelContainer}>
-// 			<Text style={{ marginBottom: 5 }}>
-// 				Enter a word to search the description for:
-// 			</Text>
-// 			<View style={styles.numberPillRow}></View>
-// 			<Text style={{ marginTop: 5 }}>people you follow</Text>
-// 			<View style={styles.panelActionRow}>
-// 				<TouchableOpacity style={styles.panelClearButton} onPress={onClear}>
-// 					<Text style={styles.panelClearText}>clear</Text>
-// 				</TouchableOpacity>
-// 				<TouchableOpacity style={styles.panelApplyButton} onPress={onApply}>
-// 					<Text style={styles.panelApplyText}>apply</Text>
-// 				</TouchableOpacity>
-// 			</View>
-// 		</View>
-// 	);
-// };
-
 interface MinRecsProps {
-	pendingMinRecs: number | null;
-	setPendingMinRecs: React.Dispatch<React.SetStateAction<number | null>>;
-	onApply: () => void;
-	onClear: () => void;
+	setMinRecs: (val: number | undefined) => void;
+	minRecs: number | undefined;
 }
 
-const minRecsArray = ['1', '2', '3', '4', '5+'];
+const minRecsArray = ['2', '3', '4', '5', '6+'];
 
-const MinRecsPanel = ({
-	pendingMinRecs,
-	setPendingMinRecs,
-	onApply,
-	onClear,
-}: MinRecsProps) => {
+const MinRecsPanel = ({ setMinRecs, minRecs }: MinRecsProps) => {
 	return (
-		<View style={styles.panelContainer}>
-			<Text style={{ marginBottom: 5 }}>
+		<View
+			style={{
+				...styles.panelContainer,
+				borderBottomColor: '#340068',
+				borderBottomWidth: 3,
+				padding: 14,
+				shadowColor: '#000',
+				shadowOpacity: 0.1,
+				shadowRadius: 4,
+				elevation: 4,
+			}}
+		>
+			<Text style={{ marginBottom: 10 }}>
 				Only show recs recommended by at least:
 			</Text>
 			<View style={styles.numberPillRow}>
 				{minRecsArray.map((num, index) => {
-					console.log('index', index === pendingMinRecs);
 					return (
 						<TouchableOpacity
-							onPress={() => setPendingMinRecs(index)}
+							onPress={() => setMinRecs(index + 1)}
 							key={index}
 							style={
-								pendingMinRecs === index
+								minRecs === index + 1
 									? styles.numberPillSelected
 									: styles.numberPill
 							}
 						>
 							<Text
 								style={
-									pendingMinRecs === index
+									minRecs === index + 1
 										? styles.numberPillSelectedText
 										: styles.numberPillText
 								}
@@ -98,15 +71,7 @@ const MinRecsPanel = ({
 					);
 				})}
 			</View>
-			<Text style={{ marginTop: 5 }}>people I follow</Text>
-			<View style={styles.panelActionRow}>
-				<TouchableOpacity style={styles.panelClearButton} onPress={onClear}>
-					<Text style={styles.panelClearText}>clear</Text>
-				</TouchableOpacity>
-				<TouchableOpacity style={styles.panelApplyButton} onPress={onApply}>
-					<Text style={styles.panelApplyText}>apply</Text>
-				</TouchableOpacity>
-			</View>
+			<Text style={{ marginTop: 10 }}>people I follow</Text>
 		</View>
 	);
 };
@@ -115,10 +80,11 @@ interface PillProps {
 	label: string;
 	pillState: PillState;
 	onPress: any;
+	numApplied?: number | undefined;
 }
 
 const Pill = (props: PillProps) => {
-	const { label, pillState, onPress } = props;
+	const { label, pillState, onPress, numApplied } = props;
 
 	const getPillStyle = (state: PillState) =>
 		({
@@ -140,7 +106,8 @@ const Pill = (props: PillProps) => {
 			style={[styles.pill, getPillStyle(pillState)]}
 		>
 			<Text style={[styles.pillText, { color: getTextColor(pillState) }]}>
-				{label} {pillState === 'applied' ? '✓' : ''}
+				{label}{' '}
+				{pillState !== 'applied' ? '' : numApplied ? `(${numApplied})✓` : '✓'}
 			</Text>
 		</TouchableOpacity>
 	);
@@ -150,7 +117,6 @@ interface RecsHeaderProps {
 	noUserShows?: boolean;
 	toggleNoUserShows?: () => void;
 	cancelFilters: () => void;
-	// allShowTags: Tag[];
 	appliedFilters: AppliedShowFilters;
 	setAppliedFilters: React.Dispatch<React.SetStateAction<AppliedShowFilters>>;
 	filterOpen: boolean;
@@ -161,13 +127,13 @@ interface RecsHeaderProps {
 	setExcludedSourceTypes?: React.Dispatch<
 		React.SetStateAction<Set<UserShowType>>
 	>;
+	tagPanelMaxHeight?: number;
 }
 
 const RecsHeader = ({
 	noUserShows,
 	toggleNoUserShows,
 	cancelFilters,
-	// allShowTags,
 	appliedFilters,
 	setAppliedFilters,
 	filterOpen,
@@ -176,6 +142,7 @@ const RecsHeader = ({
 	sourcePage,
 	excludedSourceTypes,
 	setExcludedSourceTypes,
+	tagPanelMaxHeight,
 }: RecsHeaderProps) => {
 	const [selectedTags, setSelectedTags] = useState<Record<string, boolean>>({});
 	const [selectedWarningTags, setSelectedWarningTags] = useState<
@@ -183,17 +150,16 @@ const RecsHeader = ({
 	>({});
 	const [activeFilterType, setActiveFilterType] =
 		useState<ShowFilterType | null>(null);
-	// const [loaded, setLoaded] = useState(false);
-	// const [loaded, setLoaded] = useState(false);
-	const [pendingMinRecs, setPendingMinRecs] = useState<number | null>(null);
-	// const [pendingDescription, setPendingDescription] = useState<string | null>(
-	// 	null,
-	// );
+	const isFocused = useIsFocused();
 
+	const [collapsed, setCollapsed] = useState<'collapse' | 'open'>('collapse');
 	const clearAllFilters = () => {
 		setSelectedTags({});
 		setSelectedWarningTags({});
-		setPendingMinRecs(null);
+		setAppliedFilters((prev) => {
+			const { minRecs, ...rest } = prev;
+			return rest;
+		});
 		cancelFilters();
 	};
 
@@ -218,15 +184,44 @@ const RecsHeader = ({
 			});
 	};
 
-	// useEffect(() => {
-	// 	console.log('filterLEngth', filterLength);
-	// 	Object.keys(appliedFilters).forEach((filter) =>
-	// 		console.log('applied filter', filter),
-	// 	);
-	// }, [appliedFilters, filterLength]);
+	useEffect(() => {
+		const chosenTags: number[] = [];
+		for (const tagId in selectedTags) {
+			if (selectedTags[tagId] === true) {
+				chosenTags.push(Number(tagId));
+			}
+		}
+		setAppliedFilters((prev) => {
+			const next = { ...prev };
+			if (chosenTags.length) next.hasTagIds = chosenTags;
+			else delete next.hasTagIds;
+			return next;
+		});
+	}, [selectedTags, setAppliedFilters]);
+
+	useEffect(() => {
+		const chosenWarningTags: number[] = [];
+
+		for (const tagId in selectedWarningTags) {
+			if (selectedWarningTags[tagId] === true) {
+				chosenWarningTags.push(Number(tagId));
+			}
+		}
+		setAppliedFilters((prev) => {
+			const next = { ...prev };
+			if (chosenWarningTags.length) next.notHasTagIds = chosenWarningTags;
+			else delete next.notHasTagIds;
+			return next;
+		});
+	}, [selectedWarningTags, setAppliedFilters]);
 
 	return (
-		<View style={styles.header}>
+		<View
+			style={styles.header}
+			onLayout={(e) =>
+				console.log('header height:', e.nativeEvent.layout.height)
+			}
+		>
 			{sourcePage === SourcePage.REC_SHOWS && toggleNoUserShows ? (
 				<View style={styles.toggleContainer}>
 					<Text style={{ color: 'white' }}>
@@ -284,7 +279,12 @@ const RecsHeader = ({
 			) : null}
 
 			{filterOpen ? (
-				<View style={styles.filterHeader}>
+				<View
+					style={styles.filterHeader}
+					onLayout={(e) =>
+						console.log('filterHeader height:', e.nativeEvent.layout.height)
+					}
+				>
 					<TouchableOpacity
 						onPress={() => {
 							console.log(Object.keys(appliedFilters));
@@ -337,6 +337,13 @@ const RecsHeader = ({
 										? 'pending'
 										: 'inactive'
 							}
+							numApplied={
+								appliedFilters.notHasTagIds?.length ||
+								appliedFilters.hasTagIds?.length
+									? (appliedFilters.notHasTagIds?.length ?? 0) +
+										(appliedFilters?.hasTagIds?.length ?? 0)
+									: undefined
+							}
 							onPress={() =>
 								setActiveFilterType((prev) =>
 									prev === ShowFilterType.HAS_TAG_IDS
@@ -345,13 +352,6 @@ const RecsHeader = ({
 								)
 							}
 						/>
-						{/* <Pill
-							label='words in description'
-							pillState={getPillState(ShowFilterType.DESCRIPTION_STRING)}
-							onPress={() =>
-								setActiveFilterType(ShowFilterType.DESCRIPTION_STRING)
-							}
-						/> */}
 						<Pill
 							label='has description'
 							pillState={getPillState(ShowFilterType.HAS_DESCRIPTION)}
@@ -381,113 +381,102 @@ const RecsHeader = ({
 						)}
 					</ScrollView>
 
-					{activeFilterType === 'hasTagIds' && (
-						<View style={styles.panelContainer}>
-							<ScrollView
-								showsVerticalScrollIndicator={false}
-								keyboardShouldPersistTaps='handled'
-								style={styles.tagPanelScroll}
-							>
-								<ShowTagPicker
-									selectedTags={selectedTags}
-									setSelectedTags={setSelectedTags}
-									selectedWarningTags={selectedWarningTags}
-									setSelectedWarningTags={setSelectedWarningTags}
-									warningTagsText={warningTagsText}
-									generalTagsText={generalTagsText}
-								/>
-							</ScrollView>
-							<View style={styles.panelActionRow}>
-								<TouchableOpacity
-									style={styles.panelClearButton}
-									onPress={() => {
-										setSelectedTags({});
-										setSelectedWarningTags({});
-										setAppliedFilters((prev) => {
-											const { hasTagIds, notHasTagIds, ...rest } = prev;
-											return rest;
-										});
-									}}
+					{activeFilterType === 'hasTagIds' && isFocused && (
+						<>
+							<View style={styles.panelContainer}>
+								<ScrollView
+									showsVerticalScrollIndicator={false}
+									keyboardShouldPersistTaps='handled'
+									style={
+										tagPanelMaxHeight
+											? { maxHeight: tagPanelMaxHeight }
+											: { maxHeight: 480 }
+									}
 								>
-									<Text style={styles.panelClearText}>clear</Text>
-								</TouchableOpacity>
-								<TouchableOpacity
-									style={styles.panelApplyButton}
-									onPress={() => {
-										const chosenTags: number[] = [];
-										const chosenWarningTags: number[] = [];
-										for (const tagId in selectedTags) {
-											if (selectedTags[tagId] === true) {
-												chosenTags.push(Number(tagId));
-											}
-										}
-										for (const tagId in selectedWarningTags) {
-											if (selectedWarningTags[tagId] === true) {
-												chosenWarningTags.push(Number(tagId));
-											}
-										}
-										setAppliedFilters((prev) => {
-											const next = { ...prev };
-											if (chosenTags.length) next.hasTagIds = chosenTags;
-											else delete next.hasTagIds;
-											if (chosenWarningTags.length)
-												next.notHasTagIds = chosenWarningTags;
-											else delete next.notHasTagIds;
-											return next;
-										});
-										setActiveFilterType(null);
-									}}
-								>
-									<Text style={styles.panelApplyText}>apply</Text>
-								</TouchableOpacity>
+									<ShowTagPicker
+										selectedTags={selectedTags}
+										setSelectedTags={setSelectedTags}
+										selectedWarningTags={selectedWarningTags}
+										setSelectedWarningTags={setSelectedWarningTags}
+										warningTagsText={warningTagsText}
+										generalTagsText={generalTagsText}
+										collapsed={collapsed}
+										setCollapsed={setCollapsed}
+									/>
+								</ScrollView>
 							</View>
-						</View>
+							<Portal>
+								<View
+									style={[
+										styles.panelActionRow,
+										{
+											position: 'absolute',
+											bottom: 83,
+											left: 0,
+											right: 0,
+										},
+									]}
+								>
+									<TouchableOpacity
+										onPress={() =>
+											setCollapsed((prev) =>
+												prev === 'open' ? 'collapse' : 'open',
+											)
+										}
+										style={styles.collapseAllButton}
+									>
+										<View style={{ flexDirection: 'row' }}>
+											<Text style={styles.collapseAllText}>
+												{collapsed === 'collapse'
+													? 'collapse all tags '
+													: 'open all tags '}
+											</Text>
+											<MaterialCommunityIcons
+												name={
+													collapsed === 'collapse'
+														? 'chevron-up'
+														: 'chevron-down'
+												}
+												size={13}
+												color='white'
+											/>
+										</View>
+									</TouchableOpacity>
+
+									<TouchableOpacity
+										style={styles.panelClearButton}
+										onPress={() => {
+											setSelectedTags({});
+											setSelectedWarningTags({});
+											setAppliedFilters((prev) => {
+												const { hasTagIds, notHasTagIds, ...rest } = prev;
+												return rest;
+											});
+										}}
+									>
+										<Text style={styles.panelClearText}>clear all</Text>
+									</TouchableOpacity>
+								</View>
+							</Portal>
+						</>
 					)}
 					{sourcePage === SourcePage.REC_SHOWS &&
 						activeFilterType === 'minRecs' && (
 							<MinRecsPanel
-								pendingMinRecs={pendingMinRecs}
-								setPendingMinRecs={setPendingMinRecs}
-								onApply={() => {
+								setMinRecs={(val) => {
 									setAppliedFilters((prev) => {
-										if (pendingMinRecs === null) {
+										console.log('valu', val, prev);
+										if (val === undefined || val === prev.minRecs) {
 											const { minRecs, ...rest } = prev;
 											return rest;
 										} else {
-											return { ...prev, minRecs: pendingMinRecs };
+											return { ...prev, minRecs: val };
 										}
 									});
-									setActiveFilterType(null);
 								}}
-								onClear={() => {
-									setPendingMinRecs(null);
-									setAppliedFilters((prev) => {
-										const { minRecs, ...rest } = prev;
-										return rest;
-									});
-								}}
+								minRecs={appliedFilters.minRecs}
 							/>
 						)}
-					{/* {activeFilterType === 'descriptionString' && (
-						<ChooseDescriptionPanel
-							pendingDescription={pendingDescription}
-							setPendingDescription={setPendingDescription}
-							onApply={() => {
-								setAppliedFilters((f) => ({
-									...f,
-									descriptionString: pendingDescription ?? undefined,
-								}));
-								setActiveFilterType(null);
-							}}
-							onClear={() => {
-								setPendingDescription(null);
-								setAppliedFilters((f) => ({
-									...f,
-									pendingDescription: undefined,
-								}));
-							}}
-						/>
-					)} */}
 				</View>
 			) : (
 				<View style={styles.filterHiddenHeader}>
@@ -560,89 +549,16 @@ const RecsHeader = ({
 };
 
 const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-	},
-	rowContainer: {
-		flexDirection: 'row',
-		flexWrap: 'wrap',
-	},
-	containerInfo: {
-		margin: 20,
-	},
-	containerGallery: {
-		flex: 1,
-	},
-	containerImage: {
-		flex: 1 / 3,
-		marginBottom: 5,
-	},
-	image: {
-		// flex: 1,
-		aspectRatio: 2 / 3,
-	},
-	text: {
-		margin: 5,
-		fontSize: 14,
-	},
-	button: {
-		padding: 5,
-		borderRadius: 15,
-		marginHorizontal: 3,
-		backgroundColor: '#340068',
-		marginTop: 5,
-	},
 	toggleContainer: {
 		paddingLeft: 10,
 		paddingTop: 5,
-	},
-	buttonText: {
-		textAlign: 'center',
-		fontSize: 16,
-		margin: 5,
-		fontWeight: '500',
-		color: 'white',
-	},
-	filterWord: {
-		padding: 3,
-		borderRadius: 25,
-		marginHorizontal: 3,
-		backgroundColor: '#36C9C6',
-		marginTop: 3,
-	},
-	filterText: { fontSize: 13.5, fontWeight: '400', textAlign: 'center' },
-	filterDisplay: {
-		flexDirection: 'row',
-		flexWrap: 'wrap',
-		marginTop: 2,
 	},
 	header: {
 		paddingTop: 7,
 		backgroundColor: '#340068',
 	},
-	tabSwitcher: {
-		flexDirection: 'row',
-		backgroundColor: '#340068',
-	},
-	tabButton: {
-		flex: 1,
-		padding: 10,
-		alignItems: 'center',
-		opacity: 0.8,
-	},
-	tabButtonActive: {
-		borderBottomWidth: 6,
-		borderBottomColor: '#36C9C6',
-		opacity: 1,
-	},
-	tabButtonText: {
-		color: 'white',
-		fontWeight: '500',
-		fontSize: 14,
-	},
 	panelContainer: {
 		backgroundColor: '#F0F0F0',
-		padding: 14,
 	},
 	panelActionRow: {
 		flexDirection: 'row',
@@ -650,38 +566,32 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		paddingVertical: 10,
 		paddingHorizontal: 14,
-		backgroundColor: '#E8EAF0',
-		borderTopWidth: 0.5,
-		borderTopColor: '#ddd',
-		marginHorizontal: -14,
-		marginBottom: -14,
+		backgroundColor: '#9BA8CE',
+		borderTopWidth: 3,
+		borderTopColor: '#340068',
+	},
+	collapseAllButton: {
+		alignSelf: 'flex-end',
+		paddingHorizontal: 12,
+		paddingVertical: 4,
+		marginBottom: 4,
+	},
+	collapseAllText: {
+		fontSize: 13,
+		color: 'white',
+		fontWeight: '500',
 	},
 	panelClearButton: {
 		paddingVertical: 6,
 		paddingHorizontal: 14,
 		borderRadius: 999,
 		borderWidth: 1,
-		borderColor: '#888',
+		borderColor: 'white',
 	},
 	panelClearText: {
 		fontSize: 13,
-		color: '#555',
-	},
-	panelApplyButton: {
-		paddingVertical: 6,
-		paddingHorizontal: 14,
-		borderRadius: 999,
-		backgroundColor: '#340068',
-	},
-	panelApplyText: {
-		fontSize: 13,
 		color: 'white',
 		fontWeight: '500',
-	},
-	panelLabel: {
-		fontSize: 13,
-		color: '#666',
-		marginBottom: 10,
 	},
 	filterHiddenLabel: {
 		color: 'rgba(255,255,255,0.6)',
@@ -708,10 +618,6 @@ const styles = StyleSheet.create({
 	pillRow: {
 		paddingHorizontal: 12,
 		paddingVertical: 10,
-	},
-	tagPanelScroll: {
-		maxHeight: 350,
-		marginBottom: 8,
 	},
 	pill: {
 		paddingVertical: 6,
@@ -775,14 +681,14 @@ const styles = StyleSheet.create({
 		flexWrap: 'wrap',
 	},
 	numberPill: {
-		paddingVertical: 6,
-		paddingHorizontal: 14,
+		paddingVertical: 8,
+		paddingHorizontal: 16,
 		borderRadius: 999,
 		backgroundColor: '#9BC1BC',
 	},
 	numberPillSelected: {
-		paddingVertical: 6,
-		paddingHorizontal: 14,
+		paddingVertical: 8,
+		paddingHorizontal: 16,
 		borderRadius: 999,
 		backgroundColor: '#36C9C6',
 	},

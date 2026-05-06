@@ -17,6 +17,7 @@ import {
 	UserSearchResultsWithDetails,
 } from '@/lib/types';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useIsFocused } from '@react-navigation/native';
 import * as Sentry from '@sentry/react-native';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
@@ -30,7 +31,7 @@ import {
 	TouchableOpacity,
 	View,
 } from 'react-native';
-import { TextInput } from 'react-native-paper';
+import { Portal, TextInput } from 'react-native-paper';
 
 enum PanelType {
 	profileTags = 'profileTags',
@@ -63,6 +64,7 @@ const SearchUsers = () => {
 	const [selectedPreference, setSelectedPreference] = useState<
 		Record<number, 'like' | 'dislike'>
 	>({});
+	const [collapsed, setCollapsed] = useState<'collapse' | 'open'>('collapse');
 
 	const [profileTagMatch, setProfileTagMatch] = useState<'any' | 'all'>('any');
 	const [showMatch, setShowMatch] = useState<'any' | 'all'>('any');
@@ -110,6 +112,8 @@ const SearchUsers = () => {
 		}
 		return chosen;
 	}, [selectedShowTags]);
+
+	const isFocused = useIsFocused();
 
 	const chosenWarningTags = useMemo(() => {
 		return Object.keys(selectedWarning).map((tagId) => tagMap[tagId]);
@@ -391,11 +395,11 @@ const SearchUsers = () => {
 	};
 
 	// search by username:
-	const getMatchingUsersByUsername = async (input: string) => {
+	const getMatchingUsersByUsername = (input: string) => {
 		console.log('input', input);
 		setUsernameInput(input);
-		// setSearchInput(input);
-		if (!input) {
+
+		if (input.length < 2) {
 			setMatchingUsersByUsername(null);
 			return;
 		}
@@ -1186,13 +1190,6 @@ const SearchUsers = () => {
 								handleShow={handleShow}
 								showAdded={false}
 								previous='UserSearch'
-								// onShowSelected={(newShow: Show) =>
-								// 	setSelectedShows((prev) => {
-								// 		if (prev.find((show) => show.tmdb_id === newShow.tmdb_id))
-								// 			return prev;
-								// 		return [...prev, newShow];
-								// 	})
-								// }
 							/>
 						</ScrollView>
 
@@ -1235,19 +1232,68 @@ const SearchUsers = () => {
 				)}
 
 				{/* Filters mode — show tags panel */}
-				{searchMode === 'filters' && activePanel === 'showTags' && (
-					<View style={styles.panelBg}>
-						<ShowTagPicker
-							selectedTags={selectedShowTags}
-							setSelectedTags={setSelectedShowTags}
-							// selectedWarningTags={selectedWarningShowTags}
-							// setSelectedWarningTags={setSelectedWarningShowTags}
-							// warningTagsText={warningShowTagsText}
-							generalTagsText={generalShowTagsText}
-							skipWarning={true}
-						/>
-					</View>
-				)}
+				{searchMode === 'filters' &&
+					activePanel === 'showTags' &&
+					isFocused && (
+						<View style={styles.panelBg}>
+							<ShowTagPicker
+								selectedTags={selectedShowTags}
+								setSelectedTags={setSelectedShowTags}
+								generalTagsText={generalShowTagsText}
+								skipWarning={true}
+								collapsed={collapsed}
+								setCollapsed={setCollapsed}
+							/>
+							<Portal>
+								<View
+									style={[
+										styles.panelActionRow,
+										{
+											position: 'absolute',
+											bottom: 83,
+											left: 0,
+											right: 0,
+										},
+									]}
+								>
+									<TouchableOpacity
+										onPress={() =>
+											setCollapsed((prev) =>
+												prev === 'open' ? 'collapse' : 'open',
+											)
+										}
+										style={styles.collapseAllButton}
+									>
+										<View style={{ flexDirection: 'row' }}>
+											<Text style={styles.collapseAllText}>
+												{collapsed === 'collapse'
+													? 'collapse all tags '
+													: 'open all tags '}
+											</Text>
+											<MaterialCommunityIcons
+												name={
+													collapsed === 'collapse'
+														? 'chevron-up'
+														: 'chevron-down'
+												}
+												size={13}
+												color='white'
+											/>
+										</View>
+									</TouchableOpacity>
+
+									<TouchableOpacity
+										style={styles.panelClearButton}
+										onPress={() => {
+											setSelectedShowTags({});
+										}}
+									>
+										<Text style={styles.panelClearText}>clear all</Text>
+									</TouchableOpacity>
+								</View>
+							</Portal>
+						</View>
+					)}
 
 				{/* Post-search results */}
 				{searchMode === 'filters' && searchState === 'post' && loading && (
@@ -1682,12 +1728,6 @@ const styles = StyleSheet.create({
 		alignItems: 'stretch',
 		borderWidth: 0.5,
 		borderColor: 'rgba(255,255,255,0.3)',
-		// // remove borderRightWidth: 0 -- keep all borders
-		// borderTopLeftRadius: 6,
-		// borderBottomLeftRadius: 6,
-		// width: 60,
-		// flexShrink: 0,
-		// overflow: 'hidden',
 	},
 	labelSegment: {
 		flex: 1,
@@ -1695,7 +1735,7 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		borderWidth: 0.5,
 		borderColor: 'rgba(255,255,255,0.3)',
-		borderLeftWidth: 0, // remove left border since aaSegment right border handles it
+		borderLeftWidth: 0,
 		borderTopRightRadius: 6,
 		borderBottomRightRadius: 6,
 		paddingVertical: 5,
@@ -1704,7 +1744,6 @@ const styles = StyleSheet.create({
 	},
 
 	aaPlaceholder: {
-		// width: 66,
 		flex: 1,
 		borderWidth: 0.5,
 		borderColor: 'rgba(255,255,255,0.3)',
@@ -1762,17 +1801,6 @@ const styles = StyleSheet.create({
 		fontSize: 12,
 		color: '#36C9C6',
 		fontWeight: '500',
-	},
-	compactOpt: {
-		fontSize: 10,
-		paddingVertical: 2,
-		paddingHorizontal: 5,
-		color: 'rgba(255,255,255,0.4)',
-	},
-	compactOptOn: {
-		backgroundColor: 'rgba(255,255,255,0.15)',
-		color: 'rgba(255,255,255,0.9)',
-		fontWeight: '600',
 	},
 	adjustCol: {
 		justifyContent: 'flex-end',
@@ -1851,6 +1879,39 @@ const styles = StyleSheet.create({
 		fontSize: 14,
 		color: '#222',
 		fontWeight: '500',
+	},
+	panelClearButton: {
+		paddingVertical: 6,
+		paddingHorizontal: 14,
+		borderRadius: 999,
+		borderWidth: 1,
+		borderColor: 'white',
+	},
+	panelClearText: {
+		fontSize: 13,
+		color: 'white',
+		fontWeight: '500',
+	},
+	collapseAllButton: {
+		alignSelf: 'flex-end',
+		paddingHorizontal: 12,
+		paddingVertical: 4,
+		marginBottom: 4,
+	},
+	collapseAllText: {
+		fontSize: 13,
+		color: 'white',
+		fontWeight: '500',
+	},
+	panelActionRow: {
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+		paddingVertical: 10,
+		paddingHorizontal: 14,
+		backgroundColor: '#9BA8CE',
+		borderTopWidth: 3,
+		borderTopColor: '#340068',
 	},
 });
 

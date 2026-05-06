@@ -143,8 +143,7 @@ const styles = StyleSheet.create({
 	container: {
 		marginTop: 15,
 		flex: 1,
-		// justifyContent: 'center',
-		marginBottom: 30,
+		marginBottom: 40,
 		marginRight: 10,
 		marginLeft: 10,
 	},

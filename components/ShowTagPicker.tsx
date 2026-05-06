@@ -1,7 +1,7 @@
 import { useAppData } from '@/lib/AppContext';
 import { Tag } from '@/lib/types';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface SectionProps {
@@ -36,15 +36,24 @@ const TagSection = ({
 					{!open && (
 						<View style={styles.selectedPillsRow}>
 							{selectedTagsArray.map((tag, index) => (
-								<View
+								<TouchableOpacity
 									key={index}
 									style={[
 										styles.badge,
 										isWarning ? styles.warningBadge : styles.tvBadge,
 									]}
+									onPress={() => onSelectTag(tag)}
 								>
-									<Text style={styles.badgeText}>{tag.name}</Text>
-								</View>
+									<Text style={styles.badgeText}>
+										{tag.name}
+										<Text
+											style={{ fontSize: 12, color: '#333', fontWeight: 400 }}
+										>
+											{' '}
+											✕
+										</Text>
+									</Text>
+								</TouchableOpacity>
 							))}
 						</View>
 					)}
@@ -57,7 +66,9 @@ const TagSection = ({
 					/>
 				</View>
 			</TouchableOpacity>
-			<View style={styles.divider} />
+			<View
+				style={[styles.divider, !open && isWarning && { marginBottom: 20 }]}
+			/>
 			{open && (
 				<View style={[styles.cardContent, styles.tagsContent]}>
 					{tags.map((tag) => {
@@ -97,6 +108,8 @@ interface Props {
 	warningTagsText?: string;
 	generalTagsText?: string;
 	skipWarning?: boolean;
+	collapsed?: 'collapse' | 'open';
+	setCollapsed?: React.Dispatch<React.SetStateAction<'collapse' | 'open'>>;
 }
 
 const ShowTagPicker = (props: Props) => {
@@ -108,22 +121,36 @@ const ShowTagPicker = (props: Props) => {
 		selectedWarningTags,
 		setSelectedWarningTags,
 		skipWarning,
+		collapsed,
 	} = props;
 	const { tvTags, warningTags } = useAppData();
-	const tagSections: { label: string; tags: Tag[] }[] = [
-		{ label: 'Mood', tags: tvTags.mood },
-		{ label: 'Genre', tags: tvTags.genre },
-		{ label: 'Representation', tags: tvTags.representation },
-		{ label: 'Themes', tags: tvTags.themes },
-		{
-			label: 'Viewing experience',
-			tags: tvTags.experience,
-		},
-		{ label: 'Audience', tags: tvTags.audience },
-		{ label: 'Misc', tags: tvTags.misc },
-	];
+	const tagSections: { label: string; tags: Tag[] }[] = useMemo(() => {
+		return [
+			{ label: 'Mood', tags: tvTags.mood },
+			{ label: 'Genre', tags: tvTags.genre },
+			{ label: 'Representation', tags: tvTags.representation },
+			{ label: 'Themes', tags: tvTags.themes },
+			{
+				label: 'Viewing experience',
+				tags: tvTags.experience,
+			},
+			{ label: 'Audience', tags: tvTags.audience },
+			{ label: 'Misc', tags: tvTags.misc },
+		];
+	}, [
+		tvTags.audience,
+		tvTags.experience,
+		tvTags.genre,
+		tvTags.misc,
+		tvTags.mood,
+		tvTags.representation,
+		tvTags.themes,
+	]);
 
-	const warningSection = { label: 'Content Warnings', tags: warningTags };
+	const warningSection = useMemo(() => {
+		return { label: 'Content Warnings', tags: warningTags };
+	}, [warningTags]);
+
 	const [openSections, setOpenSections] = useState<Record<string, boolean>>(
 		Object.fromEntries(tagSections.map((section) => [section.label, true])),
 	);
@@ -155,7 +182,7 @@ const ShowTagPicker = (props: Props) => {
 		setOpenSections((prev) => ({ ...prev, [label]: !prev[label] }));
 	};
 
-	const collapseAll = () => {
+	const collapseAll = useCallback(() => {
 		setOpenSections(
 			Object.fromEntries(
 				[...tagSections, warningSection].map((section) => [
@@ -164,14 +191,34 @@ const ShowTagPicker = (props: Props) => {
 				]),
 			),
 		);
-	};
+	}, [tagSections, warningSection]);
+
+	const openAll = useCallback(() => {
+		setOpenSections(
+			Object.fromEntries(
+				[...tagSections, warningSection].map((section) => [
+					section.label,
+					true,
+				]),
+			),
+		);
+	}, [tagSections, warningSection]);
+
+	useEffect(() => {
+		if (collapsed === 'collapse') {
+			openAll();
+		} else {
+			collapseAll();
+		}
+	}, [collapseAll, collapsed, openAll, tagSections, warningSection]);
 
 	return (
-		<View>
-			<TouchableOpacity onPress={collapseAll} style={styles.collapseAllButton}>
-				<Text style={styles.collapseAllText}>collapse all tags</Text>
-			</TouchableOpacity>
-			{generalTagsText && <Text style={styles.text}>{generalTagsText}</Text>}
+		<View style={styles.container}>
+			{generalTagsText && (
+				<View>
+					<Text style={styles.text}>{generalTagsText}</Text>
+				</View>
+			)}
 			{tagSections.map((section) => (
 				<TagSection
 					key={section.label}
@@ -184,8 +231,12 @@ const ShowTagPicker = (props: Props) => {
 				/>
 			))}
 
-			{warningTagsText && <Text style={styles.text}>{warningTagsText}</Text>}
-			{!skipWarning && (
+			{warningTagsText && (
+				<View style={{ paddingVertical: 8, paddingTop: 15 }}>
+					<Text style={{ ...styles.text }}>{warningTagsText}</Text>
+				</View>
+			)}
+			{!skipWarning ? (
 				<TagSection
 					key={warningSection.label}
 					label={warningSection.label}
@@ -198,6 +249,8 @@ const ShowTagPicker = (props: Props) => {
 					setOpen={() => toggleSection(warningSection.label)}
 					isWarning={true}
 				/>
+			) : (
+				<View style={{ paddingBottom: 35 }}></View>
 			)}
 		</View>
 	);
@@ -209,33 +262,6 @@ const styles = StyleSheet.create({
 		flex: 1,
 		marginHorizontal: 2,
 		marginBottom: 20,
-	},
-	title: {
-		color: '#FF3F00',
-		fontSize: 20,
-		textAlign: 'center',
-	},
-	button: {
-		padding: 10,
-		borderRadius: 40,
-		marginHorizontal: 3,
-		backgroundColor: '#340068',
-		marginTop: 5,
-		marginBottom: 20,
-	},
-	tagGroup: {
-		marginTop: 16,
-		marginHorizontal: 10,
-		marginBottom: 8,
-	},
-	tagStyle: {
-		marginTop: 4,
-		marginHorizontal: 8,
-		backgroundColor: '#FF3F00',
-		borderWidth: 0,
-		marginRight: 12,
-		paddingHorizontal: 24,
-		paddingVertical: 8,
 	},
 	badge: {
 		borderRadius: 40,
@@ -250,7 +276,7 @@ const styles = StyleSheet.create({
 		fontWeight: '500',
 	},
 	badgeText: {
-		fontSize: 12,
+		fontSize: 13.5,
 		fontWeight: '500',
 		color: 'black',
 		flexShrink: 1,
@@ -275,28 +301,10 @@ const styles = StyleSheet.create({
 		backgroundColor: '#36C9C6',
 		marginTop: 5,
 	},
-
-	textStyle: {
-		color: 'black',
-		fontSize: 14,
-		fontWeight: 'bold',
-	},
-	buttonContainer: {
-		flexDirection: 'row',
-		justifyContent: 'center',
-		margin: 10,
-	},
-	buttonText: {
-		textAlign: 'center',
-		fontSize: 18,
-		margin: 5,
-		fontWeight: '500',
-		color: 'white',
-	},
 	sectionHeader: {
 		flexDirection: 'row',
 		paddingHorizontal: 12,
-		paddingVertical: 8,
+		paddingVertical: 10,
 		position: 'relative',
 		paddingRight: 36,
 	},
@@ -369,16 +377,6 @@ const styles = StyleSheet.create({
 	tagsContent: {
 		flexWrap: 'wrap',
 		marginBottom: 8,
-	},
-	collapseAllButton: {
-		alignSelf: 'flex-end',
-		paddingHorizontal: 12,
-		paddingVertical: 4,
-		marginBottom: 4,
-	},
-	collapseAllText: {
-		fontSize: 13,
-		color: '#777',
 	},
 });
 

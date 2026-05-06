@@ -9,6 +9,8 @@ import {
 	UserShow,
 	UserShowToSave,
 } from '@/lib/types';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useIsFocused } from '@react-navigation/native';
 import * as Sentry from '@sentry/react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -30,9 +32,11 @@ const AddShowTags = () => {
 	const [description, setDescription] = useState('');
 	const { currentUser, refetchUserShows } = useAppData();
 	const [saving, setSaving] = useState(false);
+	const [collapsed, setCollapsed] = useState<'collapse' | 'open'>('collapse');
 
 	const { showToSaveString, previousString, currentShowString } =
 		useLocalSearchParams();
+	const isFocused = useIsFocused();
 
 	const previous = previousString as SourcePage;
 
@@ -188,6 +192,7 @@ const AddShowTags = () => {
 				showsVerticalScrollIndicator={false}
 				keyboardShouldPersistTaps='handled'
 				keyboardDismissMode='on-drag'
+				// contentContainerStyle={{ paddingBottom: 120 }}
 			>
 				<Text style={styles.text}>
 					Describe anything about the show you would like potential viewers to
@@ -207,26 +212,82 @@ const AddShowTags = () => {
 				<ShowTagPicker
 					selectedTags={selectedTags}
 					setSelectedTags={setSelectedTags}
+					collapsed={collapsed}
+					setCollapsed={setCollapsed}
 				/>
-				<View style={styles.buttonContainer}>
+				{/* {isFocused && (
+					<Portal> */}
+
+				{/* </Portal>
+				)} */}
+				{/* <View style={styles.buttonContainer}>
 					<TouchableOpacity style={styles.button} onPress={chooseTags}>
 						<Text style={styles.buttonText}>
 							{currentUser ? 'Save description and tags' : 'Log in / Sign up'}
 						</Text>
 					</TouchableOpacity>
-				</View>
+				</View> */}
 			</ScrollView>
+			<View style={styles.panelActionRow}>
+				<View style={{ marginBottom: 15, marginTop: 5, alignItems: 'center' }}>
+					<TouchableOpacity style={styles.panelSaveButton} onPress={chooseTags}>
+						<Text style={styles.panelSaveText}>
+							{currentUser ? 'Save description and tags' : 'Log in / Sign up'}
+						</Text>
+					</TouchableOpacity>
+				</View>
+				<View
+					style={{
+						flexDirection: 'row',
+						justifyContent: 'space-between',
+						width: '100%',
+					}}
+				>
+					<TouchableOpacity
+						onPress={() =>
+							setCollapsed((prev) => (prev === 'open' ? 'collapse' : 'open'))
+						}
+						style={styles.collapseAllButton}
+					>
+						<View style={{ flexDirection: 'row' }}>
+							<Text style={styles.collapseAllText}>
+								{collapsed === 'collapse'
+									? 'collapse all tags '
+									: 'open all tags '}
+							</Text>
+							<MaterialCommunityIcons
+								name={collapsed === 'collapse' ? 'chevron-up' : 'chevron-down'}
+								size={13}
+								color='white'
+							/>
+						</View>
+					</TouchableOpacity>
+
+					<TouchableOpacity
+						style={styles.panelClearButton}
+						onPress={() => {
+							setSelectedTags({});
+							// setAppliedFilters((prev) => {
+							// 	const { hasTagIds, notHasTagIds, ...rest } = prev;
+							// 	return rest;
+							// });
+						}}
+					>
+						<Text style={styles.panelClearText}>clear all</Text>
+					</TouchableOpacity>
+				</View>
+			</View>
 		</View>
 	);
 };
 
 const styles = StyleSheet.create({
 	container: {
-		marginTop: 15,
+		// marginTop: 15,
 		flex: 1,
 		// justifyContent: 'center',
-		marginHorizontal: 2,
-		marginBottom: 20,
+		// marginHorizontal: 2,
+		// marginBottom: 20,
 	},
 	text: {
 		fontSize: 16,
@@ -281,6 +342,7 @@ const styles = StyleSheet.create({
 		fontWeight: '500',
 		color: 'white',
 	},
+
 	cardContent: {
 		flexDirection: 'row',
 		marginLeft: 10,
@@ -328,6 +390,67 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 		alignItems: 'center',
 		zIndex: 999,
+	},
+	panelClearButton: {
+		paddingVertical: 6,
+		paddingHorizontal: 14,
+		borderRadius: 999,
+		borderWidth: 1,
+		borderColor: 'white',
+	},
+	panelClearText: {
+		fontSize: 13.5,
+		color: 'white',
+		fontWeight: '500',
+	},
+	panelSaveButton: {
+		paddingVertical: 6,
+		paddingHorizontal: 14,
+		borderRadius: 999,
+		// borderWidth: 2,
+		// borderColor: 'white',
+		backgroundColor: '#340068',
+	},
+	panelSaveText: {
+		fontSize: 16,
+		color: 'white',
+		fontWeight: '500',
+	},
+	collapseAllButton: {
+		alignSelf: 'center',
+		paddingHorizontal: 12,
+		paddingVertical: 4,
+		marginBottom: 4,
+	},
+	collapseAllText: {
+		fontSize: 14,
+		color: 'white',
+		fontWeight: '500',
+	},
+	// panelActionRow: {
+	// 	flexDirection: 'column',
+	// 	// justifyContent: 'space-between',
+	// 	alignItems: 'center',
+	// 	paddingVertical: 10,
+	// 	paddingBottom: 65,
+	// 	backgroundColor: '#9BA8CE',
+	// 	// backgroundColor: '#8E97CC',
+	// 	borderTopWidth: 3,
+	// 	borderTopColor: '#340068',
+	// 	// shadowColor: '#340068',
+	// 	// borderBottomWidth: 2,
+	// 	// borderBottomColor: '#340068',
+	// 	// shadowOpacity: 0.1,
+	// 	// shadowRadius: 4,
+	// 	// elevation: 4,
+	// },
+	panelActionRow: {
+		backgroundColor: '#9BA8CE',
+		borderTopWidth: 3,
+		borderTopColor: '#340068',
+		paddingVertical: 10,
+		paddingBottom: 30, // safe area
+		paddingHorizontal: 14,
 	},
 });
 

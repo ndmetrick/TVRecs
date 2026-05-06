@@ -33,7 +33,6 @@ const RecShows = () => {
 	const [multipleRecInfo, setMultipleRecInfo] = useState<
 		Record<number, RecCount>
 	>({});
-	// const [loadedCount, setLoadedCount] = useState(0);
 	const [noUserShows, setNoUserShows] = useState(false);
 	const [loading, setLoading] = useState(true);
 	const [filterOpen, setFilterOpen] = useState(false);
@@ -41,7 +40,6 @@ const RecShows = () => {
 	const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({});
 	const [refreshing, setRefreshing] = useState(false);
 
-	// applied filters — what actually affects the list
 	const [appliedFilters, setAppliedFilters] = useState<AppliedShowFilters>({});
 	const router = useRouter();
 
@@ -57,8 +55,6 @@ const RecShows = () => {
 		toWatch,
 		seen,
 		currentUser,
-		tvTags,
-		warningTags,
 		loading: appLoading,
 		refetchAll,
 	} = useAppData();
@@ -93,11 +89,6 @@ const RecShows = () => {
 				),
 			);
 		}
-		// if (appliedFilters.descriptionString) {
-		// 	shows = shows.filter((show) =>
-		// 		show.description?.includes(appliedFilters.descriptionString as string),
-		// 	);
-		// }
 		setFiltersApplied(!!Object.keys(appliedFilters).length);
 		return shows;
 	}, [filteredFollowingRecs, appliedFilters]);
@@ -411,27 +402,6 @@ const RecShows = () => {
 				showsLength={showsLength}
 				sourcePage={SourcePage.REC_SHOWS}
 			/>
-			{/* <View style={styles.tabSwitcher}>
-				<TouchableOpacity
-					onPress={() => setActiveTab('recs')}
-					style={[
-						styles.tabButton,
-						activeTab === 'recs' && styles.tabButtonActive,
-					]}
-				>
-					<Text style={styles.tabButtonText}>{recsTabName}</Text>
-				</TouchableOpacity>
-				<TouchableOpacity
-					onPress={() => setActiveTab('filters')}
-					style={[
-						styles.tabButton,
-						activeTab === 'filters' && styles.tabButtonActive,
-					]}
-				>
-					<Text style={styles.tabButtonText}>Filters</Text>
-				</TouchableOpacity>
-			</View> */}
-			{/* {activeTab === 'recs' ? ( */}
 			<View style={styles.containerGallery}>
 				{flatlist}
 				{selectedItem && (
@@ -455,9 +425,6 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		flexWrap: 'wrap',
 	},
-	containerInfo: {
-		margin: 20,
-	},
 	containerGallery: {
 		flex: 1,
 	},
@@ -469,100 +436,8 @@ const styles = StyleSheet.create({
 		// flex: 1,
 		aspectRatio: 2 / 3,
 	},
-	text: {
-		margin: 5,
-		textAlign: 'center',
-		fontSize: 20,
-	},
-	button: {
-		padding: 5,
-		borderRadius: 15,
-		marginHorizontal: 3,
-		backgroundColor: '#340068',
-		marginTop: 5,
-	},
 	toggleContainer: {
 		padding: 10,
-	},
-	buttonText: {
-		textAlign: 'center',
-		fontSize: 16,
-		margin: 5,
-		fontWeight: '500',
-		color: 'white',
-	},
-	filterWord: {
-		padding: 3,
-		borderRadius: 25,
-		marginHorizontal: 3,
-		backgroundColor: '#36C9C6',
-		marginTop: 3,
-	},
-	filterText: { fontSize: 13.5, fontWeight: '400', textAlign: 'center' },
-	filterDisplay: {
-		flexDirection: 'row',
-		flexWrap: 'wrap',
-		marginTop: 2,
-	},
-	header: {
-		paddingTop: 7,
-		backgroundColor: '#340068',
-	},
-	tabSwitcher: {
-		flexDirection: 'row',
-		backgroundColor: '#340068',
-	},
-	tabButton: {
-		flex: 1,
-		padding: 10,
-		alignItems: 'center',
-		opacity: 0.8,
-	},
-	tabButtonActive: {
-		borderBottomWidth: 6,
-		borderBottomColor: '#36C9C6',
-		opacity: 1,
-	},
-	tabButtonText: {
-		color: 'white',
-		fontWeight: '500',
-		fontSize: 14,
-	},
-	panelContainer: {
-		backgroundColor: '#f9f9f9',
-		padding: 14,
-	},
-	panelActionRow: {
-		flexDirection: 'row',
-		justifyContent: 'space-between',
-		alignItems: 'center',
-		marginTop: 12,
-	},
-	panelClearButton: {
-		paddingVertical: 6,
-		paddingHorizontal: 14,
-		borderRadius: 999,
-		borderWidth: 1,
-		borderColor: '#ddd',
-	},
-	panelClearText: {
-		fontSize: 13,
-		color: '#888',
-	},
-	panelApplyButton: {
-		paddingVertical: 6,
-		paddingHorizontal: 14,
-		borderRadius: 999,
-		backgroundColor: '#340068',
-	},
-	panelApplyText: {
-		fontSize: 13,
-		color: 'white',
-	},
-	panelLabel: {
-		fontSize: 13,
-		color: '#666',
-		marginBottom: 10,
 	},
 	emptyState: {
 		flex: 1,

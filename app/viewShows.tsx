@@ -74,9 +74,16 @@ const ViewShows = (props: Props) => {
 				),
 			);
 		}
-		// setFiltersApplied(!!Object.keys(appliedFilters).length);
 		return filtered;
-	}, [type, shows, excludedSourceTypes, appliedFilters.hasTags, appliedFilters.hasDescription, appliedFilters.hasTagIds, appliedFilters.notHasTagIds]);
+	}, [
+		type,
+		shows,
+		excludedSourceTypes,
+		appliedFilters.hasTags,
+		appliedFilters.hasDescription,
+		appliedFilters.hasTagIds,
+		appliedFilters.notHasTagIds,
+	]);
 
 	useEffect(() => {
 		setShowsLength(filteredShows.length);
@@ -129,6 +136,7 @@ const ViewShows = (props: Props) => {
 					showsLength={showsLength}
 					excludedSourceTypes={excludedSourceTypes}
 					setExcludedSourceTypes={setExcludedSourceTypes}
+					tagPanelMaxHeight={380}
 				/>
 			)}
 			{!filteredShows.length && Object.keys(appliedFilters).length > 0 && (
@@ -206,7 +214,6 @@ const styles = StyleSheet.create({
 	image: {
 		flex: 1,
 		aspectRatio: 2 / 3,
-		// resizeMode: 'cover',
 	},
 	fab: {
 		position: 'absolute',

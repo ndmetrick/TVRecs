@@ -4,6 +4,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Sentry from '@sentry/react-native';
 import { router, Stack } from 'expo-router';
 import { Alert, Image, TouchableOpacity } from 'react-native';
+import { Provider as PaperProvider } from 'react-native-paper';
 import Toast from 'react-native-toast-message';
 
 Sentry.init({
@@ -75,10 +76,12 @@ export const AppShell = () => {
 
 export default function RootLayout() {
 	return (
-		<AuthProvider>
-			<AppProvider>
-				<AppShell />
-			</AppProvider>
-		</AuthProvider>
+		<PaperProvider>
+			<AuthProvider>
+				<AppProvider>
+					<AppShell />
+				</AppProvider>
+			</AuthProvider>
+		</PaperProvider>
 	);
 }
