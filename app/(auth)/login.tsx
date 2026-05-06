@@ -26,7 +26,9 @@ export default function Login() {
 			await signIn(email.trim(), password);
 			router.replace('/(tabs)/recShows');
 		} catch (e: any) {
-			showErrorToast('Could not sign in. Try again.');
+			if (e.message) {
+				showErrorToast(`${e.message}`);
+			} else showErrorToast('Could not sign in. Try again.');
 			console.log('Error signing in:', e);
 			Sentry.captureException(e, {
 				tags: { location: 'login' },

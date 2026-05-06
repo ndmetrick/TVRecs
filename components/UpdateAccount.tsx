@@ -1,6 +1,6 @@
 import { deleteUserAccount, updateUser } from '@/lib/api';
 import { useAppData } from '@/lib/AppContext';
-import { useAuth } from '@/lib/AuthContext';
+import { changePassword, useAuth } from '@/lib/AuthContext';
 import { isUniqueViolation } from '@/lib/errors';
 import { supabase } from '@/lib/supabase';
 import { showErrorToast } from '@/lib/toast';
@@ -11,13 +11,15 @@ import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { TextInput } from 'react-native-paper';
 
 interface Props {
-	updateType: 'username' | 'delete';
+	updateType: 'username' | 'delete' | 'password';
 	setUsernameOpen?: React.Dispatch<React.SetStateAction<boolean>>;
+	setPasswordOpen?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const UpdateAccount = (props: Props) => {
-	const { updateType, setUsernameOpen } = props;
+	const { updateType, setUsernameOpen, setPasswordOpen } = props;
 	const [newUsername, setNewUsername] = useState('');
+	const [newPassword, setNewPassword] = useState('');
 	const { currentUser, refetchCurrentUser } = useAppData();
 	const [error, setError] = useState<string | null>(null);
 	const { signOut } = useAuth();
@@ -84,6 +86,33 @@ const UpdateAccount = (props: Props) => {
 		}
 	};
 
+	const updatePassword = async () => {
+		try {
+			if (!newPassword.length) {
+				Alert.alert('No password entered', '', [{ text: 'OK' }]);
+			} else {
+				await changePassword(newPassword);
+				Alert.alert('Your password has been updated', '', [
+					{
+						text: 'OK',
+					},
+				]);
+				if (setPasswordOpen) setPasswordOpen(false);
+			}
+		} catch (err: any) {
+			console.error(`Error updating password: ${err}`);
+			if (err.message) {
+				showErrorToast(`${err.message}`);
+			} else {
+				showErrorToast('Could not change your password');
+			}
+			Sentry.captureException(err, {
+				tags: { location: 'password update' },
+			});
+		} finally {
+		}
+	};
+
 	return (
 		<View style={styles.container}>
 			{updateType === 'username' ? (
@@ -110,7 +139,7 @@ const UpdateAccount = (props: Props) => {
 						</TouchableOpacity>
 					</View>
 				</View>
-			) : (
+			) : updateType === 'delete' ? (
 				<View>
 					<Text style={styles.text}>
 						You can delete your account at any time. All your data will be
@@ -136,6 +165,23 @@ const UpdateAccount = (props: Props) => {
 						</TouchableOpacity>
 					</View>
 				</View>
+			) : (
+				<View>
+					<TextInput
+						style={styles.inputText}
+						label='Enter new password'
+						onChangeText={(newPassword) => setNewPassword(newPassword)}
+						mode='outlined'
+						outlineColor='#340068'
+						activeOutlineColor='#340068'
+						value={newPassword}
+					/>
+					<View style={styles.buttonContainer}>
+						<TouchableOpacity style={styles.button} onPress={updatePassword}>
+							<Text style={styles.buttonText}>Change my password</Text>
+						</TouchableOpacity>
+					</View>
+				</View>
 			)}
 		</View>
 	);
@@ -144,11 +190,8 @@ const UpdateAccount = (props: Props) => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		// marginBottom: 30,
 		marginRight: 10,
 		marginLeft: 15,
-
-		// marginTop: 20,
 	},
 	inputText: {
 		margin: 10,

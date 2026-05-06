@@ -27,6 +27,7 @@ const Settings = () => {
 	const [countryOpen, setCountryOpen] = useState(false);
 	const [tagsOpen, setTagsOpen] = useState(false);
 	const [usernameOpen, setUsernameOpen] = useState(false);
+	const [passwordOpen, setPasswordOpen] = useState(false);
 	const [deleteUserOpen, setDeleteUserOpen] = useState(false);
 	const { signOut } = useAuth();
 	const [saving, setSaving] = useState(false);
@@ -206,6 +207,28 @@ const Settings = () => {
 							/>
 						</View>
 					)}
+					<TouchableOpacity
+						disabled={!currentUser}
+						style={passwordOpen ? styles.openRow : styles.row}
+						onPress={() => setPasswordOpen(!passwordOpen)}
+					>
+						<Text style={currentUser ? styles.rowText : styles.disabledRowText}>
+							Change password
+						</Text>
+						<MaterialCommunityIcons
+							name={passwordOpen ? 'chevron-down' : 'chevron-right'}
+							size={18}
+							color='#777'
+						/>
+					</TouchableOpacity>
+					{passwordOpen && (
+						<View style={styles.expandedContent}>
+							<UpdateAccount
+								updateType='password'
+								setPasswordOpen={setPasswordOpen}
+							/>
+						</View>
+					)}
 
 					<TouchableOpacity
 						disabled={!currentUser}
@@ -247,7 +270,7 @@ const Settings = () => {
 					</TouchableOpacity>
 				</View>
 
-				<View style={{ marginTop: 8, marginLeft: 15 }}>
+				<View style={{ marginTop: 8, marginLeft: 20 }}>
 					<TouchableOpacity
 						onPress={() =>
 							Linking.openURL(
