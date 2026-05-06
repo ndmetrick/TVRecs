@@ -135,11 +135,7 @@ const AddShow = () => {
 				showsVerticalScrollIndicator={false}
 				keyboardShouldPersistTaps='handled'
 			>
-				<SelectShow
-					handleShow={addThisShow}
-					showAdded={showAdded}
-					previous='AddShow'
-				/>
+				<SelectShow handleShow={addThisShow} sourcePage={SourcePage.ADD_SHOW} />
 				<View>
 					{showAdded ? (
 						<View>
