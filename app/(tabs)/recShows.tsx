@@ -41,6 +41,7 @@ const RecShows = () => {
 	const [displayedFilterLength, setDisplayedFilterLength] = useState(0);
 	const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({});
 	const [refreshing, setRefreshing] = useState(false);
+	const [containerHeight, setContainerHeight] = useState(0);
 
 	const [appliedFilters, setAppliedFilters] = useState<AppliedShowFilters>({});
 	const router = useRouter();
@@ -397,7 +398,10 @@ const RecShows = () => {
 	}
 
 	return (
-		<View style={styles.container}>
+		<View
+			style={styles.container}
+			onLayout={(e) => setContainerHeight(e.nativeEvent.layout.height)}
+		>
 			<RecsHeader
 				noUserShows={noUserShowsForHeader}
 				toggleNoUserShows={toggleNoUserShows}
@@ -409,6 +413,7 @@ const RecShows = () => {
 				showsLength={showsLength}
 				sourcePage={SourcePage.REC_SHOWS}
 				displayedFilterLength={displayedFilterLength}
+				containerHeight={containerHeight}
 			/>
 			<View style={styles.containerGallery}>
 				{flatlist}

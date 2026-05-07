@@ -130,6 +130,7 @@ interface RecsHeaderProps {
 		React.SetStateAction<Set<UserShowType>>
 	>;
 	displayedFilterLength: number;
+	containerHeight: number;
 }
 
 const RecsHeader = ({
@@ -153,6 +154,7 @@ const RecsHeader = ({
 	const [activeFilterType, setActiveFilterType] =
 		useState<ShowFilterType | null>(null);
 	const isFocused = useIsFocused();
+	const [actionBarHeight, setActionBarHeight] = useState(50);
 
 	const [collapsed, setCollapsed] = useState<'collapse' | 'open'>('collapse');
 	const clearAllFilters = () => {
@@ -169,8 +171,8 @@ const RecsHeader = ({
 		(appliedFilters.notHasTagIds?.length ?? 0);
 	const tabBarHeight = useBottomTabBarHeight();
 	const screenHeight = Dimensions.get('window').height;
-	const [panelY, setPanelY] = useState(254); // reasonable fallback
-	const availableHeight = screenHeight - panelY - tabBarHeight - 50;
+	const [panelY, setPanelY] = useState(254);
+	const availableHeight = screenHeight - panelY - actionBarHeight;
 
 	console.log('availableHeight being applied:', availableHeight);
 
@@ -236,13 +238,6 @@ const RecsHeader = ({
 						}}
 					>
 						<Toggle
-							// style={{
-							// 	marginBottom: 5,
-							// 	marginTop: 5,
-							// 	alignSelf: 'flex-start',
-							// 	...(Platform.OS === 'android' && { transform: [{ scale: 1.3 }] }),
-							// }}
-							// ios_backgroundColor='#3e3e3e'
 							onValueChange={toggleNoUserShows}
 							value={!!noUserShows}
 							trackColorOn='#36C9C6'
@@ -287,12 +282,7 @@ const RecsHeader = ({
 			) : null}
 
 			{filterOpen ? (
-				<View
-					style={styles.filterHeader}
-					onLayout={(e) =>
-						console.log('filterHeader height:', e.nativeEvent.layout.height)
-					}
-				>
+				<View style={styles.filterHeader}>
 					<TouchableOpacity
 						onPress={() => {
 							console.log(Object.keys(appliedFilters));
@@ -466,6 +456,9 @@ const RecsHeader = ({
 											right: 0,
 										},
 									]}
+									onLayout={(e) =>
+										setActionBarHeight(e.nativeEvent.layout.height)
+									}
 								>
 									<TouchableOpacity
 										onPress={() =>
@@ -601,7 +594,7 @@ const RecsHeader = ({
 const styles = StyleSheet.create({
 	toggleContainer: {
 		paddingLeft: 10,
-		paddingTop: 5,
+		paddingTop: 3,
 	},
 	header: {
 		paddingTop: 7,

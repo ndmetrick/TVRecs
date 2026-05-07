@@ -41,6 +41,7 @@ const ViewShows = (props: Props) => {
 		Set<UserShowType>
 	>(new Set([]));
 	const [displayedFilterLength, setDisplayedFilterLength] = useState(0);
+	const [containerHeight, setContainerHeight] = useState(0);
 
 	const cancelFilters = () => {
 		setAppliedFilters({});
@@ -129,7 +130,10 @@ const ViewShows = (props: Props) => {
 	}
 
 	return (
-		<View style={{ flex: 1 }}>
+		<View
+			style={{ flex: 1 }}
+			onLayout={(e) => setContainerHeight(e.nativeEvent.layout.height)}
+		>
 			{type === 'all' && (
 				<RecsHeader
 					sourcePage={SourcePage.VIEW_SHOWS}
@@ -142,6 +146,7 @@ const ViewShows = (props: Props) => {
 					excludedSourceTypes={excludedSourceTypes}
 					setExcludedSourceTypes={setExcludedSourceTypes}
 					displayedFilterLength={Object.keys(appliedFilters).length}
+					containerHeight={containerHeight}
 				/>
 			)}
 			{!filteredShows.length && Object.keys(appliedFilters).length > 0 && (
