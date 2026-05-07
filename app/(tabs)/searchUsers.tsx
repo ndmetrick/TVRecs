@@ -1,6 +1,7 @@
 import PickUserTagsContent from '@/components/PickUserTagsContent';
 import SelectShow from '@/components/SelectShow';
 import ShowTagPicker from '@/components/ShowTagPicker';
+import Toggle from '@/components/Toggle';
 import { findShowWithTmdbId, getMatchingUsers } from '@/lib/api';
 import { useAppData } from '@/lib/AppContext';
 import { supabase } from '@/lib/supabase';
@@ -18,6 +19,7 @@ import {
 	UserSearchResultsWithDetails,
 } from '@/lib/types';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useIsFocused } from '@react-navigation/native';
 import * as Sentry from '@sentry/react-native';
 import { router } from 'expo-router';
@@ -27,7 +29,6 @@ import {
 	Alert,
 	ScrollView,
 	StyleSheet,
-	Switch,
 	Text,
 	TouchableOpacity,
 	View,
@@ -75,6 +76,7 @@ const SearchUsers = () => {
 		UserProfile[] | null
 	>(null);
 	const [usernameInput, setUsernameInput] = useState('');
+	const tabBarHeight = useBottomTabBarHeight();
 
 	const matchStateMap = {
 		profileTags: profileTagMatch,
@@ -431,12 +433,11 @@ const SearchUsers = () => {
 				{/* Exclude toggle row */}
 				<View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
 					<View style={styles.headerTop}>
-						<Switch
+						<Toggle
 							value={excludeFollowed}
 							onValueChange={setExcludeFollowed}
-							trackColor={{ false: '#3e3e3e', true: '#36C9C6' }}
-							thumbColor='white'
-							ios_backgroundColor='#3e3e3e'
+							trackColorOn='#36C9C6'
+							trackColorOff='#3e3e3e'
 						/>
 						<View>
 							<Text style={styles.excludeLabel}>Exclude users I follow</Text>
@@ -512,7 +513,9 @@ const SearchUsers = () => {
 										panel !== 'summary' &&
 										styles.filterPillOpen,
 								]}
-								onPress={() => setActivePanel(panel)}
+								onPress={() =>
+									setActivePanel((prev) => (prev === panel ? 'summary' : panel))
+								}
 							>
 								<Text
 									style={[
@@ -1286,7 +1289,7 @@ const SearchUsers = () => {
 										styles.panelActionRow,
 										{
 											position: 'absolute',
-											bottom: 83,
+											bottom: tabBarHeight,
 											left: 0,
 											right: 0,
 										},

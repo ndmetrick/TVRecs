@@ -40,6 +40,7 @@ const ViewShows = (props: Props) => {
 	const [excludedSourceTypes, setExcludedSourceTypes] = useState<
 		Set<UserShowType>
 	>(new Set([]));
+	const [displayedFilterLength, setDisplayedFilterLength] = useState(0);
 
 	const cancelFilters = () => {
 		setAppliedFilters({});
@@ -52,6 +53,9 @@ const ViewShows = (props: Props) => {
 		let filtered = shows;
 		if (excludedSourceTypes.size > 0) {
 			filtered = filtered.filter((show) => !excludedSourceTypes.has(show.type));
+		}
+		if (appliedFilters.currentlyWatching) {
+			filtered = filtered.filter((show) => !!show.currently_watching);
 		}
 		if (appliedFilters.hasTags) {
 			filtered = filtered.filter((show) => show.tags.length > 0);
@@ -66,6 +70,7 @@ const ViewShows = (props: Props) => {
 				),
 			);
 		}
+
 		// does not have warning tags filtered out
 		if (appliedFilters.notHasTagIds?.length) {
 			filtered = filtered.filter((show) =>
@@ -136,7 +141,7 @@ const ViewShows = (props: Props) => {
 					showsLength={showsLength}
 					excludedSourceTypes={excludedSourceTypes}
 					setExcludedSourceTypes={setExcludedSourceTypes}
-					tagPanelMaxHeight={380}
+					displayedFilterLength={Object.keys(appliedFilters).length}
 				/>
 			)}
 			{!filteredShows.length && Object.keys(appliedFilters).length > 0 && (

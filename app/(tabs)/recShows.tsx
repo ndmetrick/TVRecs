@@ -34,18 +34,16 @@ const RecShows = () => {
 		Record<number, RecCount>
 	>({});
 	const [noUserShows, setNoUserShows] = useState(false);
+	const [noUserShowsForHeader, setNoUserShowsForHeader] = useState(false);
 	const [loading, setLoading] = useState(true);
 	const [filterOpen, setFilterOpen] = useState(false);
 	const [showsLength, setShowsLength] = useState(0);
+	const [displayedFilterLength, setDisplayedFilterLength] = useState(0);
 	const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({});
 	const [refreshing, setRefreshing] = useState(false);
 
 	const [appliedFilters, setAppliedFilters] = useState<AppliedShowFilters>({});
 	const router = useRouter();
-
-	useEffect(() => {
-		setShowsLength(recShows.length);
-	}, [recShows.length]);
 
 	const {
 		filteredFollowingRecs,
@@ -74,6 +72,10 @@ const RecShows = () => {
 		if (appliedFilters.hasDescription) {
 			shows = shows.filter((show) => !!show.description);
 		}
+
+		if (appliedFilters.currentlyWatching) {
+			shows = shows.filter((show) => !!show.currently_watching);
+		}
 		if (appliedFilters.hasTagIds?.length) {
 			shows = shows.filter((show) =>
 				appliedFilters.hasTagIds?.every((id) =>
@@ -81,6 +83,7 @@ const RecShows = () => {
 				),
 			);
 		}
+
 		// does not have warning tags filtered out
 		if (appliedFilters.notHasTagIds?.length) {
 			shows = shows.filter((show) =>
@@ -158,7 +161,10 @@ const RecShows = () => {
 		}
 		setRecShows(visibleShows);
 		setMultipleRecInfo(recCounts);
-
+		setShowsLength(visibleShows.length);
+		setDisplayedFilterLength(Object.keys(appliedFilters).length);
+		if (noUserShows) setNoUserShowsForHeader(true);
+		else setNoUserShowsForHeader(false);
 		setLoading(false);
 
 		return () => {
@@ -176,6 +182,7 @@ const RecShows = () => {
 		seen,
 		filteredRecs,
 		appliedFilters.minRecs,
+		appliedFilters,
 	]);
 
 	useScrollToTop(ref);
@@ -392,7 +399,7 @@ const RecShows = () => {
 	return (
 		<View style={styles.container}>
 			<RecsHeader
-				noUserShows={noUserShows}
+				noUserShows={noUserShowsForHeader}
 				toggleNoUserShows={toggleNoUserShows}
 				cancelFilters={cancelFilters}
 				appliedFilters={appliedFilters}
@@ -401,6 +408,7 @@ const RecShows = () => {
 				setFilterOpen={setFilterOpen}
 				showsLength={showsLength}
 				sourcePage={SourcePage.REC_SHOWS}
+				displayedFilterLength={displayedFilterLength}
 			/>
 			<View style={styles.containerGallery}>
 				{flatlist}

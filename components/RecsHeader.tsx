@@ -5,18 +5,20 @@ import {
 	UserShowType,
 } from '@/lib/types';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useIsFocused } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
 import {
+	Dimensions,
 	ScrollView,
 	StyleSheet,
-	Switch,
 	Text,
 	TouchableOpacity,
 	View,
 } from 'react-native';
 import { Portal } from 'react-native-paper';
 import ShowTagPicker from './ShowTagPicker';
+import Toggle from './Toggle';
 
 type PillState = 'inactive' | 'pending' | 'applied';
 const generalTagsText = 'Pick tags to include in filter:';
@@ -127,7 +129,7 @@ interface RecsHeaderProps {
 	setExcludedSourceTypes?: React.Dispatch<
 		React.SetStateAction<Set<UserShowType>>
 	>;
-	tagPanelMaxHeight?: number;
+	displayedFilterLength: number;
 }
 
 const RecsHeader = ({
@@ -142,7 +144,7 @@ const RecsHeader = ({
 	sourcePage,
 	excludedSourceTypes,
 	setExcludedSourceTypes,
-	tagPanelMaxHeight,
+	displayedFilterLength,
 }: RecsHeaderProps) => {
 	const [selectedTags, setSelectedTags] = useState<Record<string, boolean>>({});
 	const [selectedWarningTags, setSelectedWarningTags] = useState<
@@ -162,11 +164,15 @@ const RecsHeader = ({
 		});
 		cancelFilters();
 	};
-
-	const filterLength = Object.keys(appliedFilters).length;
 	const tagIdsFilterLength =
 		(appliedFilters.hasTagIds?.length ?? 0) +
 		(appliedFilters.notHasTagIds?.length ?? 0);
+	const tabBarHeight = useBottomTabBarHeight();
+	const screenHeight = Dimensions.get('window').height;
+	const [panelY, setPanelY] = useState(254); // reasonable fallback
+	const availableHeight = screenHeight - panelY - tabBarHeight - 50;
+
+	console.log('availableHeight being applied:', availableHeight);
 
 	const getPillState = (pillType: ShowFilterType): PillState => {
 		if (appliedFilters[pillType]) return 'applied';
@@ -216,12 +222,7 @@ const RecsHeader = ({
 	}, [selectedWarningTags, setAppliedFilters]);
 
 	return (
-		<View
-			style={styles.header}
-			onLayout={(e) =>
-				console.log('header height:', e.nativeEvent.layout.height)
-			}
-		>
+		<View style={styles.header}>
 			{sourcePage === SourcePage.REC_SHOWS && toggleNoUserShows ? (
 				<View style={styles.toggleContainer}>
 					<Text style={{ color: 'white' }}>
@@ -229,18 +230,25 @@ const RecsHeader = ({
 							? 'Toggle to see shows saved to your profile'
 							: 'Toggle to hide shows saved to your profile'}
 					</Text>
-
-					<Switch
+					<View
 						style={{
-							marginBottom: 5,
-							marginTop: 5,
+							paddingTop: 8,
 						}}
-						ios_backgroundColor='#3e3e3e'
-						onValueChange={toggleNoUserShows}
-						value={noUserShows}
-						trackColor={{ false: '#3e3e3e', true: '#36C9C6' }}
-						thumbColor='white'
-					/>
+					>
+						<Toggle
+							// style={{
+							// 	marginBottom: 5,
+							// 	marginTop: 5,
+							// 	alignSelf: 'flex-start',
+							// 	...(Platform.OS === 'android' && { transform: [{ scale: 1.3 }] }),
+							// }}
+							// ios_backgroundColor='#3e3e3e'
+							onValueChange={toggleNoUserShows}
+							value={!!noUserShows}
+							trackColorOn='#36C9C6'
+							trackColorOff='#3e3e3e'
+						/>
+					</View>
 				</View>
 			) : excludedSourceTypes ? (
 				<View style={styles.sourcesRow}>
@@ -352,6 +360,22 @@ const RecsHeader = ({
 								)
 							}
 						/>
+						{sourcePage === SourcePage.VIEW_SHOWS && (
+							<Pill
+								label='currently watching'
+								pillState={getPillState(ShowFilterType.CURRENTLY_WATCHING)}
+								onPress={() => {
+									setAppliedFilters((prev) => {
+										if (prev.currentlyWatching) {
+											const { currentlyWatching, ...rest } = prev;
+											return rest;
+										} else {
+											return { ...prev, currentlyWatching: true };
+										}
+									});
+								}}
+							/>
+						)}
 						<Pill
 							label='has description'
 							pillState={getPillState(ShowFilterType.HAS_DESCRIPTION)}
@@ -366,6 +390,22 @@ const RecsHeader = ({
 								});
 							}}
 						/>
+						{sourcePage === SourcePage.REC_SHOWS && (
+							<Pill
+								label='currently watching'
+								pillState={getPillState(ShowFilterType.CURRENTLY_WATCHING)}
+								onPress={() => {
+									setAppliedFilters((prev) => {
+										if (prev.currentlyWatching) {
+											const { currentlyWatching, ...rest } = prev;
+											return rest;
+										} else {
+											return { ...prev, currentlyWatching: true };
+										}
+									});
+								}}
+							/>
+						)}
 						{sourcePage === SourcePage.REC_SHOWS && (
 							<Pill
 								label='min recs'
@@ -383,15 +423,25 @@ const RecsHeader = ({
 
 					{activeFilterType === 'hasTagIds' && isFocused && (
 						<>
-							<View style={styles.panelContainer}>
+							<View
+								style={styles.panelContainer}
+								onLayout={(e) => {
+									e.target.measure((x, y, width, height, pageX, pageY) => {
+										console.log('panelY pageY:', pageY);
+										console.log('screenHeight:', screenHeight);
+										console.log('tabBarHeight:', tabBarHeight);
+										console.log(
+											'availableHeight:',
+											screenHeight - pageY - tabBarHeight - 50,
+										);
+										setPanelY(pageY);
+									});
+								}}
+							>
 								<ScrollView
 									showsVerticalScrollIndicator={false}
 									keyboardShouldPersistTaps='handled'
-									style={
-										tagPanelMaxHeight
-											? { maxHeight: tagPanelMaxHeight }
-											: { maxHeight: 480 }
-									}
+									style={{ maxHeight: availableHeight }}
 								>
 									<ShowTagPicker
 										selectedTags={selectedTags}
@@ -411,7 +461,7 @@ const RecsHeader = ({
 										styles.panelActionRow,
 										{
 											position: 'absolute',
-											bottom: 83,
+											bottom: tabBarHeight,
 											left: 0,
 											right: 0,
 										},
@@ -485,13 +535,13 @@ const RecsHeader = ({
 							<Text style={styles.filterHiddenTitle}>
 								{sourcePage === SourcePage.REC_SHOWS ? 'Recs' : 'Shows'} (
 								{showsLength})
-								{filterLength > 0 || noUserShows
-									? ` · Filters (${filterLength + Number(`${noUserShows ? 1 : 0}`)} active)`
+								{displayedFilterLength > 0 || noUserShows
+									? ` · Filters (${displayedFilterLength + Number(`${noUserShows ? 1 : 0}`)} active)`
 									: ''}
 							</Text>
 
 							<Text style={styles.filterExpandText}>
-								{filterLength > 0 ? 'edit' : 'filters'} ›
+								{displayedFilterLength > 0 ? 'edit' : 'filters'} ›
 							</Text>
 						</View>
 					</TouchableOpacity>
@@ -527,10 +577,10 @@ const RecsHeader = ({
 								</Text>
 							</View>
 						) : null}
-						{!noUserShows && filterLength === 0 && (
+						{!noUserShows && displayedFilterLength === 0 && (
 							<Text style={styles.filterHiddenLabel}>no filters active</Text>
 						)}
-						{(filterLength > 0 || noUserShows) && (
+						{(displayedFilterLength > 0 || noUserShows) && (
 							<TouchableOpacity
 								style={styles.clearAllChip}
 								onPress={() => {
@@ -643,7 +693,7 @@ const styles = StyleSheet.create({
 	filterHiddenHeader: {
 		backgroundColor: '#340068',
 		paddingHorizontal: 12,
-		paddingTop: 8,
+		paddingTop: 10,
 		paddingBottom: 10,
 	},
 	filterHiddenTopRow: {
@@ -707,6 +757,10 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 12,
 		paddingVertical: 4,
 		gap: 10,
+		borderTopWidth: 0.5,
+		borderBottomWidth: 0.5,
+		borderTopColor: 'rgba(255,255,255,0.2)',
+		borderBottomColor: 'rgba(255,255,255,0.2)',
 	},
 	sourceLabel: {
 		fontSize: 12,
@@ -734,6 +788,16 @@ const styles = StyleSheet.create({
 		fontSize: 13,
 		color: 'rgba(255,255,255,0.85)',
 		fontWeight: '500',
+	},
+	currentlyWatchingLabel: {
+		fontSize: 13,
+		color: 'white',
+		fontWeight: '500',
+	},
+	currentlyWatchingSub: {
+		fontSize: 11,
+		color: 'rgba(255,255,255,0.55)',
+		marginTop: 1,
 	},
 });
 

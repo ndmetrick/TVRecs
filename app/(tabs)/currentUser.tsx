@@ -88,7 +88,6 @@ const CurrentUser = () => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		paddingBottom: 20,
 	},
 	tabSwitcher: {
 		flexDirection: 'row',

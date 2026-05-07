@@ -22,6 +22,7 @@ export enum ShowFilterType {
 	NOT_HAS_TAG_IDS = 'notHasTagIds',
 	MIN_RECS = 'minRecs',
 	DESCRIPTION_STRING = 'descriptionString',
+	CURRENTLY_WATCHING = 'currentlyWatching',
 	NONE = 'none',
 }
 
@@ -33,6 +34,7 @@ export type AppliedShowFilters = {
 	minRecs?: number;
 	descriptionString?: string;
 	none?: boolean;
+	currentlyWatching?: boolean;
 };
 
 export type ProfileTagFilter = {
@@ -69,6 +71,7 @@ export type EditUserShowParams = {
 	newType?: UserShowType;
 	newVisible?: boolean;
 	oldUserShow: UserShow;
+	newWatching?: boolean;
 };
 
 export enum ProfileTagCategory {
@@ -125,6 +128,7 @@ export type UserShow = {
 	show: Show;
 	tags: Tag[];
 	updated_at: string;
+	currently_watching: boolean;
 };
 
 export type UserShowToSave = {

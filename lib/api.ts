@@ -366,9 +366,19 @@ export const addShow = async (
 		description: string | null;
 		tagIds: number[];
 		userId: string;
+		currentlyWatching: boolean;
 	},
 ): Promise<UserShow> => {
-	const { tmdbId, name, imageUrl, type, description, tagIds, userId } = params;
+	const {
+		tmdbId,
+		name,
+		imageUrl,
+		type,
+		description,
+		tagIds,
+		userId,
+		currentlyWatching,
+	} = params;
 
 	// Step 1: find or create the show
 	let show: Show;
@@ -403,6 +413,7 @@ export const addShow = async (
 			type,
 			description,
 			visible: true,
+			currently_watching: currentlyWatching,
 		})
 		.select()
 		.single();
@@ -437,6 +448,7 @@ export const editUserShow = async (
 		newType?: UserShowType;
 		newVisible?: boolean;
 		oldUserShow: UserShow;
+		newWatching?: boolean;
 	},
 ): Promise<UserShow> => {
 	const updates: Record<string, unknown> = {};
@@ -447,10 +459,12 @@ export const editUserShow = async (
 		newType,
 		newVisible,
 		oldUserShow,
+		newWatching,
 	} = params;
 	if (newType !== undefined) updates.type = newType;
 	if (newDescription !== undefined) updates.description = newDescription;
 	if (newVisible !== undefined) updates.visible = newVisible;
+	if (newWatching !== undefined) updates.currently_watching = newWatching;
 
 	let userShow = oldUserShow;
 	let tags = oldUserShow.tags;

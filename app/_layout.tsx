@@ -34,7 +34,7 @@ export const AppShell = () => {
 					headerTitle: () => (
 						<TouchableOpacity onPress={() => router.push('/(tabs)/recShows')}>
 							<Image
-								style={{ width: 50, height: 40 }}
+								style={{ width: 50, height: 40, alignSelf: 'center' }}
 								source={require('../assets/images/tempTVRecsLogo.png')}
 							/>
 						</TouchableOpacity>

@@ -19,13 +19,20 @@ CREATE TABLE public.shows (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+CREATE TABLE public.tag_sections (
+  id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
+  sort_order INTEGER NOT NULL
+);
+
 
 CREATE TABLE public.tags (
   id SERIAL PRIMARY KEY,
   name TEXT UNIQUE NOT NULL,
   type TEXT DEFAULT 'tv' CHECK (
     type IN ('profile-like','profile-dislike','profile','profile-describe','tv','warning','unassigned')
-  )
+  ),
+  section_id INTEGER REFERENCES public.tag_sections(id)
 );
 
 CREATE TABLE public.user_shows (
@@ -35,6 +42,7 @@ CREATE TABLE public.user_shows (
   type TEXT NOT NULL DEFAULT 'rec' CHECK (type IN ('rec','watch','seen')),
   description TEXT,
   visible BOOLEAN DEFAULT true,
+  currently_watching BOOLEAN DEFAULT false,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(user_id, show_id)

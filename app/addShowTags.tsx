@@ -1,4 +1,5 @@
 import ShowTagPicker from '@/components/ShowTagPicker';
+import Toggle from '@/components/Toggle';
 import { addShow, editUserShow } from '@/lib/api';
 import { useAppData } from '@/lib/AppContext';
 import { supabase } from '@/lib/supabase';
@@ -33,6 +34,7 @@ const AddShowTags = () => {
 	const { currentUser, refetchUserShows } = useAppData();
 	const [saving, setSaving] = useState(false);
 	const [collapsed, setCollapsed] = useState<'collapse' | 'open'>('collapse');
+	const [currentlyWatching, setCurrentlyWatching] = useState(false);
 
 	const { showToSaveString, previousString, currentShowString } =
 		useLocalSearchParams();
@@ -130,6 +132,9 @@ const AddShowTags = () => {
 				updates.newDescription = description;
 			if (showToSave.type !== currentUserShow.type)
 				updates.newType = showToSave.type;
+			if (currentlyWatching !== currentUserShow.currently_watching)
+				updates.newWatching = currentlyWatching;
+
 			try {
 				await editUserShow(supabase, updates);
 				await refetchUserShows();
@@ -150,6 +155,7 @@ const AddShowTags = () => {
 				description,
 				tagIds: chosenTags,
 				userId: currentUser.id,
+				currentlyWatching: currentlyWatching,
 			};
 			try {
 				await addShow(supabase, updatedShow);
@@ -209,6 +215,17 @@ const AddShowTags = () => {
 					multiline={true}
 					value={description}
 				/>
+				<View style={styles.currentlyWatchingRow}>
+					<Text
+						style={{ fontSize: 16 }}
+					>{`I'm currently watching this show`}</Text>
+					<Toggle
+						value={currentlyWatching}
+						onValueChange={setCurrentlyWatching}
+						trackColorOn='#0E8C8C'
+						trackColorOff='#3e3e3e'
+					/>
+				</View>
 				<ShowTagPicker
 					selectedTags={selectedTags}
 					setSelectedTags={setSelectedTags}
@@ -284,6 +301,14 @@ const styles = StyleSheet.create({
 	text: {
 		fontSize: 16,
 		margin: 10,
+	},
+	currentlyWatchingRow: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+		marginHorizontal: 12,
+		marginTop: 8,
+		marginBottom: 4,
 	},
 	tagText: {
 		fontSize: 13.5,
