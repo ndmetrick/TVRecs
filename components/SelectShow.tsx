@@ -81,13 +81,13 @@ const SelectShow = ({ sourcePage, handleShow }: Props) => {
 	const isFocused = useIsFocused();
 
 	useEffect(() => {
-		if (!isFocused) return;
+		if (!isFocused || sourcePage === SourcePage.ADD_SHOW) return;
 		setShowInput('');
 		setShowOptions(null);
 		setAdded(false);
 		setShowPosterPreview(false);
 		setNotFound(false);
-	}, [isFocused]);
+	}, [isFocused, sourcePage]);
 
 	type TMDBShow = {
 		name: string;
@@ -213,7 +213,7 @@ const SelectShow = ({ sourcePage, handleShow }: Props) => {
 				keyboardShouldPersistTaps='handled'
 			>
 				{!added ? (
-					<View style={{ flex: 1 }}>
+					<View style={{ marginBottom: 10, marginTop: 15, flex: 1 }}>
 						<Text style={styles.boldText}>Search shows</Text>
 
 						{showOptions ? (
@@ -413,10 +413,8 @@ const SelectShow = ({ sourcePage, handleShow }: Props) => {
 const makeStyles = (isDark: boolean) =>
 	StyleSheet.create({
 		container: {
-			marginTop: 15,
 			flex: 1,
 			marginHorizontal: 2,
-			marginBottom: 10,
 		},
 		optionContainer: {
 			flex: 1,

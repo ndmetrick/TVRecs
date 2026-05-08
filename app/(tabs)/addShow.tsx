@@ -5,7 +5,7 @@ import { useAppData } from '@/lib/AppContext';
 import { SourcePage, UserShowToSave, UserShowType } from '@/lib/types';
 import { useIsFocused } from '@react-navigation/native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
 	Alert,
 	Image,
@@ -55,6 +55,15 @@ const AddShow = () => {
 	const [imageError, setImageError] = useState(false);
 	const isDark = useColorScheme() === 'dark';
 	const styles = makeStyles(isDark);
+	const scrollRef = useRef<ScrollView>(null);
+
+	useEffect(() => {
+		if (showType && showType !== 'none') {
+			setTimeout(() => {
+				scrollRef.current?.scrollToEnd({ animated: true });
+			}, 100);
+		}
+	}, [showType]);
 
 	const [profileShowDropdownOptions, setProfileShowDropdownOptions] = useState<
 		{
@@ -74,6 +83,7 @@ const AddShow = () => {
 		}
 
 		return () => {
+			console.log('RETURNING');
 			setShowName('');
 			setImageUrl(null);
 			setShowAdded(false);
@@ -87,9 +97,21 @@ const AddShow = () => {
 			setImageError(false);
 			setSaving(false);
 		};
-	}, [currentUser, isFocused]);
+	}, [currentUser]);
 
 	useEffect(() => {
+		return () => {
+			console.log('RETURNINGxx');
+			// setStreaming('')
+			// setPurchase('')
+			setStreamingAndPurchase(false);
+			setProfileShowDropdownOpen(false);
+			setSaving(false);
+		};
+	}, [isFocused]);
+
+	useEffect(() => {
+		console.log('YES I SEE YOU');
 		if (addToType) {
 			setShowType(addToType);
 		}
@@ -137,7 +159,8 @@ const AddShow = () => {
 			<ScrollView
 				showsVerticalScrollIndicator={false}
 				keyboardShouldPersistTaps='handled'
-				style={{ marginTop: 15, marginBottom: 30 }}
+				// style={{ marginTop: 15, marginBottom: 30 }}
+				ref={scrollRef}
 			>
 				<SelectShow handleShow={addThisShow} sourcePage={SourcePage.ADD_SHOW} />
 				<View>
