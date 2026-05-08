@@ -47,6 +47,7 @@ export const deleteUserAccount = async (
 	supabase: SupabaseClient,
 ): Promise<void> => {
 	const { error } = await supabase.rpc('delete_own_account');
+	console.log('Error deleting user account', JSON.stringify(error));
 	if (error) throw error;
 };
 
