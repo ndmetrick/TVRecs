@@ -15,6 +15,7 @@ import {
 	MD3LightTheme,
 	Provider as PaperProvider,
 } from 'react-native-paper';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 
 Sentry.init({
@@ -102,12 +103,14 @@ export default function RootLayout() {
 	const scheme = useColorScheme();
 	const paperTheme = scheme === 'dark' ? MD3DarkTheme : MD3LightTheme;
 	return (
-		<PaperProvider theme={paperTheme}>
-			<AuthProvider>
-				<AppProvider>
-					<AppShell />
-				</AppProvider>
-			</AuthProvider>
-		</PaperProvider>
+		<SafeAreaProvider>
+			<PaperProvider theme={paperTheme}>
+				<AuthProvider>
+					<AppProvider>
+						<AppShell />
+					</AppProvider>
+				</AuthProvider>
+			</PaperProvider>
+		</SafeAreaProvider>
 	);
 }
