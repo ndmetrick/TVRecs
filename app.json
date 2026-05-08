@@ -2,7 +2,7 @@
 	"expo": {
 		"name": "TVRecs",
 		"slug": "TVRecs",
-		"version": "1.0.6",
+		"version": "1.0.7",
 		"orientation": "portrait",
 		"icon": "./assets/images/splash-logo.png",
 		"scheme": "tvrecs",
@@ -23,7 +23,7 @@
 			"edgeToEdgeEnabled": true,
 			"predictiveBackGestureEnabled": false,
 			"package": "com.ndmetrick.tvrecs",
-			"versionCode": 6
+			"versionCode": 7
 		},
 		"web": {
 			"output": "static",
