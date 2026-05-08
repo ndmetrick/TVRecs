@@ -16,7 +16,6 @@
 		"@react-navigation/bottom-tabs": "^7.4.0",
 		"@react-navigation/elements": "^2.6.3",
 		"@react-navigation/native": "^7.1.8",
-		"@realtril/react-native-country-picker-modal": "^1.0.12",
 		"@sentry/react-native": "~7.2.0",
 		"@supabase/supabase-js": "^2.103.3",
 		"@types/country-list": "^2.1.4",
