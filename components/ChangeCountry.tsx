@@ -1,7 +1,13 @@
 import { useAppData } from '@/lib/AppContext';
-import { Country } from '@realtril/react-native-country-picker-modal';
+import { getName } from 'country-list';
 import React, { useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+	StyleSheet,
+	Text,
+	TouchableOpacity,
+	useColorScheme,
+	View,
+} from 'react-native';
 import PickCountry from './PickCountry';
 
 interface Props {
@@ -25,10 +31,13 @@ const ChangeCountry = (props: Props) => {
 	// >(null);
 	const [changeCountry, setChangeCountry] = useState(false);
 	const { currentUser } = useAppData();
+	const isDark = useColorScheme() === 'dark';
+	const styles = makeStyles(isDark);
 
-	const getCountry = (country: Country) => {
+	const getCountry = (country: string) => {
+		console.log('country', country);
 		// setCountry(country.name);
-		setCountryCode(country.cca2);
+		setCountryCode(country);
 		setChangeCountry(false);
 		setSaveCountry(true);
 	};
@@ -37,7 +46,11 @@ const ChangeCountry = (props: Props) => {
 		<View>
 			{!changeCountry && !saveCountry ? (
 				<Text style={styles.text}>
-					{`Your country is currently set to ${countryCode}. That means that when you search for a show, or add a show to your watch list or recommendation list, the purchase and streaming options provided will be for that country. Log in or sign up to choose your country.`}
+					Your country is currently set to {getName(countryCode) ?? countryCode}
+					. That means that when you search for a show, or add a show to your
+					watch list or recommendation list, the purchase and streaming options
+					provided will be for that country. Log in or sign up to choose your
+					country.
 				</Text>
 			) : null}
 			<View style={styles.buttonContainer}>
@@ -52,13 +65,15 @@ const ChangeCountry = (props: Props) => {
 			</View>
 			{changeCountry ? (
 				<View style={styles.buttonContainer}>
-					<PickCountry onValueChange={getCountry} />
+					<PickCountry onValueChange={getCountry} initialCode={countryCode} />
 				</View>
 			) : null}
 			{saveCountry ? (
 				<View>
 					<Text style={styles.text}>
-						{`Would you like to change your country to {countryCode}? If yes, click on "Save country to profile" below.`}
+						Would you like to change your country to{' '}
+						{getName(countryCode) ?? countryCode}? If yes, click on &quot;Save
+						country to profile&quot; below.
 					</Text>
 					<View style={styles.buttonContainer}>
 						<TouchableOpacity style={styles.button} onPress={saveNewCountry}>
@@ -71,31 +86,33 @@ const ChangeCountry = (props: Props) => {
 	);
 };
 
-const styles = StyleSheet.create({
-	buttonText: {
-		textAlign: 'center',
-		fontSize: 18,
-		margin: 5,
-		fontWeight: '500',
-		color: 'white',
-	},
-	text: {
-		marginLeft: 15,
-		textAlign: 'left',
-		fontSize: 18,
-	},
-	buttonContainer: {
-		flexDirection: 'row',
-		justifyContent: 'center',
-		margin: 8,
-	},
-	button: {
-		padding: 5,
-		borderRadius: 10,
-		marginHorizontal: 3,
-		backgroundColor: '#340068',
-		marginTop: 2,
-	},
-});
+const makeStyles = (isDark: boolean) =>
+	StyleSheet.create({
+		buttonText: {
+			textAlign: 'center',
+			fontSize: 18,
+			margin: 5,
+			fontWeight: '500',
+			color: isDark ? '#cccccc' : 'white',
+		},
+		text: {
+			marginLeft: 15,
+			textAlign: 'left',
+			fontSize: 18,
+			color: isDark ? '#cccccc' : 'black',
+		},
+		buttonContainer: {
+			flexDirection: 'row',
+			justifyContent: 'center',
+			margin: 8,
+		},
+		button: {
+			padding: 5,
+			borderRadius: 10,
+			marginHorizontal: 3,
+			backgroundColor: '#340068',
+			marginTop: 2,
+		},
+	});
 
 export default ChangeCountry;

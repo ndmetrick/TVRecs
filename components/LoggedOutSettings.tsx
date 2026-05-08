@@ -5,10 +5,13 @@ import {
 	StyleSheet,
 	Text,
 	TouchableOpacity,
+	useColorScheme,
 	View,
 } from 'react-native';
 
 export default function LoggedOutSettings() {
+	const isDark = useColorScheme() === 'dark';
+	const styles = makeStyles(isDark);
 	const router = useRouter();
 
 	return (
@@ -62,45 +65,47 @@ export default function LoggedOutSettings() {
 	);
 }
 
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		backgroundColor: '#E9ECEF',
-	},
-	content: {
-		padding: 16,
-	},
-	buttonContainer: {
-		flexDirection: 'row',
-		justifyContent: 'center',
-		marginBottom: 16,
-	},
-	button: {
-		backgroundColor: '#340068',
-		borderRadius: 40,
-		paddingVertical: 10,
-		paddingHorizontal: 20,
-		marginTop: 5,
-	},
-	buttonText: {
-		color: 'white',
-		fontSize: 16,
-		fontWeight: '500',
-		textAlign: 'center',
-	},
-	text: {
-		fontSize: 16,
-		textAlign: 'left',
-		marginBottom: 16,
-	},
-	privacyLink: {
-		color: 'blue',
-		fontSize: 16,
-		fontWeight: '500',
-	},
-	link: {
-		color: '#4056F4',
-		fontSize: 15,
-		textAlign: 'center',
-	},
-});
+const makeStyles = (isDark: boolean) =>
+	StyleSheet.create({
+		container: {
+			flex: 1,
+			backgroundColor: isDark ? '#5a5a5a' : '#E9ECEF',
+		},
+		content: {
+			padding: 16,
+		},
+		buttonContainer: {
+			flexDirection: 'row',
+			justifyContent: 'center',
+			marginBottom: 16,
+		},
+		button: {
+			backgroundColor: '#340068',
+			borderRadius: 40,
+			paddingVertical: 10,
+			paddingHorizontal: 20,
+			marginTop: 5,
+		},
+		buttonText: {
+			color: isDark ? '#cccccc' : 'white',
+			fontSize: 16,
+			fontWeight: '500',
+			textAlign: 'center',
+		},
+		text: {
+			fontSize: 16,
+			textAlign: 'left',
+			marginBottom: 16,
+			color: isDark ? '#bbbbbb' : '',
+		},
+		privacyLink: {
+			color: isDark ? '#6b9fd4' : 'blue',
+			fontSize: 16,
+			fontWeight: '500',
+		},
+		link: {
+			color: isDark ? '#6b9fd4' : '#4f5cbc',
+			fontSize: 15,
+			textAlign: 'center',
+		},
+	});

@@ -10,9 +10,11 @@ import {
 	StyleSheet,
 	Text,
 	TouchableOpacity,
+	useColorScheme,
 	View,
 } from 'react-native';
 
+import AppDropdownPicker from '@/components/AppDropdownPicker';
 import OtherRecerModal from '@/components/OtherRecerModal';
 import SaveShowModal from '@/components/SaveShowModal';
 import { ShowImagePlaceholder } from '@/components/SelectShow';
@@ -31,11 +33,12 @@ import {
 } from '@/lib/types';
 import { useIsFocused } from '@react-navigation/native';
 import { router, useLocalSearchParams } from 'expo-router';
-import DropDownPicker from 'react-native-dropdown-picker';
 import { skipTagsAndSaveShowData } from '../lib/utils';
 
 const SingleShow = () => {
 	const { userShowString, userString } = useLocalSearchParams();
+	const isDark = useColorScheme() === 'dark';
+	const styles = makeStyles(isDark);
 
 	const [user, setUser] = useState<UserProfile | null>(null);
 	const [type, setType] = useState<UserShowType | null>(null);
@@ -253,7 +256,7 @@ const SingleShow = () => {
 		}
 	};
 
-	const chooseWhatToDoWithShow = (value: string) => {
+	const chooseWhatToDoWithShow = (value: any) => {
 		if (!singleShow) {
 			return;
 		}
@@ -583,10 +586,7 @@ const SingleShow = () => {
 									marginRight: 15,
 								}}
 							>
-								<DropDownPicker
-									style={{
-										borderRadius: 25,
-									}}
+								<AppDropdownPicker
 									labelStyle={{
 										flexWrap: 'wrap',
 										fontSize: 15,
@@ -702,7 +702,7 @@ const SingleShow = () => {
 								{userHasShow ? null : (
 									<View>
 										<View style={{ marginRight: 15, marginLeft: 15 }}>
-											<DropDownPicker
+											<AppDropdownPicker
 												open={profileShowDropdownOpen}
 												value={profileShowDropdownValue}
 												items={profileShowDropdownOptions}
@@ -782,131 +782,132 @@ const SingleShow = () => {
 	);
 };
 
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		marginBottom: 30,
-		backgroundColor: '#EBECF0',
-	},
-	extra: {
-		marginBottom: 25,
-		marginLeft: 15,
-	},
-	containerInfo: {
-		flexDirection: 'row',
-		padding: 5,
-		backgroundColor: '#340068',
-		alignItems: 'center',
-	},
-	backButton: {
-		padding: 8,
-	},
-	headingText: {
-		fontWeight: '500',
-		fontSize: 20,
-		margin: 10,
-	},
-	usernameButton: {
-		borderRadius: 25,
-		elevation: 3,
-		backgroundColor: '#4056F4',
-	},
-	recButton: {
-		borderRadius: 25,
-		backgroundColor: '#340068',
-	},
-	usernameText: {
-		fontWeight: '500',
-		fontSize: 20,
-		letterSpacing: 0.25,
-		margin: 4,
-		color: 'white',
-	},
-	recText: {
-		fontWeight: '500',
-		fontSize: 20,
-		letterSpacing: 0.25,
-		marginBottom: 4,
-		marginTop: 4,
-		marginRight: 4,
-		color: 'white',
-	},
-	showsList: {
-		flex: 1,
-	},
-	image: {
-		aspectRatio: 1,
-		resizeMode: 'contain',
-	},
-	text: {
-		textAlign: 'left',
-		fontSize: 18,
-		margin: 10,
-	},
-	cardContent: {
-		flexDirection: 'row',
-		marginLeft: 10,
-	},
-	tagsContent: {
-		flexWrap: 'wrap',
-		marginBottom: 10,
-	},
-	tvTag: {
-		padding: 10,
-		borderRadius: 40,
-		marginHorizontal: 3,
-		backgroundColor: '#36C9C6',
-		marginTop: 5,
-	},
-	warningTag: {
-		padding: 10,
-		borderRadius: 40,
-		marginHorizontal: 3,
-		backgroundColor: '#ED6A5A',
-		marginTop: 5,
-	},
-	tagText: {
-		fontSize: 13.5,
-		fontWeight: '500',
-	},
-	buttonText: {
-		textAlign: 'center',
-		fontSize: 18,
-		margin: 5,
-		fontWeight: '500',
-		color: 'white',
-	},
-	buttonContainer: {
-		flexDirection: 'row',
-		justifyContent: 'center',
-	},
-	button: {
-		padding: 10,
-		borderRadius: 40,
-		marginHorizontal: 3,
-		backgroundColor: '#340068',
-		marginTop: 5,
-		marginLeft: 5,
-		marginRight: 5,
-	},
-	savingOverlay: {
-		...StyleSheet.absoluteFillObject,
-		backgroundColor: 'rgba(0,0,0,0.4)',
-		justifyContent: 'center',
-		alignItems: 'center',
-		zIndex: 999,
-	},
-	saveButton: {
-		backgroundColor: '#4056F4',
-		padding: 8,
-		borderRadius: 40,
-		marginHorizontal: 3,
-		marginTop: 5,
-		marginBottom: 20,
-	},
-	showName: {
-		color: '#ED6A5A',
-	},
-});
+const makeStyles = (isDark: boolean) =>
+	StyleSheet.create({
+		container: {
+			flex: 1,
+			marginBottom: 30,
+			backgroundColor: isDark ? '#aaaaaa' : '#EBECF0',
+		},
+		extra: {
+			marginBottom: 25,
+			marginLeft: 15,
+		},
+		containerInfo: {
+			flexDirection: 'row',
+			padding: 5,
+			backgroundColor: '#340068',
+			alignItems: 'center',
+		},
+		backButton: {
+			padding: 8,
+		},
+		headingText: {
+			fontWeight: '500',
+			fontSize: 20,
+			margin: 10,
+		},
+		usernameButton: {
+			borderRadius: 25,
+			elevation: 3,
+			backgroundColor: '#4056F4',
+		},
+		recButton: {
+			borderRadius: 25,
+			backgroundColor: '#340068',
+		},
+		usernameText: {
+			fontWeight: '500',
+			fontSize: 20,
+			letterSpacing: 0.25,
+			margin: 4,
+			color: isDark ? '#dddddd' : 'white',
+		},
+		recText: {
+			fontWeight: '500',
+			fontSize: 20,
+			letterSpacing: 0.25,
+			marginBottom: 4,
+			marginTop: 4,
+			marginRight: 4,
+			color: isDark ? '#cccccc' : 'white',
+		},
+		showsList: {
+			flex: 1,
+		},
+		image: {
+			aspectRatio: 1,
+			resizeMode: 'contain',
+		},
+		text: {
+			textAlign: 'left',
+			fontSize: 18,
+			margin: 10,
+		},
+		cardContent: {
+			flexDirection: 'row',
+			marginLeft: 10,
+		},
+		tagsContent: {
+			flexWrap: 'wrap',
+			marginBottom: 10,
+		},
+		tvTag: {
+			padding: 10,
+			borderRadius: 40,
+			marginHorizontal: 3,
+			backgroundColor: '#36C9C6',
+			marginTop: 5,
+		},
+		warningTag: {
+			padding: 10,
+			borderRadius: 40,
+			marginHorizontal: 3,
+			backgroundColor: '#ED6A5A',
+			marginTop: 5,
+		},
+		tagText: {
+			fontSize: 13.5,
+			fontWeight: '500',
+		},
+		buttonText: {
+			textAlign: 'center',
+			fontSize: 18,
+			margin: 5,
+			fontWeight: '500',
+			color: isDark ? '#cccccc' : 'white',
+		},
+		buttonContainer: {
+			flexDirection: 'row',
+			justifyContent: 'center',
+		},
+		button: {
+			padding: 10,
+			borderRadius: 25,
+			marginHorizontal: 3,
+			backgroundColor: '#340068',
+			marginTop: 5,
+			marginLeft: 5,
+			marginRight: 10,
+		},
+		savingOverlay: {
+			...StyleSheet.absoluteFillObject,
+			backgroundColor: 'rgba(0,0,0,0.4)',
+			justifyContent: 'center',
+			alignItems: 'center',
+			zIndex: 999,
+		},
+		saveButton: {
+			backgroundColor: '#4056F4',
+			padding: 8,
+			borderRadius: 40,
+			marginHorizontal: 3,
+			marginTop: 5,
+			marginBottom: 20,
+		},
+		showName: {
+			color: '#ED6A5A',
+		},
+	});
 
 export default SingleShow;

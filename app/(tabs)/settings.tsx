@@ -7,6 +7,7 @@ import {
 	StyleSheet,
 	Text,
 	TouchableOpacity,
+	useColorScheme,
 	View,
 } from 'react-native';
 
@@ -32,6 +33,8 @@ const Settings = () => {
 	const { signOut } = useAuth();
 	const [saving, setSaving] = useState(false);
 	const router = useRouter();
+	const isDark = useColorScheme() === 'dark';
+	const styles = makeStyles(isDark);
 
 	useEffect(() => {
 		if (tagsOpen) setSaving(false);
@@ -170,7 +173,7 @@ const Settings = () => {
 						<MaterialCommunityIcons
 							name={countryOpen ? 'chevron-down' : 'chevron-right'}
 							size={18}
-							color='#777'
+							color={isDark ? '#f0f0f0' : '#777'}
 						/>
 					</TouchableOpacity>
 					{countryOpen && (
@@ -196,7 +199,7 @@ const Settings = () => {
 						<MaterialCommunityIcons
 							name={usernameOpen ? 'chevron-down' : 'chevron-right'}
 							size={18}
-							color='#777'
+							color={isDark ? '#f0f0f0' : '#777'}
 						/>
 					</TouchableOpacity>
 					{usernameOpen && (
@@ -218,7 +221,7 @@ const Settings = () => {
 						<MaterialCommunityIcons
 							name={passwordOpen ? 'chevron-down' : 'chevron-right'}
 							size={18}
-							color='#777'
+							color={isDark ? '#f0f0f0' : '#777'}
 						/>
 					</TouchableOpacity>
 					{passwordOpen && (
@@ -244,7 +247,7 @@ const Settings = () => {
 						<MaterialCommunityIcons
 							name={deleteUserOpen ? 'chevron-down' : 'chevron-right'}
 							size={18}
-							color='#777'
+							color={isDark ? '#f0f0f0' : '#777'}
 						/>
 					</TouchableOpacity>
 					{deleteUserOpen && (
@@ -270,7 +273,7 @@ const Settings = () => {
 					</TouchableOpacity>
 				</View>
 
-				<View style={{ marginTop: 8, marginLeft: 20 }}>
+				<View style={{ marginTop: 8, marginLeft: 20, marginBottom: 20 }}>
 					<TouchableOpacity
 						onPress={() =>
 							Linking.openURL(
@@ -278,7 +281,9 @@ const Settings = () => {
 							)
 						}
 					>
-						<Text style={{ ...styles.text, color: 'blue' }}>
+						<Text
+							style={{ ...styles.text, color: isDark ? '#6b9fd4' : 'blue' }}
+						>
 							Privacy Policy
 						</Text>
 					</TouchableOpacity>
@@ -288,193 +293,195 @@ const Settings = () => {
 	);
 };
 
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		marginBottom: 30,
-		flexDirection: 'column',
-		backgroundColor: '#eef1f8',
-	},
-	containerInfo: {
-		margin: 5,
-		padding: 5,
-	},
-	text: {
-		textAlign: 'left',
-		fontSize: 18,
-	},
-	tagsText: {
-		textAlign: 'left',
-		fontSize: 18,
-		color: 'rgba(255,255,255,0.75)',
-	},
-	buttonText: {
-		textAlign: 'center',
-		fontSize: 18,
-		margin: 5,
-		fontWeight: '500',
-	},
-	buttonContainer: {
-		flexDirection: 'column',
-		alignItems: 'flex-start',
-		// marginHorizontal: 15,
-		marginVertical: 5,
-	},
-	centerButton: {
-		padding: 5,
-		borderRadius: 10,
-		marginHorizontal: 3,
-		backgroundColor: '#340068',
-		marginTop: 5,
-	},
-	cardContent: {
-		flexDirection: 'row',
-		marginLeft: 10,
-	},
-	tagsContent: {
-		marginTop: 10,
-		flexWrap: 'wrap',
-		marginBottom: 10,
-	},
-	userTags: {
-		padding: 10,
-		borderRadius: 40,
-		marginHorizontal: 3,
-		backgroundColor: '#008DD5',
-		marginTop: 5,
-	},
-	buttonDisabled: {
-		backgroundColor: '#777',
-		opacity: 0.7,
-	},
-	tagText: {
-		fontSize: 13.5,
-		fontWeight: '500',
-	},
-	userCard: {
-		marginTop: 6,
-		flexDirection: 'row',
-		alignItems: 'center',
-		gap: 12,
-		backgroundColor: 'white',
-		padding: 16,
-		marginBottom: 4,
-		borderBottomWidth: 0.5,
-		borderColor: '#ddd',
-	},
-	userAvatar: {
-		width: 40,
-		height: 40,
-		borderRadius: 20,
-		backgroundColor: '#340068',
-		alignItems: 'center',
-		justifyContent: 'center',
-	},
-	userAvatarText: {
-		color: 'white',
-		fontSize: 16,
-		fontWeight: '500',
-	},
-	userCardLabel: {
-		fontSize: 13,
-		color: '#888',
-	},
-	userCardName: {
-		fontSize: 16,
-		fontWeight: '500',
-	},
-	row: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		paddingVertical: 14,
-		paddingHorizontal: 15,
-		borderBottomWidth: 0.5,
-		borderColor: '#ddd',
-		justifyContent: 'space-between',
-	},
-	openRow: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		justifyContent: 'space-between',
-		paddingVertical: 14,
-		paddingHorizontal: 15,
-	},
-	rowText: {
-		fontSize: 18,
-		fontWeight: '500',
-	},
-	disabledRowText: {
-		fontSize: 18,
-		fontWeight: '400',
-		color: '#777',
-	},
-	rowTextDanger: {
-		fontSize: 18,
-		fontWeight: '500',
-		color: '#c00',
-	},
-	expandedContent: {
-		paddingHorizontal: 15,
-		paddingBottom: 10,
-		paddingLeft: 20,
-		borderBottomWidth: 0.5,
-		borderColor: '#ddd',
-	},
-	sectionLabel: {
-		fontSize: 11,
-		color: '#888',
-		textTransform: 'uppercase',
-		letterSpacing: 0.6,
-		paddingHorizontal: 15,
-		paddingTop: 16,
-		paddingBottom: 6,
-	},
-	tagsCard: {
-		marginHorizontal: 15,
-		marginVertical: 10,
-		borderRadius: 10,
-		borderWidth: 1.5,
-		borderColor: '#340068',
-		overflow: 'hidden',
-		backgroundColor: '#4056F4',
-	},
-	accountCard: {
-		marginHorizontal: 15,
-		marginVertical: 4,
-		borderRadius: 10,
-		backgroundColor: 'white',
-		overflow: 'hidden',
-	},
-	tagsCardHeader: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		justifyContent: 'space-between',
-		paddingVertical: 14,
-		paddingHorizontal: 15,
-	},
-	tagsCardLabel: {
-		fontSize: 11,
-		color: 'white',
-		marginBottom: 2,
-	},
-	tagsCardTitle: {
-		fontSize: 18,
-		fontWeight: '500',
-		color: 'white',
-	},
-	tagsCardExpanded: {
-		borderTopWidth: 1,
-		borderTopColor: '#36C9C6',
-		paddingHorizontal: 15,
-		paddingVertical: 10,
-	},
+const makeStyles = (isDark: boolean) =>
+	StyleSheet.create({
+		container: {
+			flex: 1,
+			flexDirection: 'column',
+			backgroundColor: isDark ? '' : '#eef1f8',
+		},
+		containerInfo: {
+			margin: 5,
+			padding: 5,
+		},
+		text: {
+			textAlign: 'left',
+			fontSize: 18,
+		},
+		tagsText: {
+			textAlign: 'left',
+			fontSize: 18,
+			color: 'rgba(255,255,255,0.75)',
+		},
+		buttonText: {
+			textAlign: 'center',
+			fontSize: 18,
+			margin: 5,
+			fontWeight: '500',
+		},
+		buttonContainer: {
+			flexDirection: 'column',
+			alignItems: 'flex-start',
+			// marginHorizontal: 15,
+			marginVertical: 5,
+		},
+		centerButton: {
+			padding: 5,
+			borderRadius: 10,
+			marginHorizontal: 3,
+			backgroundColor: '#340068',
+			marginTop: 5,
+		},
+		cardContent: {
+			flexDirection: 'row',
+			marginLeft: 10,
+		},
+		tagsContent: {
+			marginTop: 10,
+			flexWrap: 'wrap',
+			marginBottom: 10,
+		},
+		userTags: {
+			padding: 10,
+			borderRadius: 40,
+			marginHorizontal: 3,
+			backgroundColor: '#008DD5',
+			marginTop: 5,
+		},
+		buttonDisabled: {
+			backgroundColor: '#777',
+			opacity: 0.7,
+		},
+		tagText: {
+			fontSize: 13.5,
+			fontWeight: '500',
+		},
+		userCard: {
+			marginTop: 6,
+			flexDirection: 'row',
+			alignItems: 'center',
+			gap: 12,
+			backgroundColor: isDark ? '#5a5a5a' : 'white',
+			padding: 16,
+			marginBottom: 4,
+			borderBottomWidth: 0.5,
+			borderColor: isDark ? '#aaaaaa' : '#ddd',
+		},
+		userAvatar: {
+			width: 40,
+			height: 40,
+			borderRadius: 20,
+			backgroundColor: '#340068',
+			alignItems: 'center',
+			justifyContent: 'center',
+		},
+		userAvatarText: {
+			color: isDark ? '#cccccc' : 'white',
+			fontSize: 16,
+			fontWeight: '500',
+		},
+		userCardLabel: {
+			fontSize: 13,
+			color: isDark ? '#bbbbbb' : '#888',
+		},
+		userCardName: {
+			fontSize: 16,
+			fontWeight: '500',
+			color: isDark ? '#eeeeee' : 'black',
+		},
+		row: {
+			flexDirection: 'row',
+			alignItems: 'center',
+			paddingVertical: 14,
+			paddingHorizontal: 15,
+			borderBottomWidth: 0.5,
+			borderColor: isDark ? '#aaaaaa' : '#ddd',
+			justifyContent: 'space-between',
+		},
+		openRow: {
+			flexDirection: 'row',
+			alignItems: 'center',
+			justifyContent: 'space-between',
+			paddingVertical: 14,
+			paddingHorizontal: 15,
+		},
+		rowText: {
+			fontSize: 18,
+			fontWeight: '500',
+			color: isDark ? '#dddddd' : 'white',
+		},
+		disabledRowText: {
+			fontSize: 18,
+			fontWeight: '400',
+			color: '#777',
+		},
+		rowTextDanger: {
+			fontSize: 18,
+			fontWeight: '500',
+			color: isDark ? '#ff4444' : '#c00',
+		},
+		expandedContent: {
+			paddingHorizontal: 15,
+			paddingBottom: 10,
+			paddingLeft: 20,
+			borderBottomWidth: 0.5,
+			borderColor: isDark ? '#aaaaaa' : '#ddd',
+		},
+		sectionLabel: {
+			fontSize: 11,
+			color: isDark ? '#aaaaaa' : '#888',
+			textTransform: 'uppercase',
+			letterSpacing: 0.6,
+			paddingHorizontal: 15,
+			paddingTop: 16,
+			paddingBottom: 6,
+		},
+		tagsCard: {
+			marginHorizontal: 15,
+			marginVertical: 10,
+			borderRadius: 10,
+			borderWidth: 1.5,
+			borderColor: '#340068',
+			overflow: 'hidden',
+			backgroundColor: isDark ? '#3d4f8a' : '#4056F4',
+		},
+		accountCard: {
+			marginHorizontal: 15,
+			marginVertical: 4,
+			borderRadius: 10,
+			backgroundColor: isDark ? '#5a5a5a' : 'white',
+			overflow: 'hidden',
+		},
+		tagsCardHeader: {
+			flexDirection: 'row',
+			alignItems: 'center',
+			justifyContent: 'space-between',
+			paddingVertical: 14,
+			paddingHorizontal: 15,
+		},
+		tagsCardLabel: {
+			fontSize: 11,
+			color: isDark ? '#dddddd' : 'white',
+			marginBottom: 2,
+		},
+		tagsCardTitle: {
+			fontSize: 18,
+			fontWeight: '500',
+			color: isDark ? '#dddddd' : 'white',
+		},
+		tagsCardExpanded: {
+			borderTopWidth: 1,
+			borderTopColor: '#36C9C6',
+			paddingHorizontal: 15,
+			paddingVertical: 10,
+		},
 
-	lastRow: {
-		borderBottomWidth: 0,
-	},
-	lastExpandedContent: {
-		borderBottomWidth: 0,
-	},
-});
+		lastRow: {
+			borderBottomWidth: 0,
+		},
+		lastExpandedContent: {
+			borderBottomWidth: 0,
+		},
+	});
 
 export default Settings;

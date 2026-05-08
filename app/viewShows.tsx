@@ -85,6 +85,7 @@ const ViewShows = (props: Props) => {
 		type,
 		shows,
 		excludedSourceTypes,
+		appliedFilters.currentlyWatching,
 		appliedFilters.hasTags,
 		appliedFilters.hasDescription,
 		appliedFilters.hasTagIds,

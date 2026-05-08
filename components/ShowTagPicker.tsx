@@ -2,7 +2,13 @@ import { useAppData } from '@/lib/AppContext';
 import { Tag } from '@/lib/types';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+	StyleSheet,
+	Text,
+	TouchableOpacity,
+	useColorScheme,
+	View,
+} from 'react-native';
 
 interface SectionProps {
 	label: string;
@@ -23,6 +29,8 @@ const TagSection = ({
 	open,
 	setOpen,
 }: SectionProps) => {
+	const isDark = useColorScheme() === 'dark';
+	const styles = makeStyles(isDark);
 	const selectedTagsArray = tags.filter((t) => selectedTags[t.id] === true);
 
 	return (
@@ -62,7 +70,7 @@ const TagSection = ({
 					<MaterialCommunityIcons
 						name={open ? 'chevron-up' : 'chevron-down'}
 						size={20}
-						color='#777'
+						color={isDark ? '#cccccc' : '#777'}
 					/>
 				</View>
 			</TouchableOpacity>
@@ -181,6 +189,8 @@ const ShowTagPicker = (props: Props) => {
 	const toggleSection = (label: string) => {
 		setOpenSections((prev) => ({ ...prev, [label]: !prev[label] }));
 	};
+	const isDark = useColorScheme() === 'dark';
+	const styles = makeStyles(isDark);
 
 	const collapseAll = useCallback(() => {
 		setOpenSections(
@@ -256,128 +266,130 @@ const ShowTagPicker = (props: Props) => {
 	);
 };
 
-const styles = StyleSheet.create({
-	container: {
-		marginTop: 15,
-		flex: 1,
-		marginHorizontal: 2,
-		marginBottom: 20,
-	},
-	badge: {
-		borderRadius: 40,
-		paddingHorizontal: 8,
-		paddingVertical: 4,
-		minWidth: 20,
-		maxWidth: 250,
-		alignItems: 'center',
-		flexShrink: 1,
-		alignSelf: 'flex-start',
-		fontSize: 12,
-		fontWeight: '500',
-	},
-	badgeText: {
-		fontSize: 13.5,
-		fontWeight: '500',
-		color: 'black',
-		flexShrink: 1,
-		textAlign: 'center',
-	},
-	tvBadge: {
-		backgroundColor: '#36C9C6',
-	},
-	warningBadge: {
-		backgroundColor: '#E24E1B',
-	},
-	tagText: {
-		fontSize: 13.5,
-		fontWeight: '500',
-		textAlign: 'center',
-	},
-	highlightTvTag: {
-		paddingVertical: 6,
-		paddingHorizontal: 10,
-		borderRadius: 40,
-		marginHorizontal: 3,
-		backgroundColor: '#36C9C6',
-		marginTop: 5,
-	},
-	sectionHeader: {
-		flexDirection: 'row',
-		paddingHorizontal: 12,
-		paddingVertical: 10,
-		position: 'relative',
-		paddingRight: 36,
-	},
-	sectionHeaderLeft: {
-		flex: 1,
-		flexDirection: 'column',
-		marginRight: 8,
-	},
-	chevronContainer: {
-		position: 'absolute',
-		right: 12,
-		top: 8,
-	},
-	selectedPillsRow: {
-		flexDirection: 'row',
-		flexWrap: 'wrap',
-		gap: 4,
-		marginTop: 4,
-	},
-	sectionLabel: {
-		fontSize: 16,
-		fontWeight: '600',
-		color: '#444',
-		marginRight: 4,
-	},
-	chevron: {
-		fontSize: 13,
-		color: '#888',
-	},
-	divider: {
-		height: 1,
-		backgroundColor: '#888',
-		marginHorizontal: 10,
-	},
-	tvTag: {
-		paddingVertical: 6,
-		paddingHorizontal: 10,
-		borderRadius: 40,
-		marginHorizontal: 3,
-		backgroundColor: '#9BC1BC',
-		marginTop: 5,
-	},
-	warningTag: {
-		paddingVertical: 6,
-		paddingHorizontal: 10,
-		borderRadius: 40,
-		marginHorizontal: 3,
-		backgroundColor: '#F2A541',
-		marginTop: 5,
-	},
+const makeStyles = (isDark: boolean) =>
+	StyleSheet.create({
+		container: {
+			marginTop: 15,
+			flex: 1,
+			marginHorizontal: 2,
+			marginBottom: 20,
+		},
+		badge: {
+			borderRadius: 40,
+			paddingHorizontal: 8,
+			paddingVertical: 4,
+			minWidth: 20,
+			maxWidth: 250,
+			alignItems: 'center',
+			flexShrink: 1,
+			alignSelf: 'flex-start',
+			fontSize: 12,
+			fontWeight: '500',
+		},
+		badgeText: {
+			fontSize: 13.5,
+			fontWeight: '500',
+			color: 'black',
+			flexShrink: 1,
+			textAlign: 'center',
+		},
+		tvBadge: {
+			backgroundColor: '#36C9C6',
+		},
+		warningBadge: {
+			backgroundColor: '#E24E1B',
+		},
+		tagText: {
+			fontSize: 13.5,
+			fontWeight: '500',
+			textAlign: 'center',
+		},
+		highlightTvTag: {
+			paddingVertical: 6,
+			paddingHorizontal: 10,
+			borderRadius: 40,
+			marginHorizontal: 3,
+			backgroundColor: '#36C9C6',
+			marginTop: 5,
+		},
+		sectionHeader: {
+			flexDirection: 'row',
+			paddingHorizontal: 12,
+			paddingVertical: 10,
+			position: 'relative',
+			paddingRight: 36,
+		},
+		sectionHeaderLeft: {
+			flex: 1,
+			flexDirection: 'column',
+			marginRight: 8,
+		},
+		chevronContainer: {
+			position: 'absolute',
+			right: 12,
+			top: 8,
+		},
+		selectedPillsRow: {
+			flexDirection: 'row',
+			flexWrap: 'wrap',
+			gap: 4,
+			marginTop: 4,
+		},
+		sectionLabel: {
+			fontSize: 16,
+			fontWeight: '600',
+			color: isDark ? '#cccccc' : '#444',
+			marginRight: 4,
+		},
+		chevron: {
+			fontSize: 13,
+			color: isDark ? '#dddddd' : '#888',
+		},
+		divider: {
+			height: 1,
+			backgroundColor: '#888',
+			marginHorizontal: 10,
+		},
+		tvTag: {
+			paddingVertical: 6,
+			paddingHorizontal: 10,
+			borderRadius: 40,
+			marginHorizontal: 3,
+			backgroundColor: '#9BC1BC',
+			marginTop: 5,
+		},
+		warningTag: {
+			paddingVertical: 6,
+			paddingHorizontal: 10,
+			borderRadius: 40,
+			marginHorizontal: 3,
+			backgroundColor: '#F2A541',
+			marginTop: 5,
+		},
 
-	highlightWarningTag: {
-		paddingVertical: 6,
-		paddingHorizontal: 10,
-		borderRadius: 40,
-		marginHorizontal: 3,
-		backgroundColor: '#E24E1B',
-		marginTop: 5,
-	},
-	text: {
-		fontSize: 16,
-		marginRight: 5,
-		margin: 10,
-		textAlign: 'center',
-	},
-	cardContent: {
-		flexDirection: 'row',
-		marginLeft: 10,
-	},
-	tagsContent: {
-		flexWrap: 'wrap',
-		marginBottom: 8,
-	},
-});
+		highlightWarningTag: {
+			paddingVertical: 6,
+			paddingHorizontal: 10,
+			borderRadius: 40,
+			marginHorizontal: 3,
+			backgroundColor: '#E24E1B',
+			marginTop: 5,
+		},
+		text: {
+			fontSize: 16,
+			marginRight: 5,
+			margin: 10,
+			textAlign: 'center',
+			color: isDark ? '#cccccc' : '',
+		},
+		cardContent: {
+			flexDirection: 'row',
+			marginLeft: 10,
+		},
+		tagsContent: {
+			flexWrap: 'wrap',
+			marginBottom: 8,
+		},
+	});
 
 export default ShowTagPicker;

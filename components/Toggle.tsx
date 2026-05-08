@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Animated, TouchableOpacity } from 'react-native';
+import { Animated, TouchableOpacity, useColorScheme } from 'react-native';
 
 interface ToggleProps {
 	value: boolean;
@@ -15,6 +15,8 @@ const Toggle = ({
 	trackColorOff = '#3e3e3e',
 }: ToggleProps) => {
 	const anim = useRef(new Animated.Value(value ? 1 : 0)).current;
+	const scheme = useColorScheme();
+	const isDark = scheme === 'dark';
 
 	useEffect(() => {
 		Animated.timing(anim, {
@@ -50,7 +52,7 @@ const Toggle = ({
 						width: 20,
 						height: 20,
 						borderRadius: 10,
-						backgroundColor: 'white',
+						backgroundColor: isDark ? '#dddddd' : 'white',
 						transform: [{ translateX }],
 						shadowColor: '#000',
 						shadowOpacity: 0.2,

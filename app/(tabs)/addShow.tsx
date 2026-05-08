@@ -1,3 +1,4 @@
+import AppDropdownPicker from '@/components/AppDropdownPicker';
 import SelectShow, { ShowImagePlaceholder } from '@/components/SelectShow';
 import StreamingAndPurchase from '@/components/StreamingAndPurchase';
 import { useAppData } from '@/lib/AppContext';
@@ -13,9 +14,9 @@ import {
 	StyleSheet,
 	Text,
 	TouchableOpacity,
+	useColorScheme,
 	View,
 } from 'react-native';
-import DropDownPicker from 'react-native-dropdown-picker';
 import { ActivityIndicator } from 'react-native-paper';
 import { skipTagsAndSaveShowData } from '../../lib/utils';
 
@@ -52,6 +53,8 @@ const AddShow = () => {
 	const [profileShowDropdownOpen, setProfileShowDropdownOpen] = useState(false);
 	const [showType, setShowType] = useState<string | null>(null);
 	const [imageError, setImageError] = useState(false);
+	const isDark = useColorScheme() === 'dark';
+	const styles = makeStyles(isDark);
 
 	const [profileShowDropdownOptions, setProfileShowDropdownOptions] = useState<
 		{
@@ -134,6 +137,7 @@ const AddShow = () => {
 			<ScrollView
 				showsVerticalScrollIndicator={false}
 				keyboardShouldPersistTaps='handled'
+				style={{ marginTop: 15, marginBottom: 30 }}
 			>
 				<SelectShow handleShow={addThisShow} sourcePage={SourcePage.ADD_SHOW} />
 				<View>
@@ -215,7 +219,7 @@ const AddShow = () => {
 											marginRight: 15,
 										}}
 									>
-										<DropDownPicker
+										<AppDropdownPicker
 											open={profileShowDropdownOpen}
 											value={showType}
 											items={profileShowDropdownOptions}
@@ -230,9 +234,6 @@ const AddShow = () => {
 												fontSize: 15,
 												margin: 15,
 												marginLeft: 10,
-											}}
-											style={{
-												borderRadius: 25,
 											}}
 											placeholder='What do you want to do with this show?'
 										/>
@@ -331,124 +332,126 @@ const AddShow = () => {
 	);
 };
 
-const styles = StyleSheet.create({
-	container: {
-		marginTop: 15,
-		flex: 1,
-		marginHorizontal: 2,
-		marginBottom: 30,
-	},
-	optionContainer: {
-		flex: 1,
-		justifyContent: 'space-between',
-		marginRight: 10,
-		marginLeft: 10,
-	},
-	text: {
-		margin: 5,
-		textAlign: 'center',
-		fontSize: 20,
-	},
-	boldText: {
-		margin: 5,
-		textAlign: 'center',
-		fontSize: 20,
-		fontWeight: 'bold',
-	},
-	inputText: {
-		margin: 10,
-		textAlign: 'left',
-		fontSize: 20,
-	},
-	optionsText: {
-		marginRight: 10,
-		marginLeft: 10,
-		fontSize: 15,
-	},
-	buttonText: {
-		textAlign: 'center',
-		fontSize: 18,
-		margin: 5,
-		fontWeight: '500',
-		color: 'white',
-	},
-	buttonContainer: {
-		flexDirection: 'row',
-		justifyContent: 'center',
-	},
-	button: {
-		padding: 10,
-		borderRadius: 40,
-		marginHorizontal: 3,
-		backgroundColor: '#340068',
-		marginTop: 5,
-	},
-	addPosterButton: {
-		padding: 10,
-		borderRadius: 40,
-		marginHorizontal: 3,
-		marginTop: 5,
-		backgroundColor: '#324376',
-	},
-	box: {
-		backgroundColor: 'white',
-		borderWidth: 2,
-		borderColor: '#324376',
-		marginBottom: 2,
-		marginTop: 2,
-		padding: 2,
-	},
-	removePosterButton: {
-		padding: 10,
-		borderRadius: 40,
-		marginHorizontal: 3,
-		marginTop: 5,
-		backgroundColor: '#636A7D',
-	},
-	image: {
-		flex: 1,
-		aspectRatio: 2 / 3,
-	},
-	goToTagsButton: {
-		backgroundColor: '#4056F4',
-		padding: 8,
-		borderRadius: 40,
-		marginHorizontal: 3,
-		marginTop: 5,
-		marginBottom: 20,
-	},
-	skipAndSaveButton: {
-		borderWidth: 2,
-		borderColor: '#6B5E8C',
-		backgroundColor: 'transparent',
-		padding: 8,
-		borderRadius: 40,
-		marginHorizontal: 3,
-		marginTop: 5,
-		marginBottom: 20,
-	},
-	skipButtonText: {
-		color: '#340068',
-	},
-	disabledSkipButtonText: {
-		color: '#777',
-	},
-	showTypeText: {
-		fontSize: 20,
-		fontWeight: '600',
-		textAlign: 'center',
-		marginTop: 10,
-		marginBottom: 10,
-		marginHorizontal: 15,
-		color: '#340068',
-	},
-	savingOverlay: {
-		...StyleSheet.absoluteFillObject,
-		backgroundColor: 'rgba(0,0,0,0.4)',
-		justifyContent: 'center',
-		alignItems: 'center',
-		zIndex: 999,
-	},
-});
+const makeStyles = (isDark: boolean) =>
+	StyleSheet.create({
+		container: {
+			flex: 1,
+			marginHorizontal: 2,
+
+			backgroundColor: isDark ? '#5a5a5a' : '',
+		},
+		optionContainer: {
+			flex: 1,
+			justifyContent: 'space-between',
+			marginRight: 10,
+			marginLeft: 10,
+		},
+		text: {
+			margin: 5,
+			textAlign: 'center',
+			fontSize: 20,
+		},
+		boldText: {
+			margin: 5,
+			textAlign: 'center',
+			fontSize: 20,
+			fontWeight: 'bold',
+			color: isDark ? '#cccccc' : 'black',
+		},
+		inputText: {
+			margin: 10,
+			textAlign: 'left',
+			fontSize: 20,
+		},
+		optionsText: {
+			marginRight: 10,
+			marginLeft: 10,
+			fontSize: 15,
+		},
+		buttonText: {
+			textAlign: 'center',
+			fontSize: 18,
+			margin: 5,
+			fontWeight: '500',
+			color: isDark ? '#cccccc' : 'white',
+		},
+		buttonContainer: {
+			flexDirection: 'row',
+			justifyContent: 'center',
+		},
+		button: {
+			padding: 5,
+			borderRadius: 20,
+			marginHorizontal: 3,
+			backgroundColor: '#340068',
+			marginTop: 5,
+		},
+		addPosterButton: {
+			padding: 10,
+			borderRadius: 40,
+			marginHorizontal: 3,
+			marginTop: 5,
+			backgroundColor: '#324376',
+		},
+		box: {
+			backgroundColor: 'white',
+			borderWidth: 2,
+			borderColor: '#324376',
+			marginBottom: 2,
+			marginTop: 2,
+			padding: 2,
+		},
+		removePosterButton: {
+			padding: 10,
+			borderRadius: 40,
+			marginHorizontal: 3,
+			marginTop: 5,
+			backgroundColor: '#636A7D',
+		},
+		image: {
+			flex: 1,
+			aspectRatio: 2 / 3,
+		},
+		goToTagsButton: {
+			backgroundColor: '#4056F4',
+			padding: 8,
+			borderRadius: 40,
+			marginHorizontal: 3,
+			marginTop: 5,
+			marginBottom: 20,
+		},
+		skipAndSaveButton: {
+			borderWidth: 2,
+			borderColor: '#bbbbbb',
+			backgroundColor: 'transparent',
+			padding: 8,
+			borderRadius: 15,
+			marginHorizontal: 3,
+			marginTop: 5,
+			marginBottom: 20,
+		},
+		skipButtonText: {
+			color: isDark ? '#bbbbbb' : '#340068',
+		},
+		disabledSkipButtonText: {
+			color: '#777',
+		},
+		showTypeText: {
+			fontSize: 20,
+			fontWeight: '600',
+			textAlign: 'center',
+			marginTop: 10,
+			marginBottom: 10,
+			marginHorizontal: 15,
+			color: '#340068',
+		},
+		savingOverlay: {
+			...StyleSheet.absoluteFillObject,
+			backgroundColor: 'rgba(0,0,0,0.4)',
+			justifyContent: 'center',
+			alignItems: 'center',
+			zIndex: 999,
+		},
+	});
 
 export default AddShow;

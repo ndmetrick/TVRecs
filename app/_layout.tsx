@@ -3,8 +3,18 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Sentry from '@sentry/react-native';
 import { router, Stack } from 'expo-router';
-import { Alert, Image, TouchableOpacity } from 'react-native';
-import { Provider as PaperProvider } from 'react-native-paper';
+import {
+	Alert,
+	Image,
+	TouchableOpacity,
+	useColorScheme,
+	View,
+} from 'react-native';
+import {
+	MD3DarkTheme,
+	MD3LightTheme,
+	Provider as PaperProvider,
+} from 'react-native-paper';
 import Toast from 'react-native-toast-message';
 
 Sentry.init({
@@ -13,6 +23,7 @@ Sentry.init({
 });
 
 export const AppShell = () => {
+	const scheme = useColorScheme();
 	const { signOut } = useAuth();
 	const { currentUser } = useAppData();
 	const logout = async () => {
@@ -25,23 +36,36 @@ export const AppShell = () => {
 	};
 
 	return (
-		<>
+		<View
+			style={{
+				flex: 1,
+				backgroundColor: scheme === 'dark' ? '#3e3e3e' : '#ffffff',
+			}}
+		>
 			<Stack
 				screenOptions={{
 					headerShown: true,
 					headerBackTitle: 'Back',
-					headerTintColor: '#340068',
+					contentStyle: {
+						backgroundColor: scheme === 'dark' ? '#3e3e3e' : '#ffffff',
+					},
+					animation: 'fade',
+					headerStyle: {
+						backgroundColor: scheme === 'dark' ? '#3e3e3e' : '#ffffff',
+					},
+					headerTintColor: scheme === 'dark' ? '#f0f0f0' : '#340068',
 					headerTitle: () => (
 						<TouchableOpacity onPress={() => router.push('/(tabs)/recShows')}>
 							<Image
 								style={{ width: 50, height: 40, alignSelf: 'center' }}
-								source={require('../assets/images/tempTVRecsLogo.png')}
+								source={require('../assets/images/logo-transparent.png')}
 							/>
 						</TouchableOpacity>
 					),
 					headerRight: () =>
 						currentUser ? (
 							<TouchableOpacity
+								hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
 								style={{ marginRight: 12 }}
 								onPress={() =>
 									Alert.alert('Sign out?', '', [
@@ -55,7 +79,7 @@ export const AppShell = () => {
 								<MaterialCommunityIcons
 									name='logout'
 									size={26}
-									color='#340068'
+									color={scheme === 'dark' ? '#dddddd' : '#340068'}
 								/>
 							</TouchableOpacity>
 						) : null,
@@ -70,13 +94,15 @@ export const AppShell = () => {
 				/>
 			</Stack>
 			<Toast bottomOffset={60} />
-		</>
+		</View>
 	);
 };
 
 export default function RootLayout() {
+	const scheme = useColorScheme();
+	const paperTheme = scheme === 'dark' ? MD3DarkTheme : MD3LightTheme;
 	return (
-		<PaperProvider>
+		<PaperProvider theme={paperTheme}>
 			<AuthProvider>
 				<AppProvider>
 					<AppShell />

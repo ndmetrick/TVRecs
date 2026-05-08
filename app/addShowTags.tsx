@@ -1,3 +1,4 @@
+import AppTextInput from '@/components/AppTextInput';
 import ShowTagPicker from '@/components/ShowTagPicker';
 import Toggle from '@/components/Toggle';
 import { addShow, editUserShow } from '@/lib/api';
@@ -22,9 +23,9 @@ import {
 	StyleSheet,
 	Text,
 	TouchableOpacity,
+	useColorScheme,
 	View,
 } from 'react-native';
-import { TextInput } from 'react-native-paper';
 
 const AddShowTags = () => {
 	const [selectedTags, setSelectedTags] = useState<Record<string, boolean>>({});
@@ -35,6 +36,8 @@ const AddShowTags = () => {
 	const [saving, setSaving] = useState(false);
 	const [collapsed, setCollapsed] = useState<'collapse' | 'open'>('collapse');
 	const [currentlyWatching, setCurrentlyWatching] = useState(false);
+	const isDark = useColorScheme() === 'dark';
+	const styles = makeStyles(isDark);
 
 	const { showToSaveString, previousString, currentShowString } =
 		useLocalSearchParams();
@@ -204,20 +207,20 @@ const AddShowTags = () => {
 					Describe anything about the show you would like potential viewers to
 					know in addition to the tag options below
 				</Text>
-				<TextInput
+				<AppTextInput
 					style={styles.inputText}
 					label='description (optional)'
 					// placeholder='Write a description of the show. . .'
 					onChangeText={(description) => setDescription(description)}
 					mode='outlined'
-					outlineColor='#340068'
-					activeOutlineColor='#340068'
+					// outlineColor='#340068'
+					// activeOutlineColor='#340068'
 					multiline={true}
 					value={description}
 				/>
 				<View style={styles.currentlyWatchingRow}>
 					<Text
-						style={{ fontSize: 16 }}
+						style={{ fontSize: 16, color: isDark ? '#cccccc' : 'black' }}
 					>{`I'm currently watching this show`}</Text>
 					<Toggle
 						value={currentlyWatching}
@@ -265,6 +268,7 @@ const AddShowTags = () => {
 							setCollapsed((prev) => (prev === 'open' ? 'collapse' : 'open'))
 						}
 						style={styles.collapseAllButton}
+						hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
 					>
 						<View style={{ flexDirection: 'row' }}>
 							<Text style={styles.collapseAllText}>
@@ -294,181 +298,184 @@ const AddShowTags = () => {
 	);
 };
 
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-	},
-	text: {
-		fontSize: 16,
-		margin: 10,
-	},
-	currentlyWatchingRow: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		justifyContent: 'space-between',
-		marginHorizontal: 12,
-		marginTop: 8,
-		marginBottom: 4,
-	},
-	tagText: {
-		fontSize: 13.5,
-		fontWeight: '500',
-		textAlign: 'center',
-	},
-	title: {
-		color: '#FF3F00',
-		fontSize: 20,
-		textAlign: 'center',
-	},
-	button: {
-		padding: 10,
-		borderRadius: 40,
-		marginHorizontal: 3,
-		backgroundColor: '#340068',
-		marginTop: 5,
-		marginBottom: 20,
-	},
-	tagGroup: {
-		marginTop: 16,
-		marginHorizontal: 10,
-		marginBottom: 8,
-	},
-	tagStyle: {
-		marginTop: 4,
-		marginHorizontal: 8,
-		backgroundColor: '#FF3F00',
-		borderWidth: 0,
-		marginRight: 12,
-		paddingHorizontal: 24,
-		paddingVertical: 8,
-	},
-	textStyle: {
-		color: 'black',
-		fontSize: 14,
-		fontWeight: 'bold',
-	},
-	buttonContainer: {
-		flexDirection: 'row',
-		justifyContent: 'center',
-		margin: 10,
-	},
-	buttonText: {
-		textAlign: 'center',
-		fontSize: 18,
-		margin: 5,
-		fontWeight: '500',
-		color: 'white',
-	},
+const makeStyles = (isDark: boolean) =>
+	StyleSheet.create({
+		container: {
+			flex: 1,
+			backgroundColor: isDark ? '#5a5a5a' : '',
+		},
+		text: {
+			fontSize: 16,
+			margin: 10,
+			color: isDark ? '#cccccc' : 'black',
+		},
+		currentlyWatchingRow: {
+			flexDirection: 'row',
+			alignItems: 'center',
+			justifyContent: 'space-between',
+			marginHorizontal: 12,
+			marginTop: 8,
+			marginBottom: 4,
+		},
+		tagText: {
+			fontSize: 13.5,
+			fontWeight: '500',
+			textAlign: 'center',
+		},
+		title: {
+			color: '#FF3F00',
+			fontSize: 20,
+			textAlign: 'center',
+		},
+		button: {
+			padding: 10,
+			borderRadius: 40,
+			marginHorizontal: 3,
+			backgroundColor: '#340068',
+			marginTop: 5,
+			marginBottom: 20,
+		},
+		tagGroup: {
+			marginTop: 16,
+			marginHorizontal: 10,
+			marginBottom: 8,
+		},
+		tagStyle: {
+			marginTop: 4,
+			marginHorizontal: 8,
+			backgroundColor: '#FF3F00',
+			borderWidth: 0,
+			marginRight: 12,
+			paddingHorizontal: 24,
+			paddingVertical: 8,
+		},
+		textStyle: {
+			color: 'black',
+			fontSize: 14,
+			fontWeight: 'bold',
+		},
+		buttonContainer: {
+			flexDirection: 'row',
+			justifyContent: 'center',
+			margin: 10,
+		},
+		buttonText: {
+			textAlign: 'center',
+			fontSize: 18,
+			margin: 5,
+			fontWeight: '500',
+			color: 'white',
+		},
 
-	cardContent: {
-		flexDirection: 'row',
-		marginLeft: 10,
-	},
+		cardContent: {
+			flexDirection: 'row',
+			marginLeft: 10,
+		},
 
-	tagsContent: {
-		flexWrap: 'wrap',
-	},
-	tvTag: {
-		padding: 10,
-		borderRadius: 40,
-		marginHorizontal: 3,
-		backgroundColor: '#9BC1BC',
-		marginTop: 5,
-	},
-	warningTag: {
-		padding: 10,
-		borderRadius: 40,
-		marginHorizontal: 3,
-		backgroundColor: '#F2A541',
-		marginTop: 5,
-	},
-	highlightTvTag: {
-		padding: 10,
-		borderRadius: 40,
-		marginHorizontal: 3,
-		backgroundColor: '#36C9C6',
-		marginTop: 5,
-	},
-	highlightWarningTag: {
-		padding: 10,
-		borderRadius: 40,
-		marginHorizontal: 3,
-		backgroundColor: '#E24E1B',
-		marginTop: 5,
-	},
-	inputText: {
-		margin: 10,
-		textAlign: 'left',
-		fontSize: 16,
-	},
-	savingOverlay: {
-		...StyleSheet.absoluteFillObject,
-		backgroundColor: 'rgba(0,0,0,0.4)',
-		justifyContent: 'center',
-		alignItems: 'center',
-		zIndex: 999,
-	},
-	panelClearButton: {
-		paddingVertical: 6,
-		paddingHorizontal: 14,
-		borderRadius: 999,
-		borderWidth: 1,
-		borderColor: 'white',
-	},
-	panelClearText: {
-		fontSize: 13.5,
-		color: 'white',
-		fontWeight: '500',
-	},
-	panelSaveButton: {
-		paddingVertical: 6,
-		paddingHorizontal: 14,
-		borderRadius: 999,
-		// borderWidth: 2,
-		// borderColor: 'white',
-		backgroundColor: '#340068',
-	},
-	panelSaveText: {
-		fontSize: 16,
-		color: 'white',
-		fontWeight: '500',
-	},
-	collapseAllButton: {
-		alignSelf: 'center',
-		paddingHorizontal: 12,
-		paddingVertical: 4,
-		marginBottom: 4,
-	},
-	collapseAllText: {
-		fontSize: 14,
-		color: 'white',
-		fontWeight: '500',
-	},
-	// panelActionRow: {
-	// 	flexDirection: 'column',
-	// 	// justifyContent: 'space-between',
-	// 	alignItems: 'center',
-	// 	paddingVertical: 10,
-	// 	paddingBottom: 65,
-	// 	backgroundColor: '#9BA8CE',
-	// 	// backgroundColor: '#8E97CC',
-	// 	borderTopWidth: 3,
-	// 	borderTopColor: '#340068',
-	// 	// shadowColor: '#340068',
-	// 	// borderBottomWidth: 2,
-	// 	// borderBottomColor: '#340068',
-	// 	// shadowOpacity: 0.1,
-	// 	// shadowRadius: 4,
-	// 	// elevation: 4,
-	// },
-	panelActionRow: {
-		backgroundColor: '#9BA8CE',
-		borderTopWidth: 3,
-		borderTopColor: '#340068',
-		paddingVertical: 10,
-		paddingBottom: 30, // safe area
-		paddingHorizontal: 14,
-	},
-});
+		tagsContent: {
+			flexWrap: 'wrap',
+		},
+		tvTag: {
+			padding: 10,
+			borderRadius: 40,
+			marginHorizontal: 3,
+			backgroundColor: '#9BC1BC',
+			marginTop: 5,
+		},
+		warningTag: {
+			padding: 10,
+			borderRadius: 40,
+			marginHorizontal: 3,
+			backgroundColor: '#F2A541',
+			marginTop: 5,
+		},
+		highlightTvTag: {
+			padding: 10,
+			borderRadius: 40,
+			marginHorizontal: 3,
+			backgroundColor: '#36C9C6',
+			marginTop: 5,
+		},
+		highlightWarningTag: {
+			padding: 10,
+			borderRadius: 40,
+			marginHorizontal: 3,
+			backgroundColor: '#E24E1B',
+			marginTop: 5,
+		},
+		inputText: {
+			margin: 10,
+			textAlign: 'left',
+			fontSize: 16,
+		},
+		savingOverlay: {
+			...StyleSheet.absoluteFillObject,
+			backgroundColor: 'rgba(0,0,0,0.4)',
+			justifyContent: 'center',
+			alignItems: 'center',
+			zIndex: 999,
+		},
+		panelClearButton: {
+			paddingVertical: 6,
+			paddingHorizontal: 14,
+			borderRadius: 999,
+			borderWidth: 1,
+			borderColor: 'white',
+		},
+		panelClearText: {
+			fontSize: 13.5,
+			color: 'white',
+			fontWeight: '500',
+		},
+		panelSaveButton: {
+			paddingVertical: 6,
+			paddingHorizontal: 14,
+			borderRadius: 999,
+			// borderWidth: 2,
+			// borderColor: 'white',
+			backgroundColor: '#340068',
+		},
+		panelSaveText: {
+			fontSize: 16,
+			color: 'white',
+			fontWeight: '500',
+		},
+		collapseAllButton: {
+			alignSelf: 'center',
+			paddingHorizontal: 12,
+			paddingVertical: 4,
+			marginBottom: 4,
+		},
+		collapseAllText: {
+			fontSize: 14,
+			color: 'white',
+			fontWeight: '500',
+		},
+		// panelActionRow: {
+		// 	flexDirection: 'column',
+		// 	// justifyContent: 'space-between',
+		// 	alignItems: 'center',
+		// 	paddingVertical: 10,
+		// 	paddingBottom: 65,
+		// 	backgroundColor: '#9BA8CE',
+		// 	// backgroundColor: '#8E97CC',
+		// 	borderTopWidth: 3,
+		// 	borderTopColor: '#340068',
+		// 	// shadowColor: '#340068',
+		// 	// borderBottomWidth: 2,
+		// 	// borderBottomColor: '#340068',
+		// 	// shadowOpacity: 0.1,
+		// 	// shadowRadius: 4,
+		// 	// elevation: 4,
+		// },
+		panelActionRow: {
+			backgroundColor: '#9BA8CE',
+			borderTopWidth: 3,
+			borderTopColor: '#340068',
+			paddingVertical: 10,
+			paddingBottom: 30, // safe area
+			paddingHorizontal: 14,
+		},
+	});
 
 export default AddShowTags;

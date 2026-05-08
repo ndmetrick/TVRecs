@@ -7,6 +7,7 @@ import {
 	StyleSheet,
 	Text,
 	TouchableOpacity,
+	useColorScheme,
 	View,
 } from 'react-native';
 
@@ -24,6 +25,8 @@ const ProfileHeader = (props: Props) => {
 		props;
 	const { currentUser } = useAppData();
 	const router = useRouter();
+	const isDark = useColorScheme() === 'dark';
+	const styles = makeStyles(isDark);
 
 	if (userFollowing === null || user === null) {
 		return (
@@ -138,93 +141,94 @@ const ProfileHeader = (props: Props) => {
 	);
 };
 
-const styles = StyleSheet.create({
-	container: {
-		// flex: 1,
-	},
-	topContainerInfo: {
-		padding: 5,
-		backgroundColor: '#340068',
-		alignItems: 'center',
-	},
-	bottomContainerInfo: {
-		// flexDirection: 'row',
-		// flexWrap: 'wrap',
-		backgroundColor: '#E9ECEF',
-		// justifyContent: 'space-between',
-	},
-	headingText: {
-		fontWeight: '500',
-		fontSize: 20,
-		margin: 10,
-	},
-	text: {
-		textAlign: 'left',
-		fontSize: 18,
-		marginLeft: 5,
-		fontWeight: '500',
-	},
-	buttonText: {
-		textAlign: 'center',
-		fontSize: 18,
-		margin: 2,
-	},
-	buttonContainer: {
-		flexDirection: 'row',
-		justifyContent: 'flex-start',
-	},
-	button: {
-		padding: 3,
-		borderRadius: 10,
-		borderWidth: 1,
-		marginHorizontal: 3,
-		// backgroundColor: '#36C9C6',
-		marginBottom: 5,
-		marginLeft: 8,
-	},
-	usernameButton: {
-		borderRadius: 25,
-		elevation: 3,
-		backgroundColor: '#4056F4',
-	},
-	followNumButton: {
-		marginTop: 5,
-		borderRadius: 50,
-		elevation: 3,
-		backgroundColor: '#4056F4',
-		marginBottom: 5,
-	},
-	recButton: {
-		borderRadius: 25,
-		backgroundColor: '#340068',
-	},
-	invisibleButton: {
-		margin: 5,
-		borderRadius: 25,
-		backgroundColor: '#E9ECEF',
-	},
-	usernameText: {
-		fontWeight: '500',
-		fontSize: 20,
-		letterSpacing: 0.25,
-		margin: 4,
-		color: 'white',
-	},
-	followNumText: {
-		fontWeight: '500',
-		fontSize: 20,
-		margin: 4,
-		color: 'white',
-	},
-	recText: {
-		fontWeight: '500',
-		fontSize: 20,
-		letterSpacing: 0.25,
-		marginBottom: 4,
-		marginTop: 4,
-		marginRight: 4,
-		color: 'white',
-	},
-});
+const makeStyles = (isDark: boolean) =>
+	StyleSheet.create({
+		container: {
+			// flex: 1,
+		},
+		topContainerInfo: {
+			// padding: 2,
+			backgroundColor: '#340068',
+			alignItems: 'center',
+		},
+		bottomContainerInfo: {
+			// flexDirection: 'row',
+			// flexWrap: 'wrap',
+			backgroundColor: isDark ? '#aaaaaa' : '#E9ECEF',
+			// justifyContent: 'space-between',
+		},
+		headingText: {
+			fontWeight: '500',
+			fontSize: 20,
+			margin: 10,
+		},
+		text: {
+			textAlign: 'left',
+			fontSize: 18,
+			marginLeft: 5,
+			fontWeight: '500',
+		},
+		buttonText: {
+			textAlign: 'center',
+			fontSize: 18,
+			margin: 2,
+		},
+		buttonContainer: {
+			flexDirection: 'row',
+			justifyContent: 'flex-start',
+		},
+		button: {
+			padding: 3,
+			borderRadius: 10,
+			borderWidth: 1,
+			marginHorizontal: 3,
+			// backgroundColor: '#36C9C6',
+			marginBottom: 5,
+			marginLeft: 8,
+		},
+		usernameButton: {
+			borderRadius: 25,
+			elevation: 3,
+			backgroundColor: '#4056F4',
+		},
+		followNumButton: {
+			marginTop: 5,
+			borderRadius: 50,
+			elevation: 3,
+			backgroundColor: '#4056F4',
+			marginBottom: 5,
+		},
+		recButton: {
+			borderRadius: 25,
+			backgroundColor: '#340068',
+		},
+		invisibleButton: {
+			margin: 5,
+			borderRadius: 25,
+			backgroundColor: isDark ? '#aaaaaa' : '#E9ECEF',
+		},
+		usernameText: {
+			fontWeight: '500',
+			fontSize: 20,
+			letterSpacing: 0.25,
+			margin: 4,
+			color: isDark ? '#dddddd' : 'white',
+		},
+		followNumText: {
+			fontWeight: '500',
+			fontSize: 20,
+			margin: 4,
+			color: 'white',
+		},
+		recText: {
+			fontWeight: '500',
+			fontSize: 20,
+			letterSpacing: 0.25,
+			marginBottom: 4,
+			marginTop: 4,
+			marginRight: 4,
+			color: isDark ? '#cccccc' : 'white',
+		},
+	});
 
 export default ProfileHeader;

@@ -1,6 +1,6 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Tabs } from 'expo-router';
-import { View } from 'react-native';
+import { useColorScheme, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 const BoldMagnify = ({ size = 14, color = 'black' }) => (
@@ -68,6 +68,8 @@ export const ComposedHeartIcon = ({
 );
 
 export default function TabLayout() {
+	const scheme = useColorScheme();
+	const isDark = scheme === 'dark';
 	return (
 		<Tabs
 			screenOptions={{
@@ -75,7 +77,10 @@ export default function TabLayout() {
 				tabBarShowLabel: false,
 				tabBarStyle: { backgroundColor: '#340068' },
 				tabBarActiveTintColor: '#36C9C6',
-				tabBarInactiveTintColor: 'white',
+				tabBarInactiveTintColor: isDark ? '#dddddd' : 'white',
+				sceneStyle: {
+					backgroundColor: scheme === 'dark' ? '#3e3e3e' : '#ffffff',
+				},
 			}}
 		>
 			<Tabs.Screen

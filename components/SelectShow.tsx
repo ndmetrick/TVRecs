@@ -13,9 +13,10 @@ import {
 	StyleSheet,
 	Text,
 	TouchableOpacity,
+	useColorScheme,
 	View,
 } from 'react-native';
-import { TextInput } from 'react-native-paper';
+import AppTextInput from './AppTextInput';
 
 interface Props {
 	handleShow: (
@@ -34,6 +35,8 @@ export const ShowImagePlaceholder = ({
 	name: string;
 	style?: any;
 }) => {
+	const isDark = useColorScheme() === 'dark';
+
 	return (
 		<View
 			style={[
@@ -53,7 +56,7 @@ export const ShowImagePlaceholder = ({
 			/>
 			<Text
 				style={{
-					color: 'white',
+					color: isDark ? '#cccccc' : 'white',
 					fontSize: 20,
 					fontWeight: '500',
 					textAlign: 'center',
@@ -72,6 +75,8 @@ const SelectShow = ({ sourcePage, handleShow }: Props) => {
 	const [added, setAdded] = useState(false);
 	const [showPosterPreview, setShowPosterPreview] = useState(false);
 	const [notFound, setNotFound] = useState(false);
+	const isDark = useColorScheme() === 'dark';
+	const styles = makeStyles(isDark);
 
 	const isFocused = useIsFocused();
 
@@ -251,10 +256,12 @@ const SelectShow = ({ sourcePage, handleShow }: Props) => {
 								)}
 								<Text
 									style={{
-										fontSize: 18,
+										fontSize: 16,
 										fontWeight: 'bold',
 										marginLeft: 10,
 										marginRight: 10,
+										marginVertical: 5,
+										color: isDark ? '#cccccc' : 'black',
 									}}
 								>
 									{
@@ -333,13 +340,11 @@ const SelectShow = ({ sourcePage, handleShow }: Props) => {
 							</View>
 						) : (
 							<View>
-								<TextInput
+								<AppTextInput
 									style={styles.inputText}
 									label='Enter show title'
 									onChangeText={(showInput) => setShowInput(showInput)}
 									mode='outlined'
-									outlineColor='#340068'
-									activeOutlineColor='#340068'
 									value={showInput}
 									onFocus={() => setNotFound(false)}
 								/>
@@ -405,98 +410,105 @@ const SelectShow = ({ sourcePage, handleShow }: Props) => {
 	);
 };
 
-const styles = StyleSheet.create({
-	container: {
-		marginTop: 15,
-		flex: 1,
-		marginHorizontal: 2,
-		marginBottom: 10,
-	},
-	optionContainer: {
-		flex: 1,
-		justifyContent: 'space-between',
-		marginRight: 10,
-		marginLeft: 10,
-	},
-	text: {
-		margin: 5,
-		textAlign: 'center',
-		fontSize: 20,
-	},
-	boldText: {
-		margin: 5,
-		textAlign: 'center',
-		fontSize: 20,
-		fontWeight: 'bold',
-	},
-	inputText: {
-		margin: 10,
-		textAlign: 'left',
-		fontSize: 20,
-	},
-	optionsText: {
-		marginRight: 10,
-		marginLeft: 10,
-		fontSize: 15,
-	},
-	buttonText: {
-		textAlign: 'center',
-		fontSize: 18,
-		margin: 5,
-		fontWeight: '500',
-		color: 'white',
-	},
-	buttonContainer: {
-		flexDirection: 'row',
-		justifyContent: 'center',
-	},
-	button: {
-		padding: 5,
-		borderRadius: 15,
-		marginHorizontal: 3,
-		backgroundColor: '#340068',
-		marginTop: 5,
-	},
-	addPosterButton: {
-		padding: 10,
-		borderRadius: 40,
-		marginHorizontal: 3,
-		marginTop: 5,
-		backgroundColor: '#324376',
-	},
-	box: {
-		backgroundColor: 'white',
-		borderWidth: 2,
-		borderColor: '#324376',
-		marginBottom: 2,
-		marginTop: 2,
-		padding: 2,
-	},
-	removePosterButton: {
-		padding: 10,
-		borderRadius: 40,
-		marginHorizontal: 3,
-		marginTop: 5,
-		backgroundColor: '#636A7D',
-	},
-	image: {
-		flex: 1,
-		aspectRatio: 2 / 3,
-	},
-	saveButton: {
-		backgroundColor: '#0C7489',
-		padding: 10,
-		borderRadius: 40,
-		marginHorizontal: 3,
-		marginTop: 5,
-	},
-	searchPageButton: {
-		padding: 5,
-		borderRadius: 15,
-		marginHorizontal: 3,
-		backgroundColor: '#340068',
-		marginRight: 10,
-	},
-});
+const makeStyles = (isDark: boolean) =>
+	StyleSheet.create({
+		container: {
+			marginTop: 15,
+			flex: 1,
+			marginHorizontal: 2,
+			marginBottom: 10,
+		},
+		optionContainer: {
+			flex: 1,
+			justifyContent: 'space-between',
+			marginRight: 10,
+			marginLeft: 10,
+			padding: 5,
+		},
+		text: {
+			margin: 5,
+			textAlign: 'center',
+			fontSize: 20,
+			color: isDark ? '#f0f0f0' : '#333333',
+		},
+		boldText: {
+			margin: 5,
+			textAlign: 'center',
+			fontSize: 20,
+			fontWeight: 'bold',
+			color: isDark ? '#f0f0f0' : '#333333',
+		},
+		inputText: {
+			margin: 10,
+			textAlign: 'left',
+			fontSize: 20,
+		},
+		optionsText: {
+			marginRight: 10,
+			marginLeft: 10,
+			padding: 3,
+			paddingVertical: 5,
+			fontSize: 15,
+			color: isDark ? '#f0f0f0' : '#333333',
+		},
+		buttonText: {
+			textAlign: 'center',
+			fontSize: 18,
+			margin: 5,
+			fontWeight: '500',
+			color: isDark ? '#cccccc' : 'white',
+		},
+		buttonContainer: {
+			flexDirection: 'row',
+			justifyContent: 'center',
+		},
+		button: {
+			padding: 5,
+			borderRadius: 15,
+			marginHorizontal: 3,
+			backgroundColor: '#340068',
+			marginTop: 5,
+		},
+		addPosterButton: {
+			padding: 10,
+			borderRadius: 15,
+			marginHorizontal: 3,
+			marginTop: 5,
+			backgroundColor: '#324376',
+		},
+		box: {
+			backgroundColor: isDark ? '#3e3e3e' : '#ffffff',
+			borderWidth: 2,
+			borderColor: isDark ? '#aaaaaa' : '#324376',
+			marginBottom: 2,
+			marginTop: 2,
+			padding: 2,
+		},
+		removePosterButton: {
+			padding: 10,
+			borderRadius: 15,
+			marginHorizontal: 3,
+			marginTop: 5,
+			backgroundColor: '#636A7D',
+		},
+		image: {
+			flex: 1,
+			aspectRatio: 2 / 3,
+		},
+		saveButton: {
+			backgroundColor: '#0C7489',
+			padding: 10,
+			borderRadius: 15,
+			marginHorizontal: 3,
+			marginTop: 5,
+		},
+		searchPageButton: {
+			padding: 5,
+			borderRadius: 15,
+			marginHorizontal: 3,
+			backgroundColor: '#340068',
+			marginRight: 10,
+		},
+	});
 
 export default SelectShow;

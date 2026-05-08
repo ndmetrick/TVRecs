@@ -4,6 +4,7 @@ import {
 	StyleSheet,
 	Text,
 	TouchableOpacity,
+	useColorScheme,
 	View,
 } from 'react-native';
 
@@ -25,6 +26,8 @@ function UsersFollowing() {
 	const [followsMe, setFollowsMe] = useState(false);
 	const { currentUser, followingMap, refetchFollowing, refetchFollowingRecs } =
 		useAppData();
+	const isDark = useColorScheme() === 'dark';
+	const styles = makeStyles(isDark);
 
 	useEffect(() => {
 		if (!userFollowingString) return;
@@ -163,101 +166,103 @@ function UsersFollowing() {
 	);
 }
 
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		marginTop: 10,
-	},
-	containerInfo: {
-		margin: 5,
-		padding: 5,
-		borderStyle: 'solid',
-		borderColor: 'blue',
-		borderWidth: 2,
-	},
-	followedUserContainer: {
-		flexDirection: 'row',
-		justifyContent: 'space-between',
-		marginBottom: 5,
-	},
-	followedContainer: {
-		flexDirection: 'column',
-	},
-	text: {
-		textAlign: 'center',
-		fontSize: 18,
-		margin: 5,
-	},
-	buttonText: {
-		textAlign: 'center',
-		fontSize: 18,
-		margin: 5,
-		fontWeight: '500',
-		color: 'white',
-	},
-	buttonContainer: {
-		flexDirection: 'row',
-		justifyContent: 'center',
-	},
-	button: {
-		padding: 10,
-		borderRadius: 40,
-		marginHorizontal: 3,
-		backgroundColor: '#340068',
-		marginTop: 5,
-	},
-	followed: {
-		padding: 5,
-		borderRadius: 10,
-		marginHorizontal: 3,
-		backgroundColor: 'lightblue',
-		marginTop: 5,
-		width: 100,
-	},
-	unfollowed: {
-		padding: 5,
-		borderRadius: 10,
-		marginHorizontal: 3,
-		backgroundColor: '#36C9C6',
-		marginTop: 5,
-		width: 100,
-	},
-	heading: {
-		backgroundColor: '#340068',
-		padding: 14,
-		marginBottom: 10,
-	},
-	headingText: {
-		color: 'white',
-		fontSize: 20,
-		fontWeight: '600',
-		textAlign: 'center',
-	},
-	userRow: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		gap: 5,
-		paddingVertical: 12,
-		paddingHorizontal: 8,
-	},
-	usernameText: {
-		fontSize: 18,
-		fontWeight: '500',
-		color: '#222',
-	},
-	userAvatar: {
-		width: 40,
-		height: 40,
-		borderRadius: 20,
-		backgroundColor: '#340068',
-		alignItems: 'center',
-		justifyContent: 'center',
-	},
-	userAvatarText: {
-		color: 'white',
-		fontSize: 16,
-		fontWeight: '500',
-	},
-});
+const makeStyles = (isDark: boolean) =>
+	StyleSheet.create({
+		container: {
+			flex: 1,
+			marginTop: 10,
+			backgroundColor: isDark ? '#5a5a5a' : '',
+		},
+		containerInfo: {
+			margin: 5,
+			padding: 5,
+			borderStyle: 'solid',
+			borderColor: 'blue',
+			borderWidth: 2,
+		},
+		followedUserContainer: {
+			flexDirection: 'row',
+			justifyContent: 'space-between',
+			marginBottom: 5,
+		},
+		followedContainer: {
+			flexDirection: 'column',
+		},
+		text: {
+			textAlign: 'center',
+			fontSize: 18,
+			margin: 5,
+		},
+		buttonText: {
+			textAlign: 'center',
+			fontSize: 18,
+			margin: 5,
+			fontWeight: '500',
+			color: 'white',
+		},
+		buttonContainer: {
+			flexDirection: 'row',
+			justifyContent: 'center',
+		},
+		button: {
+			padding: 10,
+			borderRadius: 40,
+			marginHorizontal: 3,
+			backgroundColor: '#340068',
+			marginTop: 5,
+		},
+		followed: {
+			padding: 5,
+			borderRadius: 10,
+			marginHorizontal: 10,
+			backgroundColor: 'lightblue',
+			marginTop: 5,
+			maxWidth: 200,
+		},
+		unfollowed: {
+			padding: 5,
+			borderRadius: 10,
+			marginHorizontal: 3,
+			backgroundColor: '#36C9C6',
+			marginTop: 5,
+			width: 100,
+		},
+		heading: {
+			backgroundColor: '#340068',
+			padding: 14,
+			marginBottom: 10,
+		},
+		headingText: {
+			color: isDark ? '#cccccc' : 'white',
+			fontSize: 20,
+			fontWeight: '600',
+			textAlign: 'center',
+		},
+		userRow: {
+			flexDirection: 'row',
+			alignItems: 'center',
+			gap: 5,
+			paddingVertical: 12,
+			paddingHorizontal: 8,
+		},
+		usernameText: {
+			fontSize: 18,
+			fontWeight: '500',
+			color: isDark ? '#cccccc' : '#222',
+		},
+		userAvatar: {
+			width: 40,
+			height: 40,
+			borderRadius: 20,
+			backgroundColor: '#340068',
+			alignItems: 'center',
+			justifyContent: 'center',
+		},
+		userAvatarText: {
+			color: 'white',
+			fontSize: 16,
+			fontWeight: '500',
+		},
+	});
 
 export default UsersFollowing;

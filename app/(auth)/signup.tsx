@@ -8,6 +8,7 @@ import {
 	Text,
 	TextInput,
 	TouchableOpacity,
+	useColorScheme,
 } from 'react-native';
 
 export default function Signup() {
@@ -18,6 +19,8 @@ export default function Signup() {
 	const [username, setUsername] = useState('');
 	const [error, setError] = useState('');
 	const [loading, setLoading] = useState(false);
+	const isDark = useColorScheme() === 'dark';
+	const styles = makeStyles(isDark);
 
 	const handleSignUp = async () => {
 		setError('');
@@ -89,65 +92,70 @@ export default function Signup() {
 					{loading ? 'Creating account...' : 'Sign Up'}
 				</Text>
 			</TouchableOpacity>
-			<TouchableOpacity onPress={() => router.back()}>
+			<TouchableOpacity
+				hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+				onPress={() => router.back()}
+			>
 				<Text style={styles.link}>Already have an account? Log in</Text>
 			</TouchableOpacity>
 		</KeyboardAvoidingView>
 	);
 }
 
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		backgroundColor: '#E9ECEF',
-		justifyContent: 'center',
-		paddingHorizontal: 24,
-	},
-	title: {
-		fontSize: 28,
-		fontWeight: '700',
-		color: '#340068',
-		textAlign: 'center',
-		marginBottom: 24,
-	},
-	input: {
-		backgroundColor: 'white',
-		borderRadius: 8,
-		padding: 14,
-		fontSize: 16,
-		marginBottom: 12,
-		borderWidth: 1,
-		borderColor: '#ddd',
-	},
-	helperText: {
-		fontSize: 13,
-		color: '#888',
-		marginTop: -6,
-		marginBottom: 12,
-		marginLeft: 4,
-	},
-	button: {
-		backgroundColor: '#340068',
-		borderRadius: 40,
-		padding: 14,
-		alignItems: 'center',
-		marginTop: 8,
-		marginBottom: 16,
-	},
-	buttonText: {
-		color: 'white',
-		fontSize: 16,
-		fontWeight: '500',
-	},
-	error: {
-		color: '#c00',
-		fontSize: 14,
-		marginBottom: 12,
-		textAlign: 'center',
-	},
-	link: {
-		color: '#4056F4',
-		fontSize: 15,
-		textAlign: 'center',
-	},
-});
+const makeStyles = (isDark: boolean) =>
+	StyleSheet.create({
+		container: {
+			flex: 1,
+			backgroundColor: isDark ? '#5a5a5a' : '#E9ECEF',
+			justifyContent: 'center',
+			paddingHorizontal: 24,
+		},
+		title: {
+			fontSize: 28,
+			fontWeight: '700',
+			color: '#340068',
+			textAlign: 'center',
+			marginBottom: 24,
+		},
+		input: {
+			backgroundColor: isDark ? '#4a4a4a' : 'white',
+			borderRadius: 8,
+			padding: 14,
+			fontSize: 16,
+			marginBottom: 12,
+			borderWidth: 1,
+			borderColor: isDark ? '#aaa' : '#ddd',
+			color: isDark ? '#ccc' : '',
+		},
+		helperText: {
+			fontSize: 13,
+			color: isDark ? '#aaa' : '#888',
+			marginTop: -6,
+			marginBottom: 12,
+			marginLeft: 4,
+		},
+		button: {
+			backgroundColor: '#340068',
+			borderRadius: 40,
+			padding: 14,
+			alignItems: 'center',
+			marginTop: 8,
+			marginBottom: 16,
+		},
+		buttonText: {
+			color: isDark ? '#cccccc' : 'white',
+			fontSize: 16,
+			fontWeight: '500',
+		},
+		error: {
+			color: isDark ? '#ff4444' : '#c00',
+			fontSize: 14,
+			marginBottom: 12,
+			textAlign: 'center',
+		},
+		link: {
+			color: isDark ? '#6b9fd4' : '#4056F4',
+			fontSize: 15,
+			textAlign: 'center',
+		},
+	});

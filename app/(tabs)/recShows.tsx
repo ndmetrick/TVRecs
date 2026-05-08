@@ -22,6 +22,7 @@ import {
 	StyleSheet,
 	Text,
 	TouchableOpacity,
+	useColorScheme,
 	View,
 } from 'react-native';
 
@@ -42,6 +43,8 @@ const RecShows = () => {
 	const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({});
 	const [refreshing, setRefreshing] = useState(false);
 	const [containerHeight, setContainerHeight] = useState(0);
+	const isDark = useColorScheme() === 'dark';
+	const styles = makeStyles(isDark);
 
 	const [appliedFilters, setAppliedFilters] = useState<AppliedShowFilters>({});
 	const router = useRouter();
@@ -430,46 +433,48 @@ const RecShows = () => {
 	);
 };
 
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-	},
-	rowContainer: {
-		flexDirection: 'row',
-		flexWrap: 'wrap',
-	},
-	containerGallery: {
-		flex: 1,
-	},
-	containerImage: {
-		flex: 1 / 3,
-		marginBottom: 5,
-	},
-	image: {
-		// flex: 1,
-		aspectRatio: 2 / 3,
-	},
-	toggleContainer: {
-		padding: 10,
-	},
-	emptyState: {
-		flex: 1,
-		alignItems: 'center',
-		justifyContent: 'center',
-		padding: 40,
-		gap: 12,
-	},
-	emptyStateText: {
-		fontSize: 16,
-		color: '#888',
-		textAlign: 'center',
-		lineHeight: 24,
-	},
-	emptyStateLink: {
-		fontSize: 16,
-		color: '#4056F4',
-		fontWeight: '500',
-	},
-});
+const makeStyles = (isDark: boolean) =>
+	StyleSheet.create({
+		container: {
+			flex: 1,
+			backgroundColor: isDark ? '#5a5a5a' : '',
+		},
+		rowContainer: {
+			flexDirection: 'row',
+			flexWrap: 'wrap',
+		},
+		containerGallery: {
+			flex: 1,
+		},
+		containerImage: {
+			flex: 1 / 3,
+			marginBottom: 5,
+		},
+		image: {
+			// flex: 1,
+			aspectRatio: 2 / 3,
+		},
+		toggleContainer: {
+			padding: 10,
+		},
+		emptyState: {
+			flex: 1,
+			alignItems: 'center',
+			justifyContent: 'center',
+			padding: 40,
+			gap: 12,
+		},
+		emptyStateText: {
+			fontSize: 16,
+			color: '#888',
+			textAlign: 'center',
+			lineHeight: 24,
+		},
+		emptyStateLink: {
+			fontSize: 16,
+			color: '#4056F4',
+			fontWeight: '500',
+		},
+	});
 
 export default RecShows;

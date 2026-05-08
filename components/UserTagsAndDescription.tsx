@@ -7,6 +7,7 @@ import {
 	ScrollView,
 	StyleSheet,
 	Text,
+	useColorScheme,
 	View,
 } from 'react-native';
 
@@ -28,6 +29,8 @@ const UserTagsAndDescription = (props: Props) => {
 	const { user, userTags, isCurrentUser } = props;
 	const [sortedProfileTags, setSortedProfileTags] =
 		useState<SortedProfileTags | null>(null);
+	const isDark = useColorScheme() === 'dark';
+	const styles = makeStyles(isDark);
 
 	useEffect(() => {
 		const like: ProfileTag[] = [];
@@ -232,76 +235,78 @@ const UserTagsAndDescription = (props: Props) => {
 	);
 };
 
-const styles = StyleSheet.create({
-	container: {
-		marginTop: 10,
-		marginBottom: 30,
-	},
-	containerInfo: {
-		margin: 5,
-		padding: 5,
-	},
-	text: {
-		textAlign: 'left',
-		fontSize: 18,
-	},
-	buttonText: {
-		textAlign: 'center',
-		fontSize: 18,
-		margin: 5,
-		fontWeight: '500',
-		color: 'white',
-	},
-	buttonContainer: {
-		flexDirection: 'row',
-		justifyContent: 'center',
-	},
-	button: {
-		padding: 10,
-		borderRadius: 40,
-		marginHorizontal: 3,
-		backgroundColor: '#340068',
-		marginTop: 5,
-	},
-	cardContent: {
-		flexDirection: 'row',
-		marginLeft: 10,
-	},
-	tagsContent: {
-		marginTop: 10,
-		flexWrap: 'wrap',
-		marginBottom: 10,
-	},
-	highlightLikeTag: {
-		padding: 10,
-		borderRadius: 40,
-		marginHorizontal: 3,
-		backgroundColor: '#008DD5',
-		marginTop: 5,
-	},
-	highlightDislikeTag: {
-		padding: 10,
-		borderRadius: 40,
-		marginHorizontal: 3,
-		backgroundColor: '#E24E1B',
-		marginTop: 5,
-	},
-	highlightDescribeTag: {
-		padding: 10,
-		borderRadius: 40,
-		marginHorizontal: 3,
-		backgroundColor: '#7B5D96',
-		marginTop: 5,
-	},
+const makeStyles = (isDark: boolean) =>
+	StyleSheet.create({
+		container: {
+			marginTop: 10,
+			marginBottom: 30,
+		},
+		containerInfo: {
+			margin: 5,
+			padding: 5,
+		},
+		text: {
+			textAlign: 'left',
+			fontSize: 18,
+			color: isDark ? '#cccccc' : 'black',
+		},
+		buttonText: {
+			textAlign: 'center',
+			fontSize: 18,
+			margin: 5,
+			fontWeight: '500',
+			color: 'white',
+		},
+		buttonContainer: {
+			flexDirection: 'row',
+			justifyContent: 'center',
+		},
+		button: {
+			padding: 10,
+			borderRadius: 40,
+			marginHorizontal: 3,
+			backgroundColor: '#340068',
+			marginTop: 5,
+		},
+		cardContent: {
+			flexDirection: 'row',
+			marginLeft: 10,
+		},
+		tagsContent: {
+			marginTop: 10,
+			flexWrap: 'wrap',
+			marginBottom: 10,
+		},
+		highlightLikeTag: {
+			padding: 10,
+			borderRadius: 40,
+			marginHorizontal: 3,
+			backgroundColor: '#008DD5',
+			marginTop: 5,
+		},
+		highlightDislikeTag: {
+			padding: 10,
+			borderRadius: 40,
+			marginHorizontal: 3,
+			backgroundColor: '#E24E1B',
+			marginTop: 5,
+		},
+		highlightDescribeTag: {
+			padding: 10,
+			borderRadius: 40,
+			marginHorizontal: 3,
+			backgroundColor: '#7B5D96',
+			marginTop: 5,
+		},
 
-	tagText: {
-		fontSize: 14,
-		fontWeight: '500',
-		textAlign: 'center',
-	},
-	otherUser: {
-		margin: 10,
-	},
-});
+		tagText: {
+			fontSize: 14,
+			fontWeight: '500',
+			textAlign: 'center',
+		},
+		otherUser: {
+			margin: 10,
+		},
+	});
 
 export default UserTagsAndDescription;

@@ -7,8 +7,15 @@ import { showErrorToast } from '@/lib/toast';
 import * as Sentry from '@sentry/react-native';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { TextInput } from 'react-native-paper';
+import {
+	Alert,
+	StyleSheet,
+	Text,
+	TouchableOpacity,
+	useColorScheme,
+	View,
+} from 'react-native';
+import AppTextInput from './AppTextInput';
 
 interface Props {
 	updateType: 'username' | 'delete' | 'password';
@@ -24,6 +31,8 @@ const UpdateAccount = (props: Props) => {
 	const [error, setError] = useState<string | null>(null);
 	const { signOut } = useAuth();
 	const router = useRouter();
+	const isDark = useColorScheme() === 'dark';
+	const styles = makeStyles(isDark);
 
 	if (!currentUser) return;
 
@@ -121,13 +130,13 @@ const UpdateAccount = (props: Props) => {
 						Your username (visible to all users) is currently{' '}
 						{currentUser.username}. You can change it at any time below:
 					</Text>
-					<TextInput
+					<AppTextInput
 						style={styles.inputText}
 						label='Enter new username'
 						onChangeText={(newUsername) => setNewUsername(newUsername)}
 						mode='outlined'
-						outlineColor='#340068'
-						activeOutlineColor='#340068'
+						// outlineColor='#340068'
+						// activeOutlineColor='#340068'
 						value={newUsername}
 					/>
 					<View style={styles.buttonContainer}>
@@ -167,13 +176,13 @@ const UpdateAccount = (props: Props) => {
 				</View>
 			) : (
 				<View>
-					<TextInput
+					<AppTextInput
 						style={styles.inputText}
 						label='Enter new password'
 						onChangeText={(newPassword) => setNewPassword(newPassword)}
 						mode='outlined'
-						outlineColor='#340068'
-						activeOutlineColor='#340068'
+						// outlineColor='#340068'
+						// activeOutlineColor='#340068'
 						value={newPassword}
 					/>
 					<View style={styles.buttonContainer}>
@@ -187,40 +196,42 @@ const UpdateAccount = (props: Props) => {
 	);
 };
 
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		marginRight: 10,
-		marginLeft: 15,
-	},
-	inputText: {
-		margin: 10,
-		textAlign: 'left',
-		fontSize: 20,
-	},
-	text: {
-		textAlign: 'left',
-		fontSize: 18,
-	},
-	buttonText: {
-		textAlign: 'center',
-		fontSize: 18,
-		margin: 5,
-		fontWeight: '500',
-		color: 'white',
-	},
-	buttonContainer: {
-		flexDirection: 'row',
-		justifyContent: 'center',
-		margin: 10,
-	},
-	button: {
-		padding: 5,
-		borderRadius: 10,
-		marginHorizontal: 3,
-		backgroundColor: '#340068',
-		marginTop: 2,
-	},
-});
+const makeStyles = (isDark: boolean) =>
+	StyleSheet.create({
+		container: {
+			flex: 1,
+			marginRight: 10,
+			marginLeft: 15,
+		},
+		inputText: {
+			margin: 10,
+			textAlign: 'left',
+			fontSize: 20,
+		},
+		text: {
+			textAlign: 'left',
+			fontSize: 18,
+			color: isDark ? '#cccccc' : 'black',
+		},
+		buttonText: {
+			textAlign: 'center',
+			fontSize: 18,
+			margin: 5,
+			fontWeight: '500',
+			color: isDark ? '#cccccc' : 'white',
+		},
+		buttonContainer: {
+			flexDirection: 'row',
+			justifyContent: 'center',
+			margin: 10,
+		},
+		button: {
+			padding: 5,
+			borderRadius: 10,
+			marginHorizontal: 3,
+			backgroundColor: '#340068',
+			marginTop: 2,
+		},
+	});
 
 export default UpdateAccount;

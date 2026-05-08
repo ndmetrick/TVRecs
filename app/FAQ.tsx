@@ -7,12 +7,15 @@ import {
 	StyleSheet,
 	Text,
 	TouchableOpacity,
+	useColorScheme,
 	View,
 } from 'react-native';
 import { ComposedHeartIcon, ComposedSearchIcon } from './(tabs)/_layout';
 
 const FAQ = () => {
 	const router = useRouter();
+	const isDark = useColorScheme() === 'dark';
+	const styles = makeStyles(isDark);
 	return (
 		<ScrollView style={styles.container}>
 			<Text style={{ ...styles.text, fontWeight: 'bold', textAlign: 'center' }}>
@@ -79,8 +82,8 @@ const FAQ = () => {
 					<View style={{ width: 26, height: 26 }}>
 						<ComposedSearchIcon
 							size={26}
-							color={'black'}
-							backgroundColor='white'
+							color={isDark ? '#dddddd' : 'black'}
+							backgroundColor={isDark ? '3e3e3e' : 'white'}
 							baseIcon='television-classic'
 						/>
 					</View>{' '}
@@ -108,7 +111,7 @@ const FAQ = () => {
 				<Text style={styles.headingText}>
 					<ComposedHeartIcon
 						size={26}
-						color={'black'}
+						color={isDark ? '#dddddd' : 'black'}
 						backgroundColor='#white'
 						baseIcon='television-classic'
 					/>{' '}
@@ -137,24 +140,27 @@ const FAQ = () => {
 	);
 };
 
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		marginTop: 10,
-		marginBottom: 50,
-	},
-	text: {
-		textAlign: 'left',
-		fontSize: 16,
-		marginRight: 10,
-		marginLeft: 10,
-	},
-	headingText: {
-		fontWeight: 'bold',
-		fontSize: 16,
-		margin: 5,
-		marginLeft: 7,
-	},
-});
+const makeStyles = (isDark: boolean) =>
+	StyleSheet.create({
+		container: {
+			flex: 1,
+			marginTop: 10,
+			marginBottom: 50,
+		},
+		text: {
+			textAlign: 'left',
+			fontSize: 16,
+			marginRight: 10,
+			marginLeft: 10,
+			color: isDark ? '#cccccc' : 'black',
+		},
+		headingText: {
+			fontWeight: 'bold',
+			fontSize: 16,
+			margin: 5,
+			marginLeft: 7,
+			color: isDark ? '#dddddd' : 'black',
+		},
+	});
 
 export default FAQ;
