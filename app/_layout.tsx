@@ -54,36 +54,45 @@ export const AppShell = () => {
 					headerStyle: {
 						backgroundColor: scheme === 'dark' ? '#3e3e3e' : '#ffffff',
 					},
-					headerTintColor: scheme === 'dark' ? '#eef1f8' : '#340068',
+					headerTintColor: scheme === 'dark' ? '#f0f0f0' : '#340068',
+					headerTitleAlign: 'center',
+
 					headerTitle: () => (
-						<TouchableOpacity onPress={() => router.push('/(tabs)/recShows')}>
-							<Image
-								style={{ width: 50, height: 40, alignSelf: 'center' }}
-								source={require('../assets/images/logo-transparent.png')}
-							/>
-						</TouchableOpacity>
-					),
-					headerRight: () =>
-						currentUser ? (
-							<TouchableOpacity
-								hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-								style={{ marginRight: 12 }}
-								onPress={() =>
-									Alert.alert('Sign out?', '', [
-										{ text: 'Yes', onPress: logout },
-										{
-											text: 'Cancel',
-										},
-									])
-								}
-							>
-								<MaterialCommunityIcons
-									name='logout'
-									size={26}
-									color={scheme === 'dark' ? '#dddddd' : '#340068'}
+						<View
+							style={{
+								flexDirection: 'row',
+								alignItems: 'center',
+								justifyContent: 'center',
+								width: '100%',
+								overflow: 'visible',
+							}}
+						>
+							<TouchableOpacity onPress={() => router.push('/(tabs)/recShows')}>
+								<Image
+									style={{ width: 50, height: 40 }}
+									source={require('../assets/images/logo-transparent.png')}
 								/>
 							</TouchableOpacity>
-						) : null,
+							{currentUser && (
+								<TouchableOpacity
+									hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+									style={{ position: 'absolute', right: 0 }}
+									onPress={() =>
+										Alert.alert('Sign out?', '', [
+											{ text: 'Yes', onPress: logout },
+											{ text: 'Cancel' },
+										])
+									}
+								>
+									<MaterialCommunityIcons
+										name='logout'
+										size={26}
+										color={scheme === 'dark' ? '#dddddd' : '#340068'}
+									/>
+								</TouchableOpacity>
+							)}
+						</View>
+					),
 				}}
 			>
 				<Stack.Screen name='index' options={{ headerBackVisible: false }} />
