@@ -82,7 +82,7 @@ const FAQ = () => {
 					<View style={{ width: 26, height: 26 }}>
 						<ComposedSearchIcon
 							size={26}
-							color={isDark ? '#dddddd' : 'black'}
+							color={isDark ? '#dddddd' : '#222'}
 							backgroundColor={isDark ? '3e3e3e' : 'white'}
 							baseIcon='television-classic'
 						/>
@@ -111,7 +111,7 @@ const FAQ = () => {
 				<Text style={styles.headingText}>
 					<ComposedHeartIcon
 						size={26}
-						color={isDark ? '#dddddd' : 'black'}
+						color={isDark ? '#dddddd' : '#222'}
 						backgroundColor='#white'
 						baseIcon='television-classic'
 					/>{' '}
@@ -152,14 +152,14 @@ const makeStyles = (isDark: boolean) =>
 			fontSize: 16,
 			marginRight: 10,
 			marginLeft: 10,
-			color: isDark ? '#cccccc' : 'black',
+			color: isDark ? '#cccccc' : '#222',
 		},
 		headingText: {
 			fontWeight: 'bold',
 			fontSize: 16,
 			margin: 5,
 			marginLeft: 7,
-			color: isDark ? '#dddddd' : 'black',
+			color: isDark ? '#dddddd' : '#222',
 		},
 	});
 

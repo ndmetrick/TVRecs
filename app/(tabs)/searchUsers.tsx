@@ -1501,7 +1501,7 @@ const makeStyles = (isDark: boolean) =>
 	StyleSheet.create({
 		container: {
 			flex: 1,
-			backgroundColor: isDark ? '#5a5a5a' : '',
+			backgroundColor: isDark ? '#5a5a5a' : '#f5f5f5',
 		},
 		header: {
 			backgroundColor: '#340068',
@@ -1542,7 +1542,7 @@ const makeStyles = (isDark: boolean) =>
 		},
 		excludeSub: {
 			fontSize: 11,
-			color: 'rgba(255,255,255,0.55)',
+			color: isDark ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.75)',
 			marginTop: 1,
 		},
 		modeTabs: {
@@ -1629,7 +1629,7 @@ const makeStyles = (isDark: boolean) =>
 		},
 		emptyMsg: {
 			fontSize: 14,
-			color: '#666',
+			color: isDark ? '#bbbbbb' : '#666',
 			textAlign: 'left',
 			padding: 20,
 			lineHeight: 20,
@@ -1648,7 +1648,7 @@ const makeStyles = (isDark: boolean) =>
 		},
 		panelBg: {
 			flex: 1,
-			backgroundColor: isDark ? '#5a5a5a' : '#F0F0F0',
+			backgroundColor: isDark ? '#5a5a5a' : '#f5f5f5',
 		},
 		resultsSection: {
 			padding: 12,
@@ -1662,10 +1662,15 @@ const makeStyles = (isDark: boolean) =>
 			flexDirection: 'row',
 			alignItems: 'flex-start',
 			gap: 10,
-			backgroundColor: isDark ? '#cccccc' : 'white',
+			backgroundColor: isDark ? '#b0b0b0' : 'white',
 			borderRadius: 8,
 			padding: 10,
 			marginBottom: 6,
+			shadowColor: isDark ? 'transparent' : '#000',
+			shadowOpacity: isDark ? 0 : 0.08,
+			shadowRadius: 4,
+			shadowOffset: { width: 0, height: 1 },
+			elevation: isDark ? 0 : 2,
 		},
 		avatar: {
 			width: 36,
@@ -1835,7 +1840,7 @@ const makeStyles = (isDark: boolean) =>
 			paddingHorizontal: 3,
 			textAlign: 'center',
 			fontSize: 11,
-			color: 'rgba(255,255,255,0.35)',
+			color: isDark ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.65)',
 		},
 		aaOptOn: {
 			color: 'rgba(255,255,255,0.9)',

@@ -99,7 +99,7 @@ const makeStyles = (isDark: boolean) =>
 			marginLeft: 15,
 			textAlign: 'left',
 			fontSize: 18,
-			color: isDark ? '#cccccc' : 'black',
+			color: isDark ? '#cccccc' : '#222',
 		},
 		buttonContainer: {
 			flexDirection: 'row',

@@ -41,17 +41,17 @@ const CurrentUser = () => {
 	const tabs = [
 		{
 			key: UserShowType.REC,
-			label: `Recs (66)`,
+			label: `Recs (${userShows.length})`,
 			shows: userShows,
 		},
 		{
 			key: UserShowType.WATCH,
-			label: `To Watch (66)`,
+			label: `To Watch (${toWatch.length})`,
 			shows: toWatch,
 		},
 		{
 			key: UserShowType.SEEN,
-			label: `Hidden (66)`,
+			label: `Hidden (${seen.length})`,
 			shows: seen,
 		},
 		{

@@ -787,7 +787,7 @@ const makeStyles = (isDark: boolean) =>
 		container: {
 			flex: 1,
 			marginBottom: 30,
-			backgroundColor: isDark ? '#aaaaaa' : '#EBECF0',
+			backgroundColor: isDark ? '#aaaaaa' : '#f5f5f5',
 		},
 		extra: {
 			marginBottom: 25,

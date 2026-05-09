@@ -101,9 +101,17 @@ function UsersFollowing() {
 								})
 				}
 			>
-				<MaterialCommunityIcons name='account' size={18} color='#888' />
+				<MaterialCommunityIcons
+					name='account'
+					size={18}
+					color={isDark ? '#999999' : '#888'}
+				/>
 				<Text style={styles.usernameText}>{user.username}</Text>
-				<MaterialCommunityIcons name='chevron-right' size={16} color='#ccc' />
+				<MaterialCommunityIcons
+					name='chevron-right'
+					size={16}
+					color={isDark ? '#bbbbbb' : '#888'}
+				/>
 			</TouchableOpacity>
 		);
 	};
@@ -171,7 +179,7 @@ const makeStyles = (isDark: boolean) =>
 		container: {
 			flex: 1,
 			marginTop: 10,
-			backgroundColor: isDark ? '#5a5a5a' : '',
+			backgroundColor: isDark ? '#5a5a5a' : '#f5f5f5',
 		},
 		containerInfo: {
 			margin: 5,

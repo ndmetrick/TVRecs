@@ -387,7 +387,7 @@ const makeStyles = (isDark: boolean) =>
 		userCardName: {
 			fontSize: 16,
 			fontWeight: '500',
-			color: isDark ? '#eeeeee' : 'black',
+			color: isDark ? '#eeeeee' : '#222',
 		},
 		row: {
 			flexDirection: 'row',
@@ -408,7 +408,7 @@ const makeStyles = (isDark: boolean) =>
 		rowText: {
 			fontSize: 18,
 			fontWeight: '500',
-			color: isDark ? '#dddddd' : 'white',
+			color: isDark ? '#dddddd' : '#222',
 		},
 		disabledRowText: {
 			fontSize: 18,

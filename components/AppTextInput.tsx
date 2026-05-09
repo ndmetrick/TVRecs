@@ -23,8 +23,15 @@ const AppTextInput = (props: Props) => {
 			: {
 					...MD3LightTheme,
 					colors: {
-						...MD3LightTheme.colors,
 						primary: '#340068',
+						surface: '#ffffff',
+						surfaceVariant: '#ffffff',
+						background: '#ffffff',
+						secondaryContainer: '#ffffff',
+						tertiaryContainer: '#ffffff',
+						primaryContainer: '#ffffff',
+						onSurfaceVariant: '#666666',
+						onSurface: '#222222',
 					},
 				};
 

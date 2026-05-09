@@ -154,7 +154,7 @@ const makeStyles = (isDark: boolean) =>
 		text: {
 			textAlign: 'left',
 			fontSize: 18,
-			color: isDark ? '#cccccc' : 'black',
+			color: isDark ? '#cccccc' : '#222',
 		},
 		tagText: {
 			fontSize: 14,

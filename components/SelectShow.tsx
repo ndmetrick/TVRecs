@@ -211,6 +211,7 @@ const SelectShow = ({ sourcePage, handleShow }: Props) => {
 			<ScrollView
 				showsVerticalScrollIndicator={false}
 				keyboardShouldPersistTaps='handled'
+				style={{ marginTop: 20 }}
 			>
 				{!added ? (
 					<View style={{ marginBottom: 10, marginTop: 15, flex: 1 }}>
@@ -261,7 +262,7 @@ const SelectShow = ({ sourcePage, handleShow }: Props) => {
 										marginLeft: 10,
 										marginRight: 10,
 										marginVertical: 5,
-										color: isDark ? '#cccccc' : 'black',
+										color: isDark ? '#cccccc' : '#222',
 									}}
 								>
 									{

@@ -240,6 +240,7 @@ const AddShow = () => {
 										style={{
 											marginLeft: 15,
 											marginRight: 15,
+											marginBottom: 15,
 										}}
 									>
 										<AppDropdownPicker
@@ -296,6 +297,36 @@ const AddShow = () => {
 															Add description and tags
 														</Text>
 													</TouchableOpacity>
+												</View>
+												<View
+													style={{
+														flexDirection: 'row',
+														alignItems: 'center',
+													}}
+												>
+													<View
+														style={{
+															flex: 1,
+															height: 0.5,
+															backgroundColor: isDark ? '#bbb' : '#777',
+														}}
+													/>
+													<Text
+														style={{
+															marginHorizontal: 8,
+															color: isDark ? '#bbb' : '#777',
+															fontSize: 12,
+														}}
+													>
+														or
+													</Text>
+													<View
+														style={{
+															flex: 1,
+															height: 0.5,
+															backgroundColor: isDark ? '#bbb' : '#777',
+														}}
+													/>
 												</View>
 												<View style={styles.buttonContainer}>
 													<TouchableOpacity
@@ -379,7 +410,7 @@ const makeStyles = (isDark: boolean) =>
 			textAlign: 'center',
 			fontSize: 20,
 			fontWeight: 'bold',
-			color: isDark ? '#cccccc' : 'black',
+			color: isDark ? '#cccccc' : '#222',
 		},
 		inputText: {
 			margin: 10,
@@ -401,6 +432,7 @@ const makeStyles = (isDark: boolean) =>
 		buttonContainer: {
 			flexDirection: 'row',
 			justifyContent: 'center',
+			marginBottom: 10,
 		},
 		button: {
 			padding: 5,
@@ -437,11 +469,10 @@ const makeStyles = (isDark: boolean) =>
 		},
 		goToTagsButton: {
 			backgroundColor: '#4056F4',
-			padding: 8,
-			borderRadius: 40,
+			padding: 10,
+			borderRadius: 15,
 			marginHorizontal: 3,
 			marginTop: 5,
-			marginBottom: 20,
 		},
 		skipAndSaveButton: {
 			borderWidth: 2,
@@ -450,8 +481,8 @@ const makeStyles = (isDark: boolean) =>
 			padding: 8,
 			borderRadius: 15,
 			marginHorizontal: 3,
-			marginTop: 5,
 			marginBottom: 20,
+			marginTop: 10,
 		},
 		skipButtonText: {
 			color: isDark ? '#bbbbbb' : '#340068',
@@ -460,13 +491,12 @@ const makeStyles = (isDark: boolean) =>
 			color: '#777',
 		},
 		showTypeText: {
-			fontSize: 20,
-			fontWeight: '600',
+			fontSize: 14,
+			fontWeight: '500',
 			textAlign: 'center',
-			marginTop: 10,
-			marginBottom: 10,
-			marginHorizontal: 15,
-			color: '#340068',
+			marginTop: 8,
+			marginBottom: 8,
+			color: isDark ? '#aaaaaa' : '#888888',
 		},
 		savingOverlay: {
 			...StyleSheet.absoluteFillObject,

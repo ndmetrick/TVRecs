@@ -79,7 +79,7 @@ export default function TabLayout() {
 				tabBarActiveTintColor: '#36C9C6',
 				tabBarInactiveTintColor: isDark ? '#dddddd' : 'white',
 				sceneStyle: {
-					backgroundColor: scheme === 'dark' ? '#3e3e3e' : '#ffffff',
+					backgroundColor: scheme === 'dark' ? '#3e3e3e' : '#f5f5f5',
 				},
 			}}
 		>

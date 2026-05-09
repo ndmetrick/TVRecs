@@ -40,7 +40,7 @@ export const AppShell = () => {
 		<View
 			style={{
 				flex: 1,
-				backgroundColor: scheme === 'dark' ? '#3e3e3e' : '#ffffff',
+				backgroundColor: scheme === 'dark' ? '#3e3e3e' : '#f2f2f7',
 			}}
 		>
 			<Stack
@@ -48,13 +48,13 @@ export const AppShell = () => {
 					headerShown: true,
 					headerBackTitle: 'Back',
 					contentStyle: {
-						backgroundColor: scheme === 'dark' ? '#3e3e3e' : '#ffffff',
+						backgroundColor: scheme === 'dark' ? '#3e3e3e' : '#f2f2f7',
 					},
 					animation: 'fade',
 					headerStyle: {
 						backgroundColor: scheme === 'dark' ? '#3e3e3e' : '#ffffff',
 					},
-					headerTintColor: scheme === 'dark' ? '#f0f0f0' : '#340068',
+					headerTintColor: scheme === 'dark' ? '#eef1f8' : '#340068',
 					headerTitle: () => (
 						<TouchableOpacity onPress={() => router.push('/(tabs)/recShows')}>
 							<Image

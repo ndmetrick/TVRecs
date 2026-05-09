@@ -220,7 +220,7 @@ const AddShowTags = () => {
 				/>
 				<View style={styles.currentlyWatchingRow}>
 					<Text
-						style={{ fontSize: 16, color: isDark ? '#cccccc' : 'black' }}
+						style={{ fontSize: 16, color: isDark ? '#cccccc' : '#222' }}
 					>{`I'm currently watching this show`}</Text>
 					<Toggle
 						value={currentlyWatching}
@@ -307,7 +307,7 @@ const makeStyles = (isDark: boolean) =>
 		text: {
 			fontSize: 16,
 			margin: 10,
-			color: isDark ? '#cccccc' : 'black',
+			color: isDark ? '#cccccc' : '#222',
 		},
 		currentlyWatchingRow: {
 			flexDirection: 'row',
