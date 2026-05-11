@@ -2,6 +2,7 @@ import * as Sentry from '@sentry/react-native';
 import React, { useEffect, useState } from 'react';
 import {
 	ActivityIndicator,
+	Image,
 	Linking,
 	ScrollView,
 	StyleSheet,
@@ -22,7 +23,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
 const Settings = () => {
-	const { currentUser } = useAppData();
+	const { currentUser, refetchCurrentUser, clearWatchProviders } = useAppData();
 	const [countryCode, setCountryCode] = useState(currentUser?.country ?? 'US');
 	const [saveCountry, setSaveCountry] = useState(false);
 	const [countryOpen, setCountryOpen] = useState(false);
@@ -80,6 +81,9 @@ const Settings = () => {
 		if (currentUser) {
 			try {
 				await updateUser(supabase, currentUser.id, { country: countryCode });
+				await refetchCurrentUser();
+				// on new country, previously cached watch provider data is no longer current
+				clearWatchProviders();
 				setSaveCountry(false);
 			} catch (err) {
 				console.log(`Error saving new country: ${err}`);
@@ -271,6 +275,37 @@ const Settings = () => {
 							Sign out
 						</Text>
 					</TouchableOpacity>
+				</View>
+
+				<Text style={styles.sectionLabel}>Attribution</Text>
+				<View style={styles.accountCard}>
+					<View style={styles.attributionRow}>
+						<Image
+							source={require('@/assets/images/tmdb-logo.png')}
+							style={styles.tmdbLogo}
+							resizeMode='contain'
+						/>
+						<Text style={styles.attributionText}>
+							This product uses the TMDB API but is not endorsed or certified by
+							TMDB.
+						</Text>
+					</View>
+					<View style={styles.attributionRow}>
+						<TouchableOpacity
+							onPress={() => Linking.openURL('https://www.justwatch.com')}
+							style={{ flexWrap: 'wrap' }}
+						>
+							<Image
+								source={require('@/assets/images/justwatch-logo.png')}
+								style={styles.justwatchLogo}
+								resizeMode='contain'
+							/>
+						</TouchableOpacity>
+
+						<Text style={styles.attributionText}>
+							Streaming and purchase data provided by JustWatch.
+						</Text>
+					</View>
 				</View>
 
 				<View style={{ marginTop: 8, marginLeft: 20, marginBottom: 20 }}>
@@ -481,6 +516,30 @@ const makeStyles = (isDark: boolean) =>
 		},
 		lastExpandedContent: {
 			borderBottomWidth: 0,
+		},
+		attributionRow: {
+			flexDirection: 'row',
+			alignItems: 'center',
+			paddingVertical: 12,
+			paddingHorizontal: 15,
+			borderBottomWidth: 0.5,
+			borderColor: isDark ? '#aaaaaa' : '#ddd',
+			gap: 12,
+		},
+		tmdbLogo: {
+			width: 60,
+			height: 30,
+			marginRight: 20,
+		},
+		justwatchLogo: {
+			width: 80,
+			height: 30,
+		},
+		attributionText: {
+			flex: 1,
+			fontSize: 13,
+			color: isDark ? '#aaaaaa' : '#666',
+			lineHeight: 18,
 		},
 	});
 

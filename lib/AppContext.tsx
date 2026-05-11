@@ -58,6 +58,7 @@ type AppData = {
 	preferenceTags: Tag[];
 	describeTags: Tag[];
 	tagMap: Record<string, Tag>;
+	clearWatchProviders: () => void;
 };
 
 const AppContext = createContext<AppData | undefined>(undefined);
@@ -138,6 +139,10 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 		setError(null);
 		setWatchProviders({});
 		setAllProfileShows([]);
+	};
+
+	const clearWatchProviders = () => {
+		setWatchProviders({});
 	};
 
 	const addToWatchProviders = (
@@ -386,6 +391,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 				preferenceTags,
 				describeTags,
 				filteredFollowingRecs,
+				clearWatchProviders,
 				tagMap,
 			}}
 		>

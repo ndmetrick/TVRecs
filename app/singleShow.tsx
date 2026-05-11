@@ -549,41 +549,35 @@ const SingleShow = () => {
 								) : null}
 							</View>
 						) : null}
+
 						{profileShowDropdownValue !== null &&
-						profileShowDropdownValue !==
-							'none' ? null : !streamingAndPurchase ? (
-							<View style={{ ...styles.buttonContainer, marginBottom: 10 }}>
-								<TouchableOpacity
-									style={styles.button}
-									onPress={() => setStreamingAndPurchase(true)}
+						profileShowDropdownValue !== 'none' ? null : (
+							<TouchableOpacity
+								style={[
+									styles.streamingPill,
+									streamingAndPurchase && styles.streamingPillActive,
+								]}
+								onPress={() => setStreamingAndPurchase(!streamingAndPurchase)}
+							>
+								<Text
+									style={[
+										styles.streamingPillText,
+										streamingAndPurchase && styles.streamingPillTextActive,
+									]}
 								>
-									<Text style={styles.buttonText}>
-										Show overview and options for streaming and purchase
-									</Text>
-								</TouchableOpacity>
-							</View>
-						) : (
-							<View>
-								<View style={styles.buttonContainer}>
-									<TouchableOpacity
-										style={styles.button}
-										onPress={() => setStreamingAndPurchase(false)}
-									>
-										<Text style={styles.buttonText}>
-											Hide overview and options for streaming and purchase
-										</Text>
-									</TouchableOpacity>
-								</View>
-								{singleShow.show.tmdb_id ? (
-									<StreamingAndPurchase showId={singleShow.show.tmdb_id} />
-								) : null}
-							</View>
+									{streamingAndPurchase
+										? 'Hide streaming & overview ↑'
+										: 'Streaming & overview ↓'}
+								</Text>
+							</TouchableOpacity>
 						)}
+						{streamingAndPurchase && singleShow.show.tmdb_id ? (
+							<StreamingAndPurchase showId={singleShow.show.tmdb_id} />
+						) : null}
 						{isCurrentUser ? (
 							<View
 								style={{
-									marginLeft: 15,
-									marginRight: 15,
+									margin: 15,
 								}}
 							>
 								<AppDropdownPicker
@@ -907,6 +901,25 @@ const makeStyles = (isDark: boolean) =>
 		},
 		showName: {
 			color: '#ED6A5A',
+		},
+		streamingPill: {
+			alignSelf: 'center',
+			paddingVertical: 8,
+			paddingHorizontal: 18,
+			borderRadius: 999,
+			backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : '#340068',
+			marginVertical: 10,
+		},
+		streamingPillActive: {
+			backgroundColor: '#36C9C6',
+		},
+		streamingPillText: {
+			fontSize: 15,
+			fontWeight: '500',
+			color: isDark ? 'rgba(255,255,255,0.7)' : 'white',
+		},
+		streamingPillTextActive: {
+			color: '#043028',
 		},
 	});
 

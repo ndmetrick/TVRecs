@@ -420,7 +420,6 @@ const SearchUsers = () => {
 
 	// search by username:
 	const getMatchingUsersByUsername = (input: string) => {
-		console.log('input', input);
 		setUsernameInput(input);
 
 		if (input.length < 2) {
@@ -429,7 +428,6 @@ const SearchUsers = () => {
 		}
 		const matches =
 			allOtherUsers?.filter((user) => {
-				console.log('user', user, 'input', input);
 				return user.username.toLowerCase().includes(input.toLowerCase());
 			}) ?? [];
 		console.log('matches', matches, input);

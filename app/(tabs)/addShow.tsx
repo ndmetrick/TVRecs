@@ -178,33 +178,27 @@ const AddShow = () => {
 								<ShowImagePlaceholder name={showName} style={styles.image} />
 							)}
 
-							{showType !== null &&
-							showType !== 'none' ? null : !streamingAndPurchase ? (
-								<View style={{ ...styles.buttonContainer, marginBottom: 10 }}>
-									<TouchableOpacity
-										style={styles.button}
-										onPress={() => setStreamingAndPurchase(true)}
+							{showType !== null && showType !== 'none' ? null : (
+								<TouchableOpacity
+									style={[
+										styles.streamingPill,
+										streamingAndPurchase && styles.streamingPillActive,
+									]}
+									onPress={() => setStreamingAndPurchase(!streamingAndPurchase)}
+								>
+									<Text
+										style={[
+											styles.streamingPillText,
+											streamingAndPurchase && styles.streamingPillTextActive,
+										]}
 									>
-										<Text style={styles.buttonText}>
-											Show overview and options for streaming and purchase
-										</Text>
-									</TouchableOpacity>
-								</View>
-							) : (
-								<View>
-									<View style={styles.buttonContainer}>
-										<TouchableOpacity
-											style={styles.button}
-											onPress={() => setStreamingAndPurchase(false)}
-										>
-											<Text style={styles.buttonText}>
-												Hide overview and options for streaming and purchase
-											</Text>
-										</TouchableOpacity>
-									</View>
-									<StreamingAndPurchase showId={tmdbId} />
-								</View>
+										{streamingAndPurchase
+											? 'Hide streaming & overview ↑'
+											: 'Streaming & overview ↓'}
+									</Text>
+								</TouchableOpacity>
 							)}
+							{streamingAndPurchase && <StreamingAndPurchase showId={tmdbId} />}
 
 							<View style={{ flexDirection: 'column' }}>
 								{userHasShow ? (
@@ -500,6 +494,25 @@ const makeStyles = (isDark: boolean) =>
 			justifyContent: 'center',
 			alignItems: 'center',
 			zIndex: 999,
+		},
+		streamingPill: {
+			alignSelf: 'center',
+			paddingVertical: 8,
+			paddingHorizontal: 18,
+			borderRadius: 999,
+			backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : '#340068',
+			marginVertical: 10,
+		},
+		streamingPillActive: {
+			backgroundColor: '#36C9C6',
+		},
+		streamingPillText: {
+			fontSize: 15,
+			fontWeight: '500',
+			color: isDark ? 'rgba(255,255,255,0.7)' : 'white',
+		},
+		streamingPillTextActive: {
+			color: '#043028',
 		},
 	});
 

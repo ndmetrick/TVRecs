@@ -14,6 +14,16 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const detectCountryFromIP = async (): Promise<string> => {
+	try {
+		const response = await fetch('https://ipapi.co/json/');
+		const data = await response.json();
+		return data.country_code ?? 'US';
+	} catch {
+		return 'US';
+	}
+};
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
 	const [session, setSession] = useState<Session | null>(null);
 	const [loading, setLoading] = useState(true);
@@ -71,10 +81,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		const { data, error } = await supabase.auth.signUp({ email, password });
 		if (error) throw error;
 
+		const country = await detectCountryFromIP();
+
 		if (data.user && username) {
 			const { error: updateError } = await supabase
 				.from('users')
-				.update({ username })
+				.update({ username, country })
 				.eq('id', data.user.id);
 			if (updateError) throw updateError;
 		}
