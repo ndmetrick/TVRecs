@@ -184,8 +184,6 @@ const RecsHeader = ({
 	const [panelY, setPanelY] = useState(254);
 	const availableHeight = screenHeight - panelY - actionBarHeight;
 
-	console.log('availableHeight being applied:', availableHeight);
-
 	const getPillState = (pillType: ShowFilterType): PillState => {
 		if (appliedFilters[pillType]) return 'applied';
 		if (activeFilterType === pillType) return 'pending';

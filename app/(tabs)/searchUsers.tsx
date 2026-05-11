@@ -28,10 +28,12 @@ import { useMemo, useState } from 'react';
 import {
 	ActivityIndicator,
 	Alert,
+	Modal,
 	ScrollView,
 	StyleSheet,
 	Text,
 	TouchableOpacity,
+	TouchableWithoutFeedback,
 	useColorScheme,
 	View,
 } from 'react-native';
@@ -81,6 +83,9 @@ const SearchUsers = () => {
 	const tabBarHeight = useBottomTabBarHeight();
 	const isDark = useColorScheme() === 'dark';
 	const styles = makeStyles(isDark);
+	const [showAllOfInfo, setShowAllOfInfo] = useState<
+		'showTags' | 'shows' | null
+	>(null);
 
 	const matchStateMap = {
 		profileTags: profileTagMatch,
@@ -547,41 +552,124 @@ const SearchUsers = () => {
 				{searchMode === 'filters' &&
 					searchState === 'pre' &&
 					activePanel !== 'summary' && (
-						<View style={styles.anyAllRow}>
-							<TouchableOpacity
-								style={[
-									styles.anyAllBtn,
-									matchStateMap[activePanel] === 'any' && styles.anyAllBtnOn,
-								]}
-								onPress={() => setMatchMap[activePanel]('any')}
-							>
-								<Text
-									style={
-										matchStateMap[activePanel] === 'any'
-											? styles.anyAllBtnOnText
-											: styles.anyAllBtnText
-									}
+						<View
+							style={{
+								flexDirection: 'row',
+								alignItems: 'flex-start',
+								justifyContent: 'center',
+							}}
+						>
+							<View style={{ width: 24 }} />
+
+							<View style={styles.anyAllRow}>
+								<TouchableOpacity
+									style={[
+										styles.anyAllBtn,
+										matchStateMap[activePanel] === 'any' && styles.anyAllBtnOn,
+									]}
+									onPress={() => setMatchMap[activePanel]('any')}
 								>
-									any of
-								</Text>
-							</TouchableOpacity>
-							<TouchableOpacity
-								onPress={() => setMatchMap[activePanel]('all')}
-								style={[
-									styles.anyAllBtn,
-									matchStateMap[activePanel] === 'all' && styles.anyAllBtnOn,
-								]}
-							>
-								<Text
-									style={
-										matchStateMap[activePanel] === 'all'
-											? styles.anyAllBtnOnText
-											: styles.anyAllBtnText
-									}
+									<Text
+										style={
+											matchStateMap[activePanel] === 'any'
+												? styles.anyAllBtnOnText
+												: styles.anyAllBtnText
+										}
+									>
+										any of
+									</Text>
+								</TouchableOpacity>
+								<TouchableOpacity
+									onPress={() => setMatchMap[activePanel]('all')}
+									style={[
+										styles.anyAllBtn,
+										matchStateMap[activePanel] === 'all' && styles.anyAllBtnOn,
+									]}
 								>
-									all of
-								</Text>
-							</TouchableOpacity>
+									<Text
+										style={
+											matchStateMap[activePanel] === 'all'
+												? styles.anyAllBtnOnText
+												: styles.anyAllBtnText
+										}
+									>
+										all of
+									</Text>
+								</TouchableOpacity>
+							</View>
+							{activePanel !== 'profileTags' ? (
+								<TouchableOpacity
+									onPress={() =>
+										setShowAllOfInfo((prev) =>
+											prev === null ? activePanel : null,
+										)
+									}
+									style={{ width: 24, paddingTop: 2, marginLeft: -6 }}
+								>
+									<MaterialCommunityIcons
+										name='information-outline'
+										size={16}
+										color='#36C9C6'
+									/>
+								</TouchableOpacity>
+							) : (
+								<View style={{ width: 24, marginLeft: -6 }} />
+							)}
+							<Modal
+								transparent
+								visible={showAllOfInfo === activePanel}
+								onRequestClose={() => setShowAllOfInfo(null)}
+							>
+								<TouchableWithoutFeedback
+									onPress={() => setShowAllOfInfo(null)}
+								>
+									<View style={StyleSheet.absoluteFillObject}>
+										<View
+											style={{
+												flex: 1,
+												backgroundColor: 'rgba(0,0,0,0.4)',
+												justifyContent: 'center',
+												alignItems: 'center',
+											}}
+										>
+											<View
+												style={{
+													backgroundColor: 'white',
+													borderRadius: 12,
+													padding: 20,
+													margin: 40,
+												}}
+											>
+												<Text
+													style={{
+														fontSize: 14,
+														color: '#333',
+														lineHeight: 20,
+													}}
+												>
+													{activePanel === 'showTags' ? (
+														<>
+															<Text style={{ fontWeight: '500' }}>All of:</Text>
+															{
+																' every tag appears on at least one of their recs'
+															}
+														</>
+													) : (
+														<>
+															<Text style={{ fontWeight: '500' }}>Any of:</Text>
+															{
+																' user recommends at least one of the selected shows\n'
+															}
+															<Text style={{ fontWeight: '500' }}>All of:</Text>
+															{' user recommends every selected show'}
+														</>
+													)}
+												</Text>
+											</View>
+										</View>
+									</View>
+								</TouchableWithoutFeedback>
+							</Modal>
 						</View>
 					)}
 
@@ -1084,12 +1172,6 @@ const SearchUsers = () => {
 											</TouchableOpacity>
 										</View>
 									)}
-									{selectedShows.length > 1 && (
-										<Text style={styles.allOfExplainer}>
-											All of: user recommends every selected show · Any of: user
-											recommends at least one
-										</Text>
-									)}
 									<View style={styles.summaryPillRow}>
 										{selectedShows.map((show) => (
 											<TouchableOpacity
@@ -1159,11 +1241,11 @@ const SearchUsers = () => {
 											</TouchableOpacity>
 										</View>
 									)}
-									{chosenShowTagIds.length > 1 && (
+									{/* {chosenShowTagIds.length > 1 && (
 										<Text style={styles.allOfExplainer}>
 											All of: every tag appears on at least one of their recs
 										</Text>
-									)}
+									)} */}
 									<View style={styles.summaryPillRow}>
 										{chosenShowTagIds.map((tagId) => {
 											const tag = tagMap[tagId];

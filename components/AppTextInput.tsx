@@ -6,7 +6,6 @@ type Props = React.ComponentProps<typeof TextInput>;
 const AppTextInput = (props: Props) => {
 	const scheme = useColorScheme();
 	const isDark = scheme === 'dark';
-	console.log('isDark', isDark);
 
 	const theme =
 		scheme === 'dark'

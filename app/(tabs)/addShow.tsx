@@ -83,7 +83,6 @@ const AddShow = () => {
 		}
 
 		return () => {
-			console.log('RETURNING');
 			setShowName('');
 			setImageUrl(null);
 			setShowAdded(false);
@@ -101,7 +100,6 @@ const AddShow = () => {
 
 	useEffect(() => {
 		return () => {
-			console.log('RETURNINGxx');
 			// setStreaming('')
 			// setPurchase('')
 			setStreamingAndPurchase(false);
@@ -111,7 +109,6 @@ const AddShow = () => {
 	}, [isFocused]);
 
 	useEffect(() => {
-		console.log('YES I SEE YOU');
 		if (addToType) {
 			setShowType(addToType);
 		}
@@ -128,7 +125,6 @@ const AddShow = () => {
 		setImageUrl(url);
 		const stringId = String(id);
 		setTmdbId(stringId);
-		console.log('TMDB', id);
 		// setStreaming(streaming)
 		// setPurchase(purchase)
 		setShowAdded(added);
@@ -256,8 +252,8 @@ const AddShow = () => {
 											labelStyle={{
 												flexWrap: 'wrap',
 												fontSize: 15,
-												margin: 15,
-												marginLeft: 10,
+												marginVertical: 8,
+												marginHorizontal: 10,
 											}}
 											placeholder='What do you want to do with this show?'
 										/>

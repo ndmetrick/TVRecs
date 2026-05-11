@@ -56,6 +56,7 @@ export const skipTagsAndSaveShowData = async (
 				description,
 				tagIds,
 				userId,
+				currentlyWatching: false,
 			};
 			await addShow(supabase, showToAdd);
 			await refetchUserShows();
