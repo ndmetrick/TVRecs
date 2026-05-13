@@ -40,26 +40,45 @@ const ChangeCountry = (props: Props) => {
 		setSaveCountry(true);
 	};
 
+	const getCountryName = (code: string) => {
+		if (code === 'US') return 'the United States';
+		return getName(code) ?? code;
+	};
+
 	return (
 		<View>
 			{!changeCountry && !saveCountry ? (
 				<Text style={styles.text}>
-					Your country is currently set to {getName(countryCode) ?? countryCode}
-					. That means that when you search for a show, or add a show to your
-					watch list or recommendation list, the purchase and streaming options
-					provided will be for that country. Log in or sign up to choose your
-					country.
+					Your country is currently set to{' '}
+					{getCountryName(countryCode) ?? countryCode}. That means that when you
+					search for a show, or add a show to your watch list or recommendation
+					list, the purchase and streaming options provided will be for that
+					country. Log in or sign up to choose your country.
 				</Text>
 			) : null}
 			<View style={styles.buttonContainer}>
-				<TouchableOpacity
-					style={styles.button}
-					onPress={() => setChangeCountry(true)}
-				>
-					<Text style={styles.buttonText}>
-						{currentUser ? 'Choose new country' : 'Log in / Sign up'}
-					</Text>
-				</TouchableOpacity>
+				{!changeCountry && (
+					<TouchableOpacity
+						style={saveCountry ? '' : styles.button}
+						onPress={() => {
+							setChangeCountry(true);
+							if (saveCountry) setSaveCountry(false);
+						}}
+					>
+						<Text
+							style={
+								saveCountry
+									? {
+											color: isDark ? '#340068' : '#340068',
+											textDecorationLine: 'underline',
+										}
+									: styles.buttonText
+							}
+						>
+							{currentUser ? 'Choose new country' : 'Log in / Sign up'}
+						</Text>
+					</TouchableOpacity>
+				)}
 			</View>
 			{changeCountry ? (
 				<View style={styles.buttonContainer}>
@@ -70,8 +89,8 @@ const ChangeCountry = (props: Props) => {
 				<View>
 					<Text style={styles.text}>
 						Would you like to change your country to{' '}
-						{getName(countryCode) ?? countryCode}? If yes, click on &quot;Save
-						country to profile&quot; below.
+						{getCountryName(countryCode) ?? countryCode}? If yes, click on
+						&quot;Save country to profile&quot; below.
 					</Text>
 					<View style={styles.buttonContainer}>
 						<TouchableOpacity style={styles.button} onPress={saveNewCountry}>

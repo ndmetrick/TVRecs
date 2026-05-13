@@ -24,6 +24,11 @@ interface Props {
 
 const COUNTRY_NOTICE_KEY = 'hasSeenCountryNotice';
 
+const getCountryName = (code: string) => {
+	if (code === 'US') return 'the United States';
+	return getName(code) ?? code;
+};
+
 const StreamingAndPurchase = (props: Props) => {
 	const [streaming, setStreaming] = useState<string | null>(null);
 	const [purchase, setPurchase] = useState<string | null>(null);
@@ -219,8 +224,8 @@ const StreamingAndPurchase = (props: Props) => {
 			{showCountryNotice && (
 				<TouchableOpacity onPress={dismissNotice} style={styles.countryNotice}>
 					<Text style={styles.countryNoticeText}>
-						Showing results for {getName(country) ?? country}. Tap to dismiss —
-						change country in Settings.
+						Showing results for {getCountryName(country) ?? country}. Tap to
+						dismiss — change country in Settings.
 					</Text>
 				</TouchableOpacity>
 			)}
