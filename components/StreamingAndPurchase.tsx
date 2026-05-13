@@ -4,6 +4,7 @@ import { TMDBWatchProviderResults } from '@/lib/types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Sentry from '@sentry/react-native';
 import axios from 'axios';
+import { getName } from 'country-list';
 import { useEffect, useState } from 'react';
 import {
 	ActivityIndicator,
@@ -218,8 +219,8 @@ const StreamingAndPurchase = (props: Props) => {
 			{showCountryNotice && (
 				<TouchableOpacity onPress={dismissNotice} style={styles.countryNotice}>
 					<Text style={styles.countryNoticeText}>
-						Showing results for {country}. Tap to dismiss — change country in
-						Settings.
+						Showing results for {getName(country) ?? country}. Tap to dismiss —
+						change country in Settings.
 					</Text>
 				</TouchableOpacity>
 			)}
@@ -271,7 +272,7 @@ const makeStyles = (isDark: boolean) =>
 			alignItems: 'center',
 			justifyContent: 'center',
 			paddingHorizontal: 10,
-			paddingTop: 8,
+			paddingTop: 4,
 			paddingBottom: 4,
 		},
 		poweredByText: {
@@ -283,15 +284,14 @@ const makeStyles = (isDark: boolean) =>
 			height: 20,
 		},
 		countryNotice: {
-			backgroundColor: isDark ? '#444' : '#f0eef8',
-			borderRadius: 8,
-			padding: 10,
-			margin: 10,
+			paddingHorizontal: 10,
+			paddingBottom: 8,
 		},
 		countryNoticeText: {
-			fontSize: 13,
-			color: isDark ? '#cccccc' : '#555',
+			fontSize: 12,
+			color: isDark ? '#aaaaaa' : '#888',
 			textAlign: 'center',
+			fontStyle: 'italic',
 		},
 	});
 

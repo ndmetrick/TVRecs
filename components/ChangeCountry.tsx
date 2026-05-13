@@ -26,9 +26,7 @@ const ChangeCountry = (props: Props) => {
 		saveCountry,
 		saveNewCountry,
 	} = props;
-	// const [country, setCountry] = useState<
-	// 	string | TranslationLanguageCodeMap | null
-	// >(null);
+
 	const [changeCountry, setChangeCountry] = useState(false);
 	const { currentUser } = useAppData();
 	const isDark = useColorScheme() === 'dark';

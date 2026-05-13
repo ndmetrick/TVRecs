@@ -430,7 +430,7 @@ const SingleShow = () => {
 
 			<ScrollView
 				showsVerticalScrollIndicator={false}
-				contentContainerStyle={{ flexGrow: 1 }}
+				contentContainerStyle={{ paddingBottom: 30 }}
 			>
 				{!currentUser ? null : multipleRecInfo[singleShow.show.id].num < 2 ? (
 					<Text
@@ -559,12 +559,7 @@ const SingleShow = () => {
 								]}
 								onPress={() => setStreamingAndPurchase(!streamingAndPurchase)}
 							>
-								<Text
-									style={[
-										styles.streamingPillText,
-										streamingAndPurchase && styles.streamingPillTextActive,
-									]}
-								>
+								<Text style={[styles.streamingPillText]}>
 									{streamingAndPurchase
 										? 'Hide streaming & overview ↑'
 										: 'Streaming & overview ↓'}
@@ -780,12 +775,11 @@ const makeStyles = (isDark: boolean) =>
 	StyleSheet.create({
 		container: {
 			flex: 1,
-			marginBottom: 30,
 			backgroundColor: isDark ? '#aaaaaa' : '#f5f5f5',
 		},
 		extra: {
 			marginBottom: 25,
-			marginLeft: 15,
+			marginHorizontal: 15,
 		},
 		containerInfo: {
 			flexDirection: 'row',
@@ -911,15 +905,12 @@ const makeStyles = (isDark: boolean) =>
 			marginVertical: 10,
 		},
 		streamingPillActive: {
-			backgroundColor: '#36C9C6',
+			backgroundColor: '#7B5DB5',
 		},
 		streamingPillText: {
 			fontSize: 15,
 			fontWeight: '500',
 			color: isDark ? 'rgba(255,255,255,0.7)' : 'white',
-		},
-		streamingPillTextActive: {
-			color: '#043028',
 		},
 	});
 

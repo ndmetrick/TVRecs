@@ -186,20 +186,18 @@ const AddShow = () => {
 									]}
 									onPress={() => setStreamingAndPurchase(!streamingAndPurchase)}
 								>
-									<Text
-										style={[
-											styles.streamingPillText,
-											streamingAndPurchase && styles.streamingPillTextActive,
-										]}
-									>
+									<Text style={[styles.streamingPillText]}>
 										{streamingAndPurchase
 											? 'Hide streaming & overview ↑'
 											: 'Streaming & overview ↓'}
 									</Text>
 								</TouchableOpacity>
 							)}
-							{streamingAndPurchase && <StreamingAndPurchase showId={tmdbId} />}
-
+							<View style={{ marginHorizontal: 15 }}>
+								{streamingAndPurchase && (
+									<StreamingAndPurchase showId={tmdbId} />
+								)}
+							</View>
 							<View style={{ flexDirection: 'column' }}>
 								{userHasShow ? (
 									<View>
@@ -230,7 +228,7 @@ const AddShow = () => {
 										style={{
 											marginLeft: 15,
 											marginRight: 15,
-											marginBottom: 15,
+											marginBottom: 25,
 										}}
 									>
 										<AppDropdownPicker
@@ -504,15 +502,12 @@ const makeStyles = (isDark: boolean) =>
 			marginVertical: 10,
 		},
 		streamingPillActive: {
-			backgroundColor: '#36C9C6',
+			backgroundColor: '#7B5DB5',
 		},
 		streamingPillText: {
 			fontSize: 15,
 			fontWeight: '500',
 			color: isDark ? 'rgba(255,255,255,0.7)' : 'white',
-		},
-		streamingPillTextActive: {
-			color: '#043028',
 		},
 	});
 
