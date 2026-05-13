@@ -1,7 +1,13 @@
 import { AppProvider, useAppData } from '@/lib/AppContext';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import {
+	DarkTheme as NavigationDarkTheme,
+	DefaultTheme as NavigationDefaultTheme,
+	ThemeProvider,
+} from '@react-navigation/native';
 import * as Sentry from '@sentry/react-native';
+import merge from 'deepmerge';
 import { router, Stack } from 'expo-router';
 import {
 	Alert,
@@ -11,6 +17,7 @@ import {
 	View,
 } from 'react-native';
 import {
+	adaptNavigationTheme,
 	MD3DarkTheme,
 	MD3LightTheme,
 	Provider as PaperProvider,
@@ -22,6 +29,13 @@ Sentry.init({
 	dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
 	debug: false,
 });
+
+const { LightTheme, DarkTheme } = adaptNavigationTheme({
+	reactNavigationLight: NavigationDefaultTheme,
+	reactNavigationDark: NavigationDarkTheme,
+});
+const CombinedLightTheme = merge(MD3LightTheme, LightTheme);
+const CombinedDarkTheme = merge(MD3DarkTheme, DarkTheme);
 
 export const AppShell = () => {
 	const scheme = useColorScheme();
@@ -58,41 +72,34 @@ export const AppShell = () => {
 					headerTitleAlign: 'center',
 
 					headerTitle: () => (
-						<View
-							style={{
-								flexDirection: 'row',
-								alignItems: 'center',
-								justifyContent: 'center',
-								width: '100%',
-								overflow: 'visible',
-							}}
-						>
-							<TouchableOpacity onPress={() => router.push('/(tabs)/recShows')}>
-								<Image
-									style={{ width: 50, height: 40 }}
-									source={require('../assets/images/logo-transparent.png')}
+						<TouchableOpacity onPress={() => router.push('/(tabs)/recShows')}>
+							<Image
+								style={{ width: 50, height: 40, alignSelf: 'center' }}
+								source={require('../assets/images/logo-transparent.png')}
+							/>
+						</TouchableOpacity>
+					),
+					headerRight: () =>
+						currentUser ? (
+							<TouchableOpacity
+								hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+								style={{ marginRight: 12 }}
+								onPress={() =>
+									Alert.alert('Sign out?', '', [
+										{ text: 'Yes', onPress: logout },
+										{
+											text: 'Cancel',
+										},
+									])
+								}
+							>
+								<MaterialCommunityIcons
+									name='logout'
+									size={26}
+									color={scheme === 'dark' ? '#dddddd' : '#340068'}
 								/>
 							</TouchableOpacity>
-							{currentUser && (
-								<TouchableOpacity
-									hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-									style={{ position: 'absolute', right: 0 }}
-									onPress={() =>
-										Alert.alert('Sign out?', '', [
-											{ text: 'Yes', onPress: logout },
-											{ text: 'Cancel' },
-										])
-									}
-								>
-									<MaterialCommunityIcons
-										name='logout'
-										size={26}
-										color={scheme === 'dark' ? '#dddddd' : '#340068'}
-									/>
-								</TouchableOpacity>
-							)}
-						</View>
-					),
+						) : null,
 				}}
 			>
 				<Stack.Screen name='index' options={{ headerBackVisible: false }} />
@@ -110,16 +117,21 @@ export const AppShell = () => {
 
 export default function RootLayout() {
 	const scheme = useColorScheme();
-	const paperTheme = scheme === 'dark' ? MD3DarkTheme : MD3LightTheme;
 	return (
 		<SafeAreaProvider>
-			<PaperProvider theme={paperTheme}>
-				<AuthProvider>
-					<AppProvider>
-						<AppShell />
-					</AppProvider>
-				</AuthProvider>
-			</PaperProvider>
+			<ThemeProvider
+				value={scheme === 'dark' ? CombinedDarkTheme : CombinedLightTheme}
+			>
+				<PaperProvider
+					theme={scheme === 'dark' ? CombinedDarkTheme : CombinedLightTheme}
+				>
+					<AuthProvider>
+						<AppProvider>
+							<AppShell />
+						</AppProvider>
+					</AuthProvider>
+				</PaperProvider>
+			</ThemeProvider>
 		</SafeAreaProvider>
 	);
 }

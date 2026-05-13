@@ -9,6 +9,9 @@
 		"userInterfaceStyle": "automatic",
 		"newArchEnabled": true,
 		"ios": {
+			"infoPlist": {
+				"UIDesignRequiresCompatibility": true
+			},
 			"supportsTablet": true,
 			"bundleIdentifier": "com.ndmetrick.tvrecs",
 			"infoPlist": {
