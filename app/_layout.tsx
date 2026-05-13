@@ -1,13 +1,7 @@
 import { AppProvider, useAppData } from '@/lib/AppContext';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import {
-	DarkTheme as NavigationDarkTheme,
-	DefaultTheme as NavigationDefaultTheme,
-	ThemeProvider,
-} from '@react-navigation/native';
 import * as Sentry from '@sentry/react-native';
-import merge from 'deepmerge';
 import { router, Stack } from 'expo-router';
 import {
 	Alert,
@@ -17,7 +11,6 @@ import {
 	View,
 } from 'react-native';
 import {
-	adaptNavigationTheme,
 	MD3DarkTheme,
 	MD3LightTheme,
 	Provider as PaperProvider,
@@ -29,13 +22,6 @@ Sentry.init({
 	dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
 	debug: false,
 });
-
-const { LightTheme, DarkTheme } = adaptNavigationTheme({
-	reactNavigationLight: NavigationDefaultTheme,
-	reactNavigationDark: NavigationDarkTheme,
-});
-const CombinedLightTheme = merge(MD3LightTheme, LightTheme);
-const CombinedDarkTheme = merge(MD3DarkTheme, DarkTheme);
 
 export const AppShell = () => {
 	const scheme = useColorScheme();
@@ -117,21 +103,16 @@ export const AppShell = () => {
 
 export default function RootLayout() {
 	const scheme = useColorScheme();
+	const paperTheme = scheme === 'dark' ? MD3DarkTheme : MD3LightTheme;
 	return (
 		<SafeAreaProvider>
-			<ThemeProvider
-				value={scheme === 'dark' ? CombinedDarkTheme : CombinedLightTheme}
-			>
-				<PaperProvider
-					theme={scheme === 'dark' ? CombinedDarkTheme : CombinedLightTheme}
-				>
-					<AuthProvider>
-						<AppProvider>
-							<AppShell />
-						</AppProvider>
-					</AuthProvider>
-				</PaperProvider>
-			</ThemeProvider>
+			<PaperProvider theme={paperTheme}>
+				<AuthProvider>
+					<AppProvider>
+						<AppShell />
+					</AppProvider>
+				</AuthProvider>
+			</PaperProvider>
 		</SafeAreaProvider>
 	);
 }
